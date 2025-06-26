@@ -1,0 +1,1 @@
+/** hook to manage state of game session */
