@@ -1,4 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export type AnswerStatus = 'correct' | 'incorrect' | 'blank';
 
@@ -88,9 +102,8 @@ const LeaderboardItem = ({ player, isCurrentUser }: { player: Player, isCurrentU
   );
 };
 
-export const useLeaderboard = (initialPlayers: PlayerInput[], timePenaltyPerIncorrect: number) => {
-  const [players, setPlayers] = useState(initialPlayers);
 
+export const useLeaderboard = (players: PlayerInput[], timePenaltyPerIncorrect: number) => {
   const rankedPlayers = useMemo(() => {
     const scoredPlayers = players.map(player => {
       const correctAnswers = player.answers.filter(a => a === 'correct').length;
@@ -100,54 +113,12 @@ export const useLeaderboard = (initialPlayers: PlayerInput[], timePenaltyPerInco
     });
 
     scoredPlayers.sort((a, b) => {
-      if (a.correctAnswers !== b.correctAnswers) {
-        return b.correctAnswers - a.correctAnswers;
-      }
+      if (a.correctAnswers !== b.correctAnswers) return b.correctAnswers - a.correctAnswers;
       return a.finalScore - b.finalScore;
     });
 
-    return scoredPlayers.map((player, index) => ({
-      ...player,
-      rank: index + 1,
-    }));
+    return scoredPlayers.map((player, index) => ({ ...player, rank: index + 1 }));
   }, [players, timePenaltyPerIncorrect]);
 
-  const updatePlayerAnswers = (playerId: number | string, newAnswers: AnswerStatus[]) => {
-    setPlayers(currentPlayers =>
-      currentPlayers.map(p =>
-        p.id === playerId ? { ...p, answers: newAnswers } : p
-      )
-    );
-  };
-
-  return { rankedPlayers, updatePlayerAnswers };
-};
-
-interface LiveLeaderboardProps {
-  title?: string;
-  players: Player[];
-  currentUserId?: number | string;
-  className?: string;
-}
-
-export const LiveLeaderboard = ({
-  title = 'Standings',
-  players,
-  currentUserId,
-  className = ''
-}: LiveLeaderboardProps) => {
-  return (
-    <div className={`max-w-xl bg-gray-800 text-white rounded-2xl shadow-lg flex flex-col font-sans ${className}`}>
-      <div className="p-4 border-b border-gray-700 flex-shrink-0">
-        <h2 className="text-xl font-bold text-gray-100">{title}</h2>
-      </div>
-      <div className="p-2 overflow-y-auto h-[65vh]">
-        <ul className="space-y-1">
-          {players.map((player) => (
-            <LeaderboardItem key={player.id} player={player} isCurrentUser={player.id === currentUserId} />
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+  return { rankedPlayers };
 };
