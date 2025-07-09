@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/firebase": "^2.4.32",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6"
+  },
+  "dependencies": {
+    "firebase": "^11.10.0"
+  }
+}
