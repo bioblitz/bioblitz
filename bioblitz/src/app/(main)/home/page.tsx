@@ -99,7 +99,12 @@ export default function HomePage() {
                 >
                   <h2 className="text-2xl font-semibold mb-2">{game.title}</h2>
                   <p className="text-sm">
-                    <span className="font-bold">Source:</span> {game.source}
+                    <span className="font-bold">Question Source:</span>{" "}
+                    {game.source}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-bold">Number of Questions:</span>{" "}
+                    {game.number_of_questions}
                   </p>
                   <p className="text-sm">
                     <span className="font-bold">Difficulty:</span>{" "}
@@ -108,6 +113,7 @@ export default function HomePage() {
                   <p className="text-sm mb-2">
                     <span className="font-bold">Time:</span> {game.total_time}
                   </p>
+
                   <Link
                     href={`/home/${game.title}/${game.id}`}
                     className="text-sm text-sky-400 cursor-pointer hover:underline"
