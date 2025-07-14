@@ -1,6 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { allGames } from "@/lib/gameRoomsAll";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -18,12 +20,12 @@ export default function GameDetailPage() {
 
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-3xl bg-zinc-900 rounded-2xl p-8 shadow-md">
-            <h1 className="text-3xl font-bold text-white mb-4">
+            <h1 className="text-4xl font-bold text-white mb-4">
               <span className="text-white font-extrabold">{gameTitle}</span>
             </h1>
 
-            <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition hover:scale-[1.03] shadow-sm">
-              Join This Game
+            <button className="w-full bg-sky-400 hover:bg-blue-700 text-white text-lg font-semibold px-4 py-2.5 rounded-lg transition hover:scale-[1.05] shadow-sm">
+              Join This Game Now!
             </button>
           </div>
         </main>
