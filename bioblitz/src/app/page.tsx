@@ -1,15 +1,9 @@
-export default function AboutPage() {
+export default function HomePage() {
   return (
-    <html>
-        <body>
- <div>
-      <h1>bioblitz</h1>
-      <p>#put something here idk#</p>
-    </div>
-
-    </body>
-
-    </html>
-   
+    <main className="p-6 max-w-3xl mx-auto">
+      <p className="text-center text-gray-700 mb-4">
+        Should probably redirect to home
+      </p>
+    </main>
   );
 }
