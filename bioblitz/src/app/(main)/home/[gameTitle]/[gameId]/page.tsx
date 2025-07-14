@@ -27,14 +27,14 @@ export default function GameDetailPage() {
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-14 bg-gray-900 text-white p-4"></nav>
 
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-3xl bg-zinc-900 rounded-2xl p-8 shadow-md border border-gray-700">
+        <main className="flex-1 p-6 overflow-y-auto flex gap-6">
+          <div className="max-w-3xl bg-zinc-950 rounded-2xl p-8 shadow-md border border-gray-700">
             <h1 className="text-4xl font-bold text-white mb-4">
               <span className="text-white font-extrabold">{gameTitle}</span>
             </h1>
 
             <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1 bg-zinc-800 rounded-xl p-6">
+              <div className="flex-1 bg-zinc-900 rounded-xl p-6">
                 <p className="text-lg text-gray-300 mb-4">
                   <span className="font-bold text-white-400">
                     Question Source:
@@ -51,7 +51,7 @@ export default function GameDetailPage() {
                 </p>
               </div>
 
-              <div className="flex-1 bg-zinc-800 rounded-xl p-6 flex flex-col justify-between">
+              <div className="flex-1 bg-zinc-900 rounded-xl p-6 flex flex-col justify-between">
                 <div>
                   <p className="text-lg text-gray-300 mb-4">
                     <span className="font-bold text-white-400">
@@ -74,7 +74,7 @@ export default function GameDetailPage() {
                 </div>
               </div>
             </div>
-            <button className="w-full mt-6 bg-sky-400 hover:bg-blue-700 text-black text-lg font-semibold px-4 py-2.5 rounded-lg transition hover:scale-[1.05] shadow-sm">
+            <button className="w-full mt-6 bg-sky-500 hover:bg-blue-800 text-white text-lg font-semibold px-4 py-2.5 rounded-lg transition hover:scale-[1.05] shadow-sm">
               Join This Game Now!
             </button>
             <Link
@@ -84,6 +84,29 @@ export default function GameDetailPage() {
               ← Back to game list
             </Link>
           </div>
+
+          <aside className="w-114 flex-shrink-0 overflow-y-auto bg-zinc-950 rounded-2xl p-4 shadow-md border border-gray-700  ml-auto">
+            {" "}
+            <h2 className="text-xl font-bold text-white mb-4">Other Games</h2>
+            {allGames
+              .filter((g) => g.id !== gameId)
+
+              .map((g) => (
+                <Link
+                  key={g.id}
+                  href={`/home/${g.title}/${g.id}`}
+                  className="block p-4 mb-4 bg-zinc-900 rounded-lg hover:bg-blue-800 hover:shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+                >
+                  <h3 className="text-xl font-semibold text-white">
+                    {g.title}
+                  </h3>
+                  <p className="text-gray-300 text-sm">
+                    {g.topic} · {g.difficulty} · {g.number_of_questions}{" "}
+                    questions
+                  </p>
+                </Link>
+              ))}
+          </aside>
         </main>
       </div>
     </div>
