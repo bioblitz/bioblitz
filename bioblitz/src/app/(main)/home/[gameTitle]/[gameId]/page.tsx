@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
+import { Sprout } from "lucide-react";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -74,9 +75,15 @@ export default function GameDetailPage() {
                 </div>
               </div>
             </div>
-            <button className="w-full mt-6 bg-sky-500 hover:bg-blue-800 text-white text-lg font-semibold px-4 py-2.5 rounded-lg transition hover:scale-[1.05] shadow-sm">
+            <button
+              className="
+    w-full mt-6 bg-sky-500 text-white text-lg font-semibold px-4 py-2.5 rounded-lg 
+    shadow-md b transform hover:scale-105 hover:bg-sky-500 
+    hover:shadow-[0_0_8px_2px_rgba(14,165,233,0.7)]"
+            >
               Join This Game Now!
             </button>
+
             <Link
               href="/home"
               className="inline-block mt-6 text-sky-400 hover:text-sky-600 hover:underline font-semibold transition-colors duration-300"
@@ -97,13 +104,18 @@ export default function GameDetailPage() {
                   href={`/home/${g.title}/${g.id}`}
                   className="block p-4 mb-4 bg-zinc-900 rounded-lg hover:bg-blue-800 hover:shadow-[0_0_8px_rgba(59,130,246,0.7)]"
                 >
-                  <h3 className="text-xl font-semibold text-white">
-                    {g.title}
-                  </h3>
-                  <p className="text-gray-300 text-sm">
-                    {g.topic} · {g.difficulty} · {g.number_of_questions}{" "}
-                    questions
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">
+                        {g.title}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {g.topic} · {g.difficulty} · {g.number_of_questions}{" "}
+                        questions
+                      </p>
+                    </div>
+                    <Sprout size={40} color="#1dad5cff " />
+                  </div>
                 </Link>
               ))}
           </aside>
