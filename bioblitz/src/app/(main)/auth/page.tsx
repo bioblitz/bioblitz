@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@components/ui/button";
 import { FcGoogle } from "react-icons/fc"; // Import the Google icon
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/navigation";
 
 export default function AuthenticationPage() {
   const [isClicked, setIsClicked] = useState(false);
@@ -11,13 +12,16 @@ export default function AuthenticationPage() {
   const [popPressed, setPopPressed] = useState(false);
   const [hideText, setHideText] = useState(false);
   const [dimScreen, setDimScreen] = useState(false);
+  const router = useRouter();
 
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       console.log("Login Success:", tokenResponse);
       setLoading(false);
       setSignedIn(true);
-
+      setTimeout(() => {
+        router.push("/home?justLoggedIn=true");
+      }, 6500);
       // You can now send this token to your backend for verification
     },
     onError: (error) => {
