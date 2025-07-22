@@ -12,11 +12,11 @@ export default function mainPage() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <a href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
+              <a href="/home" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
                 Contests
               </a>
               <button className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
-                Sign Up
+                <a href="/auth">Sign Up</a>
               </button>
             </div>
           </div>
