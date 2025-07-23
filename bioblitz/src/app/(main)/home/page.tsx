@@ -63,7 +63,7 @@ export default function HomePage() {
                   id="questionSource"
                   value={questionSource}
                   onChange={(e) => setQuestionSource(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-700 text-white p-2 rounded-md w-48 hover:scale-105"
                 >
                   <option>All Sources</option>
                   <option>Mitosisphere</option>
@@ -85,7 +85,7 @@ export default function HomePage() {
                   id="title"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-700 text-white p-2 rounded-md w-48 hover:scale-105"
                 >
                   <option>All Topics</option>
                   <option>Topic 1</option>
@@ -106,7 +106,7 @@ export default function HomePage() {
                   id="difficulty"
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-700 text-white p-2 rounded-md w-48 hover:scale-105 focus:outline-none"
                 >
                   <option>All Difficulties</option>
                   <option>Easy</option>
@@ -125,7 +125,7 @@ export default function HomePage() {
                 filteredGames.map((game, index) => (
                   <div
                     key={game.id}
-                    className="bg-zinc-900 rounded-2xl p-6 w-90 shadow-md hover:scale-[1.02] transition-transform"
+                    className="bg-zinc-900 rounded-2xl p-6 w-90 shadow-md hover:scale-[1.04] transition-transform"
                   >
                     <h2 className="text-2xl font-semibold mb-2">
                       {game.title}
@@ -148,7 +148,7 @@ export default function HomePage() {
 
                     <Link
                       href={`/home/${game.title}/${game.id}`}
-                      className="text-sm text-sky-400 cursor-pointer hover:underline"
+                      className="text-sm text-cyan-700 cursor-pointer hover:underline"
                     >
                       Click to see more...
                     </Link>

@@ -5,6 +5,7 @@
     "@types/react-dom": "^19.1.6"
   },
   "dependencies": {
-    "firebase": "^11.10.0"
+    "firebase": "^11.10.0",
+    "vanta": "^0.5.24"
   }
 }

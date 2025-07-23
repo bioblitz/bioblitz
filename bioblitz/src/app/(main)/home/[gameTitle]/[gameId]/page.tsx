@@ -1,9 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { Sprout } from "lucide-react";
+import { useState } from "react";
 
 export default function GameDetailPage() {
   const router = useRouter();
@@ -78,21 +79,22 @@ export default function GameDetailPage() {
                 </div>
               </div>
             </div>
-            <button
-              className="
-    w-full mt-6 bg-sky-500 text-white text-lg font-semibold px-4 py-2.5 rounded-lg 
-    shadow-md b transform hover:scale-105 hover:bg-sky-500 
-    hover:shadow-[0_0_8px_2px_rgba(14,165,233,0.7)]"
-            >
-              Join This Game Now!
-            </button>
+            <div className="flex gap-4">
+              <button
+                className="
+    w-80 mt-6 bg-cyan-700 text-white text-lg font-semibold px-4 py-2.5 rounded-lg 
+    shadow-md b transform hover:bg-cyan-900 "
+              >
+                Join This Game Now!
+              </button>
 
-            <Link
-              href="/home"
-              className="inline-block mt-6 text-sky-400 hover:text-sky-600 hover:underline font-semibold transition-colors duration-300"
-            >
-              ← Back to game list
-            </Link>
+              <button
+                className="w-40 mt-6 bg-emerald-600 text-white text-xl font-semibold px-4 py-2.5 rounded-lg transition shadow-sm hover:bg-emerald-800"
+                onClick={() => router.back()}
+              >
+                ← Go Back
+              </button>
+            </div>
           </div>
 
           <aside className="w-114 flex-shrink-0 overflow-y-auto bg-zinc-950 rounded-2xl p-4 shadow-md border border-gray-700  ml-auto">
@@ -126,7 +128,7 @@ export default function GameDetailPage() {
                         questions
                       </p>
                     </div>
-                    <Sprout size={40} color="#1dad5cff " />
+                    <Sprout size={40} color="#059669" />
                   </div>
                 </Link>
               ))}
