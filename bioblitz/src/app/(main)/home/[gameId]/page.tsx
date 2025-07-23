@@ -4,16 +4,40 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { Sprout } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function GameDetailPage() {
-  const router = useRouter();
-
   const params = useParams();
-  const gameTitle = params?.gameTitle as string;
   const gameId = params?.gameId as string;
+
+  const [game, setGame] = useState<gameRoom | undefined>(undefined);
+  const [otherGames, setOtherGames] = useState<gameRoom[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const game: gameRoom | undefined = allGames.find((g) => g.id === gameId);
+  useEffect(() => {
+    const loadGameData = async () => {
+      if (!gameId) return;
+
+      setLoading(true);
+      const fetchedGames = await allGames();
+      const currentGame = fetchedGames.find((g) => g.id === gameId);
+      
+      setGame(currentGame);
+      setOtherGames(fetchedGames);
+      setLoading(false);
+    };
+
+    loadGameData();
+  }, [gameId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        <p className="text-lg">Loading Game...</p>
+      </div>
+    );
+  }
 
   if (!game) {
     return (
@@ -22,6 +46,13 @@ export default function GameDetailPage() {
       </div>
     );
   }
+
+  const filteredOtherGames = otherGames
+    .filter((g) => g.id !== gameId)
+    .filter((g) =>
+      g.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       <nav className="h-12 bg-gray-900 text-white flex items-center justify-center px-6 shadow">
@@ -34,7 +65,7 @@ export default function GameDetailPage() {
         <main className="flex-1 p-6 overflow-y-auto flex gap-6">
           <div className="max-w-3xl bg-zinc-950 rounded-2xl p-8 shadow-md border border-gray-700">
             <h1 className="text-4xl font-bold text-white mb-4">
-              <span className="text-white font-extrabold">{gameTitle}</span>
+              <span className="text-white font-extrabold">{game.title}</span>
             </h1>
 
             <div className="flex flex-col md:flex-row gap-6">
@@ -45,10 +76,12 @@ export default function GameDetailPage() {
                   </span>{" "}
                   {game.source}
                 </p>
+                {game.topic && (
                 <p className="text-lg text-gray-300 mb-4">
-                  <span className="font-bold text-white-400">Topic:</span>{" "}
-                  {game.topic}
+                    <span className="font-bold text-white-400">Topic:</span>{" "}
+                    {game.topic}
                 </p>
+                )}
                 <p className="text-lg text-gray-300 mb-4">
                   <span className="font-bold text-white-400">Difficulty:</span>{" "}
                   {game.difficulty}
@@ -65,19 +98,22 @@ export default function GameDetailPage() {
                   </p>
 
                   <p className="text-lg text-gray-300 mb-4">
-                    <span className="font-bold text-white-400">Time:</span>{" "}
-                    {game.total_time}
-                  </p>
-
-                  <p className="text-lg text-gray-300 mb-4">
                     <span className="font-bold text-white-400">
-                      Time per Question:
+                      Time Limit:
                     </span>{" "}
-                    {game.time_per_question}
+                    {game.timeLimit}
                   </p>
                 </div>
               </div>
             </div>
+
+            {game.description && (
+            <p className="text-lg text-gray-300 mt-6">
+              <span className="font-bold">Description:</span> {game.description}
+            </p>
+            )}
+           
+
             <button
               className="
     w-full mt-6 bg-sky-500 text-white text-lg font-semibold px-4 py-2.5 rounded-lg 
@@ -96,7 +132,6 @@ export default function GameDetailPage() {
           </div>
 
           <aside className="w-114 flex-shrink-0 overflow-y-auto bg-zinc-950 rounded-2xl p-4 shadow-md border border-gray-700  ml-auto">
-            {" "}
             <h2 className="text-xl font-bold text-white mb-4">Other Games</h2>
             <input
               type="text"
@@ -105,15 +140,10 @@ export default function GameDetailPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full mb-4 px-3 py-2 rounded-lg bg-zinc-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-700"
             />
-            {allGames
-              .filter((g) => g.id !== gameId)
-              .filter((g) =>
-                g.title.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((g) => (
+            {filteredOtherGames.map((g) => (
                 <Link
                   key={g.id}
-                  href={`/home/${g.title}/${g.id}`}
+                  href={`/home/${g.id}`}
                   className="block p-4 mb-4 bg-zinc-900 rounded-lg hover:scale-103 hover:shadow-[0_0_4px_#22d3ee,0_0_10px_#22d3ee]"
                 >
                   <div className="flex items-center justify-between">
@@ -122,7 +152,7 @@ export default function GameDetailPage() {
                         {g.title}
                       </h3>
                       <p className="text-gray-300 text-sm">
-                        {g.topic} · {g.difficulty} · {g.number_of_questions}{" "}
+                        {g.topic} {g.difficulty} · {g.number_of_questions}{" "}
                         questions
                       </p>
                     </div>

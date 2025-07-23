@@ -1,36 +1,54 @@
 "use client";
 import Link from "next/link";
-import { allGames } from "@/lib/gameRoomsAll";
+import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { useEffect, useState } from "react";
 import CurtainReveal from "../auth/curtain";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function HomePage() {
+  // State for the filter dropdowns
   const [questionSource, setQuestionSource] = useState("All Sources");
   const [topic, setTopic] = useState("All Topics");
   const [difficulty, setDifficulty] = useState("All Difficulties");
+
+  // State to hold the game data fetched from Firestore
+  const [games, setGames] = useState<gameRoom[]>([]);
+  
+  // Logic for the "just logged in" curtain animation
   const searchParams = useSearchParams();
   const justLoggedIn = searchParams.get("justLoggedIn") === "true";
-
   const router = useRouter();
   const [showCurtain, setShowCurtain] = useState(justLoggedIn);
   const [startCurtainAnimation, setStartCurtainAnimation] = useState(false);
 
+  // Effect to handle the curtain animation on initial load
   useEffect(() => {
     if (justLoggedIn) {
       setShowCurtain(true);
       setStartCurtainAnimation(true);
 
+      // Timer to hide the curtain and clean up the URL
       const timer = setTimeout(() => {
         setShowCurtain(false);
         router.replace("/home", { scroll: false });
       }, 2800);
 
+      // Cleanup function to prevent memory leaks
       return () => clearTimeout(timer);
     }
   }, [justLoggedIn, router]);
 
-  const filteredGames = allGames.filter((game) => {
+  // Effect to fetch game data from Firestore when the component mounts
+  useEffect(() => {
+    const loadGames = async () => {
+      const fetchedGames = await allGames();
+      setGames(fetchedGames);
+    };
+    loadGames();
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Filter the game data from state based on the selected dropdown values
+  const filteredGames = games.filter((game) => {
     return (
       (questionSource === "All Sources" || game.source === questionSource) &&
       (topic === "All Topics" || game.topic === topic) &&
@@ -51,6 +69,8 @@ export default function HomePage() {
 
           <main className="flex-1 p-6 overflow-y-auto bg-black/100 text-white">
             <h1 className="text-3xl font-bold mb-3">Join a Game!</h1>
+            
+            {/* Filter Controls */}
             <div className="flex flex-wrap gap-6 mb-3">
               <div className="flex flex-col">
                 <label
@@ -116,13 +136,17 @@ export default function HomePage() {
                 </select>
               </div>
             </div>
+
+            {/* Game Cards Display */}
             <div className="flex flex-wrap gap-6">
               {filteredGames.length === 0 ? (
                 <p className="text-white">
                   No games found matching the filters.
                 </p>
               ) : (
-                filteredGames.map((game, index) => (
+                filteredGames.map((game) => (
+
+              <Link href={`/home/${game.id}`}>
                   <div
                     key={game.id}
                     className="bg-zinc-900 rounded-2xl p-6 w-90 shadow-md hover:scale-[1.02] transition-transform"
@@ -131,28 +155,41 @@ export default function HomePage() {
                       {game.title}
                     </h2>
                     <p className="text-sm">
-                      <span className="font-bold">Question Source:</span>{" "}
+                      <span className="font-bold mb-2">Question Source:</span>{" "}
                       {game.source}
                     </p>
                     <p className="text-sm">
-                      <span className="font-bold">Number of Questions:</span>{" "}
+                      <span className="font-bold mb-2">Number of Questions:</span>{" "}
                       {game.number_of_questions}
                     </p>
                     <p className="text-sm">
-                      <span className="font-bold">Difficulty:</span>{" "}
+                      <span className="font-bold mb-2">Difficulty:</span>{" "}
                       {game.difficulty}
                     </p>
+                    {game.topic && (
+                      <p className="text-sm">
+                        <span className="font-bold mb-2">Topic:</span>{" "}
+                        {game.topic}
+                      </p>
+                    )}
+                    
                     <p className="text-sm mb-2">
-                      <span className="font-bold">Time:</span> {game.total_time}
+                      <span className="font-bold">Time Limit:</span> {game.timeLimit}
                     </p>
-
-                    <Link
-                      href={`/home/${game.title}/${game.id}`}
-                      className="text-sm text-sky-400 cursor-pointer hover:underline"
-                    >
+                     <p className="text-[#00bbff] hover:underline cursor-pointer">
+          
+                    
                       Click to see more...
-                    </Link>
+
+                     </p>
+                      
+                  
+  
+                    
                   </div>
+                  </Link>
+
+
                 ))
               )}
             </div>
