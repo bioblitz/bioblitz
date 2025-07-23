@@ -1,45 +1,46 @@
-'use client'; // Required for hooks
+"use client"; // Required for hooks
+import { useState, useEffect } from "react";
+import { Button } from "@components/ui/button";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/navigation";
+import GoogleButton from "@components/ui/GoogleButton"; // Import the custom Google button component
 
-import { Button } from "@components/ui/button"
-import { FcGoogle } from "react-icons/fc"; // Import the Google icon
-
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 
 export default function AuthenticationPage() {
+  const [isClicked, setIsClicked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [popPressed, setPopPressed] = useState(false);
+  const [hideText, setHideText] = useState(false);
+  const [dimScreen, setDimScreen] = useState(false);
+  const router = useRouter();
 
-  
-
-const login = useGoogleLogin({
+  const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
-      console.log('Login Success:', tokenResponse);
-      // You can now send this token to your backend for verification
+      console.log("Login Success:", tokenResponse);
+      setLoading(false);
+      setSignedIn(true);
+      setTimeout(() => {
+        router.push("/home?justLoggedIn=true");
+      }, 1000);
     },
     onError: (error) => {
-      console.error('Login Failed:', error);
+      console.error("Login Failed:", error);
+      setLoading(false);
     },
   });
 
-  return (
-    
+  const handleClick = () => {
+    setIsClicked(true);
+    setLoading(true);
+    login();
+    setTimeout(() => setIsClicked(false), 400);
+  };
 
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-     <button 
-      className="
-        flex           
-        items-center  
-        gap-2         
-        px-4 py-2
-        bg-white
-        border border-gray-300
-        rounded-lg
-        font-semibold
-        hover:bg-gray-50
-      "
-      onClick= {()=>login()}
-    >
-      <FcGoogle className="h-5 w-5 mr-10" />
-      Google Login
-    </button>
-    </div>
+
+  return (
+
+   <GoogleButton onClick={handleClick}/>
+
   );
 }

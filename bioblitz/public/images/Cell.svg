@@ -1,0 +1,1283 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="489" height="470" fill="none" viewBox="0 0 489 470">
+  <g class="Cell">
+    <g class="Cytoplasm">
+      <mask id="a" width="369" height="336" x="68" y="69" class="a" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+        <g class="0eeb590f58">
+          <path fill="#fff" d="M68.667 69.667h368v334.666h-368V69.667Z" class="background/fillofthecell"/>
+        </g>
+      </mask>
+      <g class="Group" mask="url(#a)">
+        <g class="Clip path group">
+          <mask id="b" width="469" height="435" x="12" y="25" class="b" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="f89a229150">
+              <path fill="#fff" d="M12.349 155.089 369.26 25.182l110.761 304.302-356.917 129.907L12.349 155.089Z" class="alsobackground1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#b)">
+            <g class="Clip path group">
+              <mask id="c" width="368" height="335" x="68" y="70" class="c" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="61094dfc18">
+                  <path fill="#fff" d="M310.036 75.016c-41.458-7.318-50.968-4.886-92.713 5.677C125.406 115.286 68.396 191.41 68.698 282.339c.099 31.104 8.687 62.807 30.088 85.515 28.162 29.818 74.875 39.969 118.537 35.016 43.677-4.922 92.724-7.698 132.224-27.276 30.797-15.271 55.026-48.474 71.823-77.068 11.14-18.984 14.432-40.88 14.276-62.016-1.162-73.333-49.089-147.953-125.61-161.494Z" class="alsobackground2"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#c)">
+                <path fill="#BFDBFE" d="M.823 133.854 366.453.776l122.099 335.469-365.63 133.078L.822 133.854Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <mask id="d" width="489" height="470" x="0" y="0" class="d" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+      <g class="3192ecb540">
+        <path fill="#fff" d="M.823 133.854 366.187.875l122.042 335.307-365.364 132.979L.823 133.854Z" class="Vector"/>
+      </g>
+    </mask>
+    <g mask="url(#d)">
+      <g class="Border">
+        <g class="Clip path group">
+          <mask id="e" width="468" height="435" x="12" y="25" class="e" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="9ad2eca7bd">
+              <path fill="#fff" d="M12.354 155.083 369.245 25.188 479.87 329.13 122.979 459.031 12.354 155.083Z" class="alsoborder"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#e)">
+            <g class="Clip path group">
+              <mask id="f" width="368" height="334" x="68" y="70" class="f" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="bfaa820a32">
+                  <path fill="#fff" d="M309.807 75.057c-41.427-7.312-50.927-4.88-92.64 5.672-91.849 34.568-148.818 110.636-148.516 201.49.099 31.083 8.682 62.76 30.068 85.453 28.14 29.797 74.817 39.937 118.448 34.989 43.64-4.916 92.651-7.687 132.119-27.255 30.771-15.26 54.985-48.437 71.766-77.01 11.135-18.969 14.427-40.849 14.271-61.969-1.162-73.276-49.052-147.833-125.516-161.37Z" class="bordertoo"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#f)">
+                <path stroke="#3B82F6" stroke-width="15.981" d="M309.807 75.057c-41.427-7.312-50.927-4.88-92.64 5.672-91.849 34.568-148.818 110.636-148.516 201.49.099 31.083 8.682 62.76 30.068 85.453 28.14 29.797 74.818 39.938 118.448 34.99 43.64-4.917 92.651-7.688 132.12-27.256 30.77-15.26 54.984-48.437 71.765-77.01 11.136-18.969 14.427-40.849 14.271-61.969-1.161-73.276-49.052-147.833-125.516-161.37Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Golgi Apparatus">
+        <path fill="#FCA5A5" fill-rule="evenodd" stroke="#69BAC9" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" stroke-width=".676" d="M416.714 230.526c2.01 12.531-35.776 11.886-48.48 35.771-.182.344-1.14 4.568-3.286 7.995-.786 1.26-1.734 2.411-2.859 3.224a6.344 6.344 0 0 1-1.933.963 5.37 5.37 0 0 1-1.062.209 6.315 6.315 0 0 1-1.084.005c-3.932-.339-.046-19.458 25.563-35.089 10.953-6.682 26.63-18.776 30.995-15.776.229.156 1.864.969 2.146 2.698Z" class="Vector" clip-rule="evenodd"/>
+        <path fill="#FCA5A5" fill-rule="evenodd" stroke="#69BAC9" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" stroke-width=".676" d="M397.198 230.724c-5.677 1.938-25.828 11.927-36.104 28.745-1.13 1.844-.76 1.573-6.109 8.615-1.912 2.51-8.839 6.994-11.105-.23-.979-3.104 5.745-15.161 32.709-36.239 10.213-7.99 26.135-25.417 32.213-16.745 1.782 2.542-.255 8.568-1.609 10.203-2.495 3.016-7.542 4.818-9.995 5.651Zm9.735 28.052c-5.292 1.292-17.068 2.219-18.714 11.901-.781 4.594.177 5.089-3.125 8.391-4.912 4.911-11.443 1.891-10.651-6.104.083-.844.687-6.203 5.088-13.266 6.433-10.323 33.829-20.25 34.636-7 .182 2.938-3.297 5.12-7.234 6.078Zm-70.923-13.359c7.839-3.537 11.615 3.568 26.547-12.339 7.73-8.229 10.011-28.151 18.469-24.354 4.479 2.01-3.849 20.787-20.724 33.141-5.469 4-15.042 11.703-21.927 9.552-1.469-.458-5.713-4.485-2.365-6Z" class="Vector" clip-rule="evenodd"/>
+        <path fill="#FCA5A5" fill-rule="evenodd" stroke="#69BAC9" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" stroke-width=".676" d="M340.99 229.943c2.854-.886 10.776.161 13.047-8.99.947-3.828 1.25-10.771 7.474-9.63 7.322 1.344-3.751 25.214-16.73 27.474-7.531 1.313-12.828-6.057-3.791-8.854Zm34.583-33.068c5.833-2.693 7.016 4.75 3.401 5.74-2.922.797-7.01-4.073-3.401-5.74Zm-48.912 53.094c.527-1.62 3.053-2.719 5.105-.651 3.02 3.047-.386 5.51-2.167 5.286-3.776-.479-3.104-4.119-2.938-4.635Zm29.985 32.203c.776-1.172 4.453-3.583 4.422 1.578-.026 5.563-7.026 2.334-4.422-1.578Zm39.63-8.583c-3.812-6.229 5.203-6.985 6.25-4.172 1.313 3.536-4.427 7.156-6.25 4.172Zm20.875-46.828c.5-4.126 6.62-2.146 4.797 1.583-1.062 2.172-5.062.635-4.797-1.583Z" class="Vector" clip-rule="evenodd"/>
+      </g>
+      <g class="Mitochondria 1">
+        <g class="Element">
+          <mask id="g" width="39" height="56" x="95" y="249" class="g" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="ddd974b263">
+              <path fill="#fff" d="M95.333 249.667H134v54.666H95.333v-54.666Z" class="donotknow"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#g)">
+            <g class="Clip path group">
+              <mask id="h" width="51" height="66" x="87" y="245" class="h" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="94e67d9275">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="donotknowatall"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#h)">
+                <g class="Clip path group">
+                  <mask id="i" width="51" height="66" x="87" y="245" class="i" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="f5b00d69ff">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="donotknoweither"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#i)">
+                    <path fill="#FDBA74" d="M111.661 302.01c6.474 4.099 15.079 2.167 19.178-4.307 4.109-6.489 2.182-15.068-4.308-19.177a5.21 5.21 0 0 1-1.614-7.177c4.109-6.49 2.182-15.068-4.308-19.172-6.474-4.099-15.073-2.167-19.171 4.307-9.745 15.386-5.162 35.787 10.223 45.526Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="j" width="31" height="48" x="99" y="253" class="j" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="fabc7db690">
+              <path fill="#fff" d="M99.333 253.667H130v46.666H99.333v-46.666Z" class="mitopt1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#j)">
+            <g class="Clip path group">
+              <mask id="k" width="51" height="66" x="87" y="245" class="k" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="4b92e1027e">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#k)">
+                <g class="Clip path group">
+                  <mask id="l" width="51" height="66" x="87" y="245" class="l" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="7d98c7de3e">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="mitopt1"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#l)">
+                    <path fill="#FB923C" d="M100.87 280.521c-1.657-7.375-.261-15.443 4.578-22.427 2.891-4.177 8.802-5.5 13.198-2.969 4.401 2.536 5.625 7.974 2.729 12.146-3.911 5.646-2.25 13.031 3.698 16.458 4.401 2.537 5.62 7.974 2.729 12.146-2.891 4.172-8.802 5.5-13.198 2.964-7.37-4.245-12.078-10.938-13.734-18.318Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="m" width="25" height="43" x="103" y="256" class="m" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="d7fbc522ba">
+              <path fill="#fff" d="M103.333 256.333h24V299h-24v-42.667Z" class="squigglesonmito"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#m)">
+            <g class="Clip path group">
+              <mask id="n" width="51" height="66" x="87" y="245" class="n" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="a7d575ae9d">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="squigglesonmito"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#n)">
+                <g class="Clip path group">
+                  <mask id="o" width="51" height="66" x="87" y="245" class="o" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="63e835fc6a">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="squigglesonmito"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#o)">
+                    <path fill="#FDBA74" d="M106.948 262.24c-.516 3.687 4.036 5.786 3.167 8.343-.849 2.495-5.646-.619-5.99 4.042-.26 3.531 4.823 3.083 4.812 5.818-.015 2.239-3.77 3.531-1.791 6.687 1.969 3.13 4.984-.693 7.406 2.469 2.318 3.036-.781 6.401 1.313 8.26 4.557 4.037 14.166-5.343 10.312-9.057-1.63-1.568-5.292 1.021-6.687-.49-1.313-1.421 1.26-4.427-.131-6.333-1.453-1.995-5.64-.156-6.052-1.979-.245-1.094 3.255-1.349 2.719-3.74-.656-2.921-3.177-1.166-3.594-3.01-.411-1.849 4.323-.818 4.505-4.953.115-2.672-3.463-3.505-3.031-5.412.344-1.515 4.636.25 5.401-2.02.969-2.875-11.224-6.74-12.359 1.375Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="p" width="5" height="3" x="107" y="260" class="p" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="9b84036edc">
+              <path fill="#fff" d="M107.333 260.333h4V263h-4v-2.667Z" class="dot1mito1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#p)">
+            <g class="Clip path group">
+              <mask id="q" width="51" height="66" x="87" y="245" class="q" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="1dab7f3af0">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot1mito1"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#q)">
+                <g class="Clip path group">
+                  <mask id="r" width="51" height="66" x="87" y="245" class="r" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="b255d46723">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot1mito1"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#r)">
+                    <path fill="#FB923C" d="M109.849 262.49a.952.952 0 0 1-.74-.131.942.942 0 0 1-.437-.614.963.963 0 0 1 .13-.745.937.937 0 0 1 .615-.432.934.934 0 0 1 .744.125c.23.146.375.354.438.619a.966.966 0 0 1-.13.745.952.952 0 0 1-.62.433Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="s" width="3" height="4" x="106" y="273" class="s" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="66cf60482a">
+              <path fill="#fff" d="M106 273.667h2.667v2.666H106v-2.666Z" class="dot3mito1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#s)">
+            <g class="Clip path group">
+              <mask id="t" width="51" height="66" x="87" y="245" class="t" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="6efba03c3a">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot3mito1"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#t)">
+                <g class="Clip path group">
+                  <mask id="u" width="51" height="66" x="87" y="245" class="u" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="0c70e6f7f4">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot3mito1"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#u)">
+                    <path fill="#FB923C" d="M107.297 275.714a.93.93 0 0 1-.74-.131.942.942 0 0 1-.437-.614.958.958 0 0 1 .13-.745.937.937 0 0 1 .615-.432.936.936 0 0 1 .744.13.95.95 0 0 1 .438.614.967.967 0 0 1-.13.745.954.954 0 0 1-.62.433Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="v" width="4" height="3" x="108" y="284" class="v" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="0720d8cc38">
+              <path fill="#fff" d="M108.667 284.333h2.666V287h-2.666v-2.667Z" class="dot4mito1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#v)">
+            <g class="Clip path group">
+              <mask id="w" width="51" height="66" x="87" y="245" class="w" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="628fd2b8dd">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot4mito1"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#w)">
+                <g class="Clip path group">
+                  <mask id="x" width="51" height="66" x="87" y="245" class="x" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="d07e710a99">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot4mito1"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#x)">
+                    <path fill="#FB923C" d="M110.016 286.438a.932.932 0 0 1-.74-.125.956.956 0 0 1-.437-.62.962.962 0 0 1 .13-.745.937.937 0 0 1 .614-.432.958.958 0 0 1 .745.13.937.937 0 0 1 .432.614.936.936 0 0 1-.125.745.95.95 0 0 1-.619.433Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="y" width="5" height="5" x="115" y="281" class="y" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="6f04188b32">
+              <path fill="#fff" d="M115.333 281.667h4v4h-4v-4Z" class="dot5mito1"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#y)">
+            <g class="Clip path group">
+              <mask id="z" width="51" height="66" x="87" y="245" class="z" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="6c731f3014">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot5mito1"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#z)">
+                <g class="Clip path group">
+                  <mask id="A" width="51" height="66" x="87" y="245" class="A" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="792087ed3d">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="dot5mito1"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#A)">
+                    <path fill="#FB923C" d="M117.38 284.651a.925.925 0 0 1-.739-.13.945.945 0 0 1-.438-.615.968.968 0 0 1 .13-.745.937.937 0 0 1 .615-.432.94.94 0 0 1 .745.125.971.971 0 0 1 .437.62.958.958 0 0 1-.13.745.947.947 0 0 1-.62.432Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="B" width="4" height="3" x="116" y="295" class="B" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="242c95489a">
+              <path fill="#fff" d="M116.667 295h2.666v2.667h-2.666V295Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#B)">
+            <g class="Clip path group">
+              <mask id="C" width="51" height="66" x="87" y="245" class="C" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="1d34fd9ced">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#C)">
+                <g class="Clip path group">
+                  <mask id="D" width="51" height="66" x="87" y="245" class="D" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="326ac6162c">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#D)">
+                    <path fill="#FB923C" d="M118.339 297.016a.942.942 0 0 1-.745-.131.952.952 0 0 1-.438-.614.967.967 0 0 1 .13-.745.95.95 0 0 1 .62-.432.926.926 0 0 1 .74.13.944.944 0 0 1 .437.615.957.957 0 0 1-.13.744.939.939 0 0 1-.614.433Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="E" width="3" height="4" x="123" y="289" class="E" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="4434dbf5aa">
+              <path fill="#fff" d="M123.333 289.667H126v2.666h-2.667v-2.666Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#E)">
+            <g class="Clip path group">
+              <mask id="F" width="51" height="66" x="87" y="245" class="F" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="262ee6433d">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#F)">
+                <g class="Clip path group">
+                  <mask id="G" width="51" height="66" x="87" y="245" class="G" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="23a4ff1e27">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#G)">
+                    <path fill="#FB923C" d="M124.563 292.083a.955.955 0 0 1-.745-.13.967.967 0 0 1-.438-.614.967.967 0 0 1 .13-.745.954.954 0 0 1 .62-.433.932.932 0 0 1 .74.125.974.974 0 0 1 .437.62.962.962 0 0 1-.13.745.937.937 0 0 1-.614.432Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="H" width="5" height="3" x="112" y="267" class="H" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="3d63a1caaf">
+              <path fill="#fff" d="M112.667 267h4v2.667h-4V267Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#H)">
+            <g class="Clip path group">
+              <mask id="I" width="51" height="66" x="87" y="245" class="I" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="a4af3202fc">
+                  <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#I)">
+                <g class="Clip path group">
+                  <mask id="J" width="51" height="66" x="87" y="245" class="J" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="a67ab93a13">
+                      <path fill="#fff" d="m124.724 245.698 12.703 56.562-37.057 8.323-12.703-56.562 37.057-8.323Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#J)">
+                    <path fill="#FB923C" d="M114.724 269.172a.963.963 0 0 1-.745-.13.937.937 0 0 1-.432-.615.956.956 0 0 1 .125-.745.971.971 0 0 1 .62-.437.96.96 0 0 1 .744.13c.23.146.375.354.433.62a.933.933 0 0 1-.13.739.945.945 0 0 1-.615.438Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Clip path group">
+        <mask id="K" width="28" height="28" x="131" y="172" class="K" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="39e0c251f0">
+            <path fill="#fff" d="M131.448 172.182h26.963v26.964h-26.963v-26.964Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#K)">
+          <g class="Clip path group">
+            <mask id="L" width="28" height="28" x="131" y="172" class="L" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="26a3de1994">
+                <path fill="#fff" d="M144.932 172.182c-7.448 0-13.484 6.037-13.484 13.479 0 7.448 6.036 13.485 13.484 13.485 7.443 0 13.479-6.037 13.479-13.485 0-7.442-6.036-13.479-13.479-13.479Z" class="lysosome2"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#L)">
+              <path fill="#F472B6" d="M131.448 172.182h26.963v26.964h-26.963v-26.964Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Vacuole">
+        <g class="Clip path group">
+          <mask id="M" width="78" height="90" x="215" y="284" class="M" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="d19eb9d585">
+              <path fill="#fff" d="M215.333 284.333h77.334v89.334h-77.334v-89.334Z" class="vacuoleborder"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#M)">
+            <g class="Clip path group">
+              <mask id="N" width="102" height="116" x="207" y="272" class="N" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="95d2d228ef">
+                  <path fill="#fff" d="m207.823 362.818 32.088-90.427 68.766 24.406-32.094 90.427-68.76-24.406Z" class="vacuoleborder"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#N)">
+                <g class="Clip path group">
+                  <mask id="O" width="102" height="116" x="207" y="272" class="O" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="d3ddc817fd">
+                      <path fill="#fff" d="m207.823 362.818 32.088-90.427 68.766 24.406-32.094 90.427-68.76-24.406Z" class="vacuolefill"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#O)">
+                    <path fill="#D1FAE5" d="M229.854 370.125c-6.729-2.583-12.042-8.599-13.818-15.635-1.776-7.037.037-14.922 4.714-20.5 4.687-5.599 11.812-8.73 16.349-14.454 7.088-8.947 6.76-22.744 15.302-30.296 7.167-6.334 18.724-5.636 26.365-.006 7.64 5.631 11.729 15.136 12.958 24.625 2.906 22.48-9.99 46.235-30.38 55.98-8.276 3.947-18.474 5.281-31.49.286Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="P" width="71" height="82" x="219" y="288" class="P" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="bd79e154da">
+              <path fill="#fff" d="M219.333 288.333H290v81.334h-70.667v-81.334Z" class="vacuolefill"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#P)">
+            <g class="Clip path group">
+              <mask id="Q" width="93" height="105" x="212" y="278" class="Q" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="ca05c32414">
+                  <path fill="#fff" d="m212.786 359.953 29.084-81.948 63.109 22.401-29.083 81.948-63.11-22.401Z" class="vacuolefill"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#Q)">
+                <g class="Clip path group">
+                  <mask id="R" width="93" height="105" x="212" y="278" class="R" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="5560268460">
+                      <path fill="#fff" d="m212.786 359.953 29.084-81.948 63.109 22.401-29.083 81.948-63.11-22.401Z" class="vacuolefill"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#R)">
+                    <path fill="#E0F2FE" d="M232.937 366.656c-6.156-2.359-11.031-7.828-12.677-14.213-1.64-6.381-.01-13.526 4.245-18.563 4.271-5.062 10.771-7.875 14.901-13.052 6.448-8.083 6.104-20.594 13.891-27.411 6.526-5.719 17.094-5.052 24.094.078 7 5.125 10.765 13.75 11.916 22.354 2.729 20.385-8.984 41.88-27.588 50.646-7.552 3.552-16.87 4.729-28.782.161Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Lysosome 1">
+        <mask id="S" width="23" height="23" x="152" y="328" class="S" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="06591e607f">
+            <path fill="#fff" d="M152.818 328.208h22.151v22.151h-22.151v-22.151Z" class="lysosome1"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#S)">
+          <g class="Clip path group">
+            <mask id="T" width="23" height="23" x="152" y="328" class="T" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="450204993a">
+                <path fill="#fff" d="M163.891 328.208c-6.115 0-11.073 4.959-11.073 11.078 0 6.115 4.958 11.073 11.073 11.073 6.119 0 11.078-4.958 11.078-11.073 0-6.119-4.959-11.078-11.078-11.078Z" class="lysosome1"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#T)">
+              <path fill="#F472B6" d="M152.818 328.208h22.151v22.151h-22.151v-22.151Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Peroxisome 3">
+        <g class="Clip path group">
+          <mask id="U" width="21" height="21" x="318" y="310" class="U" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="f66638d229">
+              <path fill="#fff" d="M318.375 310.021h20.078v20.078h-20.078v-20.078Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#U)">
+            <g class="Clip path group">
+              <mask id="V" width="21" height="21" x="318" y="310" class="V" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="701606a1c6">
+                  <path fill="#fff" d="M328.411 310.021c-5.541 0-10.036 4.495-10.036 10.036 0 5.547 4.495 10.042 10.036 10.042a10.04 10.04 0 0 0 10.042-10.042c0-5.541-4.495-10.036-10.042-10.036Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#V)">
+                <path fill="#BBF7D0" d="M318.375 310.021h20.078v20.078h-20.078v-20.078Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="W" width="21" height="21" x="318" y="310" class="W" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="2c89f9813a">
+              <path fill="#fff" d="M318.375 310.021h19.99v19.989h-19.99v-19.989Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#W)">
+            <g class="Clip path group">
+              <mask id="X" width="21" height="21" x="318" y="310" class="X" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="8a121e6232">
+                  <path fill="#fff" d="M328.37 310.021a9.994 9.994 0 0 0-9.995 9.995c0 5.52 4.474 9.994 9.995 9.994 5.521 0 9.995-4.474 9.995-9.994a9.994 9.994 0 0 0-9.995-9.995Z" class="peroxisomeborder1"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#X)">
+                <path stroke="#4ADE80" stroke-width="5.974" d="M328.37 310.021c-5.521 0-9.995 4.474-9.995 9.994a9.994 9.994 0 0 0 9.995 9.995 9.994 9.994 0 0 0 9.995-9.995c0-5.52-4.474-9.994-9.995-9.994Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Clip path group">
+        <mask id="Y" width="134" height="71" x="219" y="131" class="Y" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="c2786a602b">
+            <path fill="#fff" d="M219.333 131h133.334v70.667H219.333V131Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#Y)">
+          <g class="Clip path group">
+            <mask id="Z" width="147" height="97" x="213" y="117" class="Z" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="d95329503f">
+                <path fill="#fff" d="m226.677 117.25 132.885 23.432-12.843 72.839-132.886-23.432 12.844-72.839Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#Z)">
+              <g class="Clip path group">
+                <mask id="aa" width="147" height="97" x="213" y="117" class="aa" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                  <g class="92e9656e00">
+                    <path fill="#fff" d="m226.677 117.25 132.885 23.432-12.843 72.839-132.886-23.432 12.844-72.839Z" class="Vector"/>
+                  </g>
+                </mask>
+                <g class="Group" mask="url(#aa)">
+                  <path fill="#93C5FD" d="M350.172 182.672c-.964.875-2.651 1.484-3.896 1.838-1.406.407-2.609.381-3.708-.02a5.06 5.06 0 0 1-.787-.037h-.01a.27.27 0 0 1-.219-.297.268.268 0 0 1 .146-.198 1.361 1.361 0 0 1-.339-.771c-.14-1.718.625-3.161 1.953-4.25 1.365-1.119 3.615-2.114 5.396-1.77 2.729.526 3.459 3.687 1.464 5.505ZM332.38 158.62c1.985-.599 3.781-2.011 5.573-3.037 1.906-1.088 3.859-2.146 5.578-3.515 3.464-2.75 6.11-6.219 8.375-9.974.729-1.209-.271-2.818-1.729-2.271-4.167 1.562-6.708 5.052-10.12 7.698-1.63 1.271-3.39 2.349-5.161 3.416-1.875 1.125-4.057 2.204-5.245 4.115-1.24 1.995.469 4.255 2.729 3.568Zm-99.63-9.735c.76 1.047 1.906 2.427 3.057 3.037 2.386 1.26 5.115-.5 4.683-3.245-.287-1.797-1.99-3.573-3.5-4.474-1.48-.88-3.094-1.109-4.667-.391-.479.219-.776.74-.807 1.256-.079 1.281.302 2.521 1.234 3.817Zm2.646-13.713c1.291 1.62 3.265 2.771 4.88 4.057 1.719 1.37 3.422 2.792 5.328 3.886 3.833 2.203 8.031 3.385 12.36 4.104 1.39.229 2.515-1.292 1.468-2.448-2.989-3.297-7.166-4.37-10.885-6.557-1.787-1.053-3.438-2.287-5.078-3.542-1.745-1.328-3.547-2.958-5.761-3.354-2.312-.417-3.786 2.005-2.312 3.854Zm-7.203 28.609-.157-.599c.115.521.079.391-.114-.38.12.583.078.448-.125-.401-.307-.812-.906-1.573-1.5-2.198l-.156-.156c.01.01-.032-.042-.141-.151-.297-.36-.635-.714-1.01-.979-1.787-1.282-3.881-.552-4.881 1.27-1.411 2.573 1.594 5.313 4.136 6.037l-.042-.005c.292.088.583.172.88.245.782-.011.912-.006.391.02.203 0 .411 0 .615.006-.407-.021-.334-.026.213-.016-.38-.005.385.016.5 0a3.32 3.32 0 0 0 .708-.188c.808-.286 1.177-1.286.875-2.057a9.279 9.279 0 0 0-.192-.448Zm111.776-2.557c-7.828 2.323-15.136 6.318-22.927 8.828-2.641.854-5.297 1.255-8.006 1.464-1.447.114-2.604-1.089-2.552-2.547.011-.276-.109-.453.433-1.141a5.564 5.564 0 0 1 3.739-2.052c1.761-.198 3.662-.448 4.964-.698 2.594-.505 5.469-.953 7.526-2.755 1.437-1.261.693-4.474-1.584-3.886a.469.469 0 0 1-.088.021.615.615 0 0 1-.729-.776v-.01a5.378 5.378 0 0 0 .125-2.427.614.614 0 0 1 .442-.709c.256-.067.506-.135.75-.203 2.443-.661 6.303-1.411 7.896-3.494.75-.985.318-2.391-.781-2.875-2.422-1.068-5.338.588-7.74 1.156-2.734.646-5.604.427-8.312 1.026-2.932.651-3.078 4.651-.026 5.276a9.436 9.436 0 0 0 1.677.177.984.984 0 0 1 .953.891c.042.442.11.88.198 1.286v.01a.98.98 0 0 1-.797 1.183l-.646.109c-2.828.448-5.687.828-8.552.948-5.583.24-11.265-.391-16.739-1.448l-.891-.172c-1.068-.213-1.74-1.328-1.37-2.359.058-.167.115-.333.167-.505.219-.74.495-1.516.698-2.302.229-.907 1.151-1.454 2.062-1.256l.016.006c1.557.343 3.047.625 4.646.619 1.448-.005 2.875-.166 4.318-.26 1.843-.12 3.281-.021 4.598-1.542.563-.656.714-1.797.329-2.573-1.667-3.38-5.771-2.135-8.823-2.156-1.354-.01-2.917-.156-4.188-.625-1.328-.495-2.51-1.401-3.802-1.974-2.698-1.203-5.792-1.635-8.724-1.724-1.427-.041-2.844.063-4.265.042-.875-.016-1.797-.052-2.667.109-.104.021-2.714.86-1.594.63-1.458.297-2.516 2.063-1.411 3.36.547.64.755 1.307 1.432 1.859.656.537 1.521.943 2.318 1.224 2.151.755 4.661 1.136 6.64 1.453.453.078.907.094 1.36.13a2.443 2.443 0 0 1 2.208 2.985c-.073.318-.135.625-.198.911l-.005.026a2.514 2.514 0 0 1-2.99 1.938 228.75 228.75 0 0 0-6.781-1.391c-2.526-.469-4.844-.932-7.203-2-2.214-1-4.292-2.677-6.641-3.302-.906-.239-1.609.745-1.547 1.531.287 3.594 4.073 6.063 7.766 7.662-.469.719-.833 1.536-1.229 2.375-.302.64-.537 1.265-.667 1.885-3.172-1.432-6.182-3.14-9.135-5-1.792-1.125-3.459-2.343-5.417-3.161-1.88-.781-3.51-2.167-5.573-2.406-1.161-.131-1.802.937-1.521 1.958.209.755.589 1.479 1.052 2.177a.945.945 0 0 1-.078 1.161 1.47 1.47 0 0 0-.114.125c.047-.052.083-.093.109-.119a.056.056 0 0 1-.016.02c-.005.006-.005.006-.005.011-.078.073-.099.094-.088.088-.042.042-.089.089-.151.157-.172.177-.349.349-.495.547-.073.093-.198.25-.333.416a.942.942 0 0 1-1.339.136c-2.26-1.907-4.385-3.98-6.531-6.011-2.328-2.203-4.375-4.224-7.459-5.213-1.213-.391-2.296.656-1.895 1.88 1.026 3.114 3.062 5.536 5.224 7.995 2.151 2.448 4.484 4.724 7.031 6.76 2.568 2.057 5.338 3.688 8.161 5.359l.552.318c.412.24.521.781.245 1.162l-.005.01c-.38.526-.76 1.052-1.052 1.615a.8.8 0 0 1-1.151.307c-.677-.448-1.36-.896-2.042-1.339-1.573-1.015-6.015-4.416-7.687-2.036-1.787 2.552.875 4.781 2.875 6.083 2.583 1.677 5.02 3.568 7.64 5.188 2.677 1.661 5.521 3.073 8.323 4.505 2.896 1.479 5.828 3.016 8.953 3.958 2.021.615 5.526 1.964 7.542.787 2.396-1.401-.583-4.203-2.021-4.927-2.646-1.328-5.505-2.308-8.198-3.578-2.963-1.401-5.844-2.974-8.729-4.532-.312-.172-.62-.343-.927-.515a.805.805 0 0 1-.182-1.261 7.646 7.646 0 0 0 1.437-2.088.815.815 0 0 1 .995-.396c.474.177.948.344 1.432.489 2.219.683 4.026-1.567 2.724-3.557-1.401-2.14-4.406-3.099-6.427-4.594-1.094-.807-2.213-1.567-3.338-2.333-.526-.359-.542-1.114-.052-1.521l.088-.073a.937.937 0 0 1 1.24.011c1.333 1.192 2.916 2.192 4.369 3.13 3.964 2.568 8.193 4.698 12.579 6.448 2.656 1.057 5.213 1.937 7.875 2.594a.943.943 0 0 1 .651 1.255l-.006.01c-.161.427-.364.907-.557 1.407a.937.937 0 0 1-1.255.526c-1.521-.678-3.089-1.433-4.656-1.558-2.568-.208-3.709 2.349-2.542 4.38 1.115 1.943 3.687 2.787 5.667 3.573 2.052.808 4.104 1.646 6.172 2.407 4.255 1.552 8.697 2.666 13.166 3.375 1.849.297 3.703.51 5.557.656a1.49 1.49 0 0 1 1.365 1.583c-.01.193-.021.386-.036.558-.047.432-.079.89-.084 1.359a1.503 1.503 0 0 1-1.468 1.479 992.32 992.32 0 0 0-5.454.125c-2.619.068-5.109.401-7.703.635-1.677.157-2.333 2.532-.948 3.511 4.558 3.198 11.282 1.833 16.511 1.823 3.338-.011 6.687-.125 10.005-.557 1.437-.188 2.849-.542 4.234-.974 1.089-.334 2.308-.563 3.292-1.094 1.422-.766 2.245-3.026.547-4.094-2.401-1.51-5.115-.474-7.724-.135a85.048 85.048 0 0 1-4.38.448 1.505 1.505 0 0 1-1.625-1.547c.015-.469.021-.917.031-1.302 0-.047.005-.099.005-.146a1.509 1.509 0 0 1 1.464-1.469h.015c4.042-.115 8.865-.437 12.506-2.406 1.661-.901 2.218-3.735.01-4.474-1.807-.604-3.615-.328-5.443.031-2.109.417-4.26.635-6.411.672-4.25.078-8.531-.255-12.735-.912-4.171-.645-8.276-1.656-12.239-3.135a15.97 15.97 0 0 0-.443-.167.946.946 0 0 1-.547-1.213c.089-.235.172-.469.25-.693.261-.739.636-1.489.964-2.25a.92.92 0 0 1 .901-.562c1.578.078 3.208-.021 4.614-.589 1.813-.734 3.542-2.385 2.365-4.391-.979-1.671-3.161-1.546-4.833-1.406-1.828.156-3.86-.328-5.625-.791-2.61-.688-5.167-1.735-7.683-2.808.365-.463.683-1 .969-1.573.469-.942.917-1.916 1.11-2.916.031.01.062.021.098.031a131.74 131.74 0 0 0 18.683 4.224c4.161.62 8.39 1.12 12.614 1.323a1.32 1.32 0 0 1 1.209 1.64 12.212 12.212 0 0 0-.328 2.521v.011a1.353 1.353 0 0 1-1.469 1.302c-.182-.011-.365-.031-.547-.047-1.823-.188-3.74-.896-5.344.312a1.54 1.54 0 0 0-.479 1.766c.75 1.927 2.849 2.234 4.688 2.458 1.432.172 2.88.276 4.322.297 3.084.047 6.099-.047 9.157.084 2.302.104 4.588.302 6.88-.032 4.463-.661 9.068-2.109 13.276-3.724.031-.015.062-.026.099-.041a1.178 1.178 0 0 1 1.557.76v.016c.115.385.214.765.323 1.14a1.165 1.165 0 0 1-.641 1.391c-2.234 1.005-4.437 2.203-6.744 2.432-.625.063-1.224.271-1.802.521-1.474.646-3.052.568-4.558.917-2.026.469-3.401 3.349-1.276 4.739 1.193.776 2.625.969 4.094.839a1.353 1.353 0 0 1 1.469 1.151c.026.193.062.385.104.583v.016a1.382 1.382 0 0 1-1.031 1.609c-1.813.443-3.604 1.037-5.084 2.13-3.088 2.287.391 6.459 3.526 4.62 1.844-1.078 4.261-1.26 6.302-1.739 3.063-.724 5.86-2.063 8.62-3.542 3.214-1.714 1.391-6.167-2.099-5.208-1.203.333-2.349.797-3.489 1.281a1.342 1.342 0 0 1-1.844-.99 10.033 10.033 0 0 0-.115-.552 1.332 1.332 0 0 1 .808-1.552 88.92 88.92 0 0 0 3.51-1.458c1.99-.896 4.401-1.63 6.146-2.927 1.365-1.016 1.115-4.193-.802-4.38a1.188 1.188 0 0 1-1.047-.86c-.161-.599-.365-1.187-.51-1.719-.053-.182-.11-.375-.167-.562a1.18 1.18 0 0 1 .516-1.365c.218-.13.432-.265.645-.411 2.052-1.354 3.464-3.109 4.547-5.266 1.005-1.989-1.302-3.604-3.062-3.083Z" class="Vector"/>
+                  <path fill="#93C5FD" d="M339.969 161.224c-7.828 2.323-15.136 6.318-22.927 8.828-2.641.854-5.297 1.255-8.006 1.464-1.447.114-2.604-1.089-2.552-2.547.011-.276-.109-.453.433-1.141a5.564 5.564 0 0 1 3.739-2.052c1.761-.198 3.662-.448 4.964-.698 2.594-.505 5.469-.953 7.526-2.755 1.437-1.261.693-4.474-1.584-3.886a.469.469 0 0 1-.088.021.615.615 0 0 1-.729-.776v-.01a5.378 5.378 0 0 0 .125-2.427.614.614 0 0 1 .442-.709c.256-.067.506-.135.75-.203 2.443-.661 6.303-1.411 7.896-3.494.75-.985.318-2.391-.781-2.875-2.422-1.068-5.338.588-7.74 1.156-2.734.646-5.604.427-8.312 1.026-2.932.651-3.078 4.651-.026 5.276a9.436 9.436 0 0 0 1.677.177.984.984 0 0 1 .953.891c.042.442.11.88.198 1.286v.01a.98.98 0 0 1-.797 1.183l-.646.109c-2.828.448-5.687.828-8.552.948-5.583.24-11.265-.391-16.739-1.448l-.891-.172c-1.068-.213-1.74-1.328-1.37-2.359.058-.167.115-.333.167-.505.219-.74.495-1.516.698-2.302.229-.907 1.151-1.454 2.062-1.256l.016.006c1.557.343 3.047.625 4.646.619 1.448-.005 2.875-.166 4.318-.26 1.843-.12 3.281-.021 4.598-1.542.563-.656.714-1.797.329-2.573-1.667-3.38-5.771-2.135-8.823-2.156-1.354-.01-2.917-.156-4.188-.625-1.328-.495-2.51-1.401-3.802-1.974-2.698-1.203-5.792-1.635-8.724-1.724-1.427-.041-2.844.063-4.265.042-.875-.016-1.797-.052-2.667.109-.104.021-2.714.86-1.594.63-1.458.297-2.516 2.063-1.411 3.36.547.64.755 1.307 1.432 1.859.656.537 1.521.943 2.318 1.224 2.151.755 4.661 1.136 6.64 1.453.453.078.907.094 1.36.13a2.443 2.443 0 0 1 2.208 2.985c-.073.318-.135.625-.198.911l-.005.026a2.514 2.514 0 0 1-2.99 1.938 228.75 228.75 0 0 0-6.781-1.391c-2.526-.469-4.844-.932-7.203-2-2.214-1-4.292-2.677-6.641-3.302-.906-.239-1.609.745-1.547 1.531.287 3.594 4.073 6.063 7.766 7.662-.469.719-.833 1.536-1.229 2.375-.302.64-.537 1.265-.667 1.885-3.172-1.432-6.182-3.14-9.135-5-1.792-1.125-3.459-2.343-5.417-3.161-1.88-.781-3.51-2.167-5.573-2.406-1.161-.131-1.802.937-1.521 1.958.209.755.589 1.479 1.052 2.177a.945.945 0 0 1-.078 1.161 1.47 1.47 0 0 0-.114.125c.047-.052.083-.093.109-.119a.056.056 0 0 1-.016.02c-.005.006-.005.006-.005.011-.078.073-.099.094-.088.088-.042.042-.089.089-.151.157-.172.177-.349.349-.495.547-.073.093-.198.25-.333.416a.942.942 0 0 1-1.339.136c-2.26-1.907-4.385-3.98-6.531-6.011-2.328-2.203-4.375-4.224-7.459-5.213-1.213-.391-2.296.656-1.895 1.88 1.026 3.114 3.062 5.536 5.224 7.995 2.151 2.448 4.484 4.724 7.031 6.76 2.568 2.057 5.338 3.688 8.161 5.359l.552.318c.412.24.521.781.245 1.162l-.005.01c-.38.526-.76 1.052-1.052 1.615a.8.8 0 0 1-1.151.307c-.677-.448-1.36-.896-2.042-1.339-1.573-1.015-6.015-4.416-7.687-2.036-1.787 2.552.875 4.781 2.875 6.083 2.583 1.677 5.02 3.568 7.64 5.188 2.677 1.661 5.521 3.073 8.323 4.505 2.896 1.479 5.828 3.016 8.953 3.958 2.021.615 5.526 1.964 7.542.787 2.396-1.401-.583-4.203-2.021-4.927-2.646-1.328-5.505-2.308-8.198-3.578-2.963-1.401-5.844-2.974-8.729-4.532-.312-.172-.62-.343-.927-.515a.805.805 0 0 1-.182-1.261 7.646 7.646 0 0 0 1.437-2.088.815.815 0 0 1 .995-.396c.474.177.948.344 1.432.489 2.219.683 4.026-1.567 2.724-3.557-1.401-2.14-4.406-3.099-6.427-4.594-1.094-.807-2.213-1.567-3.338-2.333-.526-.359-.542-1.114-.052-1.521l.088-.073a.937.937 0 0 1 1.24.011c1.333 1.192 2.916 2.192 4.369 3.13 3.964 2.568 8.193 4.698 12.579 6.448 2.656 1.057 5.213 1.937 7.875 2.594a.943.943 0 0 1 .651 1.255l-.006.01c-.161.427-.364.907-.557 1.407a.937.937 0 0 1-1.255.526c-1.521-.678-3.089-1.433-4.656-1.558-2.568-.208-3.709 2.349-2.542 4.38 1.115 1.943 3.687 2.787 5.667 3.573 2.052.808 4.104 1.646 6.172 2.407 4.255 1.552 8.697 2.666 13.166 3.375 1.849.297 3.703.51 5.557.656a1.49 1.49 0 0 1 1.365 1.583c-.01.193-.021.386-.036.558-.047.432-.079.89-.084 1.359a1.503 1.503 0 0 1-1.468 1.479 992.32 992.32 0 0 0-5.454.125c-2.619.068-5.109.401-7.703.635-1.677.157-2.333 2.532-.948 3.511 4.558 3.198 11.282 1.833 16.511 1.823 3.338-.011 6.687-.125 10.005-.557 1.437-.188 2.849-.542 4.234-.974 1.089-.334 2.308-.563 3.292-1.094 1.422-.766 2.245-3.026.547-4.094-2.401-1.51-5.115-.474-7.724-.135a85.048 85.048 0 0 1-4.38.448 1.505 1.505 0 0 1-1.625-1.547c.015-.469.021-.917.031-1.302 0-.047.005-.099.005-.146a1.509 1.509 0 0 1 1.464-1.469h.015c4.042-.115 8.865-.437 12.506-2.406 1.661-.901 2.218-3.735.01-4.474-1.807-.604-3.615-.328-5.443.031-2.109.417-4.26.635-6.411.672-4.25.078-8.531-.255-12.735-.912-4.171-.645-8.276-1.656-12.239-3.135a15.97 15.97 0 0 0-.443-.167.946.946 0 0 1-.547-1.213c.089-.235.172-.469.25-.693.261-.739.636-1.489.964-2.25a.92.92 0 0 1 .901-.562c1.578.078 3.208-.021 4.614-.589 1.813-.734 3.542-2.385 2.365-4.391-.979-1.671-3.161-1.546-4.833-1.406-1.828.156-3.86-.328-5.625-.791-2.61-.688-5.167-1.735-7.683-2.808.365-.463.683-1 .969-1.573.469-.942.917-1.916 1.11-2.916.031.01.062.021.098.031a131.74 131.74 0 0 0 18.683 4.224c4.161.62 8.39 1.12 12.614 1.323a1.32 1.32 0 0 1 1.209 1.64 12.212 12.212 0 0 0-.328 2.521v.011a1.353 1.353 0 0 1-1.469 1.302c-.182-.011-.365-.031-.547-.047-1.823-.188-3.74-.896-5.344.312a1.54 1.54 0 0 0-.479 1.766c.75 1.927 2.849 2.234 4.688 2.458 1.432.172 2.88.276 4.322.297 3.084.047 6.099-.047 9.157.084 2.302.104 4.588.302 6.88-.032 4.463-.661 9.068-2.109 13.276-3.724.031-.015.062-.026.099-.041a1.178 1.178 0 0 1 1.557.76v.016c.115.385.214.765.323 1.14a1.165 1.165 0 0 1-.641 1.391c-2.234 1.005-4.437 2.203-6.744 2.432-.625.063-1.224.271-1.802.521-1.474.646-3.052.568-4.558.917-2.026.469-3.401 3.349-1.276 4.739 1.193.776 2.625.969 4.094.839a1.353 1.353 0 0 1 1.469 1.151c.026.193.062.385.104.583v.016a1.382 1.382 0 0 1-1.031 1.609c-1.813.443-3.604 1.037-5.084 2.13-3.088 2.287.391 6.459 3.526 4.62 1.844-1.078 4.261-1.26 6.302-1.739 3.063-.724 5.86-2.063 8.62-3.542 3.214-1.714 1.391-6.167-2.099-5.208-1.203.333-2.349.797-3.489 1.281a1.342 1.342 0 0 1-1.844-.99 10.033 10.033 0 0 0-.115-.552 1.332 1.332 0 0 1 .808-1.552 88.92 88.92 0 0 0 3.51-1.458c1.99-.896 4.401-1.63 6.146-2.927 1.365-1.016 1.115-4.193-.802-4.38a1.188 1.188 0 0 1-1.047-.86c-.161-.599-.365-1.187-.51-1.719-.053-.182-.11-.375-.167-.562a1.18 1.18 0 0 1 .516-1.365c.218-.13.432-.265.645-.411 2.052-1.354 3.464-3.109 4.547-5.266 1.005-1.989-1.302-3.604-3.062-3.083Zm-13.448-9.724a7.318 7.318 0 0 0 2.458-1.271.267.267 0 0 1 .375.047.264.264 0 0 1-.047.37 7.924 7.924 0 0 1-2.63 1.364.255.255 0 0 1-.125.011.28.28 0 0 1-.208-.188.267.267 0 0 1 .177-.333Zm-11.063-.307c-.593-.063-1.442-.042-2.125.401-.619.401-.958 1.14-.812 1.755a.26.26 0 0 1-.193.318.263.263 0 0 1-.323-.193c-.203-.839.224-1.797 1.042-2.323.64-.422 1.495-.589 2.469-.484a.27.27 0 0 1 .239.291.27.27 0 0 1-.297.235Zm-2.442 13.151a95.209 95.209 0 0 1 1.437-.188c1.927-.245 2.99-.375 5.432-1.239a.267.267 0 0 1 .339.161.267.267 0 0 1-.162.339c-2.5.88-3.645 1.026-5.541 1.265-.432.058-.896.115-1.432.188a.237.237 0 0 1-.084 0 .28.28 0 0 1-.219-.229.272.272 0 0 1 .23-.297Zm-13.724-13.698a10.947 10.947 0 0 0 3.093-.834.26.26 0 0 1 .349.136.268.268 0 0 1-.135.349 11.35 11.35 0 0 1-3.25.88c-.026 0-.052 0-.073-.005a.266.266 0 0 1-.219-.229.273.273 0 0 1 .235-.297Zm-24.193-7.031a.261.261 0 0 1-.349.14c-1.63-.687-3.625-.479-5.078.537a.274.274 0 0 1-.198.047.28.28 0 0 1-.172-.115.268.268 0 0 1 .068-.37c1.599-1.114 3.791-1.344 5.588-.588a.266.266 0 0 1 .141.349Zm-16.234 9.895c-.063.042-.131.052-.193.042a.272.272 0 0 1-.177-.115c-.485-.729-.459-1.77.062-2.473a.262.262 0 0 1 .37-.058c.12.089.146.255.057.375a1.671 1.671 0 0 0-.047 1.86.266.266 0 0 1-.072.369Zm-31.615-3.671a.26.26 0 0 1-.375.005c-.297-.292-.849-.297-1.208-.016-.344.271-.516.787-.422 1.271.088.453.39.896.828 1.219a.265.265 0 0 1 .052.369.255.255 0 0 1-.26.105.262.262 0 0 1-.11-.047c-.552-.406-.916-.953-1.031-1.542-.135-.687.109-1.396.615-1.792.567-.447 1.421-.421 1.911.053a.264.264 0 0 1 0 .375Zm8.146 24.63a.274.274 0 0 1-.255.099.279.279 0 0 1-.12-.052 5.147 5.147 0 0 1-1.172-1.256c-.24-.354-.734-1.26-.255-2.015a.269.269 0 0 1 .37-.078.262.262 0 0 1 .083.364c-.323.505.104 1.224.245 1.433.286.437.64.817 1.052 1.13.12.088.14.255.052.375Zm17.807 6.713a.265.265 0 0 1 .349-.14l5.432 2.333a.266.266 0 0 1 .141.349.269.269 0 0 1-.292.156.22.22 0 0 1-.057-.021l-5.432-2.328a.266.266 0 0 1-.141-.349Zm-2.114-9.328a8.593 8.593 0 0 0 2.401.182.6.6 0 0 0 .125-.031.266.266 0 0 1 .51-.125.422.422 0 0 1-.021.386c-.114.187-.375.286-.578.302a8.993 8.993 0 0 1-2.151-.115c-.135-.026-.271-.052-.401-.083a.264.264 0 1 1 .115-.516Zm-1.75-14.989a.268.268 0 0 1-.37.057 13.69 13.69 0 0 0-4.927-2.271c-.235-.057-.474-.104-.688-.057-.151.036-.318.161-.328.307a.268.268 0 0 1-.286.245.268.268 0 0 1-.245-.287c.026-.364.333-.687.739-.781.323-.078.636-.016.927.052a14.206 14.206 0 0 1 5.12 2.365.26.26 0 0 1 .058.37Zm8.093 10.64a.27.27 0 0 1-.255.099.345.345 0 0 1-.12-.052 11.88 11.88 0 0 0-2.995-1.724c-.223-.088-.5-.198-.661-.458a.263.263 0 0 1 .083-.365.27.27 0 0 1 .37.089c.068.109.24.177.401.239a12.716 12.716 0 0 1 3.13 1.797.27.27 0 0 1 .047.375Zm11.167 14.589h-.016c-.963-.224-1.896-.453-2.744-.901-.985-.521-1.709-1.282-2.032-2.141a.264.264 0 0 1 .157-.344.26.26 0 0 1 .338.157c.281.739.912 1.395 1.787 1.859.791.417 1.687.641 2.614.849a.264.264 0 0 1 .198.318.262.262 0 0 1-.302.203Zm12.521 16.807a.27.27 0 0 1-.292.161l-.057-.015a2.484 2.484 0 0 1-1.474-1.74.262.262 0 0 1 .198-.317.263.263 0 0 1 .317.203c.136.599.589 1.13 1.157 1.359a.27.27 0 0 1 .151.349Zm7.87-2.635c-1.49.088-3.006.14-4.5.161-.016 0-.032 0-.047-.005a.258.258 0 0 1-.219-.255.26.26 0 0 1 .26-.271 98.274 98.274 0 0 0 4.474-.162.266.266 0 1 1 .032.532Zm20.39 1.557c.636-.063 1.287-.125 1.88-.339.631-.229 1.11-.619 1.349-1.093a.26.26 0 0 1 .355-.115c.13.063.187.224.119.354-.297.594-.88 1.078-1.646 1.354-.651.24-1.338.302-2.005.37-.026 0-.047 0-.073-.005a.27.27 0 0 1-.218-.234.271.271 0 0 1 .239-.292Zm-1.443-13.141a8.342 8.342 0 0 1 4.943-.76.265.265 0 0 1 .224.302.265.265 0 0 1-.307.219 7.831 7.831 0 0 0-4.625.718.26.26 0 0 1-.167.021.243.243 0 0 1-.187-.14.265.265 0 0 1 .119-.36Zm-20.255-1.213c1.162.135 2.334.323 3.485.552a.265.265 0 0 1 .208.312.255.255 0 0 1-.313.209 42.048 42.048 0 0 0-3.442-.547h-.016a.276.276 0 0 1-.219-.297.264.264 0 0 1 .297-.229Zm-6.875-10.719c.563.057 1.141.115 1.693.031.583-.088 1.062-.333 1.354-.692a.265.265 0 0 1 .375-.042c.115.094.136.26.042.375-.375.463-.979.781-1.693.885-.62.094-1.229.032-1.823-.026-.005 0-.01 0-.021-.005a.257.257 0 0 1-.213-.286c.01-.146.14-.25.286-.24Zm-.297-15.125a3.428 3.428 0 0 1-2.062.286 2.87 2.87 0 0 1-.323-.078.266.266 0 0 1-.188-.328.27.27 0 0 1 .329-.182 2.898 2.898 0 0 0 2.015-.172.262.262 0 0 1 .354.12.262.262 0 0 1-.125.354Zm13.297 7.078a44.822 44.822 0 0 1-2.745-.401l-.692-.125a.27.27 0 0 1-.214-.312.268.268 0 0 1 .308-.214h.005c1.12.219 2.265.396 3.401.521.146.021.25.151.234.297a.268.268 0 0 1-.297.234Zm2.933 7.505a.994.994 0 0 0-.87.568.991.991 0 0 0 .156 1.031.264.264 0 0 1-.021.375.294.294 0 0 1-.224.063.272.272 0 0 1-.151-.089 1.512 1.512 0 0 1-.245-1.594c.235-.526.782-.88 1.355-.885.151 0 .265.12.265.266a.262.262 0 0 1-.265.265Zm31.307 1.474-1.11.271c-3.588.87-4.552 1.104-8.229 1.625-.031 0-.057 0-.083-.005a.266.266 0 0 1-.219-.224.27.27 0 0 1 .229-.302c3.651-.511 4.61-.745 8.177-1.61l1.11-.27a.264.264 0 0 1 .318.198.26.26 0 0 1-.193.317Zm-7.313 9.37a.266.266 0 0 1-.359.115 1.413 1.413 0 0 1-.75-1.23.26.26 0 0 1 .26-.265c.151 0 .266.12.271.265 0 .313.183.615.464.761a.26.26 0 0 1 .114.354Zm.063 12.151a.27.27 0 0 1-.297.167c-.016-.005-.031-.011-.052-.016a3.453 3.453 0 0 1-1.484-1.13c-.355-.469-.537-1.172-.11-1.609a.268.268 0 0 1 .375-.006.269.269 0 0 1 .005.375c-.198.203-.067.625.157.922a2.9 2.9 0 0 0 1.255.953.268.268 0 0 1 .151.344Zm14.182-6.484c.339-.005.688-.011 1-.11.313-.099.547-.291.641-.52a.272.272 0 0 1 .349-.146.273.273 0 0 1 .146.349c-.157.375-.516.677-.974.823-.386.125-.797.13-1.157.135-.015 0-.031 0-.047-.005a.257.257 0 0 1-.218-.255.266.266 0 0 1 .26-.271Zm2.938-9.677a2.091 2.091 0 0 0 1.5-1.563.26.26 0 0 1 .312-.213.271.271 0 0 1 .208.312 2.596 2.596 0 0 1-1.89 1.979.267.267 0 0 1-.323-.192.267.267 0 0 1 .193-.323Zm2.541-16.401a6.049 6.049 0 0 0-4.359 1.505.256.256 0 0 1-.224.062.264.264 0 0 1-.13-.458 6.514 6.514 0 0 1 4.745-1.641.27.27 0 0 1 .25.287.264.264 0 0 1-.282.245Zm8.25 14.526c-1.781-.344-4.031.651-5.396 1.765-1.328 1.094-2.093 2.537-1.953 4.255.026.292.151.553.339.771a.225.225 0 0 1 .151-.031 4.585 4.585 0 0 0 2.75-.521.262.262 0 0 1 .359.104.264.264 0 0 1-.104.36 5.092 5.092 0 0 1-2.286.62c1.099.401 2.302.427 3.708.02 1.245-.354 2.932-.963 3.896-1.843 1.995-1.813 1.265-4.974-1.464-5.5Zm-.541 1.291a4.52 4.52 0 0 0-2.62 1.427.27.27 0 0 1-.245.084.288.288 0 0 1-.135-.063.264.264 0 0 1-.016-.375 4.962 4.962 0 0 1 2.932-1.594.266.266 0 0 1 .308.219.266.266 0 0 1-.224.302ZM232.75 148.885c.76 1.047 1.906 2.427 3.057 3.037 2.386 1.26 5.115-.5 4.683-3.245-.287-1.797-1.99-3.573-3.5-4.474-1.48-.88-3.094-1.109-4.667-.391-.479.219-.776.74-.807 1.256-.079 1.281.302 2.521 1.234 3.817Zm4.901 1.427c.38-.072.818-.171 1.13-.421.261-.198.453-.568.339-.881a.263.263 0 0 1 .156-.343.259.259 0 0 1 .339.156c.187.495-.021 1.109-.506 1.489-.411.323-.916.438-1.359.521a.267.267 0 0 1-.313-.213.266.266 0 0 1 .214-.308Zm-4.781-5.911a.267.267 0 0 1 .375.052.262.262 0 0 1-.052.37c-.625.489-.849 1.427-.506 2.146a.265.265 0 0 1-.13.354.238.238 0 0 1-.156.021.286.286 0 0 1-.198-.146c-.443-.932-.151-2.162.667-2.797Zm-4.677 19.38-.157-.599c.115.521.079.391-.114-.38.12.583.078.448-.125-.401-.307-.812-.906-1.573-1.5-2.198l-.156-.156c.01.01-.032-.042-.141-.151-.297-.36-.635-.714-1.01-.979-1.787-1.282-3.881-.552-4.881 1.27-1.411 2.573 1.594 5.313 4.136 6.037l-.042-.005c.292.088.583.172.88.245.782-.011.912-.006.391.02.203 0 .411 0 .615.006-.407-.021-.334-.026.213-.016-.38-.005.385.016.5 0a3.32 3.32 0 0 0 .708-.188c.808-.286 1.177-1.286.875-2.057a9.279 9.279 0 0 0-.192-.448Zm-6.651-3.286a.812.812 0 0 0-.568.609.83.83 0 0 0 .26.787.266.266 0 0 1 .032.375.271.271 0 0 1-.375.031 1.363 1.363 0 0 1-.438-1.307c.104-.474.469-.87.938-1.006a.264.264 0 0 1 .328.177.267.267 0 0 1-.177.334Zm5.724 4.161c-.026 0-.052 0-.073-.005a.259.259 0 0 1-.219-.229c-.057-.505-.162-1-.307-1.485a.27.27 0 0 1 .177-.333.268.268 0 0 1 .333.177c.156.516.266 1.047.323 1.578a.269.269 0 0 1-.234.297Zm105.114-6.036c1.985-.599 3.781-2.011 5.573-3.037 1.906-1.088 3.859-2.146 5.578-3.515 3.464-2.75 6.11-6.219 8.375-9.974.729-1.209-.271-2.818-1.729-2.271-4.167 1.562-6.708 5.052-10.12 7.698-1.63 1.271-3.39 2.349-5.161 3.416-1.875 1.125-4.057 2.204-5.245 4.115-1.24 1.995.469 4.255 2.729 3.568Zm14.735-15.615a5.062 5.062 0 0 1 3.359-2.026.267.267 0 0 1 .297.229.263.263 0 0 1-.224.297 4.598 4.598 0 0 0-3 1.813.267.267 0 0 1-.261.109.336.336 0 0 1-.109-.047.272.272 0 0 1-.062-.375Zm-5.438 8.693a4.987 4.987 0 0 0 1.885-1.13.269.269 0 0 1 .375.01.263.263 0 0 1-.005.375 5.597 5.597 0 0 1-2.093 1.25.334.334 0 0 1-.125.011.276.276 0 0 1-.209-.183.263.263 0 0 1 .172-.333Zm-10.719 4.844a.265.265 0 0 1 .375-.042c.365.292.86.411 1.318.323a.268.268 0 0 1 .313.213.27.27 0 0 1-.214.313 2.126 2.126 0 0 1-.771 0 2.161 2.161 0 0 1-.979-.438.263.263 0 0 1-.042-.369Zm-95.562-21.37c1.291 1.62 3.265 2.771 4.88 4.057 1.719 1.37 3.422 2.792 5.328 3.886 3.833 2.203 8.031 3.385 12.36 4.104 1.39.229 2.515-1.292 1.468-2.448-2.989-3.297-7.166-4.37-10.885-6.557-1.787-1.053-3.438-2.287-5.078-3.542-1.745-1.328-3.547-2.958-5.761-3.354-2.312-.417-3.786 2.005-2.312 3.854Zm19.734 10.109a.266.266 0 0 1 .354-.125 4.85 4.85 0 0 0 2.448.464.264.264 0 1 1 .042.526c-.448.036-.896.01-1.328-.063a5.46 5.46 0 0 1-1.391-.448.269.269 0 0 1-.125-.354Zm-18.302-13.224a.273.273 0 0 1 .375.063.267.267 0 0 1-.062.37c-.485.349-.552 1.057-.412 1.567.172.62.615 1.167 1 1.651a.265.265 0 0 1-.036.375.286.286 0 0 1-.214.052.255.255 0 0 1-.161-.093c-.422-.526-.901-1.12-1.099-1.839-.193-.687-.084-1.646.609-2.146Z" class="Vector"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 6">
+        <mask id="ab" width="11" height="11" x="245" y="165" class="ab" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="49c9892e5a">
+            <path fill="#fff" d="M245.927 165.802h9.932v9.932h-9.932v-9.932Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#ab)">
+          <g class="Clip path group">
+            <mask id="ac" width="11" height="11" x="245" y="165" class="ac" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="7cc9ffcd1f">
+                <path fill="#fff" d="M250.891 165.802a4.966 4.966 0 1 0 .004 9.932 4.966 4.966 0 0 0-.004-9.932Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ac)">
+              <path fill="#818CF8" d="M245.927 165.802h9.932v9.932h-9.932v-9.932Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 5">
+        <mask id="ad" width="11" height="11" x="232" y="155" class="ad" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="2b29c93f9a">
+            <path fill="#fff" d="M232.74 155.875h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#ad)">
+          <g class="Clip path group">
+            <mask id="ae" width="11" height="11" x="232" y="155" class="ae" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="048923933c">
+                <path fill="#fff" d="M237.703 155.875a4.959 4.959 0 0 0-4.963 4.964 4.962 4.962 0 0 0 4.963 4.963 4.963 4.963 0 1 0 0-9.927Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ae)">
+              <path fill="#818CF8" d="M232.74 155.875h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 4">
+        <mask id="af" width="11" height="11" x="279" y="172" class="af" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="facc72f739">
+            <path fill="#fff" d="M279.88 172.182h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#af)">
+          <g class="Clip path group">
+            <mask id="ag" width="11" height="11" x="279" y="172" class="ag" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="ab9dedc62c">
+                <path fill="#fff" d="M284.844 172.182a4.963 4.963 0 1 0 0 9.927 4.962 4.962 0 0 0 4.963-4.963 4.959 4.959 0 0 0-4.963-4.964Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ag)">
+              <path fill="#818CF8" d="M279.88 172.182h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 3">
+        <mask id="ah" width="11" height="11" x="318" y="175" class="ah" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="e95ed96ed7">
+            <path fill="#fff" d="M318.484 175.734h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#ah)">
+          <g class="Clip path group">
+            <mask id="ai" width="11" height="11" x="318" y="175" class="ai" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="cd9a2df684">
+                <path fill="#fff" d="M323.448 175.734a4.966 4.966 0 0 0-4.964 4.964 4.962 4.962 0 0 0 4.964 4.963 4.958 4.958 0 0 0 4.963-4.963 4.962 4.962 0 0 0-4.963-4.964Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ai)">
+              <path fill="#818CF8" d="M318.484 175.734h9.927v9.927h-9.927v-9.927Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 2">
+        <mask id="aj" width="11" height="11" x="317" y="154" class="aj" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="1255e0b856">
+            <path fill="#fff" d="M317.073 154.734h9.932v9.927h-9.932v-9.927Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#aj)">
+          <g class="Clip path group">
+            <mask id="ak" width="11" height="11" x="317" y="154" class="ak" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="b3bee9e940">
+                <path fill="#fff" d="M322.042 154.734a4.964 4.964 0 1 0 0 9.927 4.963 4.963 0 1 0 0-9.927Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ak)">
+              <path fill="#818CF8" d="M317.073 154.734h9.932v9.927h-9.932v-9.927Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 1">
+        <mask id="al" width="11" height="11" x="287" y="158" class="al" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="d3cfe4c4c0">
+            <path fill="#fff" d="M287.641 158.698h9.932v9.932h-9.932v-9.932Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#al)">
+          <g class="Clip path group">
+            <mask id="am" width="11" height="11" x="287" y="158" class="am" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="3665ca9389">
+                <path fill="#fff" d="M292.604 158.698a4.966 4.966 0 1 0 .005 9.931 4.966 4.966 0 0 0-.005-9.931Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#am)">
+              <path fill="#818CF8" d="M287.641 158.698h9.932v9.932h-9.932v-9.932Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Ribosome 7">
+        <mask id="an" width="11" height="11" x="192" y="145" class="an" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="aa2715688b">
+            <path fill="#fff" d="M192.812 145.943h9.933v9.932h-9.933v-9.932Z" class="Vector"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#an)">
+          <g class="Clip path group">
+            <mask id="ao" width="11" height="11" x="192" y="145" class="ao" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="05c889a050">
+                <path fill="#fff" d="M197.776 145.943a4.966 4.966 0 1 0 4.969 4.963 4.967 4.967 0 0 0-4.969-4.963Z" class="Vector"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#ao)">
+              <path fill="#818CF8" d="M192.812 145.943h9.933v9.932h-9.933v-9.932Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Nucleus and Nucleosome">
+        <g class="Clip path group">
+          <mask id="ap" width="101" height="58" x="236" y="112" class="ap" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="9fd7f9cc19">
+              <path fill="#fff" d="M236.667 112.333h100v57.334h-100v-57.334Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#ap)">
+            <g class="Clip path group">
+              <mask id="aq" width="116" height="112" x="229" y="83" class="aq" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="599ff6e95a">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aq)">
+                <g class="Clip path group">
+                  <mask id="ar" width="116" height="112" x="229" y="83" class="ar" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="76a66dba96">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#ar)">
+                    <path fill="#C4B5FD" d="m252.75 159.573-.255-.151c-3.896-2.115-7.188-4.995-9.88-8.646-1.792-2.437-2.48-5.208-2.058-8.302.532-4.802 6.261-10.359 17.193-16.672 10.604-5.323 21.708-8.432 33.323-9.333 6.417-.532 13.734-.266 21.948.797 5.765.755 10.156 2.031 13.167 3.828 6.317 3.953 8.437 9.427 6.359 16.416-1.037 3.084-3.167 6.313-6.38 9.688a42.566 42.566 0 0 1-11.761 8.963c-12.317 5.86-24.271 9.146-35.854 9.855-2.651.161-5.63.145-8.943-.052-9.156-2.74-14.776-4.87-16.859-6.391Zm-2.786 1.906.27.151c3.021 2 8.829 3.922 17.422 5.761 3.589.89 8.443 1.26 14.563 1.099 11.614-.901 23.109-4.235 34.5-10.006 10.166-6.031 16.562-13.151 19.187-21.359 1.709-8.047-1.031-14.302-8.218-18.766-3.152-1.932-7.938-3.343-14.355-4.234-8.317-1.063-15.817-1.323-22.494-.786-12.063.822-23.917 4.234-35.563 10.239-11.088 6.401-17.042 12.745-17.854 19.021-.729 6.885 3.453 13.182 12.542 18.88Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="as" width="95" height="52" x="239" y="115" class="as" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="b264d37d68">
+              <path fill="#fff" d="M239.333 115H334v52h-94.667v-52Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#as)">
+            <g class="Clip path group">
+              <mask id="at" width="116" height="112" x="229" y="83" class="at" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="2de9ab43a7">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#at)">
+                <g class="Clip path group">
+                  <mask id="au" width="116" height="112" x="229" y="83" class="au" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="71f8031023">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#au)">
+                    <path fill="#C4B5FD" d="M253.557 160.146c2.558 1.474 7.901 3.427 16.042 5.864h.01c3.308.193 6.292.209 8.948.053 11.589-.714 23.547-3.995 35.87-9.86a42.48 42.48 0 0 0 11.771-8.974c3.224-3.38 5.354-6.614 6.391-9.703 2.088-7.01-.042-12.505-6.375-16.474-.068-.036-.131-.078-.198-.115-3.011-1.739-7.344-2.979-12.99-3.718-8.219-1.063-15.536-1.328-21.958-.797-11.615.901-22.729 4.016-33.339 9.338v.006c-10.948 6.312-16.687 11.88-17.219 16.703-.421 3.104.271 5.885 2.068 8.338 2.531 3.433 5.599 6.188 9.198 8.266.229.13.464.26.693.391l.255.145c.234.172.51.349.833.537Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="av" width="62" height="52" x="274" y="115" class="av" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="db7067dff1">
+              <path fill="#fff" d="M274 115h61.333v52H274v-52Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#av)">
+            <g class="Clip path group">
+              <mask id="aw" width="116" height="112" x="229" y="83" class="aw" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="705147d609">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aw)">
+                <g class="Clip path group">
+                  <mask id="ax" width="116" height="112" x="229" y="83" class="ax" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="8ebde11eea">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#ax)">
+                    <path fill="#C4B5FD" d="m275.453 166.214.031.02 1.594.261 1.005-.193 3.302-.114c.172.203.469.302.891.307l4.896-.573c.526-.078.995-.167 1.401-.271l6.661-1.844 4.891-.609a19.109 19.109 0 0 0 2.802-.802 14.984 14.984 0 0 0 2.646-1.125c.234-.136.328-.38.286-.729 3.313-1.047 5.276-1.787 5.891-2.235.719-.239 1.964-1.031 3.74-2.375.114.063.843-.291 2.187-1.073l4.385-3 5.5-4.724c.245-.239.292-.515.152-.817l3.13-3.193c.166-.198.177-.453.031-.76l.719-1.417c.208 0 .39-.125.547-.37l.171-.88 1.068-1.896.818-4.281c-.011-.297-.177-.505-.49-.625.12-.646.125-1 .026-1.068-.145-.265-.375-.385-.687-.359l.068-2.099a.674.674 0 0 0-.37-.386c-.031-.651-.703-2.338-2.021-5.057-.344-.651-.677-1.172-.995-1.557-.292-.349-.64-.37-1.036-.073.286-.594-.131-1.167-1.245-1.708-3.714-1.636-6.198-2.615-7.453-2.938-.281-.026-.542 0-.766.078l-11.536-1.604c-.318-.052-.563.104-.729.474-.068.437.098.714.505.833l11.51 1.604c-.64.693-.229 1.36 1.24 1.995 2.239.657 3.849 1.063 4.817 1.229.907.151 1.412.131 1.506-.062l2.5 3.557a.685.685 0 0 0 .51.25l1.385 2.589c.193 1.604.391 2.317.589 2.146-.047.671-.062 1.208-.031 1.593l.245 3.198c.005.167.093.323.26.464l-.156.489c-.662.334-1.683 2.105-3.068 5.308-3.844 4.156-6.573 6.89-8.193 8.203-.151.156-.198.37-.14.646l-4.157 3.093c-.244.006-.895.282-1.958.829-1.823 1.151-3.26 1.953-4.307 2.406-.891.328-2.266.927-4.125 1.797.005-.297-1.651.239-4.974 1.614-.167-.182-.38-.25-.651-.203l-17.266 4.438-6.474.302c-.151-.136-.349-.188-.599-.146-.817.338-.979.818-.479 1.443Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="ay" width="70" height="16" x="248" y="115" class="ay" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="05c59075bd">
+              <path fill="#fff" d="M248.667 115H318v16h-69.333v-16Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#ay)">
+            <g class="Clip path group">
+              <mask id="az" width="116" height="112" x="229" y="83" class="az" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="e0c0492aab">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#az)">
+                <g class="Clip path group">
+                  <mask id="aA" width="116" height="112" x="229" y="83" class="aA" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="f298035d35">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aA)">
+                    <path fill="#C4B5FD" d="m249.906 129.812.047.021c.365.219.844.016 1.438-.593.229.416.786.38 1.671-.115 3.62-1.693 5.266-2.672 4.943-2.932.162.01.302 0 .406-.042.178-.078.297-.177.355-.292l2.593-.869c1.547-.615 2.297-.969 2.25-1.073l2.136-.703c-.38.401-.427.739-.141 1.015.224.276.583.339 1.078.198l9.469-3.604c.391-.255.583-.526.568-.813l.724-.239 3.453-.834c.135-.031.255-.125.37-.276l1.494-.349 3.625-.557c2.938-.776 4.282-1.172 4.032-1.193l.927-.041c.114.312.401.51.859.588 6.922.177 11.401.224 13.453.141 2.959.224 4.443.365 4.453.422.485.01.776-.057.875-.203 3.006.317 4.896.734 5.667 1.265.844-.291.927-.729.25-1.323-1.099-.635-4.333-1.182-9.698-1.64-.979-.151-2.838-.229-5.573-.24-.937-.036-1.443.099-1.521.412l-.75-.016c.068-.463-.13-.745-.588-.838-6.427.02-9.927.14-10.5.359l-5.922 1.333c-.948.219-1.427.417-1.443.599l-7.489 1.771c-.433.172-.662.385-.688.641-.333-.256-.963-.23-1.89.083l-7.808 2.51c-2.807 1.141-4.427 1.886-4.854 2.23l-1.557.322-6.183 3.011c-.968.724-1.145 1.344-.531 1.864Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aB" width="40" height="20" x="240" y="147" class="aB" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="ddaadf5857">
+              <path fill="#fff" d="M240.667 147h38.666v20h-38.666v-20Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aB)">
+            <g class="Clip path group">
+              <mask id="aC" width="116" height="112" x="229" y="83" class="aC" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="52619ee544">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aC)">
+                <g class="Clip path group">
+                  <mask id="aD" width="116" height="112" x="229" y="83" class="aD" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="a44b111e44">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aD)">
+                    <path fill="#C4B5FD" d="M277.781 166.115c-.661.218-1.552.296-2.666.244h-.021a20.783 20.783 0 0 1-2.672-.411l.141.016c-1.657-.021-3.599-.224-5.834-.61h.005c-1.385-.224-3.453-.656-6.203-1.291-.01-.006-.021-.006-.031-.011-1.557-.443-3.38-1.156-5.458-2.151l.01.005c-.266-.125-.516-.25-.76-.385l-.006-.005-3.39-1.964a.301.301 0 0 1-.031-.016l-1.209-.776a.248.248 0 0 1-.062-.046c-.5-.412-.922-.714-1.271-.901l.713-1.12c2.25 1.64 4.902 3.062 7.948 4.265l-.036-.015 2.969.984-.052-.016 4.531 1.125-.36 1.277c-4.895-1.558-8.666-2.938-11.328-4.141l.23.057a.733.733 0 0 1-.261-.068c-.182-.078-.698-.364-1.552-.869l.031.015a.077.077 0 0 1-.036-.021c-.177-.098-.891-.598-2.136-1.489l.052.031-1.307-.765c-.026-.016-.047-.032-.068-.042-1.161-.88-1.911-1.5-2.25-1.854-.01-.011-.02-.021-.026-.032l-3.546-4.265c-.006-.005-.011-.011-.011-.016-.807-1.036-.917-1.896-.333-2.583a.672.672 0 0 1 .937-.073c.282.24.313.661.073.943-.114.13.011.432.37.895l-.01-.02 3.541 4.265-.026-.031c.287.302.979.875 2.084 1.708l-.063-.047 1.307.771a.394.394 0 0 1 .052.032c1.209.864 1.881 1.338 2.021 1.416h-.005l.026.016c.802.474 1.266.739 1.396.792a.513.513 0 0 0-.167-.037.643.643 0 0 1 .224.057c2.615 1.183 6.339 2.547 11.183 4.089a.668.668 0 0 1 .442.812.67.67 0 0 1-.802.469l-4.531-1.125-.047-.015-2.969-.98c-.01-.005-.021-.005-.036-.01-3.151-1.25-5.901-2.724-8.245-4.432a.665.665 0 0 1 .714-1.12c.416.229.911.578 1.479 1.042l-.068-.047 1.208.776-.026-.016 3.396 1.964-.005-.006c.208.12.432.23.661.339l.011.005h-.005c2.01.958 3.76 1.646 5.244 2.068l-.026-.005c2.719.63 4.761 1.057 6.115 1.276h.005c2.167.375 4.042.567 5.625.588.042 0 .089.005.136.016.849.187 1.682.318 2.489.385h-.026c.953.042 1.682-.015 2.188-.182a.664.664 0 0 1 .838.427.663.663 0 0 1-.422.839Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aE" width="23" height="29" x="239" y="121" class="aE" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="5774bba32c">
+              <path fill="#fff" d="M239.333 121.667H262v28h-22.667v-28Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aE)">
+            <g class="Clip path group">
+              <mask id="aF" width="116" height="112" x="229" y="83" class="aF" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="c4fa7aaa53">
+                  <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aF)">
+                <g class="Clip path group">
+                  <mask id="aG" width="116" height="112" x="229" y="83" class="aG" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="437c0c2bc1">
+                      <path fill="#fff" d="m306.089 194.271-77.037-44.479 38.479-66.651 77.037 44.479-38.479 66.651Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aG)">
+                    <path fill="#C4B5FD" d="M242.479 139.042a8.84 8.84 0 0 1 .188-.485c.052-.109.104-.218.161-.323.156-.177.302-.343.443-.51l-.792 1.318Zm-.838 10.291c.192.11.442.12.656.006a.672.672 0 0 0 .26-.907c-1.01-1.823-1-4.031.032-6.63l.588-1.338 1.969-3.266c1.114-1.651 2.187-3.068 3.224-4.245a49.55 49.55 0 0 0 1.89-1.474c0-.005.006-.005.011-.01l6.083-5.229h.005c1.776-1.381 3.485-2.433 5.125-3.141a.668.668 0 0 0 .349-.875.658.658 0 0 0-.281-.313.644.644 0 0 0-.594-.036c-1.755.76-3.567 1.875-5.442 3.339a.1.1 0 0 0-.026.015l-5.938 5.099v.005a.653.653 0 0 0-.661.151c-.131.125-.261.25-.391.381-.438.421-1.063.984-1.87 1.682v.005c-.354.234-.677.432-.974.599a1.072 1.072 0 0 0-.094.057c-.854.683-1.401 1.141-1.63 1.386a9.842 9.842 0 0 1-.255.234h.005c-.291-.161-.583-.104-.885.177a1.897 1.897 0 0 0-.235.271c-.01.01-.02.026-.031.042-1.094 1.692-1.745 2.974-1.963 3.838a.661.661 0 0 0 .151.61 27.891 27.891 0 0 0-.99 3.526.665.665 0 0 0 .849.776c-.281 1.854-.01 3.526.813 5.01a.68.68 0 0 0 .25.255Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aH" width="38" height="24" x="276" y="121" class="aH" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="e2db1e5505">
+              <path fill="#fff" d="M276.667 121.667H314v22.666h-37.333v-22.666Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aH)">
+            <g class="Clip path group">
+              <mask id="aI" width="44" height="42" x="274" y="111" class="aI" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="583cdb168f">
+                  <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aI)">
+                <g class="Clip path group">
+                  <mask id="aJ" width="44" height="42" x="274" y="111" class="aJ" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="0c11e24adc">
+                      <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aJ)">
+                    <path fill="#A78BFA" d="m282.854 140.031-.094-.057a11.006 11.006 0 0 1-3.661-3.203c-.667-.906-.922-1.932-.766-3.078.198-1.782 2.323-3.844 6.375-6.183 3.933-1.974 8.052-3.125 12.354-3.458 2.381-.198 5.094-.099 8.141.292 2.136.281 3.766.755 4.88 1.422 2.344 1.468 3.131 3.494 2.36 6.088-.386 1.141-1.172 2.339-2.365 3.589a15.86 15.86 0 0 1-4.359 3.328c-4.568 2.172-9 3.385-13.297 3.651-.985.057-2.089.052-3.313-.021-3.395-1.016-5.479-1.802-6.255-2.37Zm-1.031.709.099.057c1.12.739 3.276 1.453 6.463 2.135 1.329.328 3.125.464 5.396.407 4.308-.334 8.568-1.573 12.792-3.709 3.771-2.239 6.141-4.875 7.114-7.922.636-2.984-.38-5.302-3.046-6.958-1.167-.714-2.943-1.24-5.323-1.568-3.084-.396-5.865-.489-8.339-.291-4.474.302-8.87 1.567-13.187 3.797-4.11 2.375-6.318 4.723-6.62 7.052-.271 2.552 1.281 4.885 4.651 7Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aK" width="36" height="20" x="278" y="123" class="aK" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="f975289770">
+              <path fill="#fff" d="M278 123h36v20h-36v-20Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aK)">
+            <g class="Clip path group">
+              <mask id="aL" width="44" height="42" x="274" y="111" class="aL" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="4764754468">
+                  <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aL)">
+                <g class="Clip path group">
+                  <mask id="aM" width="44" height="42" x="274" y="111" class="aM" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="538b3346c4">
+                      <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aM)">
+                    <path fill="#A78BFA" d="M283.156 140.245c.948.547 2.927 1.271 5.948 2.177 1.229.068 2.333.078 3.318.015 4.297-.26 8.734-1.479 13.302-3.656a15.67 15.67 0 0 0 4.365-3.328c1.197-1.25 1.984-2.448 2.369-3.594.776-2.604-.015-4.635-2.364-6.109-.026-.016-.047-.031-.073-.042-1.115-.646-2.724-1.104-4.818-1.38-3.047-.396-5.76-.489-8.141-.297-4.307.334-8.427 1.49-12.359 3.464-4.062 2.344-6.187 4.406-6.385 6.192-.157 1.157.099 2.188.765 3.094a11.08 11.08 0 0 0 3.412 3.068l.255.141.094.057h.005c.083.062.187.13.307.198Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aN" width="24" height="20" x="290" y="123" class="aN" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="eb922d2c5f">
+              <path fill="#fff" d="M290 123h24v20h-24v-20Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aN)">
+            <g class="Clip path group">
+              <mask id="aO" width="44" height="42" x="274" y="111" class="aO" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="1859799b20">
+                  <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aO)">
+                <g class="Clip path group">
+                  <mask id="aP" width="44" height="42" x="274" y="111" class="aP" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="10b0530e11">
+                      <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aP)">
+                    <path fill="#A78BFA" d="m291.271 142.495.015.005.589.099.375-.073 1.224-.042c.062.073.172.115.328.115l1.818-.214c.192-.026.37-.062.521-.099l2.468-.682 1.813-.229a6.824 6.824 0 0 0 1.042-.297 6.08 6.08 0 0 0 .979-.417c.083-.052.119-.14.104-.27 1.229-.386 1.958-.662 2.187-.829.266-.088.724-.38 1.386-.88.041.026.312-.109.812-.396l1.625-1.114 2.037-1.75c.093-.089.109-.193.057-.302l1.161-1.188c.063-.073.063-.166.011-.281l.266-.526c.078 0 .145-.042.203-.135l.062-.329.396-.703.307-1.588c-.005-.11-.067-.183-.182-.229.042-.24.047-.37.01-.396-.057-.099-.14-.141-.26-.136l.026-.776a.24.24 0 0 0-.135-.14c-.011-.245-.261-.87-.75-1.875a3.246 3.246 0 0 0-.365-.578c-.109-.131-.24-.141-.385-.026.104-.224-.047-.433-.464-.636-1.375-.609-2.297-.969-2.76-1.088a.711.711 0 0 0-.287.026l-4.276-.594c-.12-.021-.208.042-.271.177-.026.161.037.266.188.307l4.265.599c-.239.255-.083.5.459.74.833.239 1.427.39 1.791.453.334.057.521.047.558-.021l.922 1.318a.265.265 0 0 0 .192.088l.516.964c.068.594.141.859.213.792a4.97 4.97 0 0 0-.01.593l.089 1.188c.005.062.036.12.099.172l-.058.182c-.245.12-.625.776-1.135 1.963-1.427 1.542-2.438 2.558-3.042 3.047-.052.052-.073.136-.047.235l-1.547 1.151c-.088 0-.328.104-.724.307-.677.427-1.208.724-1.593.891-.334.119-.844.343-1.532.666 0-.109-.614.089-1.843.599-.063-.067-.141-.093-.245-.078l-6.401 1.646-2.401.115c-.052-.052-.13-.073-.224-.058-.302.125-.359.308-.177.537Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aQ" width="28" height="7" x="280" y="123" class="aQ" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="43de8f36fa">
+              <path fill="#fff" d="M280.667 123h26.666v6.667h-26.666V123Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aQ)">
+            <g class="Clip path group">
+              <mask id="aR" width="44" height="42" x="274" y="111" class="aR" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="46b492c3c5">
+                  <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aR)">
+                <g class="Clip path group">
+                  <mask id="aS" width="44" height="42" x="274" y="111" class="aS" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="a52b6aeab5">
+                      <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aS)">
+                    <path fill="#A78BFA" d="m281.802 128.995.016.01c.135.084.312.005.536-.219.084.157.287.141.615-.041 1.344-.63 1.953-.99 1.833-1.089a.34.34 0 0 0 .151-.015c.068-.032.11-.068.13-.11l.964-.323c.573-.229.854-.359.833-.395l.792-.261c-.141.146-.156.276-.052.375.083.104.219.125.401.073l3.51-1.339c.146-.088.219-.192.214-.296l.265-.089 1.282-.312a.238.238 0 0 0 .135-.099l.557-.131 1.344-.208c1.089-.286 1.589-.432 1.495-.443l.344-.015c.041.12.146.192.317.218 2.568.068 4.23.084 4.985.053 1.099.083 1.651.135 1.656.156.177.005.286-.021.323-.073 1.115.114 1.812.271 2.099.469.312-.11.344-.271.094-.49-.407-.24-1.605-.437-3.594-.609-.365-.058-1.052-.084-2.068-.089-.349-.015-.536.037-.562.151l-.282-.005c.026-.172-.046-.276-.218-.313-2.381.011-3.677.053-3.891.136l-2.198.495c-.349.078-.526.156-.531.218l-2.781.662c-.157.062-.245.141-.256.234-.119-.093-.354-.083-.697.032l-2.896.932c-1.042.422-1.641.698-1.797.828l-.578.115-2.292 1.119c-.359.266-.427.5-.198.688Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aT" width="15" height="8" x="278" y="135" class="aT" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="0475dc30a9">
+              <path fill="#fff" d="M278 135h14.667v8H278v-8Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aT)">
+            <g class="Clip path group">
+              <mask id="aU" width="44" height="42" x="274" y="111" class="aU" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="96c990249b">
+                  <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aU)">
+                <g class="Clip path group">
+                  <mask id="aV" width="44" height="42" x="274" y="111" class="aV" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="c5b506da1d">
+                      <path fill="#fff" d="m302.63 152.901-28.562-16.495 14.489-25.099 28.568 16.49-14.495 25.104Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aV)">
+                    <path fill="#A78BFA" d="M292.135 142.458c-.244.078-.572.11-.989.089h-.005a7.595 7.595 0 0 1-.99-.151l.052.005c-.614-.005-1.338-.083-2.167-.224h.006c-.516-.083-1.282-.245-2.302-.479-.006 0-.006-.005-.011-.005-.578-.162-1.255-.427-2.026-.797h.005c-.099-.042-.192-.094-.281-.141l-1.26-.729c-.006 0-.006-.005-.011-.005l-.448-.287-.02-.02a3.137 3.137 0 0 0-.474-.334l.265-.416c.834.609 1.818 1.135 2.948 1.583l-.016-.005 1.099.364-.015-.005 1.677.417-.13.474c-1.818-.578-3.214-1.089-4.203-1.537l.088.021a.252.252 0 0 1-.099-.026 6.16 6.16 0 0 1-.573-.323l.011.005c-.006 0-.011-.005-.016-.005-.068-.036-.328-.224-.792-.552l.021.01-.484-.286c-.011 0-.016-.005-.026-.016-.433-.323-.709-.552-.834-.682-.005-.005-.01-.01-.01-.016l-1.318-1.578v-.01c-.302-.38-.343-.698-.125-.953a.247.247 0 0 1 .349-.026.24.24 0 0 1 .026.343c-.041.053.006.162.136.334l-.005-.005 1.317 1.583-.01-.016c.104.115.364.323.771.636l-.021-.016.484.281.016.016c.448.318.698.495.75.526v-.005c0 .005.005.005.01.01.297.172.469.271.516.292a.565.565 0 0 0-.063-.016.23.23 0 0 1 .084.026c.968.438 2.354.943 4.146 1.516.13.036.203.172.166.302a.252.252 0 0 1-.297.172l-1.682-.417c-.005-.005-.01-.005-.016-.005l-1.104-.365s-.005-.005-.01-.005c-1.172-.463-2.188-1.01-3.057-1.64a.252.252 0 0 1-.063-.334.248.248 0 0 1 .328-.083c.156.083.339.213.547.385l-.026-.015.448.286-.011-.005 1.261.729v-.005c.078.047.156.088.245.125l.005.005h-.005c.744.354 1.396.609 1.948.766l-.011-.005c1.005.234 1.761.395 2.266.473.807.141 1.5.214 2.088.219.016 0 .032.005.047.005.318.073.625.12.927.146h-.01c.354.016.625-.005.812-.067a.241.241 0 0 1 .308.156.242.242 0 0 1-.157.312Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Mitochondria 2">
+        <g class="Clip path group">
+          <mask id="aW" width="45" height="53" x="160" y="116" class="aW" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="8db239805b">
+              <path fill="#fff" d="M160.667 116.333h44v52h-44v-52Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aW)">
+            <g class="Clip path group">
+              <mask id="aX" width="63" height="71" x="148" y="105" class="aX" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="afe57cc204">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#aX)">
+                <g class="Clip path group">
+                  <mask id="aY" width="63" height="71" x="148" y="105" class="aY" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="20ea0ec931">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#aY)">
+                    <path fill="#FDBA74" d="M162.594 157.141c1.875 7.427 9.448 11.942 16.88 10.067 7.443-1.885 11.948-9.437 10.062-16.88a5.214 5.214 0 0 1 3.771-6.323c7.443-1.88 11.948-9.432 10.063-16.88-1.88-7.427-9.453-11.943-16.88-10.063-17.657 4.464-28.365 22.422-23.896 40.079Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="aZ" width="37" height="45" x="164" y="120" class="aZ" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="ac9dbfae12">
+              <path fill="#fff" d="M164.667 120.333h36v44h-36v-44Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#aZ)">
+            <g class="Clip path group">
+              <mask id="ba" width="63" height="71" x="148" y="105" class="ba" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="10daf6608f">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#ba)">
+                <g class="Clip path group">
+                  <mask id="bb" width="63" height="71" x="148" y="105" class="bb" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="a77f51825b">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bb)">
+                    <path fill="#FB923C" d="M169.542 134.12c3.869-6.495 10.432-11.391 18.755-13.13 4.969-1.037 10.172 2.062 11.62 6.927 1.448 4.869-1.407 9.656-6.375 10.692-6.724 1.407-10.599 7.907-8.641 14.49 1.448 4.865-1.406 9.651-6.375 10.693-4.969 1.036-10.172-2.063-11.62-6.933-2.427-8.145-1.239-16.244 2.636-22.739Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bc" width="31" height="39" x="167" y="123" class="bc" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="795df8cc00">
+              <path fill="#fff" d="M167.333 123H198v38.667h-30.667V123Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bc)">
+            <g class="Clip path group">
+              <mask id="bd" width="63" height="71" x="148" y="105" class="bd" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="246cfe3121">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bd)">
+                <g class="Clip path group">
+                  <mask id="be" width="63" height="71" x="148" y="105" class="be" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="e00094fd8f">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#be)">
+                    <path fill="#FDBA74" d="M186.531 125.031c-2.911 2.318-1.052 6.974-3.442 8.235-2.334 1.229-3.672-4.334-7.125-1.188-2.62 2.38 1.38 5.552-.516 7.531-1.547 1.62-5.162-.031-5.896 3.625-.729 3.625 4.094 2.927 3.672 6.886-.401 3.797-4.969 4.109-4.724 6.896.526 6.062 13.953 5.869 13.708.52-.104-2.26-4.541-2.901-4.51-4.953.026-1.932 3.958-2.349 4.26-4.687.313-2.448-3.984-3.995-3.026-5.599.573-.964 3.287 1.26 4.542-.844 1.536-2.573-1.505-3.031-.536-4.656.968-1.63 3.697 2.375 6.677-.5 1.921-1.854-.105-4.922 1.52-6.011 1.292-.864 3.193 3.37 5.308 2.25 2.682-1.421-3.505-12.609-9.912-7.505Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bf" width="3" height="5" x="187" y="124" class="bf" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="4c6f41ff6c">
+              <path fill="#fff" d="M187.333 124.333H190v4h-2.667v-4Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bf)">
+            <g class="Clip path group">
+              <mask id="bg" width="63" height="71" x="148" y="105" class="bg" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="706837405e">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bg)">
+                <g class="Clip path group">
+                  <mask id="bh" width="63" height="71" x="148" y="105" class="bh" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="b9a0a816a1">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bh)">
+                    <path fill="#FB923C" d="M188.464 127.208a.925.925 0 0 1-.448-.604.935.935 0 0 1 .109-.745.94.94 0 0 1 .604-.453.94.94 0 0 1 .745.11c.234.14.385.343.453.604a.95.95 0 0 1-.109.75.961.961 0 0 1-.604.448.95.95 0 0 1-.75-.11Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bi" width="3" height="5" x="171" y="141" class="bi" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="54a1c0f606">
+              <path fill="#fff" d="M171.333 141.667H174v4h-2.667v-4Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bi)">
+            <g class="Clip path group">
+              <mask id="bj" width="63" height="71" x="148" y="105" class="bj" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="94f97439d5">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bj)">
+                <g class="Clip path group">
+                  <mask id="bk" width="63" height="71" x="148" y="105" class="bk" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="3cfaf189b3">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bk)">
+                    <path fill="#FB923C" d="M172.109 144.708a.96.96 0 0 1-.453-.609.985.985 0 0 1 .11-.745.964.964 0 0 1 .604-.453.998.998 0 0 1 .75.109.941.941 0 0 1 .448.61c.067.26.031.51-.104.745a.965.965 0 0 1-.61.453.985.985 0 0 1-.745-.11Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bl" width="3" height="5" x="178" y="145" class="bl" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="13c5a49cac">
+              <path fill="#fff" d="M178 145.667h2.667v4H178v-4Z" class="Vector"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bl)">
+            <g class="Clip path group">
+              <mask id="bm" width="63" height="71" x="148" y="105" class="bm" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="d904e3c7fe">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="Vector"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bm)">
+                <g class="Clip path group">
+                  <mask id="bn" width="63" height="71" x="148" y="105" class="bn" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="1f738a3985">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bn)">
+                    <path fill="#FB923C" d="M178.682 148.474a.95.95 0 0 1-.448-.604.938.938 0 0 1 .11-.745.95.95 0 0 1 .604-.453.938.938 0 0 1 .745.109.969.969 0 0 1 .453.604.946.946 0 0 1-.11.75.937.937 0 0 1-.604.448.946.946 0 0 1-.75-.109Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bo" width="3" height="4" x="170" y="155" class="bo" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="ed38803047">
+              <path fill="#fff" d="M170 155h2.667v4H170v-4Z" class="dot"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bo)">
+            <g class="Clip path group">
+              <mask id="bp" width="63" height="71" x="148" y="105" class="bp" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="0b3277dbed">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bp)">
+                <g class="Clip path group">
+                  <mask id="bq" width="63" height="71" x="148" y="105" class="bq" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="c0ab073d50">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bq)">
+                    <path fill="#FB923C" d="M170.87 158.104a.91.91 0 0 1-.448-.604.96.96 0 0 1 .104-.745.966.966 0 0 1 .609-.453.94.94 0 0 1 .745.109.961.961 0 0 1 .453.605.994.994 0 0 1-.109.75.961.961 0 0 1-.604.448.95.95 0 0 1-.75-.11Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="br" width="4" height="5" x="186" y="132" class="br" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="e33cb22d90">
+              <path fill="#fff" d="M186 132.333h4v4h-4v-4Z" class="dot"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#br)">
+            <g class="Clip path group">
+              <mask id="bs" width="63" height="71" x="148" y="105" class="bs" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="ed58bf4c06">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bs)">
+                <g class="Clip path group">
+                  <mask id="bt" width="63" height="71" x="148" y="105" class="bt" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="fa6bcc28a5">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bt)">
+                    <path fill="#FB923C" d="M187.406 135.411a.964.964 0 0 1-.453-.604.95.95 0 0 1 .109-.75.96.96 0 0 1 .605-.448.95.95 0 0 1 .75.11c.234.14.38.338.448.604a.938.938 0 0 1-.11.745.938.938 0 0 1-.604.453.934.934 0 0 1-.745-.11Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Clip path group">
+          <mask id="bu" width="3" height="3" x="178" y="156" class="bu" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="3801903311">
+              <path fill="#fff" d="M178 156.333h2.667V159H178v-2.667Z" class="dot"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bu)">
+            <g class="Clip path group">
+              <mask id="bv" width="63" height="71" x="148" y="105" class="bv" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="d55131a80b">
+                  <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bv)">
+                <g class="Clip path group">
+                  <mask id="bw" width="63" height="71" x="148" y="105" class="bw" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                    <g class="ca36d2db91">
+                      <path fill="#fff" d="m210.813 125.255-29.693 49.792-32.62-19.453 29.688-49.792 32.625 19.453Z" class="dot"/>
+                    </g>
+                  </mask>
+                  <g class="Group" mask="url(#bw)">
+                    <path fill="#FB923C" d="M178.781 158.807a.964.964 0 0 1-.453-.604.993.993 0 0 1 .11-.75.953.953 0 0 1 .609-.448.938.938 0 0 1 .745.11.938.938 0 0 1 .453.604.982.982 0 0 1-.11.745.96.96 0 0 1-.609.453.942.942 0 0 1-.745-.11Z" class="Vector"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Peroxisome 2">
+        <g class="Peroxisome 2 Fill">
+          <mask id="bx" width="21" height="21" x="187" y="185" class="bx" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="706f4d04ce">
+              <path fill="#fff" d="M187.63 185.661h20.078v20.079H187.63v-20.079Z" class="peroxisomefilling2"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bx)">
+            <g class="Clip path group">
+              <mask id="by" width="21" height="21" x="187" y="185" class="by" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="a7df7098fd">
+                  <path fill="#fff" d="M197.672 185.661a10.04 10.04 0 0 0-10.042 10.042c0 5.542 4.495 10.037 10.042 10.037 5.542 0 10.036-4.495 10.036-10.037 0-5.547-4.494-10.042-10.036-10.042Z" class="peroxisomefilling2"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#by)">
+                <path fill="#BBF7D0" d="M187.63 185.661h20.078v20.079H187.63v-20.079Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="Peroxisome 2 Border">
+          <mask id="bz" width="21" height="21" x="187" y="185" class="bz" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="9c35e26c5e">
+              <path fill="#fff" d="M187.63 185.661h19.99v19.99h-19.99v-19.99Z" class="peroxisomeborder2"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bz)">
+            <g class="Clip path group">
+              <mask id="bA" width="21" height="21" x="187" y="185" class="bA" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+                <g class="ea08516c55">
+                  <path fill="#fff" d="M197.625 185.661c-5.521 0-9.995 4.48-9.995 9.995a9.994 9.994 0 0 0 9.995 9.995 9.994 9.994 0 0 0 9.995-9.995c0-5.515-4.474-9.995-9.995-9.995Z" class="peroxisomeborder2"/>
+                </g>
+              </mask>
+              <g class="Group" mask="url(#bA)">
+                <path stroke="#4ADE80" stroke-width="5.974" d="M197.625 185.661c-5.521 0-9.995 4.48-9.995 9.995a9.994 9.994 0 0 0 9.995 9.995 9.994 9.994 0 0 0 9.995-9.995c0-5.515-4.474-9.995-9.995-9.995Z" class="Vector"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="Peroxisome 1">
+        <mask id="bB" width="21" height="21" x="197" y="300" class="bB" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="99107437c9">
+            <path fill="#fff" d="M197.672 300.089h20.073v20.078h-20.073v-20.078Z" class="dot"/>
+          </g>
+        </mask>
+        <g class="Clip path group" mask="url(#bB)">
+          <mask id="bC" width="21" height="21" x="197" y="300" class="bC" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+            <g class="96dbbad7ea">
+              <path fill="#fff" d="M207.708 300.089c-5.547 0-10.036 4.494-10.036 10.041 0 5.542 4.489 10.037 10.036 10.037 5.542 0 10.037-4.495 10.037-10.037 0-5.547-4.495-10.041-10.037-10.041Z" class="dot"/>
+            </g>
+          </mask>
+          <g class="Group" mask="url(#bC)">
+            <path fill="#BBF7D0" d="M197.672 300.089h20.073v20.078h-20.073v-20.078Z" class="Vector"/>
+          </g>
+        </g>
+        <mask id="bD" width="21" height="21" x="197" y="300" class="bD" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+          <g class="5e65dd6697">
+            <path fill="#fff" d="M197.672 300.089h19.989v19.989h-19.989v-19.989Z" class="peroxisomeborder3"/>
+          </g>
+        </mask>
+        <g class="Group" mask="url(#bD)">
+          <g class="Clip path group">
+            <mask id="bE" width="21" height="21" x="197" y="300" class="bE" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+              <g class="6016b148de">
+                <path fill="#fff" d="M207.667 300.089c-5.521 0-9.995 4.473-9.995 9.994a9.994 9.994 0 0 0 9.995 9.995c5.515 0 9.994-4.474 9.994-9.995 0-5.521-4.479-9.994-9.994-9.994Z" class="peroxisomeborder3"/>
+              </g>
+            </mask>
+            <g class="Group" mask="url(#bE)">
+              <path stroke="#4ADE80" stroke-width="5.974" d="M207.667 300.089c-5.521 0-9.995 4.473-9.995 9.994a9.994 9.994 0 0 0 9.995 9.995c5.515 0 9.994-4.474 9.994-9.995 0-5.521-4.479-9.994-9.994-9.994Z" class="Vector"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
