@@ -133,7 +133,7 @@
 
 html,
 body {
-  background-color: black;
+  background:transparent;
   color: white;
   margin: 0;
   padding: 0;

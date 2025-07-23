@@ -1,7 +1,6 @@
 "use client"; // Required for hooks
 import { useState, useEffect } from "react";
 import { Button } from "@components/ui/button";
-import { FcGoogle } from "react-icons/fc"; // Import the Google icon
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import GoogleButton from "@components/ui/GoogleButton"; // Import the custom Google button component
@@ -40,14 +39,8 @@ export default function AuthenticationPage() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black to-zinc-900 text-white space-y-8">
-      {/* Press to sign in text at the top */}
-      {dimScreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 transition-opacity duration-700 z-10 pointer-events-none" />
-      )}
 
-   <GoogleButton onClick={handleClick}></GoogleButton>
+   <GoogleButton onClick={handleClick}/>
 
-    </div>
   );
 }
