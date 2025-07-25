@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
+//import { dataArray } from "p5";
 
 type Question = {
   a: string;
@@ -29,17 +30,19 @@ export default function GameRoomPage() {
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [gameTitle, setGameTitle] = useState("");
+  const [timeTotal, setTimeTotal] = useState(0);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
   const [showTimeUpAlert, setShowTimeUpAlert] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     if (!gameId) return;
     const loadQuestions = async () => {
       setLoading(true);
       try {
-        const gameDocRef = doc(firestore, "sets", gameId);
+        const gameDocRef = doc(firestore, "sets", gameId as string);
         const gameDocSnap = await getDoc(gameDocRef);
         if (!gameDocSnap.exists()) {
           alert("Game not found!");
@@ -50,11 +53,12 @@ export default function GameRoomPage() {
         const data = gameDocSnap.data();
         setGameTitle(data.title || "Untitled Game");
         setTimeLeft(data.timeLimit);
+        setTimeTotal(data.timeLimit);
 
         const questionsColRef = collection(
           firestore,
           "sets",
-          gameId,
+          gameId as string,
           "questions"
         );
 
@@ -81,6 +85,16 @@ export default function GameRoomPage() {
 
     return () => clearInterval(interval);
   }, [timeLeft, submitted]);
+
+  useEffect(() => {
+  // Calculate the score only when the game is submitted
+  if (submitted) {
+    const accuracyScore = (correctCount / questions.length) * 1000;
+    const timeBonus = (1 / questions.length) * 1000 * (timeLeft! / timeTotal);
+    const finalScore = Math.floor(accuracyScore + timeBonus);
+    setScore(finalScore);
+  }
+}, [submitted, questions.length, timeLeft, timeTotal]);
 
   useEffect(() => {
     if (timeLeft !== null && timeLeft <= 0 && !submitted) {
@@ -151,7 +165,7 @@ export default function GameRoomPage() {
           <div className="max-w-2xl ml-4">
             <div className="flex justify-between items-center mb-6">
               <h1 className="ml-2 text-center text-4xl font-bold text-white drop-shadow-md">
-                Game: {gameTitle}
+             {gameTitle}
               </h1>
             </div>
 
@@ -281,6 +295,8 @@ export default function GameRoomPage() {
                       }));
 
                     const userAnswer = userAnswers[idx];
+                     
+
                     return (
                       <div
                         key={idx}
@@ -331,8 +347,16 @@ export default function GameRoomPage() {
                     );
                   })}
                   <p className="mt-6 text-center text-xl font-bold">
-                    Your Score: {correctCount} / {questions.length}
+                    Your Accuracy: {correctCount} / {questions.length}
                   </p>
+                  <p className="mt-6 text-center text-xl font-bold">
+                    Time Taken: {formatTime(timeTotal - timeLeft!)}
+                  </p>
+
+
+<h1 className="mt-6 text-center text-3xl font-bold">
+  Your Score: {score === 0 ? `${1/questions.length*500}` : score}
+</h1>
                 </>
               )}
 
