@@ -13,7 +13,7 @@ export default function HomePage() {
 
   // State to hold the game data fetched from Firestore
   const [games, setGames] = useState<gameRoom[]>([]);
-  
+
   // Logic for the "just logged in" curtain animation
   const searchParams = useSearchParams();
   const justLoggedIn = searchParams.get("justLoggedIn") === "true";
@@ -69,7 +69,7 @@ export default function HomePage() {
 
           <main className="flex-1 p-6 overflow-y-auto bg-black/100 text-white">
             <h1 className="text-3xl font-bold mb-3">Join a Game!</h1>
-            
+
             {/* Filter Controls */}
             <div className="flex flex-wrap gap-6 mb-3">
               <div className="flex flex-col">
@@ -83,7 +83,7 @@ export default function HomePage() {
                   id="questionSource"
                   value={questionSource}
                   onChange={(e) => setQuestionSource(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
                 >
                   <option>All Sources</option>
                   <option>Mitosisphere</option>
@@ -105,7 +105,7 @@ export default function HomePage() {
                   id="title"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
                 >
                   <option>All Topics</option>
                   <option>Topic 1</option>
@@ -126,7 +126,7 @@ export default function HomePage() {
                   id="difficulty"
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="bg-zinc-900 text-white p-2 rounded-md w-48"
+                  className="bg-cyan-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
                 >
                   <option>All Difficulties</option>
                   <option>Easy</option>
@@ -145,51 +145,38 @@ export default function HomePage() {
                 </p>
               ) : (
                 filteredGames.map((game) => (
-
-              <Link href={`/home/${game.id}`}>
-                  <div
-                    key={game.id}
-                    className="bg-zinc-900 rounded-2xl p-6 w-90 shadow-md hover:scale-[1.02] transition-transform"
-                  >
-                    <h2 className="text-2xl font-semibold mb-2">
-                      {game.title}
-                    </h2>
-                    <p className="text-sm">
-                      <span className="font-bold mb-2">Question Source:</span>{" "}
-                      {game.source}
-                    </p>
-                    <p className="text-sm">
-                      <span className="font-bold mb-2">Number of Questions:</span>{" "}
-                      {game.number_of_questions}
-                    </p>
-                    <p className="text-sm">
-                      <span className="font-bold mb-2">Difficulty:</span>{" "}
-                      {game.difficulty}
-                    </p>
-                    {game.topic && (
-                      <p className="text-sm">
-                        <span className="font-bold mb-2">Topic:</span>{" "}
-                        {game.topic}
+                  <Link key={game.id} href={`/home/${game.id}`}>
+                    <div className="bg-zinc-900 rounded-2xl p-6 w-90 shadow-md hover:scale-[1.04] transition-transform">
+                      <h2 className="text-2xl font-semibold mb-2">
+                        {game.title}
+                      </h2>
+                      <p className="text-sm mb-1">
+                        <span className="font-bold mb-2">Question Source:</span>{" "}
+                        {game.source}
                       </p>
-                    )}
-                    
-                    <p className="text-sm mb-2">
-                      <span className="font-bold">Time Limit:</span> {game.timeLimit}
-                    </p>
-                     <p className="text-[#00bbff] hover:underline cursor-pointer">
-          
-                    
-                      Click to see more...
+                      <p className="text-sm mb-1">
+                        <span className="font-bold mb-2">
+                          Number of Questions:
+                        </span>{" "}
+                        {game.number_of_questions}
+                      </p>
+                      <p className="text-sm mb-1">
+                        <span className="font-bold mb-2">Difficulty:</span>{" "}
+                        {game.difficulty}
+                      </p>
+                      {game.topic && (
+                        <p className="text-sm mb-1">
+                          <span className="font-bold mb-2">Topic:</span>{" "}
+                          {game.topic}
+                        </p>
+                      )}
 
-                     </p>
-                      
-                  
-  
-                    
-                  </div>
+                      <p className="text-sm mb-1">
+                        <span className="font-bold">Time Limit:</span>{" "}
+                        {game.timeLimit}
+                      </p>
+                    </div>
                   </Link>
-
-
                 ))
               )}
             </div>
