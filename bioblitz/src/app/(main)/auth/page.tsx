@@ -1,15 +1,27 @@
 "use client"; // Required for hooks
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase"; 
 import GoogleButton from "@/../components/ui/GoogleButton";
 
 export default function AuthenticationPage() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-
   const auth = getAuth(app);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/home");
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
+
   const provider = new GoogleAuthProvider();
 
   const handleClick = async () => {
@@ -31,13 +43,17 @@ export default function AuthenticationPage() {
         router.push("/home?justLoggedIn=true");
       } else {
         console.error("Failed to create session:", await res.json());
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error during sign-in:", error);
-    } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <div className = "text-white font-bold text-2xl">Loading...</div>;
+  }
 
   return <GoogleButton onClick={handleClick} disabled={loading} />;
 }
