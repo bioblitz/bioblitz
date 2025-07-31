@@ -1,4 +1,4 @@
-export default function MarketingNavbar() {
+export default function MainNavbar() {
     return (
     <nav className="w-full bg-black sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

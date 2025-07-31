@@ -1,46 +1,43 @@
 "use client"; // Required for hooks
-import { useState, useEffect } from "react";
-import { Button } from "@components/ui/button";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import GoogleButton from "@components/ui/GoogleButton"; // Import the custom Google button component
-
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { app } from "@/lib/firebase"; 
+import GoogleButton from "@/../components/ui/GoogleButton";
 
 export default function AuthenticationPage() {
-  const [isClicked, setIsClicked] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
-  const [popPressed, setPopPressed] = useState(false);
-  const [hideText, setHideText] = useState(false);
-  const [dimScreen, setDimScreen] = useState(false);
   const router = useRouter();
 
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      console.log("Login Success:", tokenResponse);
-      setLoading(false);
-      setSignedIn(true);
-      setTimeout(() => {
-        router.push("/home?justLoggedIn=true");
-      }, 1000);
-    },
-    onError: (error) => {
-      console.error("Login Failed:", error);
-      setLoading(false);
-    },
-  });
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-  const handleClick = () => {
-    setIsClicked(true);
+  const handleClick = async () => {
     setLoading(true);
-    login();
-    setTimeout(() => setIsClicked(false), 400);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (res.ok) {
+        router.push("/home?justLoggedIn=true");
+      } else {
+        console.error("Failed to create session:", await res.json());
+      }
+    } catch (error) {
+      console.error("Error during sign-in:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-
-  return (
-
-   <GoogleButton onClick={handleClick}/>
-
-  );
+  return <GoogleButton onClick={handleClick} disabled={loading} />;
 }

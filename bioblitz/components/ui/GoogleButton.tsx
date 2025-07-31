@@ -3,13 +3,15 @@ import './googleButtonCSS.css';
 
 type GoogleButtonProps = {
   onClick?: () => void;
+  disabled?: boolean;
 };
 
 
-export default function GoogleButton({ onClick }: GoogleButtonProps) {
+export default function GoogleButton({ onClick, disabled }: GoogleButtonProps) {
   return (
     <button
         onClick={onClick}
+        disabled={disabled}
         className="gsi-material-button" 
         style={{ width: 300 }} 
     >

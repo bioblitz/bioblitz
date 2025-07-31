@@ -59,9 +59,6 @@ export default function HomePage() {
   return (
     <>
       <div className="flex flex-col h-screen">
-        <nav className="h-12 bg-gray-900 text-white flex items-center justify-center px-6 shadow">
-          Navbar goes here:
-        </nav>
         <div className="flex flex-1 overflow-hidden">
           <nav className="w-14 bg-gray-900 text-white p-4"></nav>
 

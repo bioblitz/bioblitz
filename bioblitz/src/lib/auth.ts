@@ -3,21 +3,12 @@ import { initializeApp, getApps, App, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { cookies } from "next/headers";
 import path from "path";
-import fs from "fs";
 
 const serviceAccountPath = path.resolve(process.cwd(), "firebase-service-account.json");
 
-let serviceAccount: Record<string, any> | undefined;
-try {
-  serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
-} catch (err) {
-  console.error("Failed to load Firebase service account JSON:", err);
-  serviceAccount = undefined;
-}
-
-const app = !getApps().length && serviceAccount
+export const app = !getApps().length 
   ? initializeApp({
-      credential: cert(serviceAccount),
+      credential: cert(serviceAccountPath), 
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     })
   : (getApps()[0] as App);
