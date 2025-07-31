@@ -1,27 +1,9 @@
+import MarketingNavbar from "@/components/layout/MarketingNavbar";
+
 export default function mainPage() {
   return (
 
      <div className="min-h-screen flex flex-col items-center font-inter bg-black">
-       <nav className="w-full bg-black sticky top-0 z-50 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex-shrink-0">
-              <span className="text-white text-2xl font-bold tracking-widest uppercase">
-                <a href = '/'>BioBlitz</a>
-              </span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <a href="/home" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
-                Contests
-              </a>
-              <button className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
-                <a href="/auth">Sign Up</a>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
       <section className="w-full text-center py-20 bg-gradient-to-br from-black via-blue-950 to-black mb-12">
         <div className="mx-auto px-4">
           <h1 className="text-6xl md:text-7xl font-extrabold drop-shadow-lg rounded-lg p-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
