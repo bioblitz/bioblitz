@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function mainPage() {
   const user = await getCurrentUser();
@@ -19,9 +20,11 @@ export default async function mainPage() {
           <p className="text-2xl md:text-6xl text-white mb-6 opacity-90 bold drop-shadow">
             should be fun
           </p>
-          <button className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
-            <a href = "/home">Get Started</a>
-          </button>
+          <Link href="/home">
+            <button className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+              Get Started
+            </button>
+          </Link>
         </div>
         <div className="mx-auto flex justify-center space-x-8 py-4">
           <div className="flex items-center text-gray-400 text-medium">
@@ -44,7 +47,7 @@ export default async function mainPage() {
           <div className="bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
             <h3 className="text-xl font-semibold mb-2">20+ Problem Writers</h3>
             <p className="text-sm opacity-80">
-              We have a team of over 20 expert writers backed by <a href = "https://mitosisphere.org" className="underline">Mitosisphere</a>.
+              We have a team of over 20 expert writers backed by <Link href="https://mitosisphere.org" className="underline">Mitosisphere</Link>.
             </p>
           </div>
 

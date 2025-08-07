@@ -8,18 +8,10 @@ import GoogleButton from "@/components/ui/GoogleButton";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AuthenticationPage() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
   const { setIsAuthenticated } = useAuth();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [auth]);
 
   const provider = new GoogleAuthProvider();
 
@@ -41,7 +33,9 @@ export default function AuthenticationPage() {
       if (res.ok) {
         await createUserProfile(user);
         setIsAuthenticated(true); // Update AuthContext
+        console.log("Attempting to redirect to /home");
         router.push("/home?justLoggedIn=true");
+        console.log("Redirection initiated.");
       } else {
         console.error("Failed to create session:", await res.json());
         setLoading(false);

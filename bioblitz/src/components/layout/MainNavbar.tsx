@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 export default function MainNavbar() {
@@ -23,14 +24,14 @@ export default function MainNavbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
             <span className="text-white text-2xl font-bold tracking-widest uppercase">
-              <a href='/home'>BioBlitz</a>
+              <Link href='/home'>BioBlitz</Link>
             </span>
           </div>
 
           <div className="flex items-center space-x-4">
-            <a href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
+            <Link href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
               Contests
-            </a>
+            </Link>
             {isAuthenticated && (
               <button
                 onClick={handleSignOut}

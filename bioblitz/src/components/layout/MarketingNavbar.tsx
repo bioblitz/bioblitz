@@ -1,5 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
-
+import Link from 'next/link';
 export default function MarketingNavbar() {
   const { isAuthenticated, loading } = useAuth();
 
@@ -9,18 +9,18 @@ export default function MarketingNavbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
             <span className="text-white text-2xl font-bold tracking-widest uppercase">
-              <a href='/'>BioBlitz</a>
+              <Link href='/'>BioBlitz</Link>
             </span>
           </div>
 
           <div className="flex items-center space-x-4">
-            <a href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
+            <Link href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
               Contests
-            </a>
+            </Link>
             {!loading && !isAuthenticated && (
-              <a href="/auth" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
+              <Link href="/auth" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
                 Sign Up
-              </a>
+              </Link>
             )}
           </div>
         </div>
