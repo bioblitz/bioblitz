@@ -1,6 +1,13 @@
-import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function mainPage() {
+export default async function mainPage() {
+  const user = await getCurrentUser();
+
+  if (user) {
+    redirect("/contests");
+  }
+
   return (
 
      <div className="min-h-screen flex flex-col items-center font-inter bg-black">
@@ -65,7 +72,7 @@ export default function mainPage() {
       </section>
 
 
-      
+
     </div>
   );
 }

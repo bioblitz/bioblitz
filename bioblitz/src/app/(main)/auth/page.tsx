@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase"; 
-import GoogleButton from "@/../components/ui/GoogleButton";
+import { createUserProfile } from "@/lib/user";
+import GoogleButton from "@/components/ui/GoogleButton";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(true);
@@ -12,15 +13,11 @@ export default function AuthenticationPage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push("/home");
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [auth]);
 
   const provider = new GoogleAuthProvider();
 
@@ -40,7 +37,8 @@ export default function AuthenticationPage() {
       });
 
       if (res.ok) {
-        router.push("/home?justLoggedIn=true");
+        await createUserProfile(user);
+        router.push("/contests?justLoggedIn=true");
       } else {
         console.error("Failed to create session:", await res.json());
         setLoading(false);

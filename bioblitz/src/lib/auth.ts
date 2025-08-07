@@ -1,6 +1,7 @@
 import "server-only";
 import { initializeApp, getApps, App, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import { cookies } from "next/headers";
 import path from "path";
 
@@ -27,7 +28,8 @@ export async function getCurrentUser() {
     );
     return decodedIdToken;
   } catch (error) {
-    console.error("Error verifying session cookie:", error);
+    // Session cookie is invalid or expired.
+    // This is an expected error and should not be logged as an error.
     return null;
   }
 }

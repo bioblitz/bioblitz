@@ -25,7 +25,7 @@
 
 }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/ui/VantaBackground.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ui/VantaBackground.js", "../src/lib/utils.ts"],
   "exclude": ["node_modules"]
 }
 
