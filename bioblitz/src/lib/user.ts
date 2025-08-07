@@ -16,7 +16,6 @@ export interface UserProfile {
   location: string;
   createdAt: Timestamp | FieldValue;
   lastLogin: Timestamp | FieldValue;
-  setsPlayed: String[];
   nameChangedAt: Timestamp | FieldValue;
 }
 
@@ -35,7 +34,6 @@ export async function createUserProfile(user: any) {
     createdAt: serverTimestamp(),
     lastLogin: serverTimestamp(),
     nameChangedAt: serverTimestamp(),
-    setsPlayed: []
   };
 
   await setDoc(userRef, userProfile);

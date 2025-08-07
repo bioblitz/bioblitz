@@ -1,13 +1,20 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import PageReloader from "@/components/PageReloader";
 
-export default async function mainPage() {
+export default async function mainPage({ searchParams }: { searchParams: {potato:string} }) {
   const user = await getCurrentUser();
 
+
+  <PageReloader />
+
+
   if (user) {
-    redirect("/contests");
+    redirect("/home");
   }
+
+  
 
   return (
 
