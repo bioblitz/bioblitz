@@ -5,11 +5,13 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from
 import { app } from "@/lib/firebase"; 
 import { createUserProfile } from "@/lib/user";
 import GoogleButton from "@/components/ui/GoogleButton";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const auth = getAuth(app);
+  const { setIsAuthenticated } = useAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,7 +40,8 @@ export default function AuthenticationPage() {
 
       if (res.ok) {
         await createUserProfile(user);
-        router.push("/contests?justLoggedIn=true");
+        setIsAuthenticated(true); // Update AuthContext
+        router.push("/home?justLoggedIn=true");
       } else {
         console.error("Failed to create session:", await res.json());
         setLoading(false);

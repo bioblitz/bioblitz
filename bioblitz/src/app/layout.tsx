@@ -1,20 +1,19 @@
 import "./globals.css";
-import { getCurrentUser } from "@/lib/auth";
-import MainNavbar from "@/components/layout/MainNavbar";
-import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import { AuthProvider } from "@/context/AuthContext";
+import NavbarWrapper from "@/components/layout/NavbarWrapper";
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-
   return (
     <html lang="en">
       <body>
-        {user ? <MainNavbar /> : <MarketingNavbar />}
-        {children}
+        <AuthProvider>
+          <NavbarWrapper />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

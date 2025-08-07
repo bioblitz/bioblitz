@@ -1,13 +1,16 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function MainNavbar() {
   const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const handleSignOut = async () => {
     const res = await fetch('/api/sign-out');
     if (res.ok) {
+      setIsAuthenticated(false);
       router.push('/auth');
     } else {
       console.error('Failed to sign out');
@@ -28,12 +31,14 @@ export default function MainNavbar() {
             <a href="/contests" className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium">
               Contests
             </a>
-            <button
-              onClick={handleSignOut}
-              className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium"
-            >
-              Sign Out
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={handleSignOut}
+                className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium"
+              >
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
       </div>
