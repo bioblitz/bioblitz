@@ -1,31 +1,39 @@
 
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { firestore } from "./firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { serverTimestamp } from "firebase/firestore";
 
 export interface UserProfile {
-  uid: string;
   displayName: string;
   email: string;
   photoURL: string;
-  usaboRating: number;
-  mcatRating: number;
+  bElo: number;
+  buElo: number;
+  muElo: number;
+  mElo: number;
   bio: string;
-  grade: string;
-  state: string;
+  location: string;
+  createdAt: Timestamp | FieldValue;
+  lastLogin: Timestamp | FieldValue;
+  nameChangedAt: Timestamp | FieldValue;
 }
 
 export async function createUserProfile(user: any) {
   const userRef = doc(firestore, "users", user.uid);
   const userProfile: UserProfile = {
-    uid: user.uid,
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName?.[0] || "B"}&background=random`,
-    usaboRating: 1500,
-    mcatRating: 1500,
+    bElo: 1500,
+    mElo: 1500,
+    buElo: 1500,
+    muElo: 1500,
     bio: "",
-    grade: "",
-    state: "",
+    location: "",
+    createdAt: serverTimestamp(),
+    lastLogin: serverTimestamp(),
+    nameChangedAt: serverTimestamp(),
   };
 
   await setDoc(userRef, userProfile);

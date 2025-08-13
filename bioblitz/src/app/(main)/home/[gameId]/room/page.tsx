@@ -2,16 +2,17 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { firestore } from "@/lib/firebase";
-//import { dataArray } from "p5";
+import { addDoc, onSnapshot, collection, doc, getDoc } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { firestore, auth } from "@/lib/firebase";
+import { User } from "firebase/auth";
 
+// Types used in the component
 type Question = {
   a: string;
   b: string;
   c: string;
   content: string;
-  correct: string;
   d?: string;
   e?: string;
   imgURL?: string;
@@ -19,27 +20,58 @@ type Question = {
 
 type Tab = "result" | "leaderboard" | "home";
 
+// --- EDITED: Updated result type to include the correct answers ---
+type GameResult = {
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  correctAnswers: { [key: number]: string };
+};
+
 export default function GameRoomPage() {
   const { gameId } = useParams();
   const router = useRouter();
+
+  // --- State Hooks ---
+  const [user, setUser] = useState<User | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
-    {}
-  );
+  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>({});
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [gameTitle, setGameTitle] = useState("");
   const [timeTotal, setTimeTotal] = useState(0);
-  const [autoSubmitted, setAutoSubmitted] = useState(false);
   const [showTimeUpAlert, setShowTimeUpAlert] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [activeTab, setActiveTab] = useState<Tab>("result");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [score, setScore] = useState(0);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [finalResult, setFinalResult] = useState<GameResult | null>(null);
+
+  // --- Ref Hook ---
+  const isMounted = useRef(true);
+
+  // --- Effect Hooks ---
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (isMounted.current) {
+        setUser(currentUser);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!gameId) return;
-    const loadQuestions = async () => {
+    
+    const loadGameData = async () => {
       setLoading(true);
       try {
         const gameDocRef = doc(firestore, "sets", gameId as string);
@@ -51,91 +83,132 @@ export default function GameRoomPage() {
         }
 
         const data = gameDocSnap.data();
-        setGameTitle(data.title || "Untitled Game");
-        setTimeLeft(data.timeLimit);
-        setTimeTotal(data.timeLimit);
+        if (isMounted.current) {
+            setGameTitle(data.title || "Untitled Game");
+            setTimeLeft(data.timeLimit);
+            setTimeTotal(data.timeLimit);
+        }
 
-        const questionsColRef = collection(
-          firestore,
-          "sets",
-          gameId as string,
-          "questions"
-        );
+        const functions = getFunctions();
+        const getPublicQuestions = httpsCallable(functions, 'getPublicQuestions');
+        const result = await getPublicQuestions({ gameId: gameId });
+        
+        const loadedQuestions = (result.data as { questions: Question[] }).questions;
 
-        const questionsSnap = await getDocs(questionsColRef);
-        const loadedQuestions: Question[] = questionsSnap.docs.map(
-          (doc) => doc.data() as Question
-        );
-        setQuestions(loadedQuestions);
+        if (isMounted.current) {
+            setQuestions(loadedQuestions);
+        }
+
       } catch (error) {
-        console.error("Error loading questions:", error);
+        console.error("Error loading game data:", error);
+        alert(`Could not load the game. Please try again later.`);
+      } finally {
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
 
-    loadQuestions();
+    loadGameData();
   }, [gameId, router]);
+  
+  const handleSubmit = async (isAutoSubmit = false) => {
+    if (submitted) return; 
+
+    if (!isAutoSubmit && Object.keys(userAnswers).length < questions.length) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+    
+    if (!user) {
+        alert("You must be logged in to submit a score.");
+        return;
+    }
+
+    setSubmitted(true);
+    setActiveTab("result");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    const timeTaken = timeTotal - (timeLeft ?? 0);
+
+    try {
+      const submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
+        gameId: gameId,
+        userId: user.uid,
+        userAnswers: userAnswers,
+        timeTaken: timeTaken,
+        submittedAt: new Date(),
+        status: "pending_grading",
+      });
+      
+      if (isMounted.current) {
+        setSubmissionId(submissionRef.id);
+      }
+    } catch (error) {
+      console.error("Error submitting game:", error);
+      alert("There was an error submitting your game. Please try again.");
+    }
+  };
 
   useEffect(() => {
     if (timeLeft === null || submitted) return;
+
+    if (timeLeft <= 0) {
+      setShowTimeUpAlert(true);
+      handleSubmit(true);
+      return;
+    }
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeLeft, submitted]);
-
+  }, [timeLeft, submitted, handleSubmit]);
+  
   useEffect(() => {
-  // Calculate the score only when the game is submitted
-  if (submitted) {
-    const accuracyScore = (correctCount / questions.length) * 1000;
-    const timeBonus = (1 / questions.length) * 1000 * (timeLeft! / timeTotal);
-    const finalScore = Math.floor(accuracyScore + timeBonus);
-    setScore(finalScore);
-  }
-}, [submitted, questions.length, timeLeft, timeTotal]);
+    if (!submissionId) return;
 
-  useEffect(() => {
-    if (timeLeft !== null && timeLeft <= 0 && !submitted) {
-      setAutoSubmitted(true);
-      setSubmitted(true);
-      setActiveTab("result");
-      setShowTimeUpAlert(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [timeLeft, submitted]);
+    const unsub = onSnapshot(doc(firestore, "gameSubmissions", submissionId), (doc) => {
+      const data = doc.data();
+      if (data?.score !== undefined) {
+        if (isMounted.current) {
+          // --- EDITED: Set the full result object including correct answers ---
+          setFinalResult({
+            score: data.score,
+            correctCount: data.correctCount,
+            totalQuestions: data.totalQuestions,
+            correctAnswers: data.correctAnswers,
+          });
 
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${
-      seconds !== 1 ? "s" : ""
-    }`;
-  };
+          
 
-  const submitBtnRef = useRef<HTMLButtonElement>(null);
+        }
+      }
+    });
+
+    return () => unsub();
+  }, [submissionId]);
 
   const handleAnswer = (questionIndex: number, choice: string) => {
     if (submitted) return;
-
     setUserAnswers((prev) => ({
       ...prev,
       [questionIndex]: choice,
     }));
   };
 
-  const correctCount = Object.entries(userAnswers).filter(
-    ([indexStr, answer]) => {
-      const index = parseInt(indexStr);
-      return questions[index]?.correct === answer;
-    }
-  ).length;
+  const formatTime = (totalSeconds: number | null) => {
+    if (totalSeconds === null) return "0 mins 0 secs";
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${seconds !== 1 ? "s" : ""}`;
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
-        Loading questions...
+        Loading Game...
       </div>
     );
   }
@@ -155,17 +228,14 @@ export default function GameRoomPage() {
           </button>
         </div>
       )}
-      <nav className="h-12 bg-gray-900 text-white flex items-center justify-center px-6 shadow">
-        Navbar goes here:
-      </nav>
-
+      
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-14 bg-gray-900 text-white p-4"></nav>
         <div className="min-h-screen bg-black text-white p-6 max-w-full">
           <div className="max-w-2xl ml-4">
             <div className="flex justify-between items-center mb-6">
               <h1 className="ml-2 text-center text-4xl font-bold text-white drop-shadow-md">
-             {gameTitle}
+                {gameTitle}
               </h1>
             </div>
 
@@ -255,21 +325,7 @@ export default function GameRoomPage() {
 
                   <div className="mt-8 text-center flex justify-center gap-6">
                     <button
-                      ref={submitBtnRef}
-                      onClick={() => {
-                        if (
-                          !autoSubmitted &&
-                          Object.keys(userAnswers).length < questions.length
-                        ) {
-                          alert(
-                            "Please answer all questions before submitting."
-                          );
-                          return;
-                        }
-                        setSubmitted(true);
-                        setActiveTab("result");
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
+                      onClick={() => handleSubmit(false)}
                       className="px-6 py-3 bg-cyan-600 rounded-xl hover:bg-cyan-900 text-white font-semibold"
                     >
                       Submit Game
@@ -286,83 +342,83 @@ export default function GameRoomPage() {
 
               {submitted && activeTab === "result" && (
                 <>
-                  {questions.map((question, idx) => {
-                    const choices = ["a", "b", "c", "d", "e"]
-                      .filter((key) => question[key as keyof Question])
-                      .map((key) => ({
-                        key,
-                        text: question[key as keyof Question] as string,
-                      }));
+                  {!finalResult ? (
+                    <div className="text-center p-8">
+                      <p className="text-xl font-semibold animate-pulse">Grading your answers...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {questions.map((question, idx) => {
+                        const choices = ["a", "b", "c", "d", "e"]
+                          .filter((key) => question[key as keyof Question])
+                          .map((key) => ({
+                            key,
+                            text: question[key as keyof Question] as string,
+                          }));
+                        const userAnswer = userAnswers[idx];
+                        const correctAnswer = finalResult.correctAnswers[idx];
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-zinc-900 rounded-4xl p-4 shadow-md"
+                          >
+                            <h3 className="text-xl font-semibold mb-4">
+                              Question {idx + 1} of {questions.length}
+                            </h3>
+                            <p className="mb-6 text-lg">{question.content}</p>
+                            {question.imgURL && (
+                              <img
+                                src={question.imgURL}
+                                alt={`Image for question ${idx + 1}`}
+                                className="my-4 rounded-md max-w-xl h-auto"
+                              />
+                            )}
+                            <div className="flex flex-col space-y-4">
+                              {choices.map(({ key, text }) => {
+                                const isUserAnswer = userAnswer === key;
+                                const isCorrect = correctAnswer === key;
 
-                    const userAnswer = userAnswers[idx];
-                     
+                                // --- EDITED: Dynamic background class for highlighting ---
+                                let bgClass = "bg-zinc-800"; // Default
+                                if (isCorrect) {
+                                  bgClass = "bg-emerald-600/40 ring-2 ring-emerald-500"; // Correct answer is always green
+                                } else if (isUserAnswer) {
+                                  bgClass = "bg-rose-600/40 ring-2 ring-rose-500"; // User's wrong answer is red
+                                }
 
-                    return (
-                      <div
-                        key={idx}
-                        className="bg-zinc-900 rounded-4xl p-4 shadow-md"
-                      >
-                        <h3 className="text-xl font-semibold mb-4">
-                          Question {idx + 1} of {questions.length}
-                        </h3>
-                        <p className="mb-6 text-lg">{question.content}</p>
-                        {question.imgURL && (
-                          <img
-                            src={question.imgURL}
-                            alt={`Image for question ${idx + 1}`}
-                            className="my-4 rounded-md max-w-xl h-auto"
-                          />
-                        )}
-                        <div className="flex flex-col space-y-4">
-                          {choices.map(({ key, text }) => {
-                            const isUserAnswer = userAnswer === key;
-                            const isCorrect = question.correct === key;
-
-                            const bgClass = isCorrect
-                              ? "bg-emerald-500/20"
-                              : isUserAnswer
-                              ? "bg-rose-600/20"
-                              : "bg-zinc-800";
-
-                            return (
-                              <div
-                                key={key}
-                                className={`px-4 py-3 rounded-xl text-left ${bgClass}`}
-                              >
-                                <span className="font-bold mr-2">
-                                  {key.toUpperCase()}.
-                                </span>
-                                {text}
-                                {isUserAnswer && !isCorrect && (
-                                  <span className="ml-2 text-rose-400 font-semibold"></span>
-                                )}
-                                {isCorrect && (
-                                  <span className="ml-2 text-emerald-400 font-semibold"></span>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <p className="mt-6 text-center text-xl font-bold">
-                    Your Accuracy: {correctCount} / {questions.length}
-                  </p>
-                  <p className="mt-6 text-center text-xl font-bold">
-                    Time Taken: {formatTime(timeTotal - timeLeft!)}
-                  </p>
-
-
-<h1 className="mt-6 text-center text-3xl font-bold">
-  Your Score: {score === 0 ? `${1/questions.length*500}` : score}
-</h1>
+                                return (
+                                  <div
+                                    key={key}
+                                    className={`px-4 py-3 rounded-xl text-left transition-colors duration-300 ${bgClass}`}
+                                  >
+                                    <span className="font-bold mr-2">
+                                      {key.toUpperCase()}.
+                                    </span>
+                                    {text}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <p className="mt-6 text-center text-xl font-bold">
+                        Your Accuracy: {finalResult.correctCount} / {finalResult.totalQuestions}
+                      </p>
+                      <p className="mt-6 text-center text-xl font-bold">
+                        Time Taken: {formatTime(timeTotal - (timeLeft ?? 0))}
+                      </p>
+                      <h1 className="mt-6 text-center text-3xl font-bold">
+                        Your Score: {finalResult.score}
+                      </h1>
+                    </>
+                  )}
                 </>
               )}
 
               {submitted && activeTab === "leaderboard" && (
                 <div className=" w-full  mx-auto">
-                  {" "}
                   <h2 className="text-3xl font-bold mb-6">Leaderboard</h2>
                   <div>No data yet</div>
                 </div>
