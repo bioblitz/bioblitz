@@ -98,18 +98,6 @@ export default function MainNavbar() {
           </div>
 
           <div className="flex items-center space-x-4 relative">
-            <Link href="/contests">
-              <span className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium cursor-pointer">
-                Contests
-              </span>
-            </Link>
-
-            <Link href="/about">
-              <span className="hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-medium cursor-pointer">
-                About
-              </span>
-            </Link>
-
             {isAuthenticated && (
               <div className="relative" ref={dropdownRef}>
                 <div onClick={() => setDropdownOpen(!dropdownOpen)}>
