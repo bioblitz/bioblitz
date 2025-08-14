@@ -461,7 +461,7 @@ export default function ProfilePage() {
                   })
                 }
                 className="absolute top-1/2 -translate-y-1/2 bg-zinc-800 p-2 rounded-full shadow-lg z-10 hover:bg-zinc-700"
-                style={{ left: "-30px" }}
+                style={{ left: "-35px" }}
               >
                 <ChevronLeft className="text-white" />
               </button>
@@ -469,7 +469,7 @@ export default function ProfilePage() {
               {/* Cards container */}
               <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-8"
+                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-3"
               >
                 {setsPlayed.map((set, i) => (
                   <div
