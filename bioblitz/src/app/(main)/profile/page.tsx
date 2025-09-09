@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { useRouter } from "next/navigation"; // EDITED: Correct import for App Router
+import { useRouter } from "next/navigation";
 import { FaUserCircle, FaDna, FaStethoscope } from "react-icons/fa";
 import SignOutButton from '@/components/ui/SignOutButton'; 
 
@@ -30,9 +30,8 @@ export default function ProfilePage() {
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Effect to fetch user data on component mount
+
     useEffect(() => {
-        // EDITED: The 'router.isReady' check is not needed with the App Router.
         const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
             if (user) {
                 try {
