@@ -5,6 +5,8 @@ import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { Sprout } from "lucide-react";
 import { useEffect, useState } from "react";
+import { firestore } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -15,6 +17,7 @@ export default function GameDetailPage() {
   const [otherGames, setOtherGames] = useState<gameRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [creatorName, setCreatorName] = useState("");
 
   const handleJoinGame = () => {
     router.push(`/home/${gameId}/room`);
@@ -27,6 +30,15 @@ export default function GameDetailPage() {
       setLoading(true);
       const fetchedGames = await allGames();
       const currentGame = fetchedGames.find((g) => g.id === gameId);
+
+      if (currentGame && currentGame.creator) {
+        const userDoc = await getDoc(
+          doc(firestore, "users", currentGame.creator)
+        );
+        if (userDoc.exists()) {
+          setCreatorName(userDoc.data().displayName);
+        }
+      }
 
       setGame(currentGame);
       setOtherGames(fetchedGames);
@@ -58,7 +70,13 @@ export default function GameDetailPage() {
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
-      
+      {game.creatorPfp && (
+        <img
+          src={game.creatorPfp}
+          alt={game.title}
+          className="w-full h-48 object-cover"
+        />
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-14 bg-gray-900 text-white p-4"></nav>
@@ -68,6 +86,11 @@ export default function GameDetailPage() {
             <h1 className="text-4xl font-bold text-white mb-4">
               <span className="text-white font-extrabold">{game.title}</span>
             </h1>
+            {creatorName && (
+              <p className="text-lg text-gray-300 mb-4">
+                Created by: {creatorName}
+              </p>
+            )}
 
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 bg-zinc-900 rounded-xl p-6">

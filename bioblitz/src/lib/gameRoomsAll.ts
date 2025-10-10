@@ -1,17 +1,6 @@
 import {collection, doc, setDoc, getDocs, QueryDocumentSnapshot, DocumentData} from "firebase/firestore";
 import { firestore } from "./firebase";
-
-// Your gameRoom type definition
-export type gameRoom = {
-  id: string;
-  title: string;
-  source: string;
-  number_of_questions: string;
-  topic?: string;
-  difficulty: string;
-  timeLimit: string;
-  description?: string;
-};
+import { gameRoom, Question } from "@/types";
 
 /**
  * Converts a total number of seconds into a "minutes and seconds" string.
@@ -41,13 +30,18 @@ const formatTime = (totalSeconds: number): string => {
  * Fetches all game rooms from the Firestore database and counts their questions.
  * @returns A promise that resolves to an array of gameRoom objects.
  */
-export const allGames = async (): Promise<gameRoom[]> => {
+export const allGames = async (topic?: string): Promise<gameRoom[]> => {
   try {
     const gameRoomsCollection = collection(firestore, 'sets');
     const gameRoomSnapshot = await getDocs(gameRoomsCollection);
 
-    // Filter out documents where 'hidden' is true BEFORE mapping
-    const visibleDocs = gameRoomSnapshot.docs.filter(doc => !doc.data().hidden);
+    // Filter out documents where 'hidden' is true
+    let visibleDocs = gameRoomSnapshot.docs.filter(doc => !doc.data().hidden);
+
+    // Further filter by topic if a topic is provided and is not 'All Topics'
+    if (topic && topic !== "All Topics") {
+      visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);
+    }
 
     // Use Promise.all to handle the async operations on the filtered list
     const gameList = await Promise.all(
@@ -59,6 +53,7 @@ export const allGames = async (): Promise<gameRoom[]> => {
         
         // Fetch the subcollection and get its size (the number of questions)
         const questionsSnapshot = await getDocs(questionsCollection);
+        const questions = questionsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Question[];
         const questionCount = questionsSnapshot.size;
 
         return {
@@ -72,6 +67,10 @@ export const allGames = async (): Promise<gameRoom[]> => {
           // Use the time formatting function
           timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
           description: data.description,
+          creator: data.creator,
+          creatorPfp: data.creatorPfp,
+          rating: data.rating,
+          questions: questions,
         };
       })
     );

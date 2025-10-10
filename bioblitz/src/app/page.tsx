@@ -5,30 +5,23 @@ import PageReloader from "@/components/PageReloader";
 
 export default async function mainPage({ searchParams }: { searchParams: {potato:string} }) {
   const user = await getCurrentUser();
-
-
   <PageReloader />
-
-
   if (user) {
     redirect("/home");
   }
-
-  
-
   return (
-
-     <div className="min-h-screen flex flex-col items-center font-inter bg-black">
-      <section className="w-full text-center py-20 bg-gradient-to-br from-black via-blue-950 to-black mb-12">
-        <div className="px-4">
-          <h1 className="text-6xl md:text-7xl font-extrabold drop-shadow-lg rounded-lg p-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+    <div className="min-h-screen flex flex-col items-center font-inter bg-black">
+      <section className="w-full text-center py-40">
+        <div className=" py-5">
+          <h1 className="text-6xl font-bold text-white text-transparent mb-2">
             Learning Biology
           </h1>
-          <p className="text-2xl md:text-6xl text-white mb-6 opacity-90 bold drop-shadow">
+          <p className="text-5xl text-white mb-6 opacity-90 bold drop-shadow">
             should be fun
           </p>
+          
           <Link href="/home">
-            <button className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+            <button className="bg-neutral-500 text-white font-bold py-3 px-8 rounded hover:bg-blue-600">
               Get Started
             </button>
           </Link>
@@ -44,7 +37,7 @@ export default async function mainPage({ searchParams }: { searchParams: {potato
           </div>
         </div>
       </section>
-
+      {/*
       <section className="w-full flex flex-col items-center bg-white text-black py-20 px-8">
         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-black drop-shadow">
           How BioBlitz Works
@@ -82,7 +75,7 @@ export default async function mainPage({ searchParams }: { searchParams: {potato
       </section>
 
 
-
+      */}
     </div>
   );
 }
