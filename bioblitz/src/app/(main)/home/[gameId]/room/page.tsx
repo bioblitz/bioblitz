@@ -2,12 +2,17 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { addDoc, onSnapshot, collection, doc, getDoc } from "firebase/firestore";
+import {
+  addDoc,
+  onSnapshot,
+  collection,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 
-// Types used in the component
 type Question = {
   a: string;
   b: string;
@@ -20,7 +25,6 @@ type Question = {
 
 type Tab = "result" | "leaderboard" | "home";
 
-// --- EDITED: Updated result type to include the correct answers ---
 type GameResult = {
   score: number;
   correctCount: number;
@@ -32,11 +36,12 @@ export default function GameRoomPage() {
   const { gameId } = useParams();
   const router = useRouter();
 
-  // --- State Hooks ---
   const [user, setUser] = useState<User | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>({});
+  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
+    {}
+  );
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [gameTitle, setGameTitle] = useState("");
@@ -47,10 +52,7 @@ export default function GameRoomPage() {
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [finalResult, setFinalResult] = useState<GameResult | null>(null);
 
-  // --- Ref Hook ---
   const isMounted = useRef(true);
-
-  // --- Effect Hooks ---
 
   useEffect(() => {
     isMounted.current = true;
@@ -70,7 +72,7 @@ export default function GameRoomPage() {
 
   useEffect(() => {
     if (!gameId) return;
-    
+
     const loadGameData = async () => {
       setLoading(true);
       try {
@@ -84,21 +86,36 @@ export default function GameRoomPage() {
 
         const data = gameDocSnap.data();
         if (isMounted.current) {
-            setGameTitle(data.title || "Untitled Game");
+          setGameTitle(data.title || "Untitled Game");
+          setTimeTotal(data.timeLimit);
+
+          const key = `startTime-${gameId}`;
+          const savedStart = localStorage.getItem(key);
+
+          if (savedStart) {
+            const elapsed = Math.floor(
+              (Date.now() - parseInt(savedStart)) / 1000
+            );
+            const remaining = Math.max(0, data.timeLimit - elapsed);
+            setTimeLeft(remaining);
+          } else {
+            const startTime = Date.now();
+            localStorage.setItem(key, startTime.toString());
             setTimeLeft(data.timeLimit);
-            setTimeTotal(data.timeLimit);
+          }
         }
 
         const functions = getFunctions();
-        const getPublicQuestions = httpsCallable(functions, 'getPublicQuestions');
+        const getPublicQuestions = httpsCallable(
+          functions,
+          "getPublicQuestions"
+        );
         const result = await getPublicQuestions({ gameId: gameId });
-        
-        const loadedQuestions = (result.data as { questions: Question[] }).questions;
-
+        const loadedQuestions = (result.data as { questions: Question[] })
+          .questions;
         if (isMounted.current) {
-            setQuestions(loadedQuestions);
+          setQuestions(loadedQuestions);
         }
-
       } catch (error) {
         console.error("Error loading game data:", error);
         alert(`Could not load the game. Please try again later.`);
@@ -111,18 +128,18 @@ export default function GameRoomPage() {
 
     loadGameData();
   }, [gameId, router]);
-  
+
   const handleSubmit = async (isAutoSubmit = false) => {
-    if (submitted) return; 
+    if (submitted) return;
 
     if (!isAutoSubmit && Object.keys(userAnswers).length < questions.length) {
       alert("Please answer all questions before submitting.");
       return;
     }
-    
+
     if (!user) {
-        alert("You must be logged in to submit a score.");
-        return;
+      alert("You must be logged in to submit a score.");
+      return;
     }
 
     setSubmitted(true);
@@ -132,18 +149,22 @@ export default function GameRoomPage() {
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
     try {
-      const submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
-        gameId: gameId,
-        userId: user.uid,
-        userAnswers: userAnswers,
-        timeTaken: timeTaken,
-        submittedAt: new Date(),
-        status: "pending_grading",
-      });
-      
+      const submissionRef = await addDoc(
+        collection(firestore, "gameSubmissions"),
+        {
+          gameId: gameId,
+          userId: user.uid,
+          userAnswers: userAnswers,
+          timeTaken: timeTaken,
+          submittedAt: new Date(),
+          status: "pending_grading",
+        }
+      );
+
       if (isMounted.current) {
         setSubmissionId(submissionRef.id);
       }
+      localStorage.removeItem(`startTime-${gameId}`);
     } catch (error) {
       console.error("Error submitting game:", error);
       alert("There was an error submitting your game. Please try again.");
@@ -165,27 +186,26 @@ export default function GameRoomPage() {
 
     return () => clearInterval(interval);
   }, [timeLeft, submitted, handleSubmit]);
-  
+
   useEffect(() => {
     if (!submissionId) return;
 
-    const unsub = onSnapshot(doc(firestore, "gameSubmissions", submissionId), (doc) => {
-      const data = doc.data();
-      if (data?.score !== undefined) {
-        if (isMounted.current) {
-          // --- EDITED: Set the full result object including correct answers ---
-          setFinalResult({
-            score: data.score,
-            correctCount: data.correctCount,
-            totalQuestions: data.totalQuestions,
-            correctAnswers: data.correctAnswers,
-          });
-
-          
-
+    const unsub = onSnapshot(
+      doc(firestore, "gameSubmissions", submissionId),
+      (doc) => {
+        const data = doc.data();
+        if (data?.score !== undefined) {
+          if (isMounted.current) {
+            setFinalResult({
+              score: data.score,
+              correctCount: data.correctCount,
+              totalQuestions: data.totalQuestions,
+              correctAnswers: data.correctAnswers,
+            });
+          }
         }
       }
-    });
+    );
 
     return () => unsub();
   }, [submissionId]);
@@ -202,7 +222,9 @@ export default function GameRoomPage() {
     if (totalSeconds === null) return "0 mins 0 secs";
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${seconds !== 1 ? "s" : ""}`;
+    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${
+      seconds !== 1 ? "s" : ""
+    }`;
   };
 
   if (loading) {
@@ -228,7 +250,7 @@ export default function GameRoomPage() {
           </button>
         </div>
       )}
-      
+
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-14 bg-gray-900 text-white p-4"></nav>
         <div className="min-h-screen bg-black text-white p-6 max-w-full">
@@ -344,7 +366,9 @@ export default function GameRoomPage() {
                 <>
                   {!finalResult ? (
                     <div className="text-center p-8">
-                      <p className="text-xl font-semibold animate-pulse">Grading your answers...</p>
+                      <p className="text-xl font-semibold animate-pulse">
+                        Grading your answers...
+                      </p>
                     </div>
                   ) : (
                     <>
@@ -357,7 +381,7 @@ export default function GameRoomPage() {
                           }));
                         const userAnswer = userAnswers[idx];
                         const correctAnswer = finalResult.correctAnswers[idx];
-                        
+
                         return (
                           <div
                             key={idx}
@@ -379,12 +403,13 @@ export default function GameRoomPage() {
                                 const isUserAnswer = userAnswer === key;
                                 const isCorrect = correctAnswer === key;
 
-                                // --- EDITED: Dynamic background class for highlighting ---
-                                let bgClass = "bg-zinc-800"; // Default
+                                let bgClass = "bg-zinc-800";
                                 if (isCorrect) {
-                                  bgClass = "bg-emerald-600/40 ring-2 ring-emerald-500"; // Correct answer is always green
+                                  bgClass =
+                                    "bg-emerald-600/40 ring-2 ring-emerald-500";
                                 } else if (isUserAnswer) {
-                                  bgClass = "bg-rose-600/40 ring-2 ring-rose-500"; // User's wrong answer is red
+                                  bgClass =
+                                    "bg-rose-600/40 ring-2 ring-rose-500";
                                 }
 
                                 return (
@@ -404,7 +429,8 @@ export default function GameRoomPage() {
                         );
                       })}
                       <p className="mt-6 text-center text-xl font-bold">
-                        Your Accuracy: {finalResult.correctCount} / {finalResult.totalQuestions}
+                        Your Accuracy: {finalResult.correctCount} /{" "}
+                        {finalResult.totalQuestions}
                       </p>
                       <p className="mt-6 text-center text-xl font-bold">
                         Time Taken: {formatTime(timeTotal - (timeLeft ?? 0))}
@@ -447,7 +473,11 @@ export default function GameRoomPage() {
                 </h2>
                 <div className="flex justify-center space-x-4">
                   <button
-                    onClick={() => router.push("/home")}
+                    onClick={() => {
+                      localStorage.removeItem(`startTime-${gameId}`);
+
+                      router.push("/home");
+                    }}
                     className="px-4 py-1 bg-cyan-600 text-white font-bold rounded-sm hover:bg-cyan-900 transition"
                   >
                     Yes
