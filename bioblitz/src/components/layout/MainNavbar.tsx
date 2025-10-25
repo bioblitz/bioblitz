@@ -81,17 +81,15 @@ export default function MainNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            {/* Lightning bolt → toggle sidebar */}
             <div
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="cursor-pointer"
             >
-              <Zap className="w-8 h-8 text-cyan-700" />
+              <Zap className="w-8 h-8 text-green-400/80" />
             </div>
 
-            {/* Text → navigate to home */}
             <Link href="/home">
-              <span className="text-white text-2xl font-bold tracking-widest uppercase cursor-pointer">
+              <span className="text-green-400 text-2xl font-bold tracking-widest lowercase cursor-pointer">
                 BioBlitz
               </span>
             </Link>
@@ -108,7 +106,7 @@ export default function MainNavbar() {
                       className="w-10 h-10 rounded-full object-cover  cursor-pointer"
                     />
                   ) : (
-                    <FaUserCircle className="w-10 h-10 text-cyan-600 cursor-pointer" />
+                    <FaUserCircle className="w-10 h-10 text-green-600 cursor-pointer" />
                   )}
                 </div>
 
@@ -116,14 +114,14 @@ export default function MainNavbar() {
                   <div className="absolute right-0 mt-2 w-40 bg-zinc-900 rounded-lg shadow-lg overflow-hidden z-50">
                     <Link href="/profile">
                       <span
-                        className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
+                        className="block px-4 py-2 text-white hover:bg-[#5CA3FF]/80 cursor-pointer"
                         onClick={() => setDropdownOpen(false)}
                       >
                         Profile
                       </span>
                     </Link>
                     <span
-                      className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
+                      className="block px-4 py-2 text-white hover:bg-[#5CA3FF]/80  cursor-pointer"
                       onClick={handleSignOut}
                     >
                       Sign Out
@@ -131,7 +129,7 @@ export default function MainNavbar() {
 
                     <Link
                       href="/settings"
-                      className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
+                      className="block px-4 py-2 text-white hover:bg-[#5CA3FF]/80  cursor-pointer"
                       onClick={() => setDropdownOpen(false)}
                     >
                       Settings
@@ -146,45 +144,42 @@ export default function MainNavbar() {
 
       {sidebarOpen && (
         <>
-          {/* Background overlay */}
           <div
             className="bg-black bg-opacity-50 z-40"
             onClick={() => setSidebarOpen(false)}
           ></div>
 
-          {/* Sidebar */}
           <div
-            className={`fixed top-16 left-0 h-[calc(100%-4rem)] w-30 bg-zinc-950 shadow-xl p-6 z-50 transform transition-transform duration-300 ${
+            className={`fixed top-16 left-0 h-[calc(100%-4rem)] ml-2 w-20 bg-zinc-950 shadow-xl p-6 z-50 transform transition-transform duration-300 ${
               sidebarOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <h2 className="text-white text-xl font-bold mb-4">Menu</h2>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/home"
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-2 text-white hover:text-cyan-400"
+                  className="flex items-center gap-2 text-white  hover:text-[#5CA3FF]/80 "
                 >
-                  <House size={18} /> Home
+                  <House size={35} />
                 </Link>
               </li>
               <li>
                 <Link
                   href="/contests"
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-2 text-white hover:text-cyan-400"
+                  className="flex items-center gap-2 text-white hover:text-[#5CA3FF]/80 "
                 >
-                  <Gamepad2 size={18} /> Contests
+                  <Gamepad2 size={35} />
                 </Link>
               </li>
               <li>
                 <Link
                   href="/about"
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-2 text-white hover:text-cyan-400"
+                  className="flex items-center gap-2 text-white hover:text-[#5CA3FF]/80 "
                 >
-                  <Info size={18} /> About
+                  <Info size={35} />
                 </Link>
               </li>
             </ul>

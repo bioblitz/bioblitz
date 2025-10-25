@@ -163,7 +163,7 @@ export default function GameDetailPage() {
             <motion.button
               onClick={handleJoinGame}
               whileTap={{ scale: 0.95 }}
-              className="w-full mt-8 bg-green-500/80 hover:bg-green-500/40 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
+              className="w-full mt-8 bg-green-400/80 hover:bg-green-400/50 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
             >
               Join This Game Now!
             </motion.button>

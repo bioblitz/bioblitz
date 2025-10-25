@@ -324,7 +324,7 @@ export default function GameRoomPage() {
                           {choices.map(({ key, text }) => {
                             const isSelected = userAnswers[idx] === key;
                             const bgClass = isSelected
-                              ? "bg-cyan-600 hover:scale-105 "
+                              ? "bg-[#4A90E2]/60 hover:scale-105 "
                               : "bg-zinc-800 hover:bg-zinc-700 hover:scale-105";
 
                             return (
