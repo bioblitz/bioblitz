@@ -5,6 +5,14 @@ import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { Sprout } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion, Variants } from "framer-motion";
+
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -56,114 +64,170 @@ export default function GameDetailPage() {
     .filter((g) => g.id !== gameId)
     .filter((g) => g.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.25, delayChildren: 0.2 },
+    },
+  };
+
+  const slideLeft: Variants = {
+    hidden: { x: -80, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: { type: "spring" as any, stiffness: 60 },
+    },
+  };
+
+  const slideRight: Variants = {
+    hidden: { x: 80, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: { type: "spring" as any, stiffness: 100 },
+    },
+  };
+
   return (
     <div className="flex flex-col h-screen bg-black text-white">
-      
-
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-14 bg-gray-900 text-white p-4"></nav>
 
-        <main className="flex-1 p-6 overflow-y-auto flex gap-8">
-          <div className="max-w-3xl bg-zinc-950 rounded-2xl p-8 shadow-md border border-gray-700">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              <span className="text-white font-extrabold">{game.title}</span>
+        <motion.main
+          className="flex-1 p-6 overflow-y-auto flex gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            variants={slideLeft}
+            className="relative bg-zinc-950 rounded-2xl p-10 shadow-lg border border-gray-800 overflow-hidden"
+          >
+            <h1
+              className={`${inter.className} text-4xl font-extrabold text-white mb-8 text-center tracking-tight`}
+            >
+              {game.title}
             </h1>
 
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1 bg-zinc-900 rounded-xl p-6">
-                <p className="text-lg text-gray-300 mb-4">
-                  <span className="font-bold text-white-400">
-                    Question Source:
-                  </span>{" "}
-                  {game.source}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-gray-300">
+              <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                  Source
                 </p>
-                {game.topic && (
-                  <p className="text-lg text-gray-300 mb-4">
-                    <span className="font-bold text-white-400">Topic:</span>{" "}
-                    {game.topic}
-                  </p>
-                )}
-                <p className="text-lg text-gray-300 mb-4">
-                  <span className="font-bold text-white-400">Difficulty:</span>{" "}
-                  {game.difficulty}
-                </p>
+                <p className="text-lg font-semibold">{game.source}</p>
               </div>
 
-              <div className="flex-1 bg-zinc-900 rounded-xl p-6 flex flex-col justify-between">
-                <div>
-                  <p className="text-lg text-gray-300 mb-4">
-                    <span className="font-bold text-white-400">
-                      Number of Questions:
-                    </span>{" "}
-                    {game.number_of_questions}
+              {game.topic && (
+                <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                  <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                    Topic
                   </p>
-
-                  <p className="text-lg text-gray-300 mb-4">
-                    <span className="font-bold text-white-400">
-                      Time Limit:
-                    </span>{" "}
-                    {game.timeLimit}
-                  </p>
+                  <p className="text-lg font-semibold">{game.topic}</p>
                 </div>
+              )}
+
+              <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                  Difficulty
+                </p>
+                <p className="text-lg font-semibold">{game.difficulty}</p>
               </div>
+
+              <motion.div
+                animate={{ x: 100 }}
+                transition={{ type: "spring", stiffness: 50 }}
+                className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800"
+              >
+                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                  Questions
+                </p>
+                <p className="text-lg font-semibold">
+                  {game.number_of_questions}
+                </p>
+              </motion.div>
+
+              <motion.div
+                animate={{ x: 100 }}
+                transition={{ type: "spring", stiffness: 50 }}
+                className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800"
+              >
+                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                  Time Limit
+                </p>
+                <p className="text-lg font-semibold">{game.timeLimit}</p>
+              </motion.div>
             </div>
 
-            {game.description && (
-              <p className="text-lg text-gray-300 mt-6">
-                <span className="font-bold">Description:</span>{" "}
-                {game.description}
-              </p>
-            )}
-
-            <button
+            <motion.button
               onClick={handleJoinGame}
-              className="
-    w-full mt-6 bg-cyan-600 text-white text-lg font-semibold px-4 py-2.5 rounded-lg 
-    shadow-md b  hover:bg-cyan-900 
-    "
+              whileTap={{ scale: 0.95 }}
+              className="w-full mt-8 bg-green-500/80 hover:bg-green-500/40 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
             >
               Join This Game Now!
-            </button>
+            </motion.button>
 
+            {game.description && (
+              <div className="mt-8 text-left max-w-2xl">
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  About This Game
+                </h2>
+                <p className="text-white/70 leading-relaxed flex items-center gap-1">
+                  {game.description.replace(/^"(.*)"$/, "$1")}
+                  <Sprout className="w-5 h-5 text-green-400" />
+                </p>
+              </div>
+            )}
             <Link
               href="/home"
-              className="inline-block mt-6 text-cyan-600 hover:underline font-semibold transition-colors duration-300"
+              className="block mt-4 text-sm text-gray-500 hover:text-gray-400 transition-colors font-medium text-left"
             >
               ← Back to game list
             </Link>
-          </div>
+          </motion.div>
 
-          <aside className="w-114 flex-shrink-0 overflow-y-auto bg-zinc-950 rounded-2xl p-4 shadow-md border border-gray-700  ml-auto">
+          <motion.aside
+            variants={slideRight}
+            className="w-114 flex-shrink-0 overflow-y-auto bg-zinc-950 rounded-2xl p-4 shadow-md border border-gray-700 gap-14"
+            style={{ marginLeft: "1rem" }}
+          >
             <h2 className="text-xl font-bold text-white mb-4">Other Games</h2>
             <input
               type="text"
               placeholder="Search games..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full mb-4 px-3 py-2 rounded-lg bg-zinc-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              className="w-full mb-4 px-3 py-2 rounded-lg bg-zinc-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
             {filteredOtherGames.map((g) => (
-              <Link
+              <motion.div
                 key={g.id}
-                href={`/home/${g.id}`}
-                className="block p-4 mb-4 bg-zinc-900 rounded-lg hover:scale-105 hover:shadow-[0_0_4px_#22d3ee,0_0_10px_#22d3ee]"
+                whileHover={{ scale: 1.0 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">
-                      {g.title}
-                    </h3>
-                    <p className="text-gray-300 text-sm">
-                      {g.topic} {g.difficulty} · {g.number_of_questions}{" "}
-                      questions
-                    </p>
+                <Link
+                  key={g.id}
+                  href={`/home/${g.id}`}
+                  className="block p-4 mb-4 bg-zinc-900 rounded-lg hover:bg-zinc-800 hover:scale-105 transition-transform transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">
+                        {g.title}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {g.topic} {g.difficulty} · {g.number_of_questions}{" "}
+                        questions
+                      </p>
+                    </div>
+                    <Sprout size={40} color="#1dad5cff " />
                   </div>
-                  <Sprout size={40} color="#1dad5cff " />
-                </div>
-              </Link>
+                </Link>
+              </motion.div>
             ))}
-          </aside>
-        </main>
+          </motion.aside>
+        </motion.main>
       </div>
     </div>
   );

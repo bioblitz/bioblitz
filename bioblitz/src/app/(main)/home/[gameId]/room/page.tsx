@@ -267,8 +267,8 @@ export default function GameRoomPage() {
                   onClick={() => setActiveTab("result")}
                   className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
                     activeTab === "result"
-                      ? "bg-cyan-600/70 text-white"
-                      : "bg-cyan-600/30 text-white hover:bg-cyan-900/40"
+                      ? "bg-green-400/70 text-white"
+                      : "bg-green-400/30 text-white hover:bg-cyan-900/40"
                   }`}
                 >
                   Results
@@ -277,8 +277,8 @@ export default function GameRoomPage() {
                   onClick={() => setActiveTab("leaderboard")}
                   className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
                     activeTab === "leaderboard"
-                      ? "bg-cyan-600/70 text-white"
-                      : "bg-cyan-600/30 text-white hover:bg-cyan-900/40"
+                      ? "bg-green-400/70 text-white"
+                      : "bg-green-400/30 text-white hover:bg-green-800/40"
                   }`}
                 >
                   Leaderboard
@@ -405,11 +405,9 @@ export default function GameRoomPage() {
 
                                 let bgClass = "bg-zinc-800";
                                 if (isCorrect) {
-                                  bgClass =
-                                    "bg-emerald-600/40 ring-2 ring-emerald-500";
+                                  bgClass = "bg-[rgba(5,150,105,0.4)]/70 ";
                                 } else if (isUserAnswer) {
-                                  bgClass =
-                                    "bg-rose-600/40 ring-2 ring-rose-500";
+                                  bgClass = "bg-[rgba(225,29,72,0.4)]/70";
                                 }
 
                                 return (

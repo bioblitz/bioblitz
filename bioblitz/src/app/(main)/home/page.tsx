@@ -4,50 +4,48 @@ import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { useEffect, useState } from "react";
 import CurtainReveal from "../auth/curtain";
 import { useSearchParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export default function HomePage() {
-  // State for the filter dropdowns
   const [questionSource, setQuestionSource] = useState("All Sources");
   const [topic, setTopic] = useState("All Topics");
   const [difficulty, setDifficulty] = useState("All Difficulties");
 
-  // State to hold the game data fetched from Firestore
   const [games, setGames] = useState<gameRoom[]>([]);
 
-  // Logic for the "just logged in" curtain animation
   const searchParams = useSearchParams();
   const justLoggedIn = searchParams.get("justLoggedIn") === "true";
   const router = useRouter();
   const [showCurtain, setShowCurtain] = useState(justLoggedIn);
   const [startCurtainAnimation, setStartCurtainAnimation] = useState(false);
 
-  // Effect to handle the curtain animation on initial load
   useEffect(() => {
     if (justLoggedIn) {
       setShowCurtain(true);
       setStartCurtainAnimation(true);
 
-      // Timer to hide the curtain and clean up the URL
       const timer = setTimeout(() => {
         setShowCurtain(false);
         router.replace("/home", { scroll: false });
       }, 2800);
-
-      // Cleanup function to prevent memory leaks
       return () => clearTimeout(timer);
     }
   }, [justLoggedIn, router]);
 
-  // Effect to fetch game data from Firestore when the component mounts
   useEffect(() => {
     const loadGames = async () => {
       const fetchedGames = await allGames();
       setGames(fetchedGames);
     };
     loadGames();
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
-  // Filter the game data from state based on the selected dropdown values
   const filteredGames = games.filter((game) => {
     return (
       (questionSource === "All Sources" || game.source === questionSource) &&
@@ -60,17 +58,12 @@ export default function HomePage() {
     <>
       <div className="flex flex-col h-screen">
         <div className="flex flex-1 overflow-hidden">
-          
-          
-
           {showCurtain && <CurtainReveal trigger={startCurtainAnimation} />}
 
-          <main className="flex-1 p-6 overflow-y-auto bg-black/100 text-white">
+          <main className="flex-1 p-6 overflow-y-auto bg-black text-white">
             <h1 className="text-3xl font-bold mb-3">Join a Game!</h1>
 
-            {/* Filter Controls */}
-            <div className="bg-gray-900 p-4 rounded-lg mb-6">
-              <h2 className="text-xl font-bold mb-4">Filter Games</h2>
+            <div className="bg-black p-4 rounded-lg mb-6">
               <div className="flex flex-wrap gap-6">
                 <div className="flex flex-col">
                   <label
@@ -83,7 +76,7 @@ export default function HomePage() {
                     id="questionSource"
                     value={questionSource}
                     onChange={(e) => setQuestionSource(e.target.value)}
-                    className="bg-gray-700 border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
+                    className={`${inter.className} bg-[#4A90E2] border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105`}
                   >
                     <option>All Sources</option>
                     <option>Mitosisphere</option>
@@ -105,7 +98,7 @@ export default function HomePage() {
                     id="title"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
-                    className="bg-gray-700 border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
+                    className={`${inter.className} bg-[#4A90E2] border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105`}
                   >
                     <option>All Topics</option>
                     <option>Topic 1</option>
@@ -126,7 +119,7 @@ export default function HomePage() {
                     id="difficulty"
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                    className="bg-gray-700 border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105"
+                    className={`${inter.className} bg-[#4A90E2] border border-gray-600 text-white p-2 rounded-md w-48 duration-150 ease-out hover:scale-105`}
                   >
                     <option>All Difficulties</option>
                     <option>Easy</option>
@@ -138,7 +131,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Game Cards Display */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredGames.length === 0 ? (
                 <p className="text-white">
@@ -147,7 +139,7 @@ export default function HomePage() {
               ) : (
                 filteredGames.map((game) => (
                   <Link key={game.id} href={`/home/${game.id}`}>
-                    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-90 shadow-lg hover:scale-[1.04] transition-transform">
+                    <div className="bg-gray-900 border border-gray-700 rounded-3xl p-6 w-90 shadow-lg hover:scale-[1.05] transition-transform">
                       <h2 className="text-2xl font-semibold mb-2">
                         {game.title}
                       </h2>

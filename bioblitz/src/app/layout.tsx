@@ -1,6 +1,12 @@
 import "./globals.css";
+import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export default async function RootLayout({
   children,
@@ -9,7 +15,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <AuthProvider>
           <NavbarWrapper />
           {children}
