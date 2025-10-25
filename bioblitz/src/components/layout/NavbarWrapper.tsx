@@ -8,7 +8,7 @@ export default function NavbarWrapper() {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return null; // Or a loading spinner
+    return null;
   }
 
   return isAuthenticated ? <MainNavbar /> : <MarketingNavbar />;

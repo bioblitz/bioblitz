@@ -28,7 +28,7 @@ export default function CurtainReveal({ trigger = false }) {
         <div
           className={clsx(
             " absolute top-0 right-0 h-full w-10 pointer-events-none",
-            "bg-gradient-to-l from-blue-800/90 to-transparent",
+            "bg-gradient-to-l from-orange-400/90 to-transparent",
             "transition-opacity duration-2000",
             animate ? "opacity-100" : "opacity-0"
           )}
@@ -44,7 +44,7 @@ export default function CurtainReveal({ trigger = false }) {
         <div
           className={clsx(
             " absolute top-0 left-0 h-full w-10 pointer-events-none",
-            "bg-gradient-to-r from-blue-800/90 to-transparent",
+            "bg-gradient-to-r from-orange-400/90 to-transparent",
             "transition-opacity duration-2000",
             animate ? "opacity-100" : "opacity-0"
           )}
