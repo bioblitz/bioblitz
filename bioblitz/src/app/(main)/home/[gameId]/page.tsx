@@ -93,10 +93,8 @@ export default function GameDetailPage() {
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       <div className="flex flex-1 overflow-hidden">
-        <nav className="w-14 bg-gray-900 text-white p-4"></nav>
-
         <motion.main
-          className="flex-1 p-6 overflow-y-auto flex gap-8"
+          className="flex-1 px-4 py-6 overflow-y-auto flex gap-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"

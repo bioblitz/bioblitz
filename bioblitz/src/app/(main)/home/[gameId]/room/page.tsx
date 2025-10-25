@@ -13,6 +13,15 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 
+interface CircularTimerProps {
+  timeLeft: number;
+  timeTotal: number;
+}
+
+const size = 250;
+const strokeWidth = 28;
+const radius = (size - strokeWidth) / 2;
+
 type Question = {
   a: string;
   b: string;
@@ -260,15 +269,14 @@ export default function GameRoomPage() {
                 {gameTitle}
               </h1>
             </div>
-
             {submitted && (
               <div className="mb-4 flex space-x-4">
                 <button
                   onClick={() => setActiveTab("result")}
                   className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
                     activeTab === "result"
-                      ? "bg-green-400/70 text-white"
-                      : "bg-green-400/30 text-white hover:bg-cyan-900/40"
+                      ? "bg-[#5CA3FF] text-white"
+                      : "bg-[#5CA3FF]/40 text-white hover:bg-[#5CA3FF]/40"
                   }`}
                 >
                   Results
@@ -277,22 +285,21 @@ export default function GameRoomPage() {
                   onClick={() => setActiveTab("leaderboard")}
                   className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
                     activeTab === "leaderboard"
-                      ? "bg-green-400/70 text-white"
-                      : "bg-green-400/30 text-white hover:bg-green-800/40"
+                      ? "bg-[#5CA3FF] text-white"
+                      : "bg-[#5CA3FF]/40 text-white hover:bg-[#5CA3FF]/40"
                   }`}
                 >
                   Leaderboard
                 </button>
                 <button
                   onClick={() => setShowConfirmModal(true)}
-                  className="px-4 py-1 rounded-full bg-cyan-600/30 text-white font-bold text-lg hover:bg-cyan-900/40 transition duration-300 shadow-md hover:shadow-lg"
+                  className="px-4 py-1 rounded-full bg-[#5CA3FF]/30 text-white font-bold text-lg hover:bg-[#5CA3FF] transition duration-300 shadow-md hover:shadow-lg"
                 >
                   Back to Home
                 </button>
               </div>
             )}
-
-            <div className="space-y-4 p-6 bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-800 w-full max-w-4xl mx-auto">
+            <div className="space-y-4 p-6 bg-zinc-950 rounded-3xl shadow-2xl border border-zinc-800 w-full max-w-4xl mx-auto">
               {!submitted && (
                 <>
                   {questions.map((question, idx) => {
@@ -348,7 +355,7 @@ export default function GameRoomPage() {
                   <div className="mt-8 text-center flex justify-center gap-6">
                     <button
                       onClick={() => handleSubmit(false)}
-                      className="px-6 py-3 bg-cyan-600 rounded-xl hover:bg-cyan-900 text-white font-semibold"
+                      className="px-6 py-3 bg-[#5CA3FF] rounded-xl hover:bg-[#5CA3FF]/40 text-white font-semibold"
                     >
                       Submit Game
                     </button>
@@ -405,9 +412,9 @@ export default function GameRoomPage() {
 
                                 let bgClass = "bg-zinc-800";
                                 if (isCorrect) {
-                                  bgClass = "bg-[rgba(5,150,105,0.4)]/70 ";
+                                  bgClass = "bg-[#059669]/67 ";
                                 } else if (isUserAnswer) {
-                                  bgClass = "bg-[rgba(225,29,72,0.4)]/70";
+                                  bgClass = "bg-[#e11d48]/67";
                                 }
 
                                 return (
@@ -426,16 +433,31 @@ export default function GameRoomPage() {
                           </div>
                         );
                       })}
-                      <p className="mt-6 text-center text-xl font-bold">
-                        Your Accuracy: {finalResult.correctCount} /{" "}
-                        {finalResult.totalQuestions}
-                      </p>
-                      <p className="mt-6 text-center text-xl font-bold">
-                        Time Taken: {formatTime(timeTotal - (timeLeft ?? 0))}
-                      </p>
-                      <h1 className="mt-6 text-center text-3xl font-bold">
-                        Your Score: {finalResult.score}
-                      </h1>
+                      <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3 text-center">
+                        <div>
+                          <h2 className="text-xl font-semibold mb-2">
+                            Accuracy
+                          </h2>
+                          <p className="text-2xl font-bold text-[#5CA3FF]">
+                            {finalResult.correctCount} /{" "}
+                            {finalResult.totalQuestions}
+                          </p>
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-semibold mb-2">
+                            Total Time Played
+                          </h2>
+                          <p className="text-2xl font-bold text-[#5CA3FF]">
+                            {formatTime(timeTotal - (timeLeft ?? 0))}
+                          </p>
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-semibold mb-2">Score</h2>
+                          <p className="text-2xl font-bold text-[#5CA3FF]">
+                            {finalResult.score}
+                          </p>
+                        </div>
+                      </div>
                     </>
                   )}
                 </>
@@ -450,13 +472,50 @@ export default function GameRoomPage() {
             </div>
 
             {timeLeft !== null && timeLeft > 0 && !submitted && (
-              <div className="fixed top-35 right-50 flex flex-col items-center space-y-1">
-                <span className="text-white font-semibold text-xl select-none">
-                  Time Remaining:
-                </span>
-                <div className="fixed top-45 right-45 w-45 h-45 rounded-full bg-gradient-to-r from-cyan-600/30 to-cyan-600/30 shadow-lg border border-cyan-300 flex flex-col items-center justify-center text-white">
-                  <div className="font-sans text-xl tracking-wider">
-                    {formatTime(timeLeft)}
+              <div
+                className="fixed"
+                style={{ top: "250px", left: "900px", zIndex: 50 }}
+              >
+                {" "}
+                <div
+                  style={{ width: size, height: size, position: "relative" }}
+                >
+                  {" "}
+                  <svg height={size} width={size}>
+                    <circle
+                      stroke="#1a1a1a"
+                      fill="transparent"
+                      strokeWidth={strokeWidth}
+                      r={radius}
+                      cx={size / 2}
+                      cy={size / 2}
+                    />
+                    <circle
+                      stroke="#5ca3ff"
+                      fill="transparent"
+                      strokeWidth={strokeWidth}
+                      strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * radius}
+                      strokeDashoffset={
+                        2 * Math.PI * radius * (1 - timeLeft! / timeTotal) // <-- FULL at start, shrinks clockwise
+                      }
+                      r={radius}
+                      cx={size / 2}
+                      cy={size / 2}
+                      style={{
+                        transition: "stroke-dashoffset 0.3s linear",
+                        transform: "rotate(-90deg)",
+                        transformOrigin: "50% 50%",
+                      }}
+                    />
+                  </svg>
+                  <div
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg"
+                    style={{ fontSize: "2rem" }}
+                  >
+                    {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60)
+                      .toString()
+                      .padStart(2, "0")}`}
                   </div>
                 </div>
               </div>
@@ -476,7 +535,7 @@ export default function GameRoomPage() {
 
                       router.push("/home");
                     }}
-                    className="px-4 py-1 bg-cyan-600 text-white font-bold rounded-sm hover:bg-cyan-900 transition"
+                    className="px-4 py-1 bg-[#5CA3FF] text-white font-bold rounded-sm hover:bg-[#5CA3FF]/50 transition"
                   >
                     Yes
                   </button>

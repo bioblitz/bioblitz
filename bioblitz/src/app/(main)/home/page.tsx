@@ -65,7 +65,7 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold text-center">Join a Blitz!</h1>
 
             <div className="bg-black p-4 rounded-lg mb-6">
-              <div className="flex flex-wrap gap-4 ml-2">
+              <div className="flex flex-wrap gap-4 w-full">
                 <div className="flex flex-col">
                   <label
                     htmlFor="questionSource"
