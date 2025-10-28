@@ -3,12 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import DefaultAvatar from '@/components/ui/DefaultAvatar';
-import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const UserNav = () => {
-  const { user, setIsAuthenticated } = useAuth();
+  const { user, setIsAuthenticated, loading } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -39,13 +38,17 @@ const UserNav = () => {
     setDropdownOpen(false);
   };
 
+  if (loading) {
+    return <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />;
+  }
+
   if (!user) {
     return null;
   }
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setDropdownOpen(!dropdownOpen)} className="cursor-pointer">
+      <div onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center space-x-4 cursor-pointer">
         <div className="relative">
           {user.photoURL ? (
             <img
@@ -57,10 +60,7 @@ const UserNav = () => {
             <DefaultAvatar name={user.displayName} />
           )}
         </div>
-      </div>
-      <div className="flex items-center">
         <span className="text-white">{user.displayName}</span>
-        <ChevronDown className="h-4 w-4 text-white" />
       </div>
       {dropdownOpen && (
         <div className="absolute right-0 mt-2 w-40 bg-zinc-900 rounded-lg shadow-lg overflow-hidden z-50">

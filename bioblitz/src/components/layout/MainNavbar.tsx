@@ -1,23 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { app } from "@/lib/firebase";
 import UserNav from './UserNav';
 import { Zap } from "lucide-react";
 import { House, Gamepad2, Info } from "lucide-react"; // Importing icons
 
 export default function MainNavbar() {
-  const router = useRouter();
-  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const auth = getAuth(app);
-  const db = getFirestore(app);
 
 
 

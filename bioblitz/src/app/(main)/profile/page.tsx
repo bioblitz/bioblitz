@@ -12,10 +12,10 @@ import {
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { FaUserCircle, FaDna, FaStethoscope } from "react-icons/fa";
 import { Pencil } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
+import router from "next/router";
 
 import {
   getStorage,
@@ -23,7 +23,8 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import router from "next/router";
+import { FaDna, FaStethoscope } from "react-icons/fa";
+
 
 interface UserProfile {
   displayName: string;
@@ -117,7 +118,7 @@ export default function ProfilePage() {
         const setsSnap = await getDocs(setsRef);
 
         const setsData = setsSnap.docs.map((doc) => {
-          const data = doc.data() as { score?: number; submission?: any };
+          const data = doc.data() as { score?: number };
           return {
             name: "Name:" + " " + doc.id,
             score: data.score || 0,
@@ -130,8 +131,7 @@ export default function ProfilePage() {
       }
     };
 
-    fetchSetsPlayed();
-  }, [userProfile]);
+  }, [userProfile, auth.currentUser?.uid, db]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
@@ -159,7 +159,6 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [auth, db, router]);
 
-  // Skeleton Loader
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
@@ -194,8 +193,6 @@ export default function ProfilePage() {
       {userProfile && (
         <>
           <div className="w-full max-w-5xl bg-zinc-950 border-1 border-white/20 rounded-2xl shadow-2xl p-10 transform transition-all">
-            {/* Profile Header */}
-
             <div className="flex flex-col items-center text-center border-b border-zinc-700 pb-8 mb-8 gap-4">
               <input
                 type="file"
@@ -282,7 +279,6 @@ export default function ProfilePage() {
                   Edit Profile
                 </button>
 
-                {/* Modal / Editing Form */}
                 {editing && (
                   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-slate-800/90 p-6 rounded-xl w-full max-w-md flex flex-col gap-4 relative">
@@ -444,14 +440,11 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Past Games Played Card */}
           <div className="w-full max-w-5xl bg-zinc-950 border-1 border-white/20 rounded-2xl shadow-2xl p-10">
             <h2 className="text-2xl font-semibold text-white mb-4">
               Past Games Played
             </h2>
-            {/* Add past games info here */}
             <div className="relative">
-              {/* Left button */}
               <button
                 onClick={() =>
                   scrollRef.current?.scrollBy({
@@ -465,7 +458,6 @@ export default function ProfilePage() {
                 <ChevronLeft className="text-white" />
               </button>
 
-              {/* Cards container */}
               <div
                 ref={scrollRef}
                 className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-3"
@@ -485,7 +477,6 @@ export default function ProfilePage() {
                 ))}
               </div>
 
-              {/* Right button */}
               <button
                 onClick={() =>
                   scrollRef.current?.scrollBy({ left: 250, behavior: "smooth" })
