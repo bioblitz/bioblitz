@@ -11,7 +11,7 @@ import {
   collection,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { FaUserCircle, FaDna, FaStethoscope } from "react-icons/fa";
 import { Pencil } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -23,8 +23,8 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import router from "next/router";
 
-// Define the structure of the user profile data
 interface UserProfile {
   displayName: string;
   email: string;
@@ -36,8 +36,8 @@ interface UserProfile {
   bio: string;
   createdAt: Timestamp;
   location: string;
-  grade?: string; // school accounts sometimes have grade in firebase
-  status?: string; //additional fields
+  grade?: string; 
+  status?: string;
   school?: string;
 }
 
@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { updateUserPhoto } = useAuth();
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -89,12 +89,11 @@ export default function ProfilePage() {
       await uploadBytes(profileImageRef, file);
       const downloadURL = await getDownloadURL(profileImageRef);
 
-      // Update Firestore user document
       const userDocRef = doc(db, "users", auth.currentUser!.uid);
       await updateDoc(userDocRef, { photoURL: downloadURL });
 
-      // Update local state so the UI updates immediately
       setUserProfile({ ...userProfile, photoURL: downloadURL });
+      updateUserPhoto(downloadURL);
     } catch (err) {
       console.error("Error uploading profile picture:", err);
     }

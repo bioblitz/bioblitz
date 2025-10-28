@@ -19,3 +19,17 @@ export type gameRoom = {
   rating?: number;
   questions?: Question[];
 };
+
+export interface Contest {
+  id: string;
+  name: string;
+  status: "active" | "upcoming" | "past";
+  popularity: number;
+  createdAt: Date;
+}
+
+export interface FilterState {
+  search: string;
+  status: "all" | "active" | "upcoming" | "past";
+  sort: "newest" | "oldest" | "popularity";
+}
