@@ -1,3 +1,4 @@
+{/*
 "use client";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
@@ -53,3 +54,4 @@ export default function CurtainReveal({ trigger = false }) {
     </div>
   );
 }
+*/}

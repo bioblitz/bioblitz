@@ -66,24 +66,17 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     const timeLeft = timeTotal - timeTaken;
     const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / timeTotal);
     const finalScore = Math.floor(accuracyScore + timeBonus);
-
-    // --- EDITED PART: Create a new document in the user's 'setsPlayed' subcollection ---
-
-    // 1. Create a reference to the new document in the subcollection.
-    // The document will be named with the game's ID.
     const userHistoryDocRef = db
       .collection("users")
       .doc(userId)
       .collection("setsPlayed")
       .doc(gameId);
 
-    // 2. Prepare the data for this new document.
     const userHistoryData = {
-      submission: snap.id, // The ID of the submission document
+      submission: snap.id, 
       score: finalScore,
     };
     
-    // 3. Prepare the update for the original submission document.
     const submissionUpdateData = {
         score: finalScore,
         correctCount: correctCount,
@@ -93,14 +86,13 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         gradedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    // 4. Run both database writes at the same time.
     console.log(`Grading submission ${snap.id} and updating user history for ${userId}. Score: ${finalScore}`);
     await Promise.all([
         snap.ref.update(submissionUpdateData),
-        userHistoryDocRef.set(userHistoryData) // Use set() to create/overwrite the document
+        userHistoryDocRef.set(userHistoryData)
     ]);
 
-    return; // Function succeeded.
+    return;
 
   } catch (error) {
     console.error(`An unexpected error occurred grading ${snap.id}:`, error);
@@ -111,7 +103,6 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
   }
 });
 
-  // NEW: Callable function to securely fetch questions for a game.
 export const getPublicQuestions = onCall(async (request) => {
   // Check if the user is authenticated.
   if (!request.auth) {
@@ -131,10 +122,9 @@ export const getPublicQuestions = onCall(async (request) => {
       throw new HttpsError("not-found", "This game has no questions.");
     }
 
-    // Read the full question data, then create a "safe" version for the client.
     const publicQuestions = questionsSnap.docs.map(doc => {
-      const { correct, ...publicData } = doc.data(); // Destructure to remove 'correct'
-      return publicData; // Return only the public fields
+      const { correct, ...publicData } = doc.data(); 
+      return publicData; 
     });
 
     return { questions: publicQuestions };

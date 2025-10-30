@@ -24,7 +24,7 @@ export async function createUserProfile(user: any) {
   const userProfile: UserProfile = {
     displayName: user.displayName || "",
     email: user.email || "",
-    photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName?.[0] || "B"}&background=random`,
+    photoURL: user.photoURL || null,
     bElo: 1500,
     mElo: 1500,
     buElo: 1500,
