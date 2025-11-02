@@ -111,7 +111,7 @@ export default function GameDetailPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-gray-300">
               <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                <p className="text-sm uppercase text-[#5271FF]/80 mb-1 tracking-wide">
                   Source
                 </p>
                 <p className="text-lg font-semibold">{game.source}</p>
@@ -119,7 +119,7 @@ export default function GameDetailPage() {
 
               {game.topic && (
                 <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-                  <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                  <p className="text-sm uppercase text-[#5271FF]/80 mb-1 tracking-wide">
                     Topic
                   </p>
                   <p className="text-lg font-semibold">{game.topic}</p>
@@ -127,7 +127,7 @@ export default function GameDetailPage() {
               )}
 
               <div className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                <p className="text-sm uppercase text-[#5271FF]/80 mb-1 tracking-wide">
                   Difficulty
                 </p>
                 <p className="text-lg font-semibold">{game.difficulty}</p>
@@ -138,7 +138,7 @@ export default function GameDetailPage() {
                 transition={{ type: "spring", stiffness: 50 }}
                 className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800"
               >
-                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                <p className="text-sm uppercase text-[#5271FF]/80 mb-1 tracking-wide">
                   Questions
                 </p>
                 <p className="text-lg font-semibold">
@@ -151,7 +151,7 @@ export default function GameDetailPage() {
                 transition={{ type: "spring", stiffness: 50 }}
                 className="flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800"
               >
-                <p className="text-sm uppercase text-green-400 mb-1 tracking-wide">
+                <p className="text-sm uppercase text-[#5271FF]/80 mb-1 tracking-wide">
                   Time Limit
                 </p>
                 <p className="text-lg font-semibold">{game.timeLimit}</p>
@@ -161,7 +161,7 @@ export default function GameDetailPage() {
             <motion.button
               onClick={handleJoinGame}
               whileTap={{ scale: 0.95 }}
-              className="w-full mt-8 bg-green-400/80 hover:bg-green-400/50 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
+              className="w-full mt-8 bg-[#5271FF] hover:bg-[#5271FF]/60 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
             >
               Join This Game Now!
             </motion.button>
@@ -173,7 +173,7 @@ export default function GameDetailPage() {
                 </h2>
                 <p className="text-white/70 leading-relaxed flex items-center gap-1">
                   {game.description.replace(/^"(.*)"$/, "$1")}
-                  <Sprout className="w-5 h-5 text-green-400" />
+                  <Sprout className="w-5 h-5 text-[#5271FF]" />
                 </p>
               </div>
             )}
@@ -196,7 +196,7 @@ export default function GameDetailPage() {
               placeholder="Search games..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full mb-4 px-3 py-2 rounded-lg bg-zinc-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full mb-4 px-3 py-2 rounded-lg bg-zinc-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5271FF]"
             />
             {filteredOtherGames.map((g) => (
               <motion.div
@@ -219,7 +219,7 @@ export default function GameDetailPage() {
                         questions
                       </p>
                     </div>
-                    <Sprout size={40} color="#1dad5cff " />
+                    <Sprout size={40} color="#5271FF" />
                   </div>
                 </Link>
               </motion.div>

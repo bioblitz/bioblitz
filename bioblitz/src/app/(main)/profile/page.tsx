@@ -200,11 +200,11 @@ export default function ProfilePage() {
                 className="w-32 h-32 rounded-full object-cover border border-zinc-700 mx-auto group-hover:opacity-60 transition duration-300"
               />
             ) : (
-              <div className="w-32 h-32 rounded-full border border-zinc-700 mx-auto flex items-center justify-center bg-green-400 text-white text-[64px] font-bold">
+              <div className="w-32 h-32 rounded-full border border-zinc-700 mx-auto flex items-center justify-center bg-[#8c52ff] text-white text-[64px] font-bold">
                 {userProfile?.displayName?.[0].toUpperCase() || "U"}
               </div>
             )}
-            <Pencil className="absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-green-400 transition" />
+            <Pencil className="absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#8c52ff] transition" />
           </div>
 
           <h1 className="text-3xl font-bold mt-4">
@@ -307,7 +307,7 @@ export default function ProfilePage() {
                     className="min-w-[200px] flex-shrink-0 bg-zinc-900 p-4 rounded-xl text-sm"
                   >
                     <span className="block text-gray-300">{set.name}</span>
-                    <span className="block text-green-400 font-semibold text-lg mt-1">
+                    <span className="block text-[#8c52ff] font-semibold text-lg mt-1">
                       {set.score}
                     </span>
                   </div>
@@ -320,7 +320,7 @@ export default function ProfilePage() {
         <div className="text-center mt-6">
           <Link
             href="/home"
-            className="text-green-400 hover:underline text-sm tracking-wide"
+            className="text-[#8c52ff]/80 hover:underline text-sm tracking-wide"
           >
             ← Back to Home
           </Link>
@@ -349,7 +349,7 @@ export default function ProfilePage() {
             <div className="flex justify-between mt-4">
               <button
                 onClick={saveChanges}
-                className="bg-green-400/80 text-black px-4 py-2 rounded-xl font-semibold hover:scale-105 transition-transform"
+                className="bg-[#8c52ff]/80 text-black px-4 py-2 rounded-xl font-semibold hover:scale-105 transition-transform"
               >
                 Save
               </button>

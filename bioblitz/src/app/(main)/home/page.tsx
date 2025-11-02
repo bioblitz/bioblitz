@@ -77,7 +77,7 @@ export default function HomePage() {
                     id="questionSource"
                     value={questionSource}
                     onChange={(e) => setQuestionSource(e.target.value)}
-                    className={`${inter.className} bg-green-400/80 border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107`}
+                    className={`${inter.className} bg-[#8c52ff] border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107`}
                   >
                     <option>All Sources</option>
                     <option>Mitosisphere</option>
@@ -99,7 +99,7 @@ export default function HomePage() {
                     id="title"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
-                    className={`${inter.className} bg-green-400/80 border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107`}
+                    className={`${inter.className} bg-[#8c52ff] border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107`}
                   >
                     <option>All Topics</option>
                     <option>Topic 1</option>
@@ -120,7 +120,7 @@ export default function HomePage() {
                     id="difficulty"
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                    className={`${inter.className} bg-green-400/80 border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107 `}
+                    className={`${inter.className} bg-[#8c52ff] border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-107 `}
                   >
                     <option>All Difficulties</option>
                     <option>Easy</option>
@@ -140,7 +140,7 @@ export default function HomePage() {
                     id="timeLimit"
                     value={timeLimit}
                     onChange={(e) => setTimeLimit(e.target.value)}
-                    className={`${inter.className} bg-green-400/80 border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-105`}
+                    className={`${inter.className} bg-[#8c52ff] border border-gray-600 text-white p-2 rounded-2xl w-48 duration-150 ease-out hover:scale-105`}
                   >
                     <option>All</option>
                     <option>5 min</option>
@@ -161,30 +161,30 @@ export default function HomePage() {
                 filteredGames.map((game) => (
                   <Link key={game.id} href={`/home/${game.id}`}>
                     <div className="bg-zinc-950 border-zinc-800  border-2 rounded-3xl p-6 w-90 shadow-lg hover:scale-[1.06] transition-transform">
-                      <h2 className="text-2xl font-semibold mb-2">
+                      <h2 className="text-2xl text-white font-semibold mb-2">
                         {game.title}
                       </h2>
                       <p className="text-sm mb-1">
-                        <span className="font-bold text-green-400 uppercase mb-2">
+                        <span className="font-bold text-white uppercase mb-2">
                           Question Source:
                         </span>{" "}
                         {game.source}
                       </p>
                       <p className="text-sm mb-1">
-                        <span className="font-bold  text-green-400 uppercase mb-2">
+                        <span className="font-bold  text-white uppercase mb-2">
                           Number of Questions:
                         </span>{" "}
                         {game.number_of_questions}
                       </p>
                       <p className="text-sm mb-1">
-                        <span className="font-bold  text-green-400 uppercase mb-2">
+                        <span className="font-bold  text-white  uppercase mb-2">
                           Difficulty:
                         </span>{" "}
                         {game.difficulty}
                       </p>
                       {game.topic && (
                         <p className="text-sm mb-1">
-                          <span className="  text-green-400 uppercase font-bold mb-2">
+                          <span className="  text-white uppercase font-bold mb-2">
                             Topic:
                           </span>{" "}
                           {game.topic}
@@ -192,7 +192,7 @@ export default function HomePage() {
                       )}
 
                       <p className="text-sm mb-1">
-                        <span className=" text-green-400 uppercase font-bold">
+                        <span className=" text-white uppercase font-bold">
                           Time Limit:
                         </span>{" "}
                         {game.timeLimit}

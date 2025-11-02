@@ -85,11 +85,11 @@ export default function MainNavbar() {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="cursor-pointer"
             >
-              <Zap className="w-8 h-8 text-green-400/80" />
+              <Zap className="w-8 h-8 text-[#8c52ff]" />
             </div>
 
             <Link href="/home">
-              <span className="text-green-400 text-2xl font-bold tracking-widest lowercase cursor-pointer">
+              <span className="text-[#8c52ff] text-2xl font-bold tracking-widest lowercase cursor-pointer">
                 BioBlitz
               </span>
             </Link>
@@ -106,7 +106,7 @@ export default function MainNavbar() {
                       className="w-10 h-10 rounded-full object-cover  cursor-pointer"
                     />
                   ) : (
-                    <FaUserCircle className="w-10 h-10 text-green-600 cursor-pointer" />
+                    <FaUserCircle className="w-10 h-10 text-[#8c52ff]/80 cursor-pointer" />
                   )}
                 </div>
 

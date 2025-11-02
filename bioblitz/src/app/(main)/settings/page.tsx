@@ -121,7 +121,7 @@ export default function SettingsPage() {
           </div>
           <Link
             href="/profile"
-            className="bg-green-400/80 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
+            className="bg-[#8c52ff]/80 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
           </Link>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
               <Switch
                 checked={soundEnabled}
                 onCheckedChange={setSoundEnabled}
-                className="transition-colors duration-200 data-[state=checked]:bg-green-400 data-[state=unchecked]:bg-zinc-800"
+                className="transition-colors duration-200 data-[state=checked]:bg-[#8c52ff] data-[state=unchecked]:bg-zinc-800"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -148,7 +148,7 @@ export default function SettingsPage() {
               <Switch
                 checked={animationEnabled}
                 onCheckedChange={setAnimationEnabled}
-                className="transition-colors duration-200 data-[state=checked]:bg-green-400 data-[state=unchecked]:bg-zinc-800"
+                className="transition-colors duration-200 data-[state=checked]:bg-[#8c52ff] data-[state=unchecked]:bg-zinc-800"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -179,7 +179,7 @@ export default function SettingsPage() {
             <Switch
               checked={emailNotifications}
               onCheckedChange={setEmailNotifications}
-              className="transition-colors duration-200 data-[state=checked]:bg-green-400 data-[state=unchecked]:bg-zinc-800"
+              className="transition-colors duration-200 data-[state=checked]:bg-[#8c52ff] data-[state=unchecked]:bg-zinc-800"
             />
           </div>
           <p className="text-sm text-gray-400 mt-3">
@@ -247,7 +247,7 @@ export default function SettingsPage() {
         <div className="text-center mt-8">
           <Link
             href="/home"
-            className="text-green-400 hover:underline text-sm tracking-wide"
+            className="text-[#8c52ff] hover:underline text-sm tracking-wide"
           >
             ← Back to Home
           </Link>
