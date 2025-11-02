@@ -25,7 +25,6 @@ import {
 } from "firebase/storage";
 import { FaDna, FaStethoscope } from "react-icons/fa";
 
-
 interface UserProfile {
   displayName: string;
   email: string;
@@ -37,7 +36,7 @@ interface UserProfile {
   bio: string;
   createdAt: Timestamp;
   location: string;
-  grade?: string; 
+  grade?: string;
   status?: string;
   school?: string;
 }
@@ -130,7 +129,6 @@ export default function ProfilePage() {
         console.error("Error fetching sets played:", err);
       }
     };
-
   }, [userProfile, auth.currentUser?.uid, db]);
 
   useEffect(() => {
