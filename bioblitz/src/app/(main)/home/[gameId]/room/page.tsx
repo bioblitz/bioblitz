@@ -261,9 +261,9 @@ export default function GameRoomPage() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <nav className="w-14 bg-gray-900 text-white p-4"></nav>
-        <div className="min-h-screen bg-black text-white p-6 max-w-full">
-          <div className="max-w-2xl ml-4">
+        <nav className="w-14 bg-black text-white p-4"></nav>
+        <div className="min-h-screen bg-black text-white p-3 max-w-full">
+          <div className="max-w-2xl ml-0">
             <div className="flex justify-between items-center mb-4">
               <h1 className="ml-2 text-center text-4xl font-bold text-white drop-shadow-md">
                 {gameTitle}

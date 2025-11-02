@@ -154,7 +154,7 @@ export default function GameDetailPage() {
             <motion.button
               onClick={handleJoinGame}
               whileTap={{ scale: 0.95 }}
-              className="w-full mt-8 bg-[#5271FF] hover:bg-[#5271FF]/60 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
+              className="w-full mt-8 bg-indigo-500 hover:bg-[#5271FF]/60 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
             >
               Join This Game Now!
             </motion.button>
@@ -198,7 +198,7 @@ export default function GameDetailPage() {
                 <Link
                   key={g.id}
                   href={`/home/${g.id}`}
-                  className="block p-4 mb-4 bg-gray-800/30  border-gray-700 rounded-lg hover:bg-gray-700 hover:scale-105 transition-transform transition-colors"
+                  className="block p-4 mb-4 bg-gray-800/30  border-gray-700 rounded-lg hover:bg-gray-700 hover:scale-105 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div>
