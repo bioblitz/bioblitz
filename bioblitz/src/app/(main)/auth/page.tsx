@@ -32,7 +32,7 @@ export default function AuthenticationPage() {
 
       if (res.ok) {
         await createUserProfile(user);
-        setIsAuthenticated(true); // Update AuthContext
+        setIsAuthenticated(true);
         console.log("Attempting to redirect to /home");
         router.push("/home?justLoggedIn=true");
         console.log("Redirection initiated.");
