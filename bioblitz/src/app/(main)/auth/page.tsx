@@ -34,7 +34,7 @@ export default function AuthenticationPage() {
         await createUserProfile(user);
         setIsAuthenticated(true);
         console.log("Attempting to redirect to /home");
-        router.push("/home?justLoggedIn=true");
+        window.location.href = "/home";
         console.log("Redirection initiated.");
       } else {
         console.error("Failed to create session:", await res.json());
