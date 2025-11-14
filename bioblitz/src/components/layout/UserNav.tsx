@@ -54,7 +54,7 @@ const UserNav = () => {
             <img
               src={user.photoURL}
               alt={user.displayName}
-              className="h-10 w-10 rounded-full"
+              className="h-11 w-11 rounded-full"
             />
           ) : (
             <DefaultAvatar name={user.displayName} />

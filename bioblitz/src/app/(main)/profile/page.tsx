@@ -223,7 +223,6 @@ export default function ProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Left card: Bio */}
               <div className="bg-zinc-900 p-6 rounded-xl shadow flex flex-col relative space-y-4">
                 <h2 className="text-2xl font-semibold text-white mb-2">Bio</h2>
 

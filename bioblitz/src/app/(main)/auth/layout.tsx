@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import React from "react";
-import VantaBackground from "../../../components/ui/VantaBackground";
 
 
 export const metadata: Metadata = {
@@ -15,13 +14,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>      
-    <VantaBackground />
-    <main className="flex items-center justify-center min-h-screen text-white">
+    <main className="flex items-center justify-center min-h-screen text-white bg-black">
 
         {children}
       </main>
-      </>
 
     
   );
