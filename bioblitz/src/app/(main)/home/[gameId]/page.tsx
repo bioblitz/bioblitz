@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
-import { Sprout } from "lucide-react";
+import { Sprout, Loader2 } from "lucide-react"; // Added Loader2
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
 
@@ -37,10 +37,18 @@ export default function GameDetailPage() {
     loadGameData();
   }, [gameId]);
 
+  // NEW: Animated Loading Screen (Matches Home Page style)
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
-        <p className="text-lg">Loading Game...</p>
+        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
+          {/* Using Amber here to match the global loading theme, 
+              or change text-amber-500 to text-indigo-500 if you want it to match this page's buttons */}
+          <Loader2 className="w-12 h-12 text-yellow-500 animate-spin" />
+          <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
+            Loading Game Details...
+          </p>
+        </div>
       </div>
     );
   }
@@ -87,7 +95,8 @@ export default function GameDetailPage() {
     <div className="flex flex-col h-screen bg-black text-white">
       <div className="flex flex-1 overflow-hidden">
         <motion.main
-          className="flex-1 px-4 py-6 overflow-y-auto flex justify-center "
+          // Kept pt-24 to ensure it sits below the navbar
+          className="flex-1 px-4 py-6 pt-24 overflow-y-auto flex justify-center"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
