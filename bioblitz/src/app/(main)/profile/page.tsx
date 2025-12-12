@@ -12,18 +12,24 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { Pencil, MapPin, Briefcase, GraduationCap, School as SchoolIcon, User as UserIcon, CalendarDays } from "lucide-react";
-import { useRouter } from "next/navigation"; // Corrected import for App Router
-
+import { useRouter } from "next/navigation";
+import { Pencil } from "lucide-react";
+import { motion } from "framer-motion";
+import { Inter } from "next/font/google";
 import {
   getStorage,
   ref as storageRef,
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import Link from "next/link";
+import { FaDna, FaStethoscope } from "react-icons/fa";
 
-// --- User Profile Data Structure ---
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 interface UserProfile {
   displayName: string;
   email: string;
@@ -40,40 +46,27 @@ interface UserProfile {
   school?: string;
 }
 
-// --- Rank Calculation ---
 interface Rank {
   name: string;
   color: string;
 }
 
-/**
- * Calculates a user's rank based on their Elo rating.
- * Mimics the Codeforces ranking system.
- */
 const getRank = (elo: number): Rank => {
+  //add rank function
   if (elo >= 2100) return { name: "Master", color: "text-orange-500" };
-  if (elo >= 1900) return { name: "Candidate Master", color: "text-purple-500" };
+  if (elo >= 1900)
+    return { name: "Candidate Master", color: "text-purple-500" };
   if (elo >= 1600) return { name: "Expert", color: "text-blue-500" };
   if (elo >= 1400) return { name: "Specialist", color: "text-cyan-400" };
   if (elo >= 1200) return { name: "Pupil", color: "text-green-500" };
   return { name: "Newbie", color: "text-gray-400" };
 };
 
-// --- Main Profile Page Component ---
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { updateUserPhoto } = useAuth();
-  const router = useRouter();
-
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
-  
   const [tempProfile, setTempProfile] = useState({
     bio: "",
     location: "",
@@ -81,12 +74,28 @@ export default function ProfilePage() {
     status: "",
     school: "",
   });
-
   const [setsPlayed, setSetsPlayed] = useState<
     { name: string; score: number }[]
   >([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Effect to fetch user profile on auth change
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (userProfile) {
+      setTempProfile({
+        bio: userProfile.bio || "",
+        location: userProfile.location || "",
+        grade: userProfile.grade || "",
+        status: userProfile.status || "",
+        school: userProfile.school || "",
+      });
+    }
+  }, [userProfile]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
@@ -95,25 +104,12 @@ export default function ProfilePage() {
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
-            const profileData = userDocSnap.data() as UserProfile;
-            setUserProfile(profileData);
-            // Initialize temp profile for editing
-            setTempProfile({
-              bio: profileData.bio || "",
-              location: profileData.location || "",
-              grade: profileData.grade || "",
-              status: profileData.status || "",
-              school: profileData.school || "",
-            });
-            
-            // Fetch sets played after profile is loaded
-            fetchSetsPlayed(user.uid);
-
+            setUserProfile(userDocSnap.data() as UserProfile);
           } else {
             setError("Could not find user profile. Please contact support.");
           }
         } catch (err) {
-          console.error("Error fetching user profile:", err);
+          console.error("Error fetching profile:", err);
           setError("An error occurred while loading your profile.");
         } finally {
           setLoading(false);
@@ -126,357 +122,329 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [auth, db, router]);
 
+  useEffect(() => {
+    if (!userProfile) return;
+    const fetchSetsPlayed = async () => {
+      try {
+        const setsRef = collection(
+          db,
+          "users",
+          auth.currentUser!.uid,
+          "setsPlayed"
+        );
+        const setsSnap = await getDocs(setsRef);
+        const setsData = setsSnap.docs.map((doc) => ({
+          name: "Name: " + doc.id,
+          score: (doc.data() as { score?: number }).score || 0,
+        }));
+        setSetsPlayed(setsData);
+      } catch (err) {
+        console.error("Error fetching sets played:", err);
+      }
+    };
+    fetchSetsPlayed();
+  }, [userProfile, db, auth]);
 
-  // Function to fetch sets played
-  const fetchSetsPlayed = async (uid: string) => {
-    try {
-      const setsRef = collection(db, "users", uid, "setsPlayed");
-      const setsSnap = await getDocs(setsRef);
-      const setsData = setsSnap.docs.map((doc) => {
-        const data = doc.data() as { score?: number };
-        return {
-          name: doc.id, // Just use the set name
-          score: data.score || 0,
-        };
-      });
-      setSetsPlayed(setsData);
-    } catch (err) {
-      console.error("Error fetching sets played:", err);
-    }
-  };
-
-  // Handler for profile picture change
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !userProfile || !auth.currentUser) return;
+    if (!e.target.files || !userProfile) return;
     const file = e.target.files[0];
 
     try {
-      const profileImageRef = storageRef(
+      const profileRef = storageRef(
         storage,
-        `profilePictures/${auth.currentUser.uid}`
+        `profilePictures/${auth.currentUser?.uid}`
       );
-      await uploadBytes(profileImageRef, file);
-      const downloadURL = await getDownloadURL(profileImageRef);
+      await uploadBytes(profileRef, file);
+      const downloadURL = await getDownloadURL(profileRef);
 
-      const userDocRef = doc(db, "users", auth.currentUser.uid);
-      await updateDoc(userDocRef, { photoURL: downloadURL });
-
+      await updateDoc(doc(db, "users", auth.currentUser!.uid), {
+        photoURL: downloadURL,
+      });
       setUserProfile({ ...userProfile, photoURL: downloadURL });
-      updateUserPhoto(downloadURL); // Update auth context
     } catch (err) {
       console.error("Error uploading profile picture:", err);
-      // TODO: Show user-friendly error message
     }
   };
 
-  // Handler for saving profile edits
-  const handleSaveEdits = async () => {
-    if (!auth.currentUser) return;
+  const saveChanges = async () => {
     try {
-      const userDocRef = doc(db, "users", auth.currentUser.uid);
-      await updateDoc(userDocRef, { ...tempProfile });
-      setUserProfile((prev) => prev ? { ...prev, ...tempProfile } : null);
+      const userRef = doc(db, "users", auth.currentUser!.uid);
+      await updateDoc(userRef, tempProfile);
+      setUserProfile({ ...userProfile!, ...tempProfile });
       setEditing(false);
     } catch (err) {
-      console.error("Error saving profile:", err);
-      // TODO: Show user-friendly error message
+      console.error("Error updating profile:", err);
     }
   };
 
-  // --- Render Loading State ---
-  if (loading) {
+  const rank = userProfile ? getRank(userProfile.bElo) : null;
+
+  if (loading)
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white p-4">
-        <div className="w-full max-w-7xl animate-pulse">
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column Skeleton */}
-              <div className="lg:col-span-1 bg-zinc-900 rounded-lg p-6 space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-24 h-24 bg-zinc-700 rounded-full" />
-                  <div className="space-y-2">
-                    <div className="h-6 w-40 bg-zinc-700 rounded-md" />
-                    <div className="h-4 w-24 bg-zinc-700 rounded-md" />
-                    <div className="h-4 w-20 bg-zinc-700 rounded-md" />
-                  </div>
-                </div>
-                 <div className="space-y-3 pt-4">
-                  <div className="h-4 w-full bg-zinc-700 rounded-md" />
-                  <div className="h-4 w-3/4 bg-zinc-700 rounded-md" />
-                  <div className="h-4 w-1/2 bg-zinc-700 rounded-md" />
-                 </div>
-              </div>
-              {/* Right Column Skeleton */}
-              <div className="lg:col-span-2 bg-zinc-900 rounded-lg p-6 space-y-4">
-                <div className="h-6 w-48 bg-zinc-700 rounded-md" />
-                <div className="h-8 w-full bg-zinc-700 rounded-md" />
-                <div className="h-8 w-full bg-zinc-700 rounded-md" />
-                <div className="h-8 w-full bg-zinc-700 rounded-md" />
-              </div>
-           </div>
-        </div>
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        <div className="animate-pulse text-zinc-500">Loading profile...</div>
       </div>
     );
-  }
 
-  // --- Render Error State ---
-  if (error) {
+  if (error)
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <p className="text-xl text-red-500">{error}</p>
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        <p className="text-red-500">{error}</p>
       </div>
     );
-  }
 
-  // --- Render Profile Page ---
-  if (userProfile) {
-    return (
-      <main className="flex-1 flex flex-col items-center bg-black text-white p-4 md:p-6">
-        <div className="w-full max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* --- Left Column: Main Profile Card --- */}
-            <div className="lg:col-span-1">
-              <MainProfileCard
-                user={userProfile}
-                onEdit={() => setEditing(true)}
-                onPhotoChange={handleFileChange}
-                fileInputRef={fileInputRef}
-              />
-            </div>
-
-            {/* --- Right Column: Past Games --- */}
-            <div className="lg:col-span-2">
-              <PastGamesCard sets={setsPlayed} />
-            </div>
-
-          </div>
-        </div>
-
-        {/* --- Edit Profile Modal --- */}
-        {editing && (
-          <EditProfileModal
-            tempProfile={tempProfile}
-            setTempProfile={setTempProfile}
-            onClose={() => setEditing(false)}
-            onSave={handleSaveEdits}
-          />
-        )}
-      </main>
-    );
-  }
-
-  return null; // Should be covered by loading/error/redirect
-}
-
-
-// --- Sub-component: MainProfileCard ---
-interface MainProfileCardProps {
-  user: UserProfile;
-  onEdit: () => void;
-  onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-}
-
-const MainProfileCard: React.FC<MainProfileCardProps> = ({ user, onEdit, onPhotoChange, fileInputRef }) => {
-  const rank = getRank(user.bElo);
-  
   return (
-    <div className="bg-zinc-900 rounded-lg shadow-lg border border-zinc-700/50 overflow-hidden">
-      {/* Card Header: Avatar, Name, Rank, Elo */}
-      <div className="p-5 border-b border-zinc-700/50">
-        <div className="flex items-start space-x-4">
-          {/* Avatar */}
+    <main className={`${inter.className} min-h-screen bg-black text-white p-8`}>
+      <div className="max-w-5xl mx-auto space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-8 text-center shadow-lg"
+        >
           <input
-            type="file"
             ref={fileInputRef}
-            onChange={onPhotoChange}
-            className="hidden"
+            type="file"
+            onChange={handleFileChange}
             accept="image/*"
+            className="hidden"
           />
           <div
-            className="relative w-20 h-20 md:w-24 md:h-24 group cursor-pointer shrink-0"
+            className="relative inline-block cursor-pointer group"
             onClick={() => fileInputRef.current?.click()}
           >
-            <img
-              src={user.photoURL}
-              alt="Profile"
-              className="w-full h-full rounded-full object-cover ring-2 ring-zinc-700 transition-opacity duration-300 group-hover:opacity-50"
-            />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">
-              <Pencil className="w-6 h-6" />
-            </div>
+            {userProfile?.photoURL ? (
+              <img
+                src={userProfile.photoURL}
+                alt=""
+                className="w-32 h-32 rounded-full object-cover border border-zinc-700 mx-auto group-hover:opacity-60 transition duration-300"
+              />
+            ) : (
+              <div className="w-32 h-32 rounded-full border border-zinc-700 mx-auto flex items-center justify-center bg-[#8c52ff] text-white text-[64px] font-bold">
+                {userProfile?.displayName?.[0].toUpperCase() || "U"}
+              </div>
+            )}
+            <Pencil className="absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#8c52ff] transition" />
           </div>
-          
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl md:text-3xl font-bold text-white truncate" title={user.displayName}>
-              {user.displayName}
-            </h1>
-            <p className={`text-lg font-semibold ${rank.color}`}>
+
+          <h1 className="text-3xl font-bold mt-4">
+            {userProfile?.displayName}
+          </h1>
+          {rank && (
+            <p className={`text-lg font-semibold mt-1 ${rank.color}`}>
               {rank.name}
             </p>
-            <p className="text-md text-zinc-400">
-              Rating: <span className="font-bold text-white">{user.bElo}</span>
+          )}
+
+          <p className="text-sm text-gray-400">{userProfile?.email}</p>
+        </motion.div>
+
+        <motion.section
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-2xl font-semibold">Profile Information</h2>
+            <button
+              onClick={() => setEditing(true)}
+              className="bg-[#5CA3FF] text-black px-3 py-1 rounded-xl font-semibold hover:scale-105 transition-transform"
+            >
+              Edit
+            </button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-gray-300">
+            <p>
+              <span className="text-[#5CA3FF] font-bold">Bio:</span>{" "}
+              {userProfile?.bio || "Tell others about yourself"}
+            </p>
+            <p>
+              <span className="text-[#5CA3FF] font-bold">Status:</span>{" "}
+              {userProfile?.status || "Set your status"}
+            </p>
+            <p>
+              <span className="text-[#5CA3FF] font-bold">Location:</span>{" "}
+              {userProfile?.location || "Add location"}
+            </p>
+            <p>
+              <span className="text-[#5CA3FF] font-bold">Grade:</span>{" "}
+              {userProfile?.grade || "Not specified"}
+            </p>
+            <p>
+              <span className="text-[#5CA3FF] font-bold">School:</span>{" "}
+              {userProfile?.school || "Not specified"}
+            </p>
+            <p>
+              <span className="text-[#5CA3FF] font-bold">Player Since:</span>{" "}
+              {userProfile?.createdAt
+                ? new Date(
+                    userProfile.createdAt.seconds * 1000
+                  ).toLocaleDateString()
+                : "N/A"}
             </p>
           </div>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg"
+        >
+          <h2 className="text-2xl font-semibold mb-4">Elo Ratings</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <EloCard
+              icon={<FaDna />}
+              label="USABO Elo"
+              value={userProfile.bElo}
+              color="green"
+            />
+            <EloCard
+              icon={<FaDna />}
+              label="USABO Unofficial Elo"
+              value={userProfile.buElo}
+              color="green"
+            />
+            <EloCard
+              icon={<FaStethoscope />}
+              label="MCAT Elo"
+              value={userProfile.mElo}
+              color="blue"
+            />
+            <EloCard
+              icon={<FaStethoscope />}
+              label="MCAT Unofficial Elo"
+              value={userProfile.muElo}
+              color="blue"
+            />
+          </div>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg relative"
+        >
+          <h2 className="text-2xl font-semibold mb-4">Recent Sets Played</h2>
+          {setsPlayed.length === 0 ? (
+            <p className="text-gray-400">No sets played yet.</p>
+          ) : (
+            <>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("setsScroll")
+                    ?.scrollBy({ left: -250, behavior: "smooth" })
+                }
+                className="absolute top-1/2 -translate-y-1/2 left-2 bg-zinc-800 p-2 rounded-full shadow hover:bg-zinc-700 z-10"
+              >
+                &larr;
+              </button>
+
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("setsScroll")
+                    ?.scrollBy({ left: 250, behavior: "smooth" })
+                }
+                className="absolute top-1/2 -translate-y-1/2 right-2 bg-zinc-800 p-2 rounded-full shadow hover:bg-zinc-700 z-10"
+              >
+                &rarr;
+              </button>
+
+              <div
+                id="setsScroll"
+                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
+              >
+                {setsPlayed.map((set, i) => (
+                  <div
+                    key={i}
+                    className="min-w-[200px] flex-shrink-0 bg-zinc-900 p-4 rounded-xl text-sm"
+                  >
+                    <span className="block text-gray-300">{set.name}</span>
+                    <span className="block text-[#8c52ff] font-semibold text-lg mt-1">
+                      {set.score}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </motion.section>
+
+        <div className="text-center mt-6">
+          <Link
+            href="/home"
+            className="text-[#8c52ff]/80 hover:underline text-sm tracking-wide"
+          >
+            ← Back to Home
+          </Link>
         </div>
       </div>
-      
-      {/* Card Body: Profile Details Table */}
-      <div className="p-5 space-y-3">
-        <InfoRow icon={<UserIcon />} label="About" value={user.bio || "..."} />
-        <InfoRow icon={<Briefcase />} label="Status" value={user.status || "..."} />
-        <InfoRow icon={<MapPin />} label="Location" value={user.location || "..."} />
-        <InfoRow icon={<GraduationCap />} label="Grade" value={user.grade || "..."} />
-        <InfoRow icon={<SchoolIcon />} label="School" value={user.school || "..."} />
-        <InfoRow 
-          icon={<CalendarDays />} 
-          label="Player Since" 
-          value={user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : "N/A"} 
-        />
-        
-        <button
-          onClick={onEdit}
-          className="w-full mt-4 bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-colors"
-        >
-          Edit Profile
-        </button>
-      </div>
-    </div>
-  );
-};
 
-// --- Sub-component: InfoRow (for the profile card) ---
-const InfoRow: React.FC<{ icon: React.ReactNode, label: string, value: string }> = ({ icon, label, value }) => (
-  <div className="flex items-start text-sm">
-    <span className="text-cyan-400 w-5 h-5 mr-3 mt-0.5 shrink-0">{icon}</span>
-    <div className="flex-1 min-w-0">
-      <span className="text-zinc-400">{label}: </span>
-      <span className="text-white break-words">{value}</span>
-    </div>
-  </div>
-);
-
-// --- Sub-component: PastGamesCard ---
-const PastGamesCard: React.FC<{ sets: { name: string, score: number }[] }> = ({ sets }) => {
-  return (
-    <div className="bg-zinc-900 rounded-lg shadow-lg border border-zinc-700/50">
-      <h2 className="text-2xl font-semibold text-white p-5 border-b border-zinc-700/50">
-        Recent Activity
-      </h2>
-      
-      {sets.length === 0 ? (
-        <p className="p-5 text-zinc-400">No games played yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[400px] text-left">
-            <thead>
-              <tr className="border-b border-zinc-700/50">
-                <th className="px-5 py-3 text-sm font-medium text-zinc-400 uppercase">Set Name</th>
-                <th className="px-5 py-3 text-sm font-medium text-zinc-400 uppercase text-right">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sets.map((set, i) => (
-                <tr key={i} className="border-b border-zinc-800 hover:bg-zinc-800/50">
-                  <td className="px-5 py-4 text-white font-medium truncate" title={set.name}>
-                    {set.name}
-                  </td>
-                  <td className="px-5 py-4 text-white font-bold text-right">
-                    {set.score}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {editing && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md space-y-4">
+            <h2 className="text-xl font-bold text-center">Edit Profile</h2>
+            {Object.keys(tempProfile).map((key) => (
+              <div key={key}>
+                <label className="block text-sm text-gray-400 capitalize mb-1">
+                  {key}
+                </label>
+                <input
+                  type="text"
+                  value={(tempProfile as any)[key]}
+                  onChange={(e) =>
+                    setTempProfile({ ...tempProfile, [key]: e.target.value })
+                  }
+                  className="w-full bg-zinc-800 text-white p-2 rounded-xl border border-zinc-700"
+                />
+              </div>
+            ))}
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={saveChanges}
+                className="bg-[#8c52ff]/80 text-black px-4 py-2 rounded-xl font-semibold hover:scale-105 transition-transform"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="bg-zinc-700 text-white px-4 py-2 rounded-xl hover:bg-zinc-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </main>
   );
-};
-
-
-// --- Sub-component: EditProfileModal ---
-interface EditProfileModalProps {
-  tempProfile: {
-    bio: string;
-    location: string;
-    grade: string;
-    status: string;
-    school: string;
-  };
-  setTempProfile: React.Dispatch<React.SetStateAction<typeof tempProfile>>;
-  onClose: () => void;
-  onSave: () => void;
 }
 
-const EditProfileModal: React.FC<EditProfileModalProps> = ({ tempProfile, setTempProfile, onClose, onSave }) => {
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setTempProfile(prev => ({ ...prev, [name]: value }));
-  };
+interface EloCardProps {
+  icon: React.ReactElement;
+  label: string;
+  value: number;
+  color: "green" | "blue";
+}
+
+const EloCard = ({ icon, label, value, color }: EloCardProps) => {
+  const colorClass = color === "green" ? "text-green-400" : "text-blue-400";
+  const barColorClass = color === "green" ? "bg-green-400" : "bg-blue-400";
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-zinc-800 p-6 rounded-xl w-full max-w-md flex flex-col gap-4 shadow-2xl border border-zinc-700">
-        <h3 className="text-xl font-semibold text-white">
-          Edit Profile
-        </h3>
-
-        <ModalInput name="bio" label="About You" value={tempProfile.bio} onChange={handleChange} as="textarea" />
-        <ModalInput name="status" label="Status" value={tempProfile.status} onChange={handleChange} />
-        <ModalInput name="location" label="Location" value={tempProfile.location} onChange={handleChange} />
-        <ModalInput name="grade" label="Grade" value={tempProfile.grade} onChange={handleChange} />
-        <ModalInput name="school" label="School" value={tempProfile.school} onChange={handleChange} />
-
-        <div className="flex justify-end gap-3 mt-2">
-          <button
-            className="bg-zinc-600 px-4 py-2 rounded-lg hover:bg-zinc-500 text-white transition-colors"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-cyan-600 px-4 py-2 rounded-lg hover:bg-cyan-700 text-white transition-colors"
-            onClick={onSave}
-          >
-            Save
-          </button>
-        </div>
+    <div className="bg-zinc-900 p-6 rounded-xl flex flex-col items-center justify-center shadow hover:shadow-lg transition-shadow w-full">
+      <div className={`${colorClass} text-4xl mb-2`}>{icon}</div>
+      <p className="text-lg font-semibold">{label}</p>
+      <p className="text-3xl font-bold">{value}</p>
+      <div className="w-full h-2 bg-zinc-700 rounded-full mt-2">
+        <div
+          className={`h-2 rounded-full ${barColorClass}`}
+          style={{ width: `${Math.min(value, 300) / 3}%` }}
+        />
       </div>
     </div>
   );
 };
-
-// --- Sub-component: ModalInput (for the edit modal) ---
-interface ModalInputProps {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  as?: "input" | "textarea";
-}
-
-const ModalInput: React.FC<ModalInputProps> = ({ label, name, value, onChange, as = "input" }) => (
-  <div className="flex flex-col">
-    <label className="text-zinc-300 text-sm mb-1">{label}</label>
-    {as === "textarea" ? (
-      <textarea
-        name={name}
-        className="p-2 rounded bg-zinc-700 text-white resize-none border border-zinc-600 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-        rows={3}
-        value={value}
-        onChange={onChange}
-      />
-    ) : (
-      <input
-        name={name}
-        className="p-2 rounded bg-zinc-700 text-white border border-zinc-600 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-        type="text"
-        value={value}
-        onChange={onChange}
-      />
-    )}
-  </div>
-);

@@ -12,6 +12,16 @@ import {
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
+import { Loader2, AlertCircle } from "lucide-react";
+
+interface CircularTimerProps {
+  timeLeft: number;
+  timeTotal: number;
+}
+
+const size = 220;
+const strokeWidth = 20;
+const radius = (size - strokeWidth) / 2;
 
 type Question = {
   a: string;
@@ -229,271 +239,342 @@ export default function GameRoomPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        Loading Game...
+      <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
+        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
+          <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
+          <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
+            Loading Game...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24">
       {showTimeUpAlert && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-800/90 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl">
-          <span className="text-lg font-semibold">
-            Time’s up! Your game has been submitted.
-          </span>
+        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-violet-900/90 border border-violet-500/50 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="text-violet-300 w-6 h-6" />
+            <span className="text-lg font-semibold">
+              Time’s up! Submitting results...
+            </span>
+          </div>
           <button
             onClick={() => setShowTimeUpAlert(false)}
-            className="text-white text-2xl leading-none hover:text-zinc-200"
+            className="text-white/70 hover:text-white text-2xl leading-none"
           >
             &times;
           </button>
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
-        <nav className="w-14 bg-gray-900 text-white p-4"></nav>
-        <div className="min-h-screen bg-black text-white p-6 max-w-full">
-          <div className="max-w-2xl ml-4">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="ml-2 text-center text-4xl font-bold text-white drop-shadow-md">
-                {gameTitle}
-              </h1>
-            </div>
+      {/* Main Layout */}
+      <div className="flex-1 flex justify-center py-8 px-4">
+        <div className="w-full max-w-4xl relative">
+          
+          {/* Header */}
+          <div className="mb-8 text-center md:text-left">
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+              {gameTitle}
+            </h1>
+            <div className="h-1 w-20 bg-violet-600 rounded-full mx-auto md:mx-0"></div>
+          </div>
 
-            {submitted && (
-              <div className="mb-4 flex space-x-4">
-                <button
-                  onClick={() => setActiveTab("result")}
-                  className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
-                    activeTab === "result"
-                      ? "bg-cyan-600/70 text-white"
-                      : "bg-cyan-600/30 text-white hover:bg-cyan-900/40"
-                  }`}
-                >
-                  Results
-                </button>
-                <button
-                  onClick={() => setActiveTab("leaderboard")}
-                  className={`px-4 py-1 rounded-full font-bold text-lg transition duration-300 shadow-md hover:shadow-lg ${
-                    activeTab === "leaderboard"
-                      ? "bg-cyan-600/70 text-white"
-                      : "bg-cyan-600/30 text-white hover:bg-cyan-900/40"
-                  }`}
-                >
-                  Leaderboard
-                </button>
-                <button
-                  onClick={() => setShowConfirmModal(true)}
-                  className="px-4 py-1 rounded-full bg-cyan-600/30 text-white font-bold text-lg hover:bg-cyan-900/40 transition duration-300 shadow-md hover:shadow-lg"
-                >
-                  Back to Home
-                </button>
-              </div>
+          {submitted && (
+            <div className="mb-8 flex flex-wrap gap-4 justify-center md:justify-start">
+              <button
+                onClick={() => setActiveTab("result")}
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
+                  activeTab === "result"
+                    ? "bg-violet-600 text-white shadow-violet-500/20"
+                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                }`}
+              >
+                Results
+              </button>
+              <button
+                onClick={() => setActiveTab("leaderboard")}
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
+                  activeTab === "leaderboard"
+                    ? "bg-violet-600 text-white shadow-violet-500/20"
+                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                }`}
+              >
+                Leaderboard
+              </button>
+              
+              {/* FIXED: This button now directly pushes to home because the game is already submitted */}
+              <button
+                onClick={() => router.push("/home")}
+                className="px-6 py-2 rounded-full bg-zinc-800 text-white font-bold text-lg hover:bg-white hover:text-black transition duration-300 shadow-md"
+              >
+                Back to Home
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-8 pb-20">
+            {!submitted && (
+              <>
+                {questions.map((question, idx) => {
+                  const choices = ["a", "b", "c", "d", "e"]
+                    .filter((key) => question[key as keyof Question])
+                    .map((key) => ({
+                      key,
+                      text: question[key as keyof Question] as string,
+                    }));
+
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xl"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="bg-violet-500/10 text-violet-400 text-sm font-bold px-3 py-1 rounded-full border border-violet-500/20">
+                          Question {idx + 1}
+                        </span>
+                      </div>
+                      
+                      <p className="mb-6 text-xl leading-relaxed text-zinc-100 font-medium">
+                        {question.content}
+                      </p>
+                      
+                      {question.imgURL && (
+                        <div className="mb-6 rounded-xl overflow-hidden border border-zinc-700 bg-black">
+                           <img
+                            src={question.imgURL}
+                            alt={`Question ${idx + 1}`}
+                            className="w-full max-h-[400px] object-contain"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex flex-col space-y-3">
+                        {choices.map(({ key, text }) => {
+                          const isSelected = userAnswers[idx] === key;
+                          const bgClass = isSelected
+                            ? "bg-violet-600 text-white border-violet-600"
+                            : "bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:bg-zinc-700 hover:text-white hover:border-violet-500";
+
+                          return (
+                            <button
+                              key={key}
+                              onClick={() => handleAnswer(idx, key)}
+                              className={`group flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-200 ${bgClass}`}
+                            >
+                              <span className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${
+                                isSelected ? "bg-white/20 text-white" : "bg-black/20 text-zinc-400 group-hover:text-white"
+                              }`}>
+                                {key}
+                              </span>
+                              <span className="text-lg">{text}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className="mt-12 flex flex-col md:flex-row justify-center gap-6">
+                  <button
+                    onClick={() => handleSubmit(false)}
+                    className="w-full md:w-auto px-10 py-4 bg-violet-600 text-white text-lg font-bold rounded-xl hover:bg-violet-500 hover:scale-105 transition-all shadow-lg shadow-violet-500/20"
+                  >
+                    Submit Game
+                  </button>
+                  {/* NOTE: This 'Quit Game' button STILL shows the modal because you haven't finished yet */}
+                  <button
+                    onClick={() => setShowConfirmModal(true)}
+                    className="w-full md:w-auto px-10 py-4 bg-zinc-800 text-white text-lg font-bold rounded-xl hover:bg-zinc-700 transition-all"
+                  >
+                    Quit Game
+                  </button>
+                </div>
+              </>
             )}
 
-            <div className="space-y-4 p-6 bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-800 w-full max-w-4xl mx-auto">
-              {!submitted && (
-                <>
-                  {questions.map((question, idx) => {
-                    const choices = ["a", "b", "c", "d", "e"]
-                      .filter((key) => question[key as keyof Question])
-                      .map((key) => ({
-                        key,
-                        text: question[key as keyof Question] as string,
-                      }));
-
-                    return (
-                      <div
-                        key={idx}
-                        className="bg-zinc-900 rounded-4xl p-4 shadow-md"
-                      >
-                        <h2 className="text-xl font-semibold mb-4">
-                          Question {idx + 1} of {questions.length}
-                        </h2>
-                        <p className="mb-6 text-lg">{question.content}</p>
-                        {question.imgURL && (
-                          <img
-                            src={question.imgURL}
-                            alt={`Image for question ${idx + 1}`}
-                            className="my-4 rounded-md max-w-xl h-auto"
-                          />
-                        )}
-
-                        <div className="flex flex-col space-y-4">
-                          {choices.map(({ key, text }) => {
-                            const isSelected = userAnswers[idx] === key;
-                            const bgClass = isSelected
-                              ? "bg-cyan-600 hover:scale-105 "
-                              : "bg-zinc-800 hover:bg-zinc-700 hover:scale-105";
-
-                            return (
-                              <button
-                                key={key}
-                                onClick={() => handleAnswer(idx, key)}
-                                className={`px-4 py-3 rounded-xl text-left transition-all transform duration-200 ${bgClass} hover:scale-105`}
-                              >
-                                <span className="font-bold mr-2">
-                                  {key.toUpperCase()}.
-                                </span>
-                                {text}
-                              </button>
-                            );
-                          })}
-                        </div>
+            {/* RESULTS VIEW */}
+            {submitted && activeTab === "result" && (
+              <>
+                {!finalResult ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <Loader2 className="w-10 h-10 text-violet-500 animate-spin mb-4" />
+                    <p className="text-xl font-semibold text-zinc-400 animate-pulse">
+                      Calculating score...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                      <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-zinc-400 font-medium mb-1">Accuracy</h2>
+                        <p className="text-3xl font-bold text-white">
+                          <span className="text-violet-500">{finalResult.correctCount}</span>
+                          <span className="text-zinc-600 text-xl"> / {finalResult.totalQuestions}</span>
+                        </p>
                       </div>
-                    );
-                  })}
-
-                  <div className="mt-8 text-center flex justify-center gap-6">
-                    <button
-                      onClick={() => handleSubmit(false)}
-                      className="px-6 py-3 bg-cyan-600 rounded-xl hover:bg-cyan-900 text-white font-semibold"
-                    >
-                      Submit Game
-                    </button>
-                    <button
-                      onClick={() => setShowConfirmModal(true)}
-                      className="px-6 py-3 bg-slate-700 rounded-xl hover:bg-slate-900 text-white font-semibold"
-                    >
-                      Quit Game
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {submitted && activeTab === "result" && (
-                <>
-                  {!finalResult ? (
-                    <div className="text-center p-8">
-                      <p className="text-xl font-semibold animate-pulse">
-                        Grading your answers...
-                      </p>
+                      <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-zinc-400 font-medium mb-1">Time Played</h2>
+                        <p className="text-3xl font-bold text-white">
+                          {formatTime(timeTotal - (timeLeft ?? 0))}
+                        </p>
+                      </div>
+                      <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-zinc-400 font-medium mb-1">Score</h2>
+                        <p className="text-3xl font-bold text-violet-500">
+                          {finalResult.score}
+                        </p>
+                      </div>
                     </div>
-                  ) : (
-                    <>
-                      {questions.map((question, idx) => {
-                        const choices = ["a", "b", "c", "d", "e"]
-                          .filter((key) => question[key as keyof Question])
-                          .map((key) => ({
-                            key,
-                            text: question[key as keyof Question] as string,
-                          }));
-                        const userAnswer = userAnswers[idx];
-                        const correctAnswer = finalResult.correctAnswers[idx];
 
-                        return (
-                          <div
-                            key={idx}
-                            className="bg-zinc-900 rounded-4xl p-4 shadow-md"
-                          >
-                            <h3 className="text-xl font-semibold mb-4">
-                              Question {idx + 1} of {questions.length}
-                            </h3>
-                            <p className="mb-6 text-lg">{question.content}</p>
-                            {question.imgURL && (
-                              <img
-                                src={question.imgURL}
-                                alt={`Image for question ${idx + 1}`}
-                                className="my-4 rounded-md max-w-xl h-auto"
-                              />
-                            )}
-                            <div className="flex flex-col space-y-4">
-                              {choices.map(({ key, text }) => {
-                                const isUserAnswer = userAnswer === key;
-                                const isCorrect = correctAnswer === key;
+                    {questions.map((question, idx) => {
+                      const choices = ["a", "b", "c", "d", "e"]
+                        .filter((key) => question[key as keyof Question])
+                        .map((key) => ({
+                          key,
+                          text: question[key as keyof Question] as string,
+                        }));
+                      const userAnswer = userAnswers[idx];
+                      const correctAnswer = finalResult.correctAnswers[idx];
 
-                                let bgClass = "bg-zinc-800";
-                                if (isCorrect) {
-                                  bgClass =
-                                    "bg-emerald-600/40 ring-2 ring-emerald-500";
-                                } else if (isUserAnswer) {
-                                  bgClass =
-                                    "bg-rose-600/40 ring-2 ring-rose-500";
-                                }
-
-                                return (
-                                  <div
-                                    key={key}
-                                    className={`px-4 py-3 rounded-xl text-left transition-colors duration-300 ${bgClass}`}
-                                  >
-                                    <span className="font-bold mr-2">
-                                      {key.toUpperCase()}.
-                                    </span>
-                                    {text}
-                                  </div>
-                                );
-                              })}
-                            </div>
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-md"
+                        >
+                           <div className="flex items-center gap-3 mb-4">
+                            <span className="bg-zinc-800 text-zinc-400 text-sm font-bold px-3 py-1 rounded-full">
+                              Question {idx + 1}
+                            </span>
                           </div>
-                        );
-                      })}
-                      <p className="mt-6 text-center text-xl font-bold">
-                        Your Accuracy: {finalResult.correctCount} /{" "}
-                        {finalResult.totalQuestions}
-                      </p>
-                      <p className="mt-6 text-center text-xl font-bold">
-                        Time Taken: {formatTime(timeTotal - (timeLeft ?? 0))}
-                      </p>
-                      <h1 className="mt-6 text-center text-3xl font-bold">
-                        Your Score: {finalResult.score}
-                      </h1>
-                    </>
-                  )}
-                </>
-              )}
+                          
+                          <p className="mb-6 text-xl text-zinc-100">{question.content}</p>
+                          
+                          {question.imgURL && (
+                            <img
+                              src={question.imgURL}
+                              alt={`Question ${idx + 1}`}
+                              className="mb-6 rounded-lg max-h-[300px] w-auto border border-zinc-700"
+                            />
+                          )}
 
-              {submitted && activeTab === "leaderboard" && (
-                <div className=" w-full  mx-auto">
-                  <h2 className="text-3xl font-bold mb-6">Leaderboard</h2>
-                  <div>No data yet</div>
-                </div>
-              )}
-            </div>
+                          <div className="flex flex-col space-y-3">
+                            {choices.map(({ key, text }) => {
+                              const isUserAnswer = userAnswer === key;
+                              const isCorrect = correctAnswer === key;
 
-            {timeLeft !== null && timeLeft > 0 && !submitted && (
-              <div className="fixed top-35 right-50 flex flex-col items-center space-y-1">
-                <span className="text-white font-semibold text-xl select-none">
-                  Time Remaining:
-                </span>
-                <div className="fixed top-45 right-45 w-45 h-45 rounded-full bg-gradient-to-r from-cyan-600/30 to-cyan-600/30 shadow-lg border border-cyan-300 flex flex-col items-center justify-center text-white">
-                  <div className="font-sans text-xl tracking-wider">
-                    {formatTime(timeLeft)}
-                  </div>
-                </div>
+                              let bgClass = "bg-zinc-800/50 border-zinc-700 text-zinc-400";
+
+                              if (isCorrect) {
+                                bgClass = "bg-emerald-500/10 border-emerald-500 text-emerald-400";
+                              } else if (isUserAnswer) {
+                                bgClass = "bg-red-500/10 border-red-500 text-red-400";
+                              }
+
+                              return (
+                                <div
+                                  key={key}
+                                  className={`flex items-center px-5 py-4 rounded-xl border-2 ${bgClass}`}
+                                >
+                                  <span className="font-bold mr-4 uppercase w-6">{key}</span>
+                                  <span className="font-medium">{text}</span>
+                                  
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+              </>
+            )}
+
+            {submitted && activeTab === "leaderboard" && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center">
+                <h2 className="text-2xl font-bold mb-2">Leaderboard</h2>
+                <p className="text-zinc-500">Leaderboard data coming soon.</p>
               </div>
             )}
           </div>
+        </div>
 
-          {showConfirmModal && (
-            <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-              <div className="bg-slate-800/90 rounded-2xl p-6 w-70 max-w-md shadow-2xl text-center">
-                <h2 className="text-2xl font-bold mb-4 text-white">
-                  Continue to Home?
-                </h2>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem(`startTime-${gameId}`);
-
-                      router.push("/home");
-                    }}
-                    className="px-4 py-1 bg-cyan-600 text-white font-bold rounded-sm hover:bg-cyan-900 transition"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => setShowConfirmModal(false)}
-                    className="px-4 py-1 bg-slate-700 text-white font-bold rounded-sm hover:bg-slate-900 transition"
-                  >
-                    No
-                  </button>
+        {/* FIXED POSITION TIMER (Desktop) - With Purple Theme */}
+        {timeLeft !== null && timeLeft > 0 && !submitted && (
+          <div className="hidden xl:block fixed right-10 top-1/2 transform -translate-y-1/2 z-40">
+            <div className="relative flex flex-col items-center">
+              <div style={{ width: size, height: size, position: "relative" }}>
+                <svg height={size} width={size} className="transform -rotate-90">
+                  <circle
+                    stroke="#27272a" // zinc-800
+                    fill="transparent"
+                    strokeWidth={strokeWidth}
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                  />
+                  <circle
+                    stroke="#8b5cf6" // violet-500
+                    fill="transparent"
+                    strokeWidth={strokeWidth}
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * radius}
+                    strokeDashoffset={
+                      2 * Math.PI * radius * (1 - timeLeft! / timeTotal)
+                    }
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                    className="transition-[stroke-dashoffset] duration-1000 linear"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-4xl font-bold text-white tabular-nums">
+                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60)
+                      .toString()
+                      .padStart(2, "0")}`}
+                  </span>
+                  <span className="text-zinc-500 text-sm font-medium uppercase tracking-wider mt-1">Remaining</span>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* CONFIRM MODAL */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center transform scale-100 transition-all">
+            <h2 className="text-2xl font-bold mb-2 text-white">
+              Quit Game?
+            </h2>
+            <p className="text-zinc-400 mb-8">
+              Your progress will be lost and you will return to the home screen.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  localStorage.removeItem(`startTime-${gameId}`);
+                  router.push("/home");
+                }}
+                className="flex-1 px-6 py-3 bg-red-600/10 text-red-500 border border-red-600/50 font-bold rounded-xl hover:bg-red-600 hover:text-white transition"
+              >
+                Quit
+              </button>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-6 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
