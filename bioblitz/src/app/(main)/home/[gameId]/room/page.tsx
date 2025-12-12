@@ -89,14 +89,14 @@ export default function GameRoomPage() {
         const gameDocRef = doc(firestore, "sets", gameId as string);
         const gameDocSnap = await getDoc(gameDocRef);
         if (!gameDocSnap.exists()) {
-          alert("Game not found!");
+          alert("Blitz not found!");
           router.push("/home");
           return;
         }
 
         const data = gameDocSnap.data();
         if (isMounted.current) {
-          setGameTitle(data.title || "Untitled Game");
+          setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
           const key = `startTime-${gameId}`;
@@ -127,8 +127,8 @@ export default function GameRoomPage() {
           setQuestions(loadedQuestions);
         }
       } catch (error) {
-        console.error("Error loading game data:", error);
-        alert(`Could not load the game. Please try again later.`);
+        console.error("Error loading Blitz data:", error);
+        alert(`Could not load the Blitz. Please try again later.`);
       } finally {
         if (isMounted.current) {
           setLoading(false);
@@ -176,8 +176,8 @@ export default function GameRoomPage() {
       }
       localStorage.removeItem(`startTime-${gameId}`);
     } catch (error) {
-      console.error("Error submitting game:", error);
-      alert("There was an error submitting your game. Please try again.");
+      console.error("Error submitting Blitz:", error);
+      alert("There was an error submitting your Blitz. Please try again.");
     }
   };
 
@@ -243,7 +243,7 @@ export default function GameRoomPage() {
         <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
           <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
           <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
-            Loading Game...
+            Loading Blitz...
           </p>
         </div>
       </div>
@@ -382,14 +382,13 @@ export default function GameRoomPage() {
                     onClick={() => handleSubmit(false)}
                     className="w-full md:w-auto px-10 py-4 bg-violet-600 text-white text-lg font-bold rounded-xl hover:bg-violet-500 hover:scale-105 transition-all shadow-lg shadow-violet-500/20"
                   >
-                    Submit Game
+                    Submit Blitz
                   </button>
-                  {/* NOTE: This 'Quit Game' button STILL shows the modal because you haven't finished yet */}
                   <button
                     onClick={() => setShowConfirmModal(true)}
                     className="w-full md:w-auto px-10 py-4 bg-zinc-800 text-white text-lg font-bold rounded-xl hover:bg-zinc-700 transition-all"
                   >
-                    Quit Game
+                    Quit Blitz
                   </button>
                 </div>
               </>
@@ -550,7 +549,7 @@ export default function GameRoomPage() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center transform scale-100 transition-all">
             <h2 className="text-2xl font-bold mb-2 text-white">
-              Quit Game?
+              Quit the Blitz?
             </h2>
             <p className="text-zinc-400 mb-8">
               Your progress will be lost and you will return to the home screen.
