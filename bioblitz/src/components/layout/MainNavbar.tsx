@@ -36,7 +36,6 @@ export default function MainNavbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* LEFT SIDE: Logo */}
           <Link href="/home" className="flex items-center space-x-2 group">
             <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
               <Zap className="w-6 h-6 text-yellow-400" />
@@ -46,7 +45,6 @@ export default function MainNavbar() {
             </span>
           </Link>
 
-          {/* CENTER: Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -56,8 +54,6 @@ export default function MainNavbar() {
                   href={item.href}
                   className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${
                     isActive
-                      // MATCH FIX: Glassy Purple background + Bright Text
-                      // This echoes the "All Topics" button without being a solid block
                       ? "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10"
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
@@ -69,7 +65,6 @@ export default function MainNavbar() {
             })}
           </div>
 
-          {/* RIGHT SIDE: User Nav & Mobile Toggle */}
           <div className="flex items-center space-x-4">
             {isAuthenticated && <UserNav />}
 
@@ -83,7 +78,6 @@ export default function MainNavbar() {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
       <div
         className={`md:hidden absolute w-full bg-zinc-950 border-b border-white/10 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
           isMobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"

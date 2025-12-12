@@ -1,4 +1,4 @@
-"use client"; // Required for hooks
+"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";

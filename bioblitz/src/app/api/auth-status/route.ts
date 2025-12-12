@@ -11,7 +11,6 @@ export async function GET() {
       userProfile = await getUserProfile(decodedIdToken.uid);
 
       if (!userProfile) {
-        // If user profile doesn't exist, create a basic one
         userProfile = await createUserProfile({
           uid: decodedIdToken.uid,
           displayName: decodedIdToken.name || decodedIdToken.email?.split('@')[0] || 'User',
