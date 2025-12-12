@@ -9,8 +9,6 @@ import { Clock, HelpCircle, User, Star, Filter, Loader2 } from "lucide-react";
 export default function HomePage() {
   const [topic, setTopic] = useState("All Topics");
   const [games, setGames] = useState<gameRoom[]>([]);
-  
-  // 1. Initialize Loading State to true
   const [isLoading, setIsLoading] = useState(true);
   
   const searchParams = useSearchParams();
@@ -24,9 +22,8 @@ export default function HomePage() {
         const fetchedGames = await allGames();
         setGames(fetchedGames);
       } catch (error) {
-        console.error("Failed to load games:", error);
+        console.error("Failed to load Blitzes:", error);
       } finally {
-        // 2. Turn off loading state once data arrives (success or fail)
         setIsLoading(false);
       }
     };
@@ -54,7 +51,6 @@ export default function HomePage() {
     }
   };
 
-  // 3. Render Loading Screen if fetching
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center pt-20">
@@ -68,7 +64,6 @@ export default function HomePage() {
     );
   }
 
-  // 4. Render Main Content once loaded
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
@@ -77,7 +72,7 @@ export default function HomePage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-              Join a Game
+              Join a Blitz
             </h1>
             <p className="text-zinc-400 mt-1">Select a topic to start competing</p>
           </div>
@@ -90,10 +85,11 @@ export default function HomePage() {
                     key={t}
                     onClick={() => setTopic(t)}
                     className={`
-                      whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border
+                      whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border
                       ${topic === t 
-                        ? "bg-indigo-500 text-black border-indigo-500 shadow-md shadow-indigo-500/20" 
-                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white hover:bg-zinc-800"
+                        // NAV STYLE MATCH: Glassy Violet (15% opacity) + Bright Text + Subtle Glow
+                        ? "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border-violet-500/10" 
+                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-zinc-700"
                       }
                     `}
                   >
@@ -109,7 +105,7 @@ export default function HomePage() {
           {filteredGames.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
               <Filter className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-              <p className="text-zinc-400 text-lg">No games found matching these filters.</p>
+              <p className="text-zinc-400 text-lg">No Blitzes found matching these filters.</p>
               <button 
                 onClick={() => setTopic("All Topics")}
                 className="mt-4 text-yellow-500 hover:text-yellow-400 font-medium transition-colors"

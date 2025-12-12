@@ -1,7 +1,6 @@
-
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { firestore } from "./firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore"; // Added updateDoc
 import { serverTimestamp } from "firebase/firestore";
 
 export interface UserProfile {
@@ -21,7 +20,20 @@ export interface UserProfile {
 
 export async function createUserProfile(user: any) {
   const userRef = doc(firestore, "users", user.uid);
-  const userProfile: UserProfile = {
+  
+  // 1. Check if the user already exists
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    // 2. USER EXISTS: Do NOT overwrite. Just update the lastLogin time.
+    await updateDoc(userRef, {
+      lastLogin: serverTimestamp()
+    });
+    return userSnap.data() as UserProfile;
+  }
+
+  // 3. USER DOES NOT EXIST: Create the new default profile.
+  const newUserProfile: UserProfile = {
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || null,
@@ -36,8 +48,8 @@ export async function createUserProfile(user: any) {
     nameChangedAt: serverTimestamp(),
   };
 
-  await setDoc(userRef, userProfile);
-  return userProfile;
+  await setDoc(userRef, newUserProfile);
+  return newUserProfile;
 }
 
 export async function getUserProfile(uid: string) {

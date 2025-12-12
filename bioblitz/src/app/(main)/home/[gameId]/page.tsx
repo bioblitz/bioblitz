@@ -46,7 +46,7 @@ export default function GameDetailPage() {
               or change text-amber-500 to text-indigo-500 if you want it to match this page's buttons */}
           <Loader2 className="w-12 h-12 text-yellow-500 animate-spin" />
           <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
-            Loading Game Details...
+            Loading Blitz Details...
           </p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function GameDetailPage() {
   if (!game) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
-        <p className="text-lg">Game not found</p>
+        <p className="text-lg">Blitz not found</p>
       </div>
     );
   }
@@ -165,13 +165,13 @@ export default function GameDetailPage() {
               whileTap={{ scale: 0.95 }}
               className="w-full mt-8 bg-indigo-500 hover:bg-[#5271FF]/60 text-white text-lg font-semibold px-6 py-3 rounded-xl transition-all shadow-lg"
             >
-              Join This Game Now!
+              Join This Blitz Now!
             </motion.button>
 
             {game.description && (
               <div className="mt-8 text-left max-w-2xl">
                 <h2 className="text-2xl font-bold text-white mb-2">
-                  About This Game
+                  About This Blitz
                 </h2>
                 <p className="text-white/70 leading-relaxed flex items-center gap-1">
                   {game.description.replace(/^"(.*)"$/, "$1")}
@@ -182,7 +182,7 @@ export default function GameDetailPage() {
               href="/home"
               className="block mt-4 text-sm text-gray-500 hover:text-gray-400 transition-colors font-medium text-left"
             >
-              ← Back to game list
+              ← Back to Blitz list
             </Link>
           </motion.div>
 
@@ -190,10 +190,10 @@ export default function GameDetailPage() {
             variants={slideRight}
             className="flex-[0.9] overflow-y-auto bg-gray-900/70 rounded-2xl p-4 shadow-md border border-gray-800 ml-10"
           >
-            <h2 className="text-xl font-bold text-white mb-4">Other Games</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Other Blitzes</h2>
             <input
               type="text"
-              placeholder="Search games..."
+              placeholder="Search Blitzes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full mb-4 px-3 py-2 rounded-lg bg-gray-700/40  text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5271FF]"

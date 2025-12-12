@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import UserNav from "./UserNav";
-import { Zap, House, Gamepad2, Info, Menu, X } from "lucide-react";
+import { Zap, House, Trophy, Menu, X } from "lucide-react"; 
 
 export default function MainNavbar() {
   const { isAuthenticated } = useAuth();
@@ -15,8 +15,7 @@ export default function MainNavbar() {
 
   const navItems = [
     { name: "Home", href: "/home", icon: House },
-    { name: "Contests", href: "/contests", icon: Gamepad2 },
-    { name: "About", href: "/about", icon: Info },
+    { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
   ];
 
   useEffect(() => {
@@ -48,20 +47,22 @@ export default function MainNavbar() {
           </Link>
 
           {/* CENTER: Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-2 text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${
                     isActive
-                      ? "text-yellow-400"
-                      : "text-zinc-400 hover:text-white"
+                      // MATCH FIX: Glassy Purple background + Bright Text
+                      // This echoes the "All Topics" button without being a solid block
+                      ? "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10"
+                      : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <item.icon size={18} />
+                  <item.icon size={18} className={isActive ? "text-violet-400" : ""} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -98,7 +99,7 @@ export default function MainNavbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
                   isActive
-                    ? "bg-yellow-400/10 text-yellow-400"
+                    ? "bg-violet-600/20 text-violet-300 border border-violet-500/20"
                     : "text-zinc-400 hover:bg-white/5 hover:text-white"
                 }`}
               >

@@ -1,6 +1,33 @@
-import {collection, doc, setDoc, getDocs, QueryDocumentSnapshot, DocumentData} from "firebase/firestore";
-import { firestore } from "./firebase";
-import { gameRoom, Question } from "@/types";
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import { firestore } from "./firebase"; // Ensure this path is correct based on your project structure
+
+// --- 1. DEFINE AND EXPORT THE TYPES HERE ---
+export type Question = {
+  id: string;
+  a?: string;
+  b?: string;
+  c?: string;
+  d?: string;
+  e?: string;
+  content?: string;
+  imgURL?: string;
+  [key: string]: any;
+};
+
+export type gameRoom = {
+  id: string;
+  title: string;
+  source: string;
+  number_of_questions: string;
+  topic: string;
+  difficulty: string;
+  timeLimit: string;
+  description?: string;
+  creator?: string;
+  creatorPfp?: string;
+  rating?: number;
+  questions: Question[];
+};
 
 /**
  * Converts a total number of seconds into a "minutes and seconds" string.
@@ -35,23 +62,18 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
     const gameRoomsCollection = collection(firestore, 'sets');
     const gameRoomSnapshot = await getDocs(gameRoomsCollection);
 
-    // Filter out documents where 'hidden' is true
     let visibleDocs = gameRoomSnapshot.docs.filter(doc => !doc.data().hidden);
 
-    // Further filter by topic if a topic is provided and is not 'All Topics'
     if (topic && topic !== "All Topics") {
       visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);
     }
 
-    // Use Promise.all to handle the async operations on the filtered list
     const gameList = await Promise.all(
       visibleDocs.map(async (doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
 
-        // Get a reference to the 'questions' subcollection for the current game
         const questionsCollection = collection(firestore, 'sets', doc.id, 'questions');
         
-        // Fetch the subcollection and get its size (the number of questions)
         const questionsSnapshot = await getDocs(questionsCollection);
         const questions = questionsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Question[];
         const questionCount = questionsSnapshot.size;
@@ -60,11 +82,9 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
           id: doc.id,
           title: data.title || '',
           source: data.source || '',
-          // Use the dynamically counted number of questions
           number_of_questions: questionCount.toString(),
           topic: data.topic,
           difficulty: data.difficulty || 'Easy',
-          // Use the time formatting function
           timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
           description: data.description,
           creator: data.creator,
