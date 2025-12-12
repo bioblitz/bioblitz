@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import {
   addDoc,
@@ -8,6 +8,9 @@ import {
   collection,
   doc,
   getDoc,
+  setDoc,
+  serverTimestamp,
+  arrayUnion, // <--- 1. Imported arrayUnion
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
@@ -45,6 +48,11 @@ type GameResult = {
 export default function GameRoomPage() {
   const { gameId } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read the 'ranked' query param passed from the previous page
+  // Defaults to false if missing (Practice mode)
+  const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -99,6 +107,7 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
+          // Only recover session if user hasn't submitted yet
           const key = `startTime-${gameId}`;
           const savedStart = localStorage.getItem(key);
 
@@ -159,6 +168,7 @@ export default function GameRoomPage() {
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
     try {
+      // 1. Create the submission document
       const submissionRef = await addDoc(
         collection(firestore, "gameSubmissions"),
         {
@@ -166,9 +176,22 @@ export default function GameRoomPage() {
           userId: user.uid,
           userAnswers: userAnswers,
           timeTaken: timeTaken,
-          submittedAt: new Date(),
+          submittedAt: serverTimestamp(),
           status: "pending_grading",
+          ranked: isRanked,
         }
+      );
+
+      // 2. Update user profile history
+      await setDoc(
+        doc(firestore, "users", user.uid, "setsPlayed", gameId as string), 
+        {
+          title: gameTitle, 
+          lastPlayedAt: serverTimestamp(),
+          // 2. Added the history field using arrayUnion
+          history: arrayUnion(submissionRef.id) 
+        }, 
+        { merge: true }
       );
 
       if (isMounted.current) {
@@ -275,9 +298,21 @@ export default function GameRoomPage() {
           
           {/* Header */}
           <div className="mb-8 text-center md:text-left">
-            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
-              {gameTitle}
-            </h1>
+            <div className="flex items-center justify-center md:justify-start gap-4">
+              <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+                {gameTitle}
+              </h1>
+              {isRanked && !submitted && (
+                <span className="bg-violet-600 text-white text-xs px-2 py-1 rounded-md font-bold uppercase tracking-wider mb-2">
+                  Ranked
+                </span>
+              )}
+              {!isRanked && !submitted && (
+                <span className="bg-zinc-700 text-zinc-300 text-xs px-2 py-1 rounded-md font-bold uppercase tracking-wider mb-2">
+                  Practice
+                </span>
+              )}
+            </div>
             <div className="h-1 w-20 bg-violet-600 rounded-full mx-auto md:mx-0"></div>
           </div>
 
@@ -304,7 +339,6 @@ export default function GameRoomPage() {
                 Leaderboard
               </button>
               
-              {/* FIXED: This button now directly pushes to home because the game is already submitted */}
               <button
                 onClick={() => router.push("/home")}
                 className="px-6 py-2 rounded-full bg-zinc-800 text-white font-bold text-lg hover:bg-white hover:text-black transition duration-300 shadow-md"
@@ -394,7 +428,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {/* RESULTS VIEW */}
             {submitted && activeTab === "result" && (
               <>
                 {!finalResult ? (
@@ -479,7 +512,8 @@ export default function GameRoomPage() {
                                 >
                                   <span className="font-bold mr-4 uppercase w-6">{key}</span>
                                   <span className="font-medium">{text}</span>
-                                  
+                                  {isCorrect && <span className="ml-auto text-emerald-500 font-bold text-sm">CORRECT</span>}
+                                  {isUserAnswer && !isCorrect && <span className="ml-auto text-red-500 font-bold text-sm">YOUR ANSWER</span>}
                                 </div>
                               );
                             })}
@@ -508,7 +542,7 @@ export default function GameRoomPage() {
               <div style={{ width: size, height: size, position: "relative" }}>
                 <svg height={size} width={size} className="transform -rotate-90">
                   <circle
-                    stroke="#27272a" // zinc-800
+                    stroke="#27272a"
                     fill="transparent"
                     strokeWidth={strokeWidth}
                     r={radius}
@@ -516,7 +550,7 @@ export default function GameRoomPage() {
                     cy={size / 2}
                   />
                   <circle
-                    stroke="#8b5cf6" // violet-500
+                    stroke="#8b5cf6"
                     fill="transparent"
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
