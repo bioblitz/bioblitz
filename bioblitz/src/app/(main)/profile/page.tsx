@@ -13,7 +13,19 @@ import {
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { 
+  Pencil, 
+  MapPin, 
+  School, 
+  GraduationCap, 
+  Activity, 
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  User as UserIcon,
+  Save,
+  X
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
 import {
@@ -23,11 +35,10 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import Link from "next/link";
-import { FaDna, FaStethoscope } from "react-icons/fa";
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 interface UserProfile {
@@ -35,32 +46,12 @@ interface UserProfile {
   email: string;
   photoURL: string;
   bElo: number;
-  buElo: number;
-  muElo: number;
-  mElo: number;
   bio: string;
   createdAt: Timestamp;
   location: string;
   grade?: string;
-  status?: string;
   school?: string;
 }
-
-interface Rank {
-  name: string;
-  color: string;
-}
-
-const getRank = (elo: number): Rank => {
-  //add rank function
-  if (elo >= 2100) return { name: "Master", color: "text-orange-500" };
-  if (elo >= 1900)
-    return { name: "Candidate Master", color: "text-purple-500" };
-  if (elo >= 1600) return { name: "Expert", color: "text-blue-500" };
-  if (elo >= 1400) return { name: "Specialist", color: "text-cyan-400" };
-  if (elo >= 1200) return { name: "Pupil", color: "text-green-500" };
-  return { name: "Newbie", color: "text-gray-400" };
-};
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -71,13 +62,12 @@ export default function ProfilePage() {
     bio: "",
     location: "",
     grade: "",
-    status: "",
     school: "",
+    displayName: ""
   });
-  const [setsPlayed, setSetsPlayed] = useState<
-    { name: string; score: number }[]
-  >([]);
+  const [setsPlayed, setSetsPlayed] = useState<{ name: string; score: number }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -90,8 +80,8 @@ export default function ProfilePage() {
         bio: userProfile.bio || "",
         location: userProfile.location || "",
         grade: userProfile.grade || "",
-        status: userProfile.status || "",
         school: userProfile.school || "",
+        displayName: userProfile.displayName || ""
       });
     }
   }, [userProfile]);
@@ -106,11 +96,10 @@ export default function ProfilePage() {
           if (userDocSnap.exists()) {
             setUserProfile(userDocSnap.data() as UserProfile);
           } else {
-            setError("Could not find user profile. Please contact support.");
+            setError("Profile data unavailable.");
           }
         } catch (err) {
-          console.error("Error fetching profile:", err);
-          setError("An error occurred while loading your profile.");
+          setError("Unable to load profile.");
         } finally {
           setLoading(false);
         }
@@ -122,7 +111,7 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [auth, db, router]);
 
-  useEffect(() => {
+ useEffect(() => {
     if (!userProfile) return;
     const fetchSetsPlayed = async () => {
       try {
@@ -133,13 +122,28 @@ export default function ProfilePage() {
           "setsPlayed"
         );
         const setsSnap = await getDocs(setsRef);
-        const setsData = setsSnap.docs.map((doc) => ({
-          name: "Name: " + doc.id,
-          score: (doc.data() as { score?: number }).score || 0,
-        }));
+
+        const sortedDocs = setsSnap.docs.sort((a, b) => {
+          const dataA = a.data();
+          const dataB = b.data();
+          
+          const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
+          const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
+          
+          return timeB - timeA; 
+        });
+
+        const setsData = sortedDocs.map((doc) => {
+          const data = doc.data();
+          return {
+            name: data.title || "Unknown Set", 
+            score: data.score || 0,
+          };
+        });
+
         setSetsPlayed(setsData);
       } catch (err) {
-        console.error("Error fetching sets played:", err);
+        console.error(err);
       }
     };
     fetchSetsPlayed();
@@ -162,7 +166,7 @@ export default function ProfilePage() {
       });
       setUserProfile({ ...userProfile, photoURL: downloadURL });
     } catch (err) {
-      console.error("Error uploading profile picture:", err);
+      console.error(err);
     }
   };
 
@@ -173,16 +177,26 @@ export default function ProfilePage() {
       setUserProfile({ ...userProfile!, ...tempProfile });
       setEditing(false);
     } catch (err) {
-      console.error("Error updating profile:", err);
+      console.error(err);
     }
   };
 
-  const rank = userProfile ? getRank(userProfile.bElo) : null;
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const { current } = scrollRef;
+      const scrollAmount = 300;
+      if (direction === "left") {
+        current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      } else {
+        current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }
+  };
 
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
-        <div className="animate-pulse text-zinc-500">Loading profile...</div>
+        <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
@@ -194,257 +208,274 @@ export default function ProfilePage() {
     );
 
   return (
-    <main className={`${inter.className} min-h-screen bg-black text-white p-8`}>
-      <div className="max-w-5xl mx-auto space-y-6">
+<main className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}>      <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
+      
+      <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-8 text-center shadow-lg"
+          className="grid lg:grid-cols-3 gap-6"
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          <div
-            className="relative inline-block cursor-pointer group"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {userProfile?.photoURL ? (
-              <img
-                src={userProfile.photoURL}
-                alt=""
-                className="w-32 h-32 rounded-full object-cover border border-zinc-700 mx-auto group-hover:opacity-60 transition duration-300"
+          <div className="lg:col-span-2 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-xl">
+            <div className="relative group shrink-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
               />
-            ) : (
-              <div className="w-32 h-32 rounded-full border border-zinc-700 mx-auto flex items-center justify-center bg-[#8c52ff] text-white text-[64px] font-bold">
-                {userProfile?.displayName?.[0].toUpperCase() || "U"}
+              <div
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 cursor-pointer relative"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {userProfile?.photoURL ? (
+                  <img
+                    src={userProfile.photoURL}
+                    alt="Profile"
+                    className="w-full h-full object-cover group-hover:opacity-50 transition-all duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-violet-900/30 flex items-center justify-center text-violet-400 text-4xl font-bold group-hover:bg-violet-900/50 transition-colors">
+                    {userProfile?.displayName?.[0].toUpperCase()}
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Pencil className="w-8 h-8 text-white" />
+                </div>
               </div>
-            )}
-            <Pencil className="absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#8c52ff] transition" />
+            </div>
+
+            <div className="flex-1 text-center md:text-left space-y-4 w-full">
+              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                    {userProfile?.displayName}
+                  </h1>
+                  <p className="text-zinc-500 text-sm mt-1 font-mono">
+                    {userProfile?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
+                >
+                  <Pencil className="w-3 h-3 group-hover:text-violet-400" />
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
+                <p className="text-zinc-300 leading-relaxed italic">
+                  {userProfile?.bio || "Add a biography!"}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                {userProfile?.location && (
+                  <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+                    <MapPin className="w-3 h-3 text-violet-400" />
+                    {userProfile.location}
+                  </div>
+                )}
+                {userProfile?.school && (
+                  <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+                    <School className="w-3 h-3 text-violet-400" />
+                    {userProfile.school}
+                  </div>
+                )}
+                {userProfile?.grade && (
+                  <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+                    <GraduationCap className="w-3 h-3 text-violet-400" />
+                    {userProfile.grade}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+                  <Calendar className="w-3 h-3 text-violet-400" />
+                  Joined {userProfile?.createdAt ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : "before the Universe started"}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-3xl font-bold mt-4">
-            {userProfile?.displayName}
-          </h1>
-          {rank && (
-            <p className={`text-lg font-semibold mt-1 ${rank.color}`}>
-              {rank.name}
-            </p>
-          )}
-
-          <p className="text-sm text-gray-400">{userProfile?.email}</p>
+          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col justify-center items-center shadow-xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-50" />
+            <div className="relative z-10 flex flex-col items-center">
+              <h3>Ranked ELO</h3>
+              <span className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500 tracking-tighter">
+                {Math.round(userProfile?.bElo || 0)}
+              </span>
+              <div className="flex items-center gap-2 mt-2 text-violet-400 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium">
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        <motion.section
-          initial={{ opacity: 0, y: 25 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg"
+          className="space-y-4"
         >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-2xl font-semibold">Profile Information</h2>
-            <button
-              onClick={() => setEditing(true)}
-              className="bg-[#5CA3FF] text-black px-3 py-1 rounded-xl font-semibold hover:scale-105 transition-transform"
-            >
-              Edit
-            </button>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4 text-gray-300">
-            <p>
-              <span className="text-[#5CA3FF] font-bold">Bio:</span>{" "}
-              {userProfile?.bio || "Tell others about yourself"}
-            </p>
-            <p>
-              <span className="text-[#5CA3FF] font-bold">Status:</span>{" "}
-              {userProfile?.status || "Set your status"}
-            </p>
-            <p>
-              <span className="text-[#5CA3FF] font-bold">Location:</span>{" "}
-              {userProfile?.location || "Add location"}
-            </p>
-            <p>
-              <span className="text-[#5CA3FF] font-bold">Grade:</span>{" "}
-              {userProfile?.grade || "Not specified"}
-            </p>
-            <p>
-              <span className="text-[#5CA3FF] font-bold">School:</span>{" "}
-              {userProfile?.school || "Not specified"}
-            </p>
-            <p>
-              <span className="text-[#5CA3FF] font-bold">Player Since:</span>{" "}
-              {userProfile?.createdAt
-                ? new Date(
-                    userProfile.createdAt.seconds * 1000
-                  ).toLocaleDateString()
-                : "N/A"}
-            </p>
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg"
-        >
-          <h2 className="text-2xl font-semibold mb-4">Elo Ratings</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <EloCard
-              icon={<FaDna />}
-              label="USABO Elo"
-              value={userProfile.bElo}
-              color="green"
-            />
-            <EloCard
-              icon={<FaDna />}
-              label="USABO Unofficial Elo"
-              value={userProfile.buElo}
-              color="green"
-            />
-            <EloCard
-              icon={<FaStethoscope />}
-              label="MCAT Elo"
-              value={userProfile.mElo}
-              color="blue"
-            />
-            <EloCard
-              icon={<FaStethoscope />}
-              label="MCAT Unofficial Elo"
-              value={userProfile.muElo}
-              color="blue"
-            />
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 shadow-lg relative"
-        >
-          <h2 className="text-2xl font-semibold mb-4">Recent Sets Played</h2>
-          {setsPlayed.length === 0 ? (
-            <p className="text-gray-400">No sets played yet.</p>
-          ) : (
-            <>
-              <button
-                onClick={() =>
-                  document
-                    .getElementById("setsScroll")
-                    ?.scrollBy({ left: -250, behavior: "smooth" })
-                }
-                className="absolute top-1/2 -translate-y-1/2 left-2 bg-zinc-800 p-2 rounded-full shadow hover:bg-zinc-700 z-10"
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-violet-500" />
+              Recent Sets
+            </h2>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => scroll("left")}
+                className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               >
-                &larr;
+                <ChevronLeft className="w-5 h-5" />
               </button>
-
-              <button
-                onClick={() =>
-                  document
-                    .getElementById("setsScroll")
-                    ?.scrollBy({ left: 250, behavior: "smooth" })
-                }
-                className="absolute top-1/2 -translate-y-1/2 right-2 bg-zinc-800 p-2 rounded-full shadow hover:bg-zinc-700 z-10"
+              <button 
+                onClick={() => scroll("right")}
+                className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               >
-                &rarr;
+                <ChevronRight className="w-5 h-5" />
               </button>
+            </div>
+          </div>
 
-              <div
-                id="setsScroll"
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
-              >
-                {setsPlayed.map((set, i) => (
-                  <div
-                    key={i}
-                    className="min-w-[200px] flex-shrink-0 bg-zinc-900 p-4 rounded-xl text-sm"
-                  >
-                    <span className="block text-gray-300">{set.name}</span>
-                    <span className="block text-[#8c52ff] font-semibold text-lg mt-1">
-                      {set.score}
-                    </span>
-                  </div>
-                ))}
+          <div 
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {setsPlayed.length === 0 ? (
+              <div className="w-full p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-500">
+                No recent activity recorded.
               </div>
-            </>
-          )}
-        </motion.section>
+            ) : (
+              setsPlayed.map((set, i) => (
+                <div
+                  key={i}
+                  className="min-w-[240px] bg-zinc-900/50 border border-zinc-800/50 p-5 rounded-2xl hover:border-violet-500/30 transition-all group"
+                >
+                  <div className="flex flex-col h-full justify-between gap-4">
+                    <span className="text-zinc-300 font-medium line-clamp-2 text-sm group-hover:text-white transition-colors">
+                      {set.name.replace("Name: ", "")}
+                    </span>
+                    <div className="flex items-end justify-between border-t border-zinc-800 pt-3">
+                      <span className="text-xs text-zinc-500 uppercase tracking-wider">Score</span>
+                      <span className="text-xl font-bold text-violet-400">{set.score}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </motion.div>
 
-        <div className="text-center mt-6">
+        <div className="text-center pt-8 border-t border-zinc-900">
           <Link
             href="/home"
-            className="text-[#8c52ff]/80 hover:underline text-sm tracking-wide"
+            className="text-zinc-500 hover:text-white text-sm transition-colors"
           >
-            ← Back to Home
+            Back to Dashboard
           </Link>
         </div>
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-center">Edit Profile</h2>
-            {Object.keys(tempProfile).map((key) => (
-              <div key={key}>
-                <label className="block text-sm text-gray-400 capitalize mb-1">
-                  {key}
-                </label>
-                <input
-                  type="text"
-                  value={(tempProfile as any)[key]}
-                  onChange={(e) =>
-                    setTempProfile({ ...tempProfile, [key]: e.target.value })
-                  }
-                  className="w-full bg-zinc-800 text-white p-2 rounded-xl border border-zinc-700"
-                />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative"
+          >
+            <button
+              onClick={() => setEditing(false)}
+              className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-white bg-zinc-900 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            
+            <h2 className="text-2xl font-bold mb-6 text-center">Update Profile</h2>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Name</label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={tempProfile.displayName}
+                      onChange={(e) => setTempProfile({ ...tempProfile, displayName: e.target.value })}
+                      className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Bio</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Brief description..."
+                    value={tempProfile.bio}
+                    onChange={(e) => setTempProfile({ ...tempProfile, bio: e.target.value })}
+                    className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Location</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="text"
+                      placeholder="City, Country"
+                      value={tempProfile.location}
+                      onChange={(e) => setTempProfile({ ...tempProfile, location: e.target.value })}
+                      className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Grade</label>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="text"
+                      placeholder="Year 12"
+                      value={tempProfile.grade}
+                      onChange={(e) => setTempProfile({ ...tempProfile, grade: e.target.value })}
+                      className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">School / Institution</label>
+                  <div className="relative">
+                    <School className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="text"
+                      placeholder="University or High School Name"
+                      value={tempProfile.school}
+                      onChange={(e) => setTempProfile({ ...tempProfile, school: e.target.value })}
+                      className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
               </div>
-            ))}
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={saveChanges}
-                className="bg-[#8c52ff]/80 text-black px-4 py-2 rounded-xl font-semibold hover:scale-105 transition-transform"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setEditing(false)}
-                className="bg-zinc-700 text-white px-4 py-2 rounded-xl hover:bg-zinc-600"
-              >
-                Cancel
-              </button>
+
+              <div className="flex gap-3 mt-8 pt-4 border-t border-zinc-900">
+                <button
+                  onClick={saveChanges}
+                  className="flex-1 bg-violet-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-violet-500 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </main>
   );
 }
-
-interface EloCardProps {
-  icon: React.ReactElement;
-  label: string;
-  value: number;
-  color: "green" | "blue";
-}
-
-const EloCard = ({ icon, label, value, color }: EloCardProps) => {
-  const colorClass = color === "green" ? "text-green-400" : "text-blue-400";
-  const barColorClass = color === "green" ? "bg-green-400" : "bg-blue-400";
-
-  return (
-    <div className="bg-zinc-900 p-6 rounded-xl flex flex-col items-center justify-center shadow hover:shadow-lg transition-shadow w-full">
-      <div className={`${colorClass} text-4xl mb-2`}>{icon}</div>
-      <p className="text-lg font-semibold">{label}</p>
-      <p className="text-3xl font-bold">{value}</p>
-      <div className="w-full h-2 bg-zinc-700 rounded-full mt-2">
-        <div
-          className={`h-2 rounded-full ${barColorClass}`}
-          style={{ width: `${Math.min(value, 300) / 3}%` }}
-        />
-      </div>
-    </div>
-  );
-};

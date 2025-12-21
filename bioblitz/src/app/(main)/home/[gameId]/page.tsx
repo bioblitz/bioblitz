@@ -62,15 +62,12 @@ export default function GameDetailPage() {
     loadGameData();
   }, [gameId]);
 
-  // 3. Load Previous Attempts (Firestore)
   useEffect(() => {
     const fetchAttempts = async () => {
       if (!user || !gameId) return;
 
       setLoadingAttempts(true);
       try {
-        // NOTE: This query requires a Firestore Composite Index.
-        // Check browser console if this fails; Firebase provides a link to create it.
         const q = query(
           collection(firestore, "gameSubmissions"),
           where("userId", "==", user.uid),

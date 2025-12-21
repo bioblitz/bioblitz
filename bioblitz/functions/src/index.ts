@@ -1,7 +1,7 @@
-//import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
-import { onDocumentCreated } from "firebase-functions/v2/firestore"
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { FieldValue } from "firebase-admin/firestore"; // <--- Import FieldValue
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -9,7 +9,7 @@ const db = admin.firestore();
 export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", async (event) => {
   const snap = event.data;
   if (!snap) {
-    console.log("No data associated with the event, exiting function.");
+    console.log("No data associated with the event.");
     return;
   }
 
@@ -35,18 +35,15 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
       return snap.ref.update({ status: "error_game_not_found" });
     }
 
+    const gameTitle = gameDoc.data()?.title || gameDoc.data()?.name || "Woah so vintage";
     const timeTotal = gameDoc.data()?.timeLimit as number;
-    if (typeof timeTotal !== "number" || timeTotal <= 0) {
-      console.error("Invalid 'timeLimit' on game set:", gameId);
-      return snap.ref.update({ status: "error_invalid_time_limit" });
-    }
 
+    // --- 1. Fetch Questions & Calculate Score ---
     const questionsColRef = gameDocRef.collection("questions");
     const questionsSnap = await questionsColRef.get();
     const totalQuestions = questionsSnap.size;
 
     if (totalQuestions === 0) {
-      console.error("Game has no questions:", gameId);
       return snap.ref.update({ score: 0, status: "error_no_questions" });
     }
 
@@ -63,18 +60,72 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     }
 
     const accuracyScore = (correctCount / totalQuestions) * 1000;
-    const timeLeft = timeTotal - timeTaken;
-    const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / timeTotal);
+    const safeTimeTotal = (typeof timeTotal === "number" && timeTotal > 0) ? timeTotal : 60;
+    const timeLeft = Math.max(0, safeTimeTotal - timeTaken);
+    const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
     const finalScore = Math.floor(accuracyScore + timeBonus);
-    const userHistoryDocRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("setsPlayed")
-      .doc(gameId);
 
+    const userRef = db.collection("users").doc(userId);
+    const userHistoryDocRef = userRef.collection("setsPlayed").doc(gameId);
+    const existingHistory = await userHistoryDocRef.get();
+
+    if (existingHistory.exists) {
+        console.log(`User ${userId} has played set ${gameId} before. Marking as Replay.`);
+ 
+        await Promise.all([
+          snap.ref.update({ 
+              status: "graded_replay", 
+              score: finalScore,
+              correctCount: correctCount,
+              totalQuestions: totalQuestions,
+              correctAnswers: correctAnswersMap,
+              gradedAt: FieldValue.serverTimestamp(),
+              note: "Replay: Elo not updated."
+          }),
+          userHistoryDocRef.update({
+             history: FieldValue.arrayUnion(snap.id),
+             lastPlayedAt: FieldValue.serverTimestamp(),
+             title: gameTitle 
+          })
+        ]);
+        return;
+    }
+
+    const allSetsPlayedSnap = await userRef.collection("setsPlayed").get();
+    
+    let weightedScoreSum = 0;
+    let totalWeight = 0;
+    const now = Date.now();
+    const DAY_IN_MS = 1000 * 60 * 60 * 24;
+    const DECAY_DAYS = 30; 
+
+    allSetsPlayedSnap.forEach((doc) => {
+        const data = doc.data();
+        const score = data.score;
+        const playedAtVal = data.playedAt?.toDate().getTime() || (now - (60 * DAY_IN_MS));
+
+        if (typeof score === 'number') {
+            const daysAgo = Math.max(0, (now - playedAtVal) / DAY_IN_MS);
+            const weight = Math.exp(-daysAgo / DECAY_DAYS);
+            weightedScoreSum += (score * weight);
+            totalWeight += weight;
+        }
+    });
+
+    // Add CURRENT game (Weight = 1.0)
+    weightedScoreSum += finalScore * 1.0;
+    totalWeight += 1.0;
+
+    const newBElo = Math.round(weightedScoreSum / totalWeight);
+
+    // 4. Update Database for First Attempt
     const userHistoryData = {
       submission: snap.id, 
+      history: [snap.id], // Initialize array with this submission
       score: finalScore,
+      title: gameTitle,
+      playedAt: FieldValue.serverTimestamp(),
+      lastPlayedAt: FieldValue.serverTimestamp()
     };
     
     const submissionUpdateData = {
@@ -83,19 +134,21 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         totalQuestions: totalQuestions,
         correctAnswers: correctAnswersMap,
         status: "graded",
-        gradedAt: admin.firestore.FieldValue.serverTimestamp(),
+        gradedAt: FieldValue.serverTimestamp(),
     };
 
-    console.log(`Grading submission ${snap.id} and updating user history for ${userId}. Score: ${finalScore}`);
+    console.log(`First Attempt: Updating bElo to ${newBElo}`);
+    
     await Promise.all([
         snap.ref.update(submissionUpdateData),
-        userHistoryDocRef.set(userHistoryData)
+        userHistoryDocRef.set(userHistoryData),
+        userRef.update({ bElo: newBElo })
     ]);
 
     return;
 
   } catch (error) {
-    console.error(`An unexpected error occurred grading ${snap.id}:`, error);
+    console.error(`Error grading ${snap.id}:`, error);
     return snap.ref.update({
       status: "error_unexpected",
       errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -104,7 +157,6 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
 });
 
 export const getPublicQuestions = onCall(async (request) => {
-  // Check if the user is authenticated.
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be logged in to start a game.");
   }

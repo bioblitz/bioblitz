@@ -1,6 +1,5 @@
-//filler settings page
-
 "use client";
+
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
 import Link from "next/link";
@@ -10,6 +9,9 @@ import {
   onAuthStateChanged,
   signOut,
   deleteUser,
+  GoogleAuthProvider,
+  reauthenticateWithPopup,
+  User
 } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
@@ -25,22 +27,27 @@ export default function SettingsPage() {
   const [animationEnabled, setAnimationEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [volume, setVolume] = useState(70);
+  const [gregoryMode, setGregoryMode] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
 
   const router = useRouter();
 
+  // Load Settings on Mount
   useEffect(() => {
     const sound = localStorage.getItem("soundEnabled");
     const animation = localStorage.getItem("animationEnabled");
     const email = localStorage.getItem("emailNotifications");
+    const gregory = localStorage.getItem("gregoryMode");
 
     if (sound !== null) setSoundEnabled(sound === "true");
     if (animation !== null) setAnimationEnabled(animation === "true");
     if (email !== null) setEmailNotifications(email === "true");
+    if (gregory !== null) setGregoryMode(gregory === "true");
   }, []);
 
+  // Save regular settings automatically
   useEffect(() => {
     localStorage.setItem("soundEnabled", soundEnabled.toString());
   }, [soundEnabled]);
@@ -52,6 +59,16 @@ export default function SettingsPage() {
   useEffect(() => {
     localStorage.setItem("emailNotifications", emailNotifications.toString());
   }, [emailNotifications]);
+
+ useEffect(() => {
+    if (gregoryMode) {
+      document.body.style.filter = "sepia(1) hue-rotate(275deg) saturate(6)";
+      document.body.style.transition = "none";
+    } else {
+      document.body.style.filter = "none";
+      document.body.style.transition = "none";
+    }
+  }, [gregoryMode]);
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -69,25 +86,52 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     const auth = getAuth(app);
-    if (auth.currentUser) {
-      const confirmed = confirm(
-        "Are you sure you want to permanently delete your account?"
-      );
-      if (confirmed) {
-        try {
-          await deleteUser(auth.currentUser);
-          alert("Account deleted successfully.");
-        } catch (err) {
-          console.error(err);
-          alert("You need to sign in again to delete your account.");
+    const currentUser = auth.currentUser;
+  
+    if (!currentUser) return;
+  
+    const confirmed = confirm("Are you sure you want to permanently delete your account?");
+    if (!confirmed) return;
+  
+    const walrusChorus = "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
+    const userInput = prompt(`Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`);
+  
+    if (userInput !== walrusChorus) {
+      alert("Incorrect phrase. Deletion cancelled.");
+      return;
+    }
+  
+    try {
+      await deleteUser(currentUser);
+      alert("Account deleted successfully.");
+      router.push("/auth");
+    } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        const reConfirm = confirm("For security, you must sign in again to confirm deletion. Sign in now?");
+        
+        if (reConfirm) {
+          try {
+            const provider = new GoogleAuthProvider();
+            await reauthenticateWithPopup(currentUser, provider);
+            
+            await deleteUser(currentUser);
+            alert("Account deleted successfully.");
+            router.push("/auth");
+          } catch (reAuthError) {
+            console.error("Re-auth failed", reAuthError);
+            alert("Verification failed. Account was not deleted.");
+          }
         }
+      } else {
+        console.error("Error deleting user:", error);
+        alert("An error occurred. Please try again later.");
       }
     }
   };
 
   return (
     <main
-      className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto`}
+      className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
     >
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">
@@ -106,6 +150,7 @@ export default function SettingsPage() {
                 src={user.photoURL}
                 alt="Profile picture"
                 className="w-16 h-16 rounded-full object-cover border border-zinc-700"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400">
@@ -169,6 +214,7 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
+       
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -217,6 +263,32 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
+         <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
+        >
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            Experimental 
+            {gregoryMode && <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">ON</span>}
+          </h2>
+          <div className="flex items-center justify-between">
+            <div>
+               <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>Gregory Mode</p>
+            </div>
+            <Switch
+              checked={gregoryMode}
+              onCheckedChange={(val) => {
+                setGregoryMode(val);
+                localStorage.setItem("gregoryMode", val.toString());
+              }}
+              className="transition-colors duration-200 data-[state=checked]:bg-pink-600 data-[state=unchecked]:bg-zinc-800"
+            />
+          </div>
+        </motion.section>
+
+
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -258,5 +330,3 @@ export default function SettingsPage() {
     </main>
   );
 }
-
-//Note: The settings page is currently storing all of the preferences in local storage for simplicity. We should later save these preferences to Firebase for persistence across devices.

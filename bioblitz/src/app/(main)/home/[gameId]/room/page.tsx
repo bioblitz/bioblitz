@@ -168,7 +168,6 @@ export default function GameRoomPage() {
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
     try {
-      // 1. Create the submission document
       const submissionRef = await addDoc(
         collection(firestore, "gameSubmissions"),
         {
@@ -180,18 +179,6 @@ export default function GameRoomPage() {
           status: "pending_grading",
           ranked: isRanked,
         }
-      );
-
-      // 2. Update user profile history
-      await setDoc(
-        doc(firestore, "users", user.uid, "setsPlayed", gameId as string), 
-        {
-          title: gameTitle, 
-          lastPlayedAt: serverTimestamp(),
-          // 2. Added the history field using arrayUnion
-          history: arrayUnion(submissionRef.id) 
-        }, 
-        { merge: true }
       );
 
       if (isMounted.current) {
