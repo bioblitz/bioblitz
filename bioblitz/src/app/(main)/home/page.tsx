@@ -4,34 +4,74 @@ import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Clock, HelpCircle, User, Star, Filter, Loader2 } from "lucide-react"; 
+import { Clock,  HelpCircle, User, Star, Filter, Loader2, CheckCircle2, SlidersHorizontal, ChevronDown, ChevronUp, Search } from "lucide-react"; 
+import { getAuth } from "firebase/auth";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { app } from "@/lib/firebase";
 
 export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
+  
+  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
+  const [typeFilter, setTypeFilter] = useState<"All" | "Official" | "Community">("All");
+
   const [games, setGames] = useState<gameRoom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
   
   const searchParams = useSearchParams();
   const router = useRouter();
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
   const topics = ["All Topics", "Animal", "Cell Bio", "Biochem", "Genetics", "Plants"];
 
   useEffect(() => {
-    const loadGames = async () => {
+    const loadData = async () => {
       try {
         const fetchedGames = await allGames();
         setGames(fetchedGames);
+
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const historyRef = collection(db, "users", currentUser.uid, "setsPlayed");
+          const historySnap = await getDocs(historyRef);
+          const ids = new Set<string>();
+          historySnap.forEach(doc => ids.add(doc.id));
+          setPlayedGameIds(ids);
+        }
+
       } catch (error) {
-        console.error("Failed to load Blitzes:", error);
+        console.error("Failed to load data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadGames();
-  }, []);
+    loadData();
+  }, [auth, db]);
 
   const filteredGames = games.filter((game) => {
-    return topic === "All Topics" || game.topic === topic;
+    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTopic = topic === "All Topics" || game.topic === topic;
+    const isPlayed = playedGameIds.has(game.id);
+    
+    let matchesStatus = true;
+    if (statusFilter === "Completed") matchesStatus = isPlayed;
+    if (statusFilter === "New") matchesStatus = !isPlayed;
+
+    const hasSource = (game as any).source;
+    const hasCreator = game.creator;
+    let matchesType = true;
+    
+    if (typeFilter === "Official") {
+        matchesType = !!hasSource || !hasCreator;
+    } else if (typeFilter === "Community") {
+        matchesType = !!hasCreator && !hasSource;
+    }
+
+    return matchesSearch && matchesTopic && matchesStatus && matchesType;
   });
 
   const getTopicColors = (topic: string | undefined) => {
@@ -64,51 +104,148 @@ export default function HomePage() {
     );
   }
 
+  const activeFilterCount = (statusFilter !== "All" ? 1 : 0) + (typeFilter !== "All" ? 1 : 0) + (topic !== "All Topics" ? 1 : 0);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-              Join a Blitz
-            </h1>
-            <p className="text-zinc-400 mt-1">Select a topic to start competing</p>
+        <div className="flex flex-col gap-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+                Join a Blitz
+              </h1>
+              <p className="text-zinc-400 mt-1">Select a topic to start competing</p>
+            </div>
+
+            <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+               
+               <div className="relative group flex-grow sm:flex-grow-0">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-violet-500 transition-colors" />
+                  <input 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search titles..."
+                    className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600"
+                  />
+               </div>
+
+               <button 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`
+                    flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all
+                    ${showFilters || activeFilterCount > 0 
+                       ? "bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700" 
+                       : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
+                    }
+                  `}
+               >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>Filters</span>
+                  {activeFilterCount > 0 && (
+                     <span className="bg-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem]">
+                        {activeFilterCount}
+                     </span>
+                  )}
+                  {showFilters ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+               </button>
+            </div>
           </div>
 
-          {/* TOPIC SELECTOR UI */}
-          <div className="w-full md:w-auto overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
-             <div className="flex space-x-2">
-                {topics.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTopic(t)}
-                    className={`
-                      whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border
-                      ${topic === t 
-                        // NAV STYLE MATCH: Glassy Violet (15% opacity) + Bright Text + Subtle Glow
-                        ? "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border-violet-500/10" 
-                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-zinc-700"
-                      }
-                    `}
-                  >
-                    {t}
-                  </button>
-                ))}
-             </div>
-          </div>
+          {showFilters && (
+            <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                  
+                  <div className="md:col-span-5 space-y-6">
+                    <div className="space-y-3">
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                          <CheckCircle2 className="w-3 h-3" /> Status
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {(["All", "New", "Completed"] as const).map((opt) => (
+                              <button
+                                key={opt}
+                                onClick={() => setStatusFilter(opt)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                                  statusFilter === opt
+                                  ? "bg-zinc-800 text-white border-zinc-600"
+                                  : "bg-transparent text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700"
+                                }`}
+                              >
+                                {opt}
+                              </button>
+                          ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                          <User className="w-3 h-3" /> Type
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {(["All", "Official", "Community"] as const).map((opt) => (
+                              <button
+                                key={opt}
+                                onClick={() => setTypeFilter(opt)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                                  typeFilter === opt
+                                  ? "bg-zinc-800 text-white border-zinc-600"
+                                  : "bg-transparent text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700"
+                                }`}
+                              >
+                                {opt}
+                              </button>
+                          ))}
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-7 border-t md:border-t-0 md:border-l border-zinc-800 pt-6 md:pt-0 md:pl-8">
+                      <div className="space-y-3">
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                            <Filter className="w-3 h-3" /> Topics
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                            {topics.map((t) => (
+                              <button
+                                key={t}
+                                onClick={() => setTopic(t)}
+                                className={`
+                                  px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
+                                  ${topic === t 
+                                    ? "bg-violet-600/15 text-violet-300 border-violet-500/30" 
+                                    : "bg-transparent text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
+                                  }
+                                `}
+                              >
+                                {t}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                  </div>
+
+                </div>
+            </div>
+          )}
         </div>
 
-        {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredGames.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
               <Filter className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
               <p className="text-zinc-400 text-lg">No Blitzes found matching these filters.</p>
               <button 
-                onClick={() => setTopic("All Topics")}
-                className="mt-4 text-yellow-500 hover:text-yellow-400 font-medium transition-colors"
+                onClick={() => {
+                   setSearchQuery("");
+                   setTopic("All Topics");
+                   setStatusFilter("All");
+                   setTypeFilter("All");
+                }}
+                className="mt-4 text-violet-400 hover:text-violet-500 font-medium transition-colors"
               >
                 Clear Filters
               </button>
@@ -116,6 +253,8 @@ export default function HomePage() {
           ) : (
             filteredGames.map((game) => {
               const theme = getTopicColors(game.topic);
+              const isPlayed = playedGameIds.has(game.id);
+
               return (
                 <Link key={game.id} href={`/home/${game.id}`} className="block group">
                   <div className={`relative h-full flex flex-col justify-between bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}>
@@ -126,6 +265,14 @@ export default function HomePage() {
                             {game.topic}
                           </span>
                         )}
+                        
+                        {isPlayed && (
+                          <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Completed</span>
+                          </div>
+                        )}
+
                       </div>
                       <h2 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight transition-colors">
                         {game.title}

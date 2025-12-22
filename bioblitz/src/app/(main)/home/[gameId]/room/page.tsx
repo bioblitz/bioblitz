@@ -10,12 +10,18 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-  arrayUnion, // <--- 1. Imported arrayUnion
+  arrayUnion,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { Loader2, AlertCircle } from "lucide-react";
+import { Crown, Medal } from "lucide-react";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -168,18 +174,34 @@ export default function GameRoomPage() {
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
     try {
-      const submissionRef = await addDoc(
-        collection(firestore, "gameSubmissions"),
-        {
+      let submissionRef;
+
+      if (isRanked) {
+        const rankedId = `${user.uid}_${gameId}`;
+        const rankedRef = doc(firestore, "gameSubmissions", rankedId);
+
+        await setDoc(rankedRef, {
           gameId: gameId,
           userId: user.uid,
           userAnswers: userAnswers,
           timeTaken: timeTaken,
           submittedAt: serverTimestamp(),
           status: "pending_grading",
-          ranked: isRanked,
-        }
-      );
+          ranked: true,
+        });
+
+        submissionRef = rankedRef;
+      } else {
+        submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
+          gameId: gameId,
+          userId: user.uid,
+          userAnswers: userAnswers,
+          timeTaken: timeTaken,
+          submittedAt: serverTimestamp(),
+          status: "pending_grading",
+          ranked: false,
+        });
+      }
 
       if (isMounted.current) {
         setSubmissionId(submissionRef.id);
@@ -247,6 +269,67 @@ export default function GameRoomPage() {
     }`;
   };
 
+  const [leaderboard, setLeaderboard] = useState<
+    { userId: string; score: number; timeTaken: number }[]
+  >([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+
+  useEffect(() => {
+    if (!submitted || activeTab !== "leaderboard") return;
+
+    const fetchLeaderboard = async () => {
+      setLoadingLeaderboard(true);
+      try {
+        const q = query(
+          collection(firestore, "gameSubmissions"),
+          where("gameId", "==", gameId),
+          where("ranked", "==", true),
+          orderBy("score", "desc"),
+          orderBy("timeTaken", "asc"),
+          orderBy("submittedAt", "asc"),
+          limit(50)
+        );
+
+        const snapshot = await getDocs(q);
+
+        const firstByUser: { [userId: string]: any } = {};
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          if (!firstByUser[data.userId]) {
+            firstByUser[data.userId] = data;
+          }
+        });
+
+        const data = Object.values(firstByUser) as {
+          userId: string;
+          score: number;
+          timeTaken: number;
+        }[];
+        setLeaderboard(data);
+      } catch (err) {
+        console.error("Error fetching leaderboard:", err);
+      } finally {
+        setLoadingLeaderboard(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [submitted, activeTab, gameId]);
+
+  const [usersMap, setUsersMap] = useState<{ [uid: string]: string }>({});
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const snapshot = await getDocs(collection(firestore, "users"));
+      const map: { [uid: string]: string } = {};
+      snapshot.docs.forEach((doc) => {
+        map[doc.id] = doc.data().displayName || "Unknown";
+      });
+      setUsersMap(map);
+    };
+    fetchUsers();
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
@@ -282,7 +365,6 @@ export default function GameRoomPage() {
       {/* Main Layout */}
       <div className="flex-1 flex justify-center py-8 px-4">
         <div className="w-full max-w-4xl relative">
-          
           {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
@@ -325,7 +407,7 @@ export default function GameRoomPage() {
               >
                 Leaderboard
               </button>
-              
+
               <button
                 onClick={() => router.push("/home")}
                 className="px-6 py-2 rounded-full bg-zinc-800 text-white font-bold text-lg hover:bg-white hover:text-black transition duration-300 shadow-md"
@@ -356,14 +438,14 @@ export default function GameRoomPage() {
                           Question {idx + 1}
                         </span>
                       </div>
-                      
+
                       <p className="mb-6 text-xl leading-relaxed text-zinc-100 font-medium">
                         {question.content}
                       </p>
-                      
+
                       {question.imgURL && (
                         <div className="mb-6 rounded-xl overflow-hidden border border-zinc-700 bg-black">
-                           <img
+                          <img
                             src={question.imgURL}
                             alt={`Question ${idx + 1}`}
                             className="w-full max-h-[400px] object-contain"
@@ -384,9 +466,13 @@ export default function GameRoomPage() {
                               onClick={() => handleAnswer(idx, key)}
                               className={`group flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-200 ${bgClass}`}
                             >
-                              <span className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${
-                                isSelected ? "bg-white/20 text-white" : "bg-black/20 text-zinc-400 group-hover:text-white"
-                              }`}>
+                              <span
+                                className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${
+                                  isSelected
+                                    ? "bg-white/20 text-white"
+                                    : "bg-black/20 text-zinc-400 group-hover:text-white"
+                                }`}
+                              >
                                 {key}
                               </span>
                               <span className="text-lg">{text}</span>
@@ -428,20 +514,31 @@ export default function GameRoomPage() {
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                       <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-400 font-medium mb-1">Accuracy</h2>
+                        <h2 className="text-zinc-400 font-medium mb-1">
+                          Accuracy
+                        </h2>
                         <p className="text-3xl font-bold text-white">
-                          <span className="text-violet-500">{finalResult.correctCount}</span>
-                          <span className="text-zinc-600 text-xl"> / {finalResult.totalQuestions}</span>
+                          <span className="text-violet-500">
+                            {finalResult.correctCount}
+                          </span>
+                          <span className="text-zinc-600 text-xl">
+                            {" "}
+                            / {finalResult.totalQuestions}
+                          </span>
                         </p>
                       </div>
                       <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-400 font-medium mb-1">Time Played</h2>
+                        <h2 className="text-zinc-400 font-medium mb-1">
+                          Time Played
+                        </h2>
                         <p className="text-3xl font-bold text-white">
                           {formatTime(timeTotal - (timeLeft ?? 0))}
                         </p>
                       </div>
                       <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-400 font-medium mb-1">Score</h2>
+                        <h2 className="text-zinc-400 font-medium mb-1">
+                          Score
+                        </h2>
                         <p className="text-3xl font-bold text-violet-500">
                           {finalResult.score}
                         </p>
@@ -463,14 +560,16 @@ export default function GameRoomPage() {
                           key={idx}
                           className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-md"
                         >
-                           <div className="flex items-center gap-3 mb-4">
+                          <div className="flex items-center gap-3 mb-4">
                             <span className="bg-zinc-800 text-zinc-400 text-sm font-bold px-3 py-1 rounded-full">
                               Question {idx + 1}
                             </span>
                           </div>
-                          
-                          <p className="mb-6 text-xl text-zinc-100">{question.content}</p>
-                          
+
+                          <p className="mb-6 text-xl text-zinc-100">
+                            {question.content}
+                          </p>
+
                           {question.imgURL && (
                             <img
                               src={question.imgURL}
@@ -484,12 +583,15 @@ export default function GameRoomPage() {
                               const isUserAnswer = userAnswer === key;
                               const isCorrect = correctAnswer === key;
 
-                              let bgClass = "bg-zinc-800/50 border-zinc-700 text-zinc-400";
+                              let bgClass =
+                                "bg-zinc-800/50 border-zinc-700 text-zinc-400";
 
                               if (isCorrect) {
-                                bgClass = "bg-emerald-500/10 border-emerald-500 text-emerald-400";
+                                bgClass =
+                                  "bg-emerald-500/10 border-emerald-500 text-emerald-400";
                               } else if (isUserAnswer) {
-                                bgClass = "bg-red-500/10 border-red-500 text-red-400";
+                                bgClass =
+                                  "bg-red-500/10 border-red-500 text-red-400";
                               }
 
                               return (
@@ -497,10 +599,20 @@ export default function GameRoomPage() {
                                   key={key}
                                   className={`flex items-center px-5 py-4 rounded-xl border-2 ${bgClass}`}
                                 >
-                                  <span className="font-bold mr-4 uppercase w-6">{key}</span>
+                                  <span className="font-bold mr-4 uppercase w-6">
+                                    {key}
+                                  </span>
                                   <span className="font-medium">{text}</span>
-                                  {isCorrect && <span className="ml-auto text-emerald-500 font-bold text-sm">CORRECT</span>}
-                                  {isUserAnswer && !isCorrect && <span className="ml-auto text-red-500 font-bold text-sm">YOUR ANSWER</span>}
+                                  {isCorrect && (
+                                    <span className="ml-auto text-emerald-500 font-bold text-sm">
+                                      CORRECT
+                                    </span>
+                                  )}
+                                  {isUserAnswer && !isCorrect && (
+                                    <span className="ml-auto text-red-500 font-bold text-sm">
+                                      YOUR ANSWER
+                                    </span>
+                                  )}
                                 </div>
                               );
                             })}
@@ -514,20 +626,83 @@ export default function GameRoomPage() {
             )}
 
             {submitted && activeTab === "leaderboard" && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center">
-                <h2 className="text-2xl font-bold mb-2">Leaderboard</h2>
-                <p className="text-zinc-500">Leaderboard data coming soon.</p>
+              <div className="bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-8">
+                <h2 className="text-2xl font-bold mb-6 text-center">
+                  Contest Leaderboard
+                </h2>
+
+                {loadingLeaderboard ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-8 h-8 text-violet-500 animate-spin mb-2" />
+                    <span className="text-zinc-400">
+                      Loading leaderboard...
+                    </span>
+                  </div>
+                ) : leaderboard.length === 0 ? (
+                  <p className="text-zinc-500 text-center">
+                    No submissions yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-[420px] overflow-y-auto">
+                    {leaderboard.map((entry, idx) => {
+                      const isCurrentUser = entry.userId === user?.uid;
+                      const displayName = usersMap[entry.userId] || "Unknown";
+
+                      return (
+                        <div
+                          key={entry.userId}
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${
+                            isCurrentUser
+                              ? "bg-violet-600/20 border-violet-500 text-white font-semibold"
+                              : "bg-zinc-800/50 text-zinc-300"
+                          }`}
+                        >
+                          <div className="w-6 flex justify-center">
+                            {idx === 0 ? (
+                              <Crown className="w-6 h-6 text-yellow-500 fill-yellow-500/20" />
+                            ) : idx === 1 ? (
+                              <Medal className="w-6 h-6 text-zinc-300" />
+                            ) : idx === 2 ? (
+                              <Medal className="w-6 h-6 text-orange-500" />
+                            ) : (
+                              <span className="font-bold text-zinc-500 w-6 text-center">
+                                {idx + 1}
+                              </span>
+                            )}
+                          </div>
+
+                          <img
+                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
+                            alt={displayName}
+                            className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900"
+                          />
+
+                          <span className="truncate flex-1 text-left">
+                            {displayName}
+                          </span>
+
+                          <span className="font-mono text-lg text-right">
+                            {entry.score}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* FIXED POSITION TIMER (Desktop) - With Purple Theme */}
         {timeLeft !== null && timeLeft > 0 && !submitted && (
           <div className="hidden xl:block fixed right-10 top-1/2 transform -translate-y-1/2 z-40">
             <div className="relative flex flex-col items-center">
               <div style={{ width: size, height: size, position: "relative" }}>
-                <svg height={size} width={size} className="transform -rotate-90">
+                <svg
+                  height={size}
+                  width={size}
+                  className="transform -rotate-90"
+                >
                   <circle
                     stroke="#27272a"
                     fill="transparent"
@@ -553,11 +728,13 @@ export default function GameRoomPage() {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-4xl font-bold text-white tabular-nums">
-                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60)
+                    {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60)
                       .toString()
                       .padStart(2, "0")}`}
                   </span>
-                  <span className="text-zinc-500 text-sm font-medium uppercase tracking-wider mt-1">Remaining</span>
+                  <span className="text-zinc-500 text-sm font-medium uppercase tracking-wider mt-1">
+                    Remaining
+                  </span>
                 </div>
               </div>
             </div>
@@ -565,7 +742,6 @@ export default function GameRoomPage() {
         )}
       </div>
 
-      {/* CONFIRM MODAL */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center transform scale-100 transition-all">
