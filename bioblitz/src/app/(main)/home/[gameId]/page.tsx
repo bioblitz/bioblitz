@@ -3,21 +3,30 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
-import { Sprout, Loader2, History, Trophy, AlertCircle, Calendar, Clock, Play } from "lucide-react"; 
+import { Sprout, Loader2, History, Trophy, AlertCircle, Calendar, Clock, Play, Medal, Crown } from "lucide-react"; 
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, firestore } from "@/lib/firebase"; 
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc } from "firebase/firestore";
 
 // Define shape for past attempts
 interface GameSubmission {
   id: string;
+  userId: string;
   score: number;
   totalQuestions: number; 
   submittedAt: Timestamp;
   timeTaken: number;
   ranked?: boolean;
+}
+
+// Define shape for Leaderboard Entry
+interface LeaderboardEntry {
+  userId: string;
+  username: string; // This will now come from the Users collection
+  score: number;
+  timeTaken: number;
 }
 
 export default function GameDetailPage() {
@@ -27,20 +36,20 @@ export default function GameDetailPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [game, setGame] = useState<gameRoom | undefined>(undefined);
-  const [otherGames, setOtherGames] = useState<gameRoom[]>([]);
   
   // Loading states
   const [loadingGame, setLoadingGame] = useState(true);
   const [loadingAttempts, setLoadingAttempts] = useState(true);
   
-  const [searchQuery, setSearchQuery] = useState("");
   const [previousAttempts, setPreviousAttempts] = useState<GameSubmission[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]); 
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   // 1. Listen for Auth State
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (!currentUser) setLoadingAttempts(false); // Stop loading if no user
+      if (!currentUser) setLoadingAttempts(false);
     });
     return () => unsubscribe();
   }, []);
@@ -55,13 +64,13 @@ export default function GameDetailPage() {
       const currentGame = fetchedGames.find((g) => g.id === gameId);
 
       setGame(currentGame);
-      setOtherGames(fetchedGames);
       setLoadingGame(false);
     };
 
     loadGameData();
   }, [gameId]);
 
+  // 3. Load User History
   useEffect(() => {
     const fetchAttempts = async () => {
       if (!user || !gameId) return;
@@ -83,7 +92,7 @@ export default function GameDetailPage() {
 
         setPreviousAttempts(attempts);
       } catch (err) {
-        console.error("Error fetching attempts (Check Console for Index Link):", err);
+        console.error("Error fetching attempts:", err);
       } finally {
         setLoadingAttempts(false);
       }
@@ -92,56 +101,85 @@ export default function GameDetailPage() {
     fetchAttempts();
   }, [user, gameId]);
 
-  // Logic: It is a "Ranked" attempt only if they have 0 previous submissions
-  // We explicitly check !loadingAttempts to avoid false positives during load
+  // 4. Load & Process Leaderboard (First Attempt Only + Fetch Usernames)
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+       if (!gameId) return;
+       setLoadingLeaderboard(true);
+       
+       try {
+          // A. Fetch ALL submissions for this game, ordered by Time (Oldest First)
+          // We order by time ASC so the first one we encounter in the loop is the "First Attempt"
+          const q = query(
+             collection(firestore, "gameSubmissions"),
+             where("gameId", "==", gameId),
+             orderBy("submittedAt", "asc") 
+          );
+          
+          const snapshot = await getDocs(q);
+          const rawSubmissions = snapshot.docs.map(doc => doc.data() as GameSubmission);
+
+          // B. Filter: Keep only the FIRST submission per User ID
+          const firstAttemptsMap = new Map<string, GameSubmission>();
+          
+          rawSubmissions.forEach((sub) => {
+             // If we haven't seen this user yet, this is their first attempt (due to ASC sort)
+             if (!firstAttemptsMap.has(sub.userId)) {
+                firstAttemptsMap.set(sub.userId, sub);
+             }
+          });
+
+          // C. Convert to Array and Sort by Score (High to Low)
+          const sortedAttempts = Array.from(firstAttemptsMap.values())
+             .sort((a, b) => b.score - a.score)
+             .slice(0, 20); // Only keep Top 20 for display
+
+          // D. Fetch User Profiles for these Top 20 IDs
+          // We use Promise.all to fetch the displayNames in parallel
+          const leaderboardData = await Promise.all(
+             sortedAttempts.map(async (submission) => {
+                let displayName = "Unknown User";
+                
+                try {
+                   // Fetch user document
+                   const userDocRef = doc(firestore, "users", submission.userId);
+                   const userSnap = await getDoc(userDocRef);
+                   
+                   if (userSnap.exists()) {
+                      const userData = userSnap.data();
+                      displayName = userData.displayName || "Unknown User";
+                   }
+                } catch (e) {
+                   console.error("Failed to fetch user profile", e);
+                }
+
+                return {
+                   userId: submission.userId,
+                   username: displayName, // Now using real data from Users collection
+                   score: submission.score,
+                   timeTaken: submission.timeTaken
+                };
+             })
+          );
+          
+          setLeaderboard(leaderboardData);
+
+       } catch (err) {
+          console.error("Error loading leaderboard:", err);
+       } finally {
+          setLoadingLeaderboard(false);
+       }
+    };
+
+    fetchLeaderboard();
+  }, [gameId]);
+
+
   const isFirstAttempt = !loadingAttempts && previousAttempts.length === 0;
 
   const handleJoinGame = () => {
     if (loadingAttempts) return;
-    // Pass 'ranked=true' if it's their first time, otherwise 'ranked=false'
     router.push(`/home/${gameId}/room?ranked=${isFirstAttempt}`);
-  };
-
-  if (loadingGame) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
-          <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
-          <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
-            Loading Blitz Details...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!game) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <p className="text-lg">Blitz not found</p>
-      </div>
-    );
-  }
-
-  const filteredOtherGames = otherGames
-    .filter((g) => g.id !== gameId)
-    .filter((g) => g.title.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-  };
-
-  const slideUp: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 80 },
-    },
   };
 
   const formatTimePlayed = (seconds: number) => {
@@ -159,9 +197,34 @@ export default function GameDetailPage() {
     });
   };
 
+  const getRankIcon = (index: number) => {
+    if (index === 0) return <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500/20" />;
+    if (index === 1) return <Medal className="w-4 h-4 text-zinc-300" />;
+    if (index === 2) return <Medal className="w-4 h-4 text-orange-500" />;
+    return <span className="text-zinc-500 font-mono text-xs w-4 text-center">{index + 1}</span>;
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+  };
+  const slideUp: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 80 } },
+  };
+
+  if (loadingGame) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!game) return <div className="text-white p-10">Game not found</div>;
+
   return (
     <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">
-      {/* Scrollable Container */}
       <div className="flex flex-1 overflow-hidden pt-24 px-4 md:px-8 pb-4 gap-6 max-w-7xl mx-auto w-full">
         
         {/* LEFT COLUMN: Main Game Details */}
@@ -171,7 +234,7 @@ export default function GameDetailPage() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div
+           <motion.div
             variants={slideUp}
             className="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 shadow-2xl backdrop-blur-sm"
           >
@@ -191,14 +254,12 @@ export default function GameDetailPage() {
               </div>
             </div>
 
-            {/* Description */}
             {game.description && (
                <p className="text-zinc-400 text-lg leading-relaxed mb-8 max-w-3xl">
                  {game.description.replace(/^"(.*)"$/, "$1")}
                </p>
             )}
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
                  <div className="text-zinc-500 text-xs uppercase font-bold mb-1">Questions</div>
@@ -206,7 +267,7 @@ export default function GameDetailPage() {
               </div>
               <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
                  <div className="text-zinc-500 text-xs uppercase font-bold mb-1">Time Limit</div>
-                 <div className="text-2xl font-bold text-white">{Math.floor(parseInt(game.timeLimit) / 60)}m</div>
+                 <div className="text-2xl font-bold text-white">{game.timeLimit}</div>
               </div>
               <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
                  <div className="text-zinc-500 text-xs uppercase font-bold mb-1">Attempts</div>
@@ -216,7 +277,6 @@ export default function GameDetailPage() {
               </div>
             </div>
 
-            {/* ACTION BUTTON */}
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleJoinGame}
@@ -239,7 +299,7 @@ export default function GameDetailPage() {
                     <>
                       <Trophy className="w-6 h-6" />
                       <div className="flex flex-col items-start">
-                        <span className="text-lg font-bold leading-none">Start Ranked Run</span>
+                        <span className="text-lg font-bold leading-none">Start Ranked Attempt</span>
                         <span className="text-xs font-medium opacity-80">Counts towards Elo</span>
                       </div>
                     </>
@@ -254,18 +314,11 @@ export default function GameDetailPage() {
                   )}
                 </div>
               </button>
-
-              {!loadingAttempts && !isFirstAttempt && (
-                 <p className="text-center text-zinc-500 text-xs flex items-center justify-center gap-1.5 bg-zinc-900/50 py-2 rounded-lg border border-zinc-800/50">
-                    <AlertCircle className="w-3 h-3" />
-                    You have already played this Blitz. Score will not update Elo.
-                 </p>
-              )}
             </div>
           </motion.div>
 
           {/* HISTORY SECTION */}
-          <motion.div variants={slideUp} className="mt-6 flex-1">
+          <motion.div variants={slideUp} className="mt-6 flex-1 mb-8">
              <div className="flex items-center gap-2 mb-4 px-2">
                 <History className="text-violet-500 w-5 h-5" />
                 <h3 className="text-xl font-bold text-white">Your History</h3>
@@ -320,51 +373,63 @@ export default function GameDetailPage() {
           </motion.div>
         </motion.main>
 
-        {/* RIGHT COLUMN: Sidebar (Other Games) */}
+        {/* RIGHT COLUMN: LEADERBOARD */}
         <motion.aside
           variants={slideUp}
           className="hidden lg:flex flex-[0.8] flex-col bg-zinc-900 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-fit max-h-full sticky top-0"
         >
-          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Sprout className="text-green-500 w-5 h-5" />
-            Similar Blitzes
-          </h2>
-          
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full mb-4 px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-all text-sm"
-          />
-
-          <div className="overflow-y-auto custom-scrollbar pr-1 flex-1 space-y-3">
-            {filteredOtherGames.map((g) => (
-              <Link
-                key={g.id}
-                href={`/home/${g.id}`}
-                className="block p-3 rounded-xl bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 transition-all group"
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
-                    {g.title}
-                  </h3>
-                </div>
-                <div className="flex gap-2 mt-2">
-                   <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-700">
-                     {g.difficulty}
-                   </span>
-                   <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-700">
-                     {g.number_of_questions} Qs
-                   </span>
-                </div>
-              </Link>
-            ))}
-            
-            {filteredOtherGames.length === 0 && (
-               <p className="text-zinc-600 text-center text-sm py-4">No other games found.</p>
-            )}
+          <div className="flex items-center justify-between mb-6">
+             <h2 className="text-lg font-bold text-white flex items-center gap-2">
+               <Trophy className="text-yellow-500 w-5 h-5" />
+               Top Performers
+             </h2>
+             <span className="text-xs text-zinc-500 font-bold bg-zinc-800 px-2 py-1 rounded">Ranked</span>
           </div>
+          
+          {loadingLeaderboard ? (
+             <div className="flex justify-center py-10">
+                <Loader2 className="w-6 h-6 text-zinc-600 animate-spin" />
+             </div>
+          ) : leaderboard.length === 0 ? (
+             <div className="text-center py-10 text-zinc-500 text-sm">
+                No ranked plays yet.
+             </div>
+          ) : (
+             <div className="overflow-y-auto custom-scrollbar pr-1 flex-1 space-y-2">
+                {leaderboard.map((entry, index) => (
+                   <div 
+                     key={index} 
+                     className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                        entry.userId === user?.uid 
+                          ? "bg-violet-500/10 border-violet-500/30 ring-1 ring-violet-500/20" // Highlight current user
+                          : "bg-zinc-950/50 border-zinc-800 hover:border-zinc-700"
+                     }`}
+                   >
+                      <div className="flex items-center gap-3">
+                         {/* Rank Icon */}
+                         <div className="w-5 flex justify-center">
+                            {getRankIcon(index)}
+                         </div>
+                         
+                         {/* User Info */}
+                         <div>
+                            <div className={`text-sm font-bold ${entry.userId === user?.uid ? "text-violet-300" : "text-zinc-200"}`}>
+                               {entry.userId === user?.uid ? "You" : entry.username}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 font-mono">
+                               {formatTimePlayed(entry.timeTaken)}
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* Score */}
+                      <div className="font-bold text-white">
+                         {entry.score}
+                      </div>
+                   </div>
+                ))}
+             </div>
+          )}
         </motion.aside>
 
       </div>

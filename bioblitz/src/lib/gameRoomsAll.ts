@@ -1,7 +1,5 @@
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
-import { firestore } from "./firebase"; // Ensure this path is correct based on your project structure
-
-// --- 1. DEFINE AND EXPORT THE TYPES HERE ---
+import { firestore } from "./firebase"; 
 export type Question = {
   id: string;
   a?: string;
@@ -29,11 +27,7 @@ export type gameRoom = {
   questions: Question[];
 };
 
-/**
- * Converts a total number of seconds into a "minutes and seconds" string.
- * @param {number} totalSeconds - The total time in seconds.
- * @returns {string} A formatted string, e.g., "2 min 30 sec".
- */
+
 const formatTime = (totalSeconds: number): string => {
   if (isNaN(totalSeconds) || totalSeconds < 0) {
     return "0 sec";
@@ -52,11 +46,6 @@ const formatTime = (totalSeconds: number): string => {
   return `${seconds} sec`;
 };
 
-
-/**
- * Fetches all game rooms from the Firestore database and counts their questions.
- * @returns A promise that resolves to an array of gameRoom objects.
- */
 export const allGames = async (topic?: string): Promise<gameRoom[]> => {
   try {
     const gameRoomsCollection = collection(firestore, 'sets');
