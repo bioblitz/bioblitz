@@ -18,6 +18,7 @@ export interface UserProfile {
   createdAt: Timestamp | FieldValue;
   lastLogin: Timestamp | FieldValue;
   nameChangedAt: Timestamp | FieldValue;
+  bannerURL?: string;
 }
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
@@ -32,6 +33,13 @@ export async function updateUsername(uid: string, username: string): Promise<voi
   await updateDoc(userRef, {
     username: username,
     nameChangedAt: serverTimestamp()
+  });
+}
+
+export async function updateUserBanner(uid: string, bannerURL: string): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await updateDoc(userRef, {
+    bannerURL: bannerURL,
   });
 }
 
@@ -77,6 +85,21 @@ export async function getUserProfile(uid: string) {
   if (userSnap.exists()) {
     const userProfile = userSnap.data() as UserProfile;
     userProfile.uid = uid;
+    return userProfile;
+  } else {
+    return null;
+  }
+}
+
+export async function getUserProfileByUsername(username: string): Promise<UserProfile | null> {
+  const usersRef = collection(firestore, "users");
+  const q = query(usersRef, where("username", "==", username));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const userDoc = querySnapshot.docs[0];
+    const userProfile = userDoc.data() as UserProfile;
+    userProfile.uid = userDoc.id; // Set the UID from the document ID
     return userProfile;
   } else {
     return null;

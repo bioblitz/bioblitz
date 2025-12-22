@@ -113,7 +113,7 @@ export default function MainNavbar() {
                 Profile
               </span>
             </Link>
-            <Link href="/channel">
+            <Link href={user?.username ? `/channel/${user.username}` : '/channel'}>
               <span
                 className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
                 onClick={() => setDropdownOpen(false)}
