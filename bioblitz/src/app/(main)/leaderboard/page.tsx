@@ -187,9 +187,13 @@ export default function LeaderboardPage() {
                           : "text-white"
                       }`}
                     >
-                      {user.displayName}
-                      {user.uid === currentUserUid}
+                      <Link href={`/profile/${user.uid}`}>
+                        <span className="cursor-pointer hover:underline">
+                          {user.displayName}
+                        </span>
+                      </Link>
                     </h3>
+
                     {user.school && (
                       <p className="text-xs text-zinc-500 truncate">
                         {user.school}
