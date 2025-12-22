@@ -130,7 +130,7 @@ export default function ProfilePage() {
           const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
           const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
           
-          return timeB - timeA; 
+          return timeA-timeB; 
         });
 
         const setsData = sortedDocs.map((doc) => {
