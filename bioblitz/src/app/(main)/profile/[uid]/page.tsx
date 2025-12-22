@@ -10,13 +10,15 @@ import {
   updateDoc,
   collection,
   Timestamp,
-  writeBatch, // <--- Added for Friend Requests
-  setDoc, // <--- Added for Friend Requests
+  writeBatch,
+  setDoc,
   query,
   where,
+  orderBy, // Added
+  limit,   // Added
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Pencil,
   MapPin,
@@ -29,6 +31,8 @@ import {
   User as UserIcon,
   Save,
   X,
+  TrendingUp,   // Added
+  TrendingDown, // Added
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -40,7 +44,14 @@ import {
 } from "firebase/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+
+// --- RECHARTS IMPORTS ---
+import {
+  AreaChart,
+  Area,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -61,12 +72,21 @@ interface UserProfile {
   school?: string;
 }
 
+// Data shape for the graph
+interface EloHistoryPoint {
+  date: string;
+  elo: number;
+  fullDate: string;
+}
+
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  
+  // Profile State
   const [tempProfile, setTempProfile] = useState({
     bio: "",
     location: "",
@@ -75,9 +95,12 @@ export default function ProfilePage() {
     displayName: "",
     username: "",
   });
-  const [setsPlayed, setSetsPlayed] = useState<
-    { name: string; score: number }[]
-  >([]);
+
+  const [setsPlayed, setSetsPlayed] = useState<{ name: string; score: number }[]>([]);
+  
+  // Graph State
+  const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,31 +108,15 @@ export default function ProfilePage() {
   const db = getFirestore(app);
   const storage = getStorage(app);
   const router = useRouter();
-
-  // Friendship State
-  const [friendshipStatus, setFriendshipStatus] = useState<
-    "none" | "sent" | "received" | "friends"
-  >("none");
-
   const params = useParams();
   const profileUid = params.uid as string;
+
+  // Friendship State
+  const [friendshipStatus, setFriendshipStatus] = useState<"none" | "sent" | "received" | "friends">("none");
   const [friends, setFriends] = useState<UserProfile[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<UserProfile[]>([]);
 
-  // ... (Existing useEffect for loading Profile Data remains the same) ...
-  useEffect(() => {
-    if (userProfile) {
-      setTempProfile({
-        bio: userProfile.bio || "",
-        location: userProfile.location || "",
-        grade: userProfile.grade || "",
-        school: userProfile.school || "",
-        displayName: userProfile.displayName || "",
-        username: userProfile.username || "",
-      });
-    }
-  }, [userProfile]);
-
+  // 1. Load User Profile Data
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
@@ -135,7 +142,21 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [auth, db, router, profileUid]);
 
-  // ... (Existing useEffect for Sets Played remains the same) ...
+  // 2. Sync Temp Profile for Editing
+  useEffect(() => {
+    if (userProfile) {
+      setTempProfile({
+        bio: userProfile.bio || "",
+        location: userProfile.location || "",
+        grade: userProfile.grade || "",
+        school: userProfile.school || "",
+        displayName: userProfile.displayName || "",
+        username: userProfile.username || "",
+      });
+    }
+  }, [userProfile]);
+
+  // 3. Fetch Sets Played
   useEffect(() => {
     if (!userProfile) return;
     const fetchSetsPlayed = async () => {
@@ -146,11 +167,9 @@ export default function ProfilePage() {
         const sortedDocs = setsSnap.docs.sort((a, b) => {
           const dataA = a.data();
           const dataB = b.data();
-          const timeA =
-            dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
-          const timeB =
-            dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
-          return timeA - timeB;
+          const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
+          const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
+          return timeB - timeA; // Sort Newest first
         });
 
         const setsData = sortedDocs.map((doc) => {
@@ -167,33 +186,65 @@ export default function ProfilePage() {
       }
     };
     fetchSetsPlayed();
-  }, [userProfile, db, auth, profileUid]);
+  }, [userProfile, db, profileUid]);
 
-  // --- UPDATED FRIENDSHIP CHECK (Sub-collection) ---
+  // 4. Fetch Rating History (Graph Data)
   useEffect(() => {
-    if (
-      !userProfile ||
-      !auth.currentUser ||
-      auth.currentUser.uid === profileUid
-    )
-      return;
+    if (!userProfile) return;
+
+    const fetchHistory = async () => {
+      try {
+        const historyRef = collection(db, "users", profileUid, "ratingHistory");
+        const q = query(historyRef, orderBy("timestamp", "asc"), limit(20));
+        const snap = await getDocs(q);
+        
+        const historyData: EloHistoryPoint[] = snap.docs.map(doc => {
+          const data = doc.data();
+          const date = data.timestamp ? new Date(data.timestamp.seconds * 1000) : new Date();
+          return {
+            elo: data.newElo,
+            date: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            fullDate: date.toLocaleDateString()
+          };
+        });
+
+        // FALLBACK: If history is empty (new user or old data), create a visual line
+        if (historyData.length === 0 && userProfile.bElo) {
+           historyData.push({
+             elo: userProfile.bElo,
+             date: 'Now',
+             fullDate: new Date().toLocaleDateString()
+           });
+           historyData.unshift({
+             elo: 1200, // Default starting Elo
+             date: 'Joined',
+             fullDate: 'Start'
+           });
+        }
+
+        setEloHistory(historyData);
+      } catch (err) {
+        console.error("Error fetching rating history:", err);
+      }
+    };
+
+    fetchHistory();
+  }, [userProfile, db, profileUid]);
+
+  // 5. Check Friendship Status
+  useEffect(() => {
+    // FIX: TypeScript check for currentUser
+    const currentUser = auth.currentUser;
+    if (!userProfile || !currentUser || currentUser.uid === profileUid) return;
 
     const checkFriendship = async () => {
       try {
-        // We only need to check MY list.
-        // If I have a document for YOU, I know the status.
-        const myFriendDocRef = doc(
-          db,
-          "users",
-          auth.currentUser!.uid,
-          "friends",
-          profileUid
-        );
+        const myFriendDocRef = doc(db, "users", currentUser.uid, "friends", profileUid);
         const docSnap = await getDoc(myFriendDocRef);
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setFriendshipStatus(data.status); // "sent", "received", or "friends"
+          setFriendshipStatus(data.status);
         } else {
           setFriendshipStatus("none");
         }
@@ -205,12 +256,15 @@ export default function ProfilePage() {
     checkFriendship();
   }, [userProfile, auth.currentUser, db, profileUid]);
 
+  // 6. Fetch Friends Lists
   useEffect(() => {
-    if (!auth.currentUser) return;
+    // FIX: TypeScript check for currentUser
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
 
     const fetchFriendsAndRequests = async () => {
       try {
-        // Friends: status === "friends"
+        // Friends
         const friendsQuery = query(
           collection(db, "users", profileUid, "friends"),
           where("status", "==", "friends")
@@ -218,15 +272,17 @@ export default function ProfilePage() {
         const friendsSnap = await getDocs(friendsQuery);
         setFriends(friendsSnap.docs.map((doc) => doc.data() as UserProfile));
 
-        // Incoming requests: status === "received"
-        const requestsQuery = query(
-          collection(db, "users", auth.currentUser.uid, "friends"),
-          where("status", "==", "received")
-        );
-        const requestsSnap = await getDocs(requestsQuery);
-        setIncomingRequests(
-          requestsSnap.docs.map((doc) => doc.data() as UserProfile)
-        );
+        // Incoming requests (only if looking at own profile)
+        if (currentUser.uid === profileUid) {
+             const requestsQuery = query(
+              collection(db, "users", currentUser.uid, "friends"),
+              where("status", "==", "received")
+            );
+            const requestsSnap = await getDocs(requestsQuery);
+            setIncomingRequests(
+              requestsSnap.docs.map((doc) => doc.data() as UserProfile)
+            );
+        }
       } catch (err) {
         console.error("Error fetching friends/requests:", err);
       }
@@ -235,37 +291,25 @@ export default function ProfilePage() {
     fetchFriendsAndRequests();
   }, [auth.currentUser, db, profileUid]);
 
-  // --- UPDATED ADD FRIEND FUNCTION (Batch Write) ---
+
+  // --- ACTIONS ---
+
   const sendFriendRequest = async () => {
     if (!auth.currentUser || !userProfile) return;
 
     try {
       const batch = writeBatch(db);
 
-      // 1. Add to MY subcollection (Status: Sent)
-      const myRef = doc(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "friends",
-        profileUid
-      );
+      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
       batch.set(myRef, {
         uid: profileUid,
         status: "sent",
         createdAt: Timestamp.now(),
-        displayName: userProfile.displayName, // Cache name
-        photoURL: userProfile.photoURL, // Cache photo
+        displayName: userProfile.displayName, 
+        photoURL: userProfile.photoURL, 
       });
 
-      // 2. Add to THEIR subcollection (Status: Received)
-      const theirRef = doc(
-        db,
-        "users",
-        profileUid,
-        "friends",
-        auth.currentUser.uid
-      );
+      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
       batch.set(theirRef, {
         uid: auth.currentUser.uid,
         status: "received",
@@ -278,7 +322,7 @@ export default function ProfilePage() {
       setFriendshipStatus("sent");
     } catch (err) {
       console.error("Error sending friend request:", err);
-      alert("Failed to send request. Check console.");
+      alert("Failed to send request.");
     }
   };
 
@@ -287,21 +331,8 @@ export default function ProfilePage() {
 
     try {
       const batch = writeBatch(db);
-
-      const myRef = doc(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "friends",
-        profileUid
-      );
-      const theirRef = doc(
-        db,
-        "users",
-        profileUid,
-        "friends",
-        auth.currentUser.uid
-      );
+      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
+      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
 
       batch.update(myRef, { status: "friends" });
       batch.update(theirRef, { status: "friends" });
@@ -318,21 +349,8 @@ export default function ProfilePage() {
 
     try {
       const batch = writeBatch(db);
-
-      const myRef = doc(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "friends",
-        profileUid
-      );
-      const theirRef = doc(
-        db,
-        "users",
-        profileUid,
-        "friends",
-        auth.currentUser.uid
-      );
+      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
+      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
 
       batch.delete(myRef);
       batch.delete(theirRef);
@@ -345,18 +363,18 @@ export default function ProfilePage() {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !userProfile) return;
+    if (!e.target.files || !userProfile || !auth.currentUser) return;
     const file = e.target.files[0];
 
     try {
       const profileRef = storageRef(
         storage,
-        `profilePictures/${auth.currentUser?.uid}`
+        `profilePictures/${auth.currentUser.uid}`
       );
       await uploadBytes(profileRef, file);
       const downloadURL = await getDownloadURL(profileRef);
 
-      await updateDoc(doc(db, "users", auth.currentUser!.uid), {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
         photoURL: downloadURL,
       });
       setUserProfile({ ...userProfile, photoURL: downloadURL });
@@ -367,6 +385,7 @@ export default function ProfilePage() {
 
   const saveChanges = async () => {
     setEditError(null);
+    if (!auth.currentUser) return;
 
     if (tempProfile.username !== userProfile?.username) {
       if (tempProfile.username.length < 3) {
@@ -382,7 +401,7 @@ export default function ProfilePage() {
     }
 
     try {
-      const userRef = doc(db, "users", auth.currentUser!.uid);
+      const userRef = doc(db, "users", auth.currentUser.uid);
       await updateDoc(userRef, tempProfile);
       setUserProfile({ ...userProfile!, ...tempProfile });
       setEditing(false);
@@ -404,33 +423,36 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading)
-    return (
+  // Helper for trend icon
+  const isTrendingUp = eloHistory.length >= 2 && eloHistory[eloHistory.length - 1].elo >= eloHistory[eloHistory.length - 2].elo;
+
+
+  if (loading) return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
         <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
       </div>
-    );
+  );
 
-  if (error)
-    return (
+  if (error) return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
         <p className="text-red-500">{error}</p>
       </div>
-    );
+  );
 
   return (
-    <main
-      className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
-    >
+    <main className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}>
       <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+        
+        {/* TOP ROW: PROFILE & GRAPH */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="grid lg:grid-cols-3 gap-6"
         >
+          {/* LEFT: INFO CARD */}
           <div className="lg:col-span-2 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-xl">
-            {/* Profile Picture Logic */}
+            {/* Profile Picture */}
             <div className="relative group shrink-0">
               <input
                 ref={fileInputRef}
@@ -469,7 +491,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4 w-full">
-              {/* --- FRIENDSHIP BUTTONS --- */}
+              {/* Friendship Controls */}
               {auth.currentUser?.uid !== profileUid && (
                 <div className="mt-4">
                   {friendshipStatus === "none" && (
@@ -512,7 +534,7 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* ... (Rest of UI is standard) ... */}
+              {/* Names & Actions */}
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
@@ -534,13 +556,14 @@ export default function ProfilePage() {
                 )}
               </div>
 
+              {/* Bio */}
               <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
                 <p className="text-zinc-300 leading-relaxed italic">
                   {userProfile?.bio || "Add a biography!"}
                 </p>
               </div>
 
-              {/* ... (Stats/Location/School pills) ... */}
+              {/* Details Pills */}
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
                 {userProfile?.location && (
                   <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
@@ -576,17 +599,63 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col justify-center items-center shadow-xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-50" />
-            <div className="relative z-10 flex flex-col items-center">
-              <h3>Ranked ELO</h3>
-              <span className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500 tracking-tighter">
-                {Math.round(userProfile?.bElo || 0)}
-              </span>
+          {/* RIGHT: ELO GRAPH CARD */}
+          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl flex flex-col shadow-xl relative overflow-hidden h-full min-h-[300px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-50 pointer-events-none" />
+            
+            {/* Stats Header */}
+            <div className="relative z-10 flex flex-col items-center pt-8 pb-4">
+              <h3 className="text-zinc-400 text-sm font-medium uppercase tracking-wider mb-1">Ranked Rating</h3>
+              <div className="flex items-center gap-3">
+                <span className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-400 tracking-tighter">
+                  {Math.round(userProfile?.bElo || 0)}
+                </span>
+                
+                {/* Trend Indicator */}
+                {eloHistory.length > 1 && (
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isTrendingUp ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                     {isTrendingUp ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* The Graph */}
+            <div className="w-full h-[180px] mt-auto"> 
+                {eloHistory.length > 0 ? (
+                   <ResponsiveContainer width="100%" height="100%">
+                     <AreaChart data={eloHistory} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                       <defs>
+                         <linearGradient id="colorElo" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                           <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                         </linearGradient>
+                       </defs>
+                       <Tooltip 
+                          contentStyle={{ backgroundColor: "#18181b", border: "1px solid #27272a", borderRadius: "8px" }}
+                          itemStyle={{ color: "#a1a1aa" }}
+                          labelStyle={{ color: "#fff", fontWeight: "bold", marginBottom: "4px" }}
+                       />
+                       <Area 
+                         type="monotone" 
+                         dataKey="elo" 
+                         stroke="#8b5cf6" 
+                         strokeWidth={3} 
+                         fillOpacity={1} 
+                         fill="url(#colorElo)" 
+                       />
+                     </AreaChart>
+                   </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-zinc-600 text-sm pb-8">
+                     Play more games to see history
+                  </div>
+                )}
             </div>
           </div>
         </motion.div>
 
+        {/* MIDDLE ROW: FRIENDS & REQUESTS */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -605,11 +674,17 @@ export default function ProfilePage() {
                     href={`/profile/${friend.uid}`}
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-800 transition"
                   >
-                    <img
-                      src={friend.photoURL || ""}
-                      alt={friend.displayName}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
+                    {friend.photoURL ? (
+                       <img
+                         src={friend.photoURL}
+                         alt={friend.displayName}
+                         className="w-8 h-8 rounded-full object-cover"
+                       />
+                    ) : (
+                       <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                          {friend.displayName?.[0]}
+                       </div>
+                    )}
                     <span className="text-sm text-white">
                       {friend.displayName}
                     </span>
@@ -619,102 +694,81 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Friend Requests */}
-          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-white mb-2">
-              Friend Requests
-            </h3>
-            {incomingRequests.length === 0 ? (
-              <p className="text-zinc-400 text-sm">No incoming requests.</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {incomingRequests.map((request) => (
-                  <div
-                    key={request.uid}
-                    className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={request.photoURL || ""}
-                        alt={request.displayName}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <span className="text-sm text-white">
-                        {request.displayName}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => {
-                          // Accept request
-                          const batch = writeBatch(db);
-                          const myRef = doc(
-                            db,
-                            "users",
-                            auth.currentUser!.uid,
-                            "friends",
-                            request.uid
-                          );
-                          const theirRef = doc(
-                            db,
-                            "users",
-                            request.uid,
-                            "friends",
-                            auth.currentUser!.uid
-                          );
-                          batch.update(myRef, { status: "friends" });
-                          batch.update(theirRef, { status: "friends" });
-                          await batch.commit();
+          {/* Friend Requests (Only visible to owner) */}
+          {auth.currentUser?.uid === profileUid && (
+            <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Friend Requests
+              </h3>
+              {incomingRequests.length === 0 ? (
+                <p className="text-zinc-400 text-sm">No incoming requests.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {incomingRequests.map((request) => (
+                    <div
+                      key={request.uid}
+                      className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        {request.photoURL ? (
+                           <img
+                             src={request.photoURL}
+                             alt={request.displayName}
+                             className="w-8 h-8 rounded-full object-cover"
+                           />
+                        ) : (
+                           <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                              {request.displayName?.[0]}
+                           </div>
+                        )}
+                        <span className="text-sm text-white">
+                          {request.displayName}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            // Local accept logic here or call acceptFriendRequest logic for specific ID
+                            // For simplicity, reusing batch logic inline or you can refactor acceptFriendRequest to take an ID
+                            const batch = writeBatch(db);
+                            const myRef = doc(db, "users", auth.currentUser!.uid, "friends", request.uid);
+                            const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser!.uid);
+                            batch.update(myRef, { status: "friends" });
+                            batch.update(theirRef, { status: "friends" });
+                            await batch.commit();
 
-                          // Update local state
-                          setIncomingRequests((prev) =>
-                            prev.filter((r) => r.uid !== request.uid)
-                          );
-                          setFriends((prev) => [...prev, request]);
-                        }}
-                        className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500 transition"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={async () => {
-                          // Decline request
-                          const batch = writeBatch(db);
-                          const myRef = doc(
-                            db,
-                            "users",
-                            auth.currentUser!.uid,
-                            "friends",
-                            request.uid
-                          );
-                          const theirRef = doc(
-                            db,
-                            "users",
-                            request.uid,
-                            "friends",
-                            auth.currentUser!.uid
-                          );
-                          batch.delete(myRef);
-                          batch.delete(theirRef);
-                          await batch.commit();
+                            setIncomingRequests((prev) => prev.filter((r) => r.uid !== request.uid));
+                            setFriends((prev) => [...prev, request]);
+                          }}
+                          className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500 transition"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const batch = writeBatch(db);
+                            const myRef = doc(db, "users", auth.currentUser!.uid, "friends", request.uid);
+                            const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser!.uid);
+                            batch.delete(myRef);
+                            batch.delete(theirRef);
+                            await batch.commit();
 
-                          setIncomingRequests((prev) =>
-                            prev.filter((r) => r.uid !== request.uid)
-                          );
-                        }}
-                        className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 text-sm hover:text-white transition"
-                      >
-                        Decline
-                      </button>
+                            setIncomingRequests((prev) => prev.filter((r) => r.uid !== request.uid));
+                          }}
+                          className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 text-sm hover:text-white transition"
+                        >
+                          Decline
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </motion.div>
 
-        {/* ... (Recent Sets section remains the same) ... */}
+        {/* BOTTOM ROW: RECENT SETS */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -786,7 +840,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ... (Editing Modal remains the same) ... */}
+      {/* Editing Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
