@@ -23,6 +23,7 @@ interface LeaderboardUser {
   photoURL: string;
   bElo: number;
   school?: string;
+  username: string;
 }
 
 export default function LeaderboardPage() {
@@ -57,6 +58,7 @@ export default function LeaderboardPage() {
               leaderboardData.push({
                 uid: doc.id,
                 displayName: data.displayName || "Anonymous User",
+                username: data.username,
                 photoURL: data.photoURL || "",
                 bElo: data.bElo,
                 school: data.school
@@ -157,8 +159,7 @@ export default function LeaderboardPage() {
 
                 <div className="flex-grow min-w-0 pr-4">
                   <h3 className={`font-bold truncate text-sm sm:text-base ${user.uid === currentUserUid ? "text-violet-400" : "text-white"}`}>
-                    {user.displayName}
-                    {user.uid === currentUserUid}
+                    {user.username || user.displayName}
                   </h3>
                   {user.school && (
                     <p className="text-xs text-zinc-500 truncate">{user.school}</p>
