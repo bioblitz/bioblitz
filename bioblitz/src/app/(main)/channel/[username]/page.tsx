@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { PencilIcon, PlusIcon } from "lucide-react";
@@ -11,44 +11,48 @@ import { updateUserBanner, getUserProfileByUsername, UserProfile } from "../../.
 export default function ChannelPage() {
   const { username } = useParams<{ username: string }>();
   const { user: authUser } = useAuth();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [channelOwnerProfile, setChannelOwnerProfile] = useState<UserProfile | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
-    const [bannerLoading, setBannerLoading] = useState(false);
+  const [bannerLoading, setBannerLoading] = useState(false);
   
-    const handleBannerUploadClick = () => {
-      fileInputRef.current?.click();
-    };
+  const handleBannerUploadClick = () => {
+    fileInputRef.current?.click();
+  };
   
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file && authUser) {
-        setBannerLoading(true);
-        try {
-          const filePath = `userBanners/${authUser.uid}/${file.name}`;
-          const downloadURL = await uploadImage(file, filePath);
-          await updateUserBanner(authUser.uid, downloadURL);
-          
-          setChannelOwnerProfile(prevProfile => {
-            if (prevProfile) {
-              return { ...prevProfile, bannerURL: downloadURL };
-            }
-            return null;
-          });
-        } catch (error) {
-          console.error("Error uploading banner image:", error);
-        } finally {
-          setBannerLoading(false);
-        }
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && authUser) {
+      setBannerLoading(true);
+      try {
+        const filePath = `userBanners/${authUser.uid}/${file.name}`;
+        const downloadURL = await uploadImage(file, filePath);
+        await updateUserBanner(authUser.uid, downloadURL);
+        
+        setChannelOwnerProfile(prevProfile => {
+          if (prevProfile) {
+            return { ...prevProfile, bannerURL: downloadURL };
+          }
+          return null;
+        });
+      } catch (error) {
+        console.error("Error uploading banner image:", error);
+      } finally {
+        setBannerLoading(false);
       }
-    };
+    }
+  };
   
   
-    useEffect(() => {
+  useEffect(() => {
     async function fetchChannelOwner() {
-      if (!username) return;
+      if (!username) {
+        router.push('/404');
+        return;
+      }
       setLoading(true);
       const profile = await getUserProfileByUsername(username as string);
       if (profile) {
@@ -58,14 +62,18 @@ export default function ChannelPage() {
         console.error("Channel owner profile not found for username:", username);
         setChannelOwnerProfile(null);
         setIsOwner(false);
+        router.push('/404');
       }
       setLoading(false);
     }
     fetchChannelOwner();
-  }, [username, authUser?.uid]);
+  }, [username, authUser?.uid, router]);
 
   return (
-    <div className="bg-black h-screen text-white">
+
+    <div className="bg-black justify-center h-screen pt-16 text-white">
+    <div className ="w-11/12 mx-auto">
+
       <input
         type="file"
         ref={fileInputRef}
@@ -80,7 +88,11 @@ export default function ChannelPage() {
       ) : (
         <div
           className="relative h-48 bg-cover bg-center flex items-center justify-center"
-          style={{ backgroundImage: channelOwnerProfile?.bannerURL ? `url(${channelOwnerProfile.bannerURL})` : 'url(https://via.placeholder.com/1500x300/0000FF/FFFFFF?text=Default+Banner)' }}
+          style={{ 
+            backgroundImage: channelOwnerProfile?.bannerURL 
+            ? `url(${channelOwnerProfile.bannerURL})` 
+            : `linear-gradient(to bottom, #18181b, #000000)`
+          }}
         >
           {isOwner && (
             <button
@@ -101,17 +113,19 @@ export default function ChannelPage() {
           )}
         </div>
       )}
+      
       <div className="p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">{channelOwnerProfile?.username || channelOwnerProfile?.displayName}'s Channel</h1>
         {isOwner && (
             <Link href="/contests/create" passHref>
-                <button className="px-4 py-2 bg-black-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-2">
+                <button className="px-4 py-2 bg-black-600 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2">
                     <PlusIcon className="w-5 h-5" />
                     Create New Contest
                 </button>
             </Link>
         )}
       </div>
+    </div>
     </div>
   );
 }
