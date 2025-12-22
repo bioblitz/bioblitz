@@ -21,6 +21,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { Loader2, AlertCircle } from "lucide-react";
+import { Crown, Medal } from "lucide-react";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -625,8 +626,10 @@ export default function GameRoomPage() {
             )}
 
             {submitted && activeTab === "leaderboard" && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center">
-                <h2 className="text-2xl font-bold mb-6">Leaderboard</h2>
+              <div className="bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-8">
+                <h2 className="text-2xl font-bold mb-6 text-center">
+                  Contest Leaderboard
+                </h2>
 
                 {loadingLeaderboard ? (
                   <div className="flex flex-col items-center">
@@ -636,24 +639,51 @@ export default function GameRoomPage() {
                     </span>
                   </div>
                 ) : leaderboard.length === 0 ? (
-                  <p className="text-zinc-500">No submissions yet.</p>
+                  <p className="text-zinc-500 text-center">
+                    No submissions yet.
+                  </p>
                 ) : (
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {leaderboard.map((entry, idx) => {
                       const isCurrentUser = entry.userId === user?.uid;
+                      const displayName = usersMap[entry.userId] || "Unknown";
+
                       return (
                         <div
                           key={entry.userId}
-                          className={`flex justify-between px-4 py-2 rounded-lg border ${
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${
                             isCurrentUser
-                              ? "bg-violet-600/20 border-violet-500 text-white font-bold"
-                              : "bg-zinc-800/50 border-zinc-700 text-zinc-300"
+                              ? "bg-violet-600/20 border-violet-500 text-white font-semibold"
+                              : "bg-zinc-800/50 text-zinc-300"
                           }`}
                         >
-                          <span>
-                            {idx + 1}. {usersMap[entry.userId] || entry.userId}
+                          <div className="w-6 flex justify-center">
+                            {idx === 0 ? (
+                              <Crown className="w-6 h-6 text-yellow-500 fill-yellow-500/20" />
+                            ) : idx === 1 ? (
+                              <Medal className="w-6 h-6 text-zinc-300" />
+                            ) : idx === 2 ? (
+                              <Medal className="w-6 h-6 text-orange-500" />
+                            ) : (
+                              <span className="font-bold text-zinc-500 w-6 text-center">
+                                {idx + 1}
+                              </span>
+                            )}
+                          </div>
+
+                          <img
+                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
+                            alt={displayName}
+                            className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900"
+                          />
+
+                          <span className="truncate flex-1 text-left">
+                            {displayName}
                           </span>
-                          <span>{entry.score}</span>
+
+                          <span className="font-mono text-lg text-right">
+                            {entry.score}
+                          </span>
                         </div>
                       );
                     })}
