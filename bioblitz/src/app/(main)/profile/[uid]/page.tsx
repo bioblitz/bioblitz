@@ -10,8 +10,9 @@ import {
   updateDoc,
   collection,
   Timestamp,
-  addDoc,
-  query,
+  writeBatch, // <--- Added for Friend Requests
+  setDoc,     // <--- Added for Friend Requests
+  query, 
   where,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
@@ -85,13 +86,15 @@ export default function ProfilePage() {
   const storage = getStorage(app);
   const router = useRouter();
 
+  // Friendship State
   const [friendshipStatus, setFriendshipStatus] = useState<
-    "none" | "pending" | "accepted" | "declined"
+    "none" | "sent" | "received" | "friends"
   >("none");
-  const [friendshipId, setFriendshipId] = useState<string | null>(null);
+  
   const params = useParams();
-  const profileUid = params.uid;
+  const profileUid = params.uid as string;
 
+  // ... (Existing useEffect for loading Profile Data remains the same) ...
   useEffect(() => {
     if (userProfile) {
       setTempProfile({
@@ -128,25 +131,21 @@ export default function ProfilePage() {
     });
 
     return () => unsubscribe();
-  }, [auth, db, router]);
+  }, [auth, db, router, profileUid]);
 
+  // ... (Existing useEffect for Sets Played remains the same) ...
   useEffect(() => {
     if (!userProfile) return;
     const fetchSetsPlayed = async () => {
       try {
         const setsRef = collection(db, "users", profileUid, "setsPlayed");
-
         const setsSnap = await getDocs(setsRef);
 
         const sortedDocs = setsSnap.docs.sort((a, b) => {
           const dataA = a.data();
           const dataB = b.data();
-
-          const timeA =
-            dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
-          const timeB =
-            dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
-
+          const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
+          const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
           return timeA - timeB;
         });
 
@@ -164,34 +163,68 @@ export default function ProfilePage() {
       }
     };
     fetchSetsPlayed();
-  }, [userProfile, db, auth]);
+  }, [userProfile, db, auth, profileUid]);
 
+  // --- UPDATED FRIENDSHIP CHECK (Sub-collection) ---
   useEffect(() => {
-    if (!userProfile || !auth.currentUser) return;
+    if (!userProfile || !auth.currentUser || auth.currentUser.uid === profileUid) return;
 
     const checkFriendship = async () => {
-      if (!userProfile || !auth.currentUser) return;
+      try {
+        // We only need to check MY list. 
+        // If I have a document for YOU, I know the status.
+        const myFriendDocRef = doc(db, "users", auth.currentUser!.uid, "friends", profileUid);
+        const docSnap = await getDoc(myFriendDocRef);
 
-      const friendshipKey = [auth.currentUser.uid, profileUid].sort().join("_");
-
-      const q = query(
-        collection(db, "friendships"),
-        where("friendshipKey", "==", friendshipKey)
-      );
-
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const docData = snapshot.docs[0].data();
-        setFriendshipStatus(docData.status);
-        setFriendshipId(snapshot.docs[0].id);
-      } else {
-        setFriendshipStatus("none");
-        setFriendshipId(null);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFriendshipStatus(data.status); // "sent", "received", or "friends"
+        } else {
+          setFriendshipStatus("none");
+        }
+      } catch (err) {
+        console.error("Error checking friendship:", err);
       }
     };
 
     checkFriendship();
-  }, [userProfile, auth.currentUser, db]);
+  }, [userProfile, auth.currentUser, db, profileUid]);
+
+  // --- UPDATED ADD FRIEND FUNCTION (Batch Write) ---
+  const sendFriendRequest = async () => {
+    if (!auth.currentUser || !userProfile) return;
+
+    try {
+      const batch = writeBatch(db);
+
+      // 1. Add to MY subcollection (Status: Sent)
+      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
+      batch.set(myRef, {
+        uid: profileUid,
+        status: "sent",
+        createdAt: Timestamp.now(),
+        displayName: userProfile.displayName, // Cache name
+        photoURL: userProfile.photoURL        // Cache photo
+      });
+
+      // 2. Add to THEIR subcollection (Status: Received)
+      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
+      batch.set(theirRef, {
+        uid: auth.currentUser.uid,
+        status: "received",
+        createdAt: Timestamp.now(),
+        displayName: auth.currentUser.displayName || "Unknown",
+        photoURL: auth.currentUser.photoURL || ""
+      });
+
+      await batch.commit();
+      setFriendshipStatus("sent");
+
+    } catch (err) {
+      console.error("Error sending friend request:", err);
+      alert("Failed to send request. Check console.");
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !userProfile) return;
@@ -268,10 +301,7 @@ export default function ProfilePage() {
     );
 
   return (
-    <main
-      className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
-    >
-      {" "}
+    <main className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}>
       <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <motion.div
@@ -280,6 +310,7 @@ export default function ProfilePage() {
           className="grid lg:grid-cols-3 gap-6"
         >
           <div className="lg:col-span-2 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-xl">
+            {/* Profile Picture Logic */}
             <div className="relative group shrink-0">
               <input
                 ref={fileInputRef}
@@ -287,10 +318,11 @@ export default function ProfilePage() {
                 onChange={handleFileChange}
                 accept="image/*"
                 className="hidden"
+                disabled={auth.currentUser?.uid !== profileUid}
               />
               <div
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 cursor-pointer relative"
-                onClick={() => fileInputRef.current?.click()}
+                className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 relative ${auth.currentUser?.uid === profileUid ? "cursor-pointer" : ""}`}
+                onClick={() => auth.currentUser?.uid === profileUid && fileInputRef.current?.click()}
               >
                 {userProfile?.photoURL ? (
                   <img
@@ -303,69 +335,50 @@ export default function ProfilePage() {
                     {userProfile?.displayName?.[0].toUpperCase()}
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Pencil className="w-8 h-8 text-white" />
-                </div>
+                {auth.currentUser?.uid === profileUid && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Pencil className="w-8 h-8 text-white" />
+                    </div>
+                )}
               </div>
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4 w-full">
+              
+              {/* --- FRIENDSHIP BUTTONS --- */}
               {auth.currentUser?.uid !== profileUid && (
                 <div className="mt-4">
                   {friendshipStatus === "none" && (
                     <button
-                      onClick={async () => {
-                        if (!userProfile) return;
-
-                        // Create a sorted key for consistent lookup
-                        const friendshipKey = [
-                          auth.currentUser!.uid,
-                          profileUid,
-                        ]
-                          .sort()
-                          .join("_");
-
-                        const docRef = await addDoc(
-                          collection(db, "friendships"),
-                          {
-                            friendshipKey,
-                            user1: auth.currentUser!.uid,
-                            user2: profileUid,
-                            status: "pending",
-                            createdAt: Timestamp.now(),
-                            updatedAt: Timestamp.now(),
-                          }
-                        );
-
-                        setFriendshipId(docRef.id);
-                        setFriendshipStatus("pending");
-                      }}
-                      className="px-4 py-2 bg-violet-600 rounded-full text-white"
+                      onClick={sendFriendRequest}
+                      className="px-4 py-2 bg-violet-600 rounded-full text-white font-semibold hover:bg-violet-500 transition"
                     >
                       Add Friend
                     </button>
                   )}
 
-                  {friendshipStatus === "pending" && (
-                    <span className="px-4 py-2 bg-zinc-700 rounded-full text-white">
+                  {friendshipStatus === "sent" && (
+                    <span className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 cursor-default">
                       Request Sent
                     </span>
                   )}
 
-                  {friendshipStatus === "accepted" && (
-                    <span className="px-4 py-2 bg-green-600 rounded-full text-white">
-                      Friends
+                  {friendshipStatus === "received" && (
+                    <span className="px-4 py-2 bg-violet-900/50 border border-violet-500 rounded-full text-violet-200 cursor-default">
+                      Has requested you
                     </span>
+                    // Note: You can add Accept/Decline buttons here later
                   )}
 
-                  {friendshipStatus === "declined" && (
-                    <span className="px-4 py-2 bg-red-600 rounded-full text-white">
-                      Request Declined
+                  {friendshipStatus === "friends" && (
+                    <span className="px-4 py-2 bg-green-900/30 border border-green-600/50 rounded-full text-green-400">
+                      Friends
                     </span>
                   )}
                 </div>
               )}
 
+              {/* ... (Rest of UI is standard) ... */}
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
@@ -393,6 +406,7 @@ export default function ProfilePage() {
                 </p>
               </div>
 
+              {/* ... (Stats/Location/School pills) ... */}
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
                 {userProfile?.location && (
                   <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
@@ -422,7 +436,7 @@ export default function ProfilePage() {
                         month: "short",
                         year: "numeric",
                       })
-                    : "before the Universe started"}
+                    : "Unknown"}
                 </div>
               </div>
             </div>
@@ -435,11 +449,11 @@ export default function ProfilePage() {
               <span className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500 tracking-tighter">
                 {Math.round(userProfile?.bElo || 0)}
               </span>
-              <div className="flex items-center gap-2 mt-2 text-violet-400 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium"></div>
             </div>
           </div>
         </motion.div>
 
+        {/* ... (Recent Sets section remains the same) ... */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -510,6 +524,8 @@ export default function ProfilePage() {
           </Link>
         </div>
       </div>
+      
+      {/* ... (Editing Modal remains the same) ... */}
       {editing && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
@@ -549,6 +565,7 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+                {/* ... Rest of inputs ... */}
                 <div className="col-span-2">
                   <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
                     Display Name
