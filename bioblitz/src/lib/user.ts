@@ -1,9 +1,11 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { firestore } from "./firebase";
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore"; // Added updateDoc
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { serverTimestamp } from "firebase/firestore";
 
 export interface UserProfile {
+  uid: string;
+  username: string | null;
   displayName: string;
   email: string;
   photoURL: string;
@@ -18,22 +20,38 @@ export interface UserProfile {
   nameChangedAt: Timestamp | FieldValue;
 }
 
+export async function isUsernameUnique(username: string): Promise<boolean> {
+  const usersRef = collection(firestore, "users");
+  const q = query(usersRef, where("username", "==", username));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.empty;
+}
+
+export async function updateUsername(uid: string, username: string): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await updateDoc(userRef, {
+    username: username,
+    nameChangedAt: serverTimestamp()
+  });
+}
+
 export async function createUserProfile(user: any) {
   const userRef = doc(firestore, "users", user.uid);
   
-  // 1. Check if the user already exists
   const userSnap = await getDoc(userRef);
 
   if (userSnap.exists()) {
-    // 2. USER EXISTS: Do NOT overwrite. Just update the lastLogin time.
     await updateDoc(userRef, {
       lastLogin: serverTimestamp()
     });
-    return userSnap.data() as UserProfile;
+    const userProfile = userSnap.data() as UserProfile;
+    userProfile.uid = user.uid;
+    return userProfile;
   }
 
-  // 3. USER DOES NOT EXIST: Create the new default profile.
   const newUserProfile: UserProfile = {
+    uid: user.uid,
+    username: null,
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || null,
@@ -57,7 +75,9 @@ export async function getUserProfile(uid: string) {
   const userSnap = await getDoc(userRef);
 
   if (userSnap.exists()) {
-    return userSnap.data() as UserProfile;
+    const userProfile = userSnap.data() as UserProfile;
+    userProfile.uid = uid;
+    return userProfile;
   } else {
     return null;
   }

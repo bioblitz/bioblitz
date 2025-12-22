@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
+import { UsernameChecker } from "@/components/auth/UsernameChecker";
 
 export default async function RootLayout({
   children,
@@ -11,6 +12,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
+          <UsernameChecker />
           <NavbarWrapper />
           {children}
         </AuthProvider>
