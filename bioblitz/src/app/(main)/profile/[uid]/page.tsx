@@ -10,21 +10,24 @@ import {
   updateDoc,
   collection,
   Timestamp,
+  addDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { 
-  Pencil, 
-  MapPin, 
-  School, 
-  GraduationCap, 
-  Activity, 
+import {
+  Pencil,
+  MapPin,
+  School,
+  GraduationCap,
+  Activity,
   Calendar,
   ChevronLeft,
   ChevronRight,
   User as UserIcon,
   Save,
-  X
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -35,6 +38,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,6 +46,7 @@ const inter = Inter({
 });
 
 interface UserProfile {
+  uid: string;
   displayName: string;
   email: string;
   photoURL: string;
@@ -63,9 +68,11 @@ export default function ProfilePage() {
     location: "",
     grade: "",
     school: "",
-    displayName: ""
+    displayName: "",
   });
-  const [setsPlayed, setSetsPlayed] = useState<{ name: string; score: number }[]>([]);
+  const [setsPlayed, setSetsPlayed] = useState<
+    { name: string; score: number }[]
+  >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +81,13 @@ export default function ProfilePage() {
   const storage = getStorage(app);
   const router = useRouter();
 
+  const [friendshipStatus, setFriendshipStatus] = useState<
+    "none" | "pending" | "accepted" | "declined"
+  >("none");
+  const [friendshipId, setFriendshipId] = useState<string | null>(null);
+  const params = useParams();
+  const profileUid = params.uid;
+
   useEffect(() => {
     if (userProfile) {
       setTempProfile({
@@ -81,7 +95,7 @@ export default function ProfilePage() {
         location: userProfile.location || "",
         grade: userProfile.grade || "",
         school: userProfile.school || "",
-        displayName: userProfile.displayName || ""
+        displayName: userProfile.displayName || "",
       });
     }
   }, [userProfile]);
@@ -90,7 +104,7 @@ export default function ProfilePage() {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         try {
-          const userDocRef = doc(db, "users", user.uid);
+          const userDocRef = doc(db, "users", profileUid);
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
@@ -111,32 +125,30 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [auth, db, router]);
 
- useEffect(() => {
+  useEffect(() => {
     if (!userProfile) return;
     const fetchSetsPlayed = async () => {
       try {
-        const setsRef = collection(
-          db,
-          "users",
-          auth.currentUser!.uid,
-          "setsPlayed"
-        );
+        const setsRef = collection(db, "users", profileUid, "setsPlayed");
+
         const setsSnap = await getDocs(setsRef);
 
         const sortedDocs = setsSnap.docs.sort((a, b) => {
           const dataA = a.data();
           const dataB = b.data();
-          
-          const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
-          const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
-          
-          return timeA-timeB; 
+
+          const timeA =
+            dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
+          const timeB =
+            dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
+
+          return timeA - timeB;
         });
 
         const setsData = sortedDocs.map((doc) => {
           const data = doc.data();
           return {
-            name: data.title || "Unknown Set", 
+            name: data.title || "Unknown Set",
             score: data.score || 0,
           };
         });
@@ -148,6 +160,33 @@ export default function ProfilePage() {
     };
     fetchSetsPlayed();
   }, [userProfile, db, auth]);
+
+  useEffect(() => {
+    if (!userProfile || !auth.currentUser) return;
+
+    const checkFriendship = async () => {
+      if (!userProfile || !auth.currentUser) return;
+
+      const friendshipKey = [auth.currentUser.uid, profileUid].sort().join("_");
+
+      const q = query(
+        collection(db, "friendships"),
+        where("friendshipKey", "==", friendshipKey)
+      );
+
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data();
+        setFriendshipStatus(docData.status);
+        setFriendshipId(snapshot.docs[0].id);
+      } else {
+        setFriendshipStatus("none");
+        setFriendshipId(null);
+      }
+    };
+
+    checkFriendship();
+  }, [userProfile, auth.currentUser, db]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !userProfile) return;
@@ -208,8 +247,11 @@ export default function ProfilePage() {
     );
 
   return (
-<main className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}>      <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
-      
+    <main
+      className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
+    >
+      {" "}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -247,6 +289,62 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4 w-full">
+              {auth.currentUser?.uid !== profileUid && (
+                <div className="mt-4">
+                  {friendshipStatus === "none" && (
+                    <button
+                      onClick={async () => {
+                        if (!userProfile) return;
+
+                        // Create a sorted key for consistent lookup
+                        const friendshipKey = [
+                          auth.currentUser!.uid,
+                          profileUid,
+                        ]
+                          .sort()
+                          .join("_");
+
+                        const docRef = await addDoc(
+                          collection(db, "friendships"),
+                          {
+                            friendshipKey,
+                            user1: auth.currentUser!.uid,
+                            user2: profileUid,
+                            status: "pending",
+                            createdAt: Timestamp.now(),
+                            updatedAt: Timestamp.now(),
+                          }
+                        );
+
+                        setFriendshipId(docRef.id);
+                        setFriendshipStatus("pending");
+                      }}
+                      className="px-4 py-2 bg-violet-600 rounded-full text-white"
+                    >
+                      Add Friend
+                    </button>
+                  )}
+
+                  {friendshipStatus === "pending" && (
+                    <span className="px-4 py-2 bg-zinc-700 rounded-full text-white">
+                      Request Sent
+                    </span>
+                  )}
+
+                  {friendshipStatus === "accepted" && (
+                    <span className="px-4 py-2 bg-green-600 rounded-full text-white">
+                      Friends
+                    </span>
+                  )}
+
+                  {friendshipStatus === "declined" && (
+                    <span className="px-4 py-2 bg-red-600 rounded-full text-white">
+                      Request Declined
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
@@ -256,13 +354,16 @@ export default function ProfilePage() {
                     {userProfile?.email}
                   </p>
                 </div>
-                <button
-                  onClick={() => setEditing(true)}
-                  className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
-                >
-                  <Pencil className="w-3 h-3 group-hover:text-violet-400" />
-                  Edit Profile
-                </button>
+
+                {auth.currentUser?.uid === profileUid && (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
+                  >
+                    <Pencil className="w-3 h-3 group-hover:text-violet-400" />
+                    Edit Profile
+                  </button>
+                )}
               </div>
 
               <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
@@ -292,7 +393,15 @@ export default function ProfilePage() {
                 )}
                 <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
                   <Calendar className="w-3 h-3 text-violet-400" />
-                  Joined {userProfile?.createdAt ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : "before the Universe started"}
+                  Joined{" "}
+                  {userProfile?.createdAt
+                    ? new Date(
+                        userProfile.createdAt.seconds * 1000
+                      ).toLocaleDateString(undefined, {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "before the Universe started"}
                 </div>
               </div>
             </div>
@@ -305,8 +414,7 @@ export default function ProfilePage() {
               <span className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500 tracking-tighter">
                 {Math.round(userProfile?.bElo || 0)}
               </span>
-              <div className="flex items-center gap-2 mt-2 text-violet-400 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium">
-              </div>
+              <div className="flex items-center gap-2 mt-2 text-violet-400 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium"></div>
             </div>
           </div>
         </motion.div>
@@ -323,13 +431,13 @@ export default function ProfilePage() {
               Recent Sets
             </h2>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => scroll("left")}
                 className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => scroll("right")}
                 className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               >
@@ -338,10 +446,10 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div 
+          <div
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {setsPlayed.length === 0 ? (
               <div className="w-full p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-500">
@@ -358,8 +466,12 @@ export default function ProfilePage() {
                       {set.name.replace("Name: ", "")}
                     </span>
                     <div className="flex items-end justify-between border-t border-zinc-800 pt-3">
-                      <span className="text-xs text-zinc-500 uppercase tracking-wider">Score</span>
-                      <span className="text-xl font-bold text-violet-400">{set.score}</span>
+                      <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                        Score
+                      </span>
+                      <span className="text-xl font-bold text-violet-400">
+                        {set.score}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -377,10 +489,9 @@ export default function ProfilePage() {
           </Link>
         </div>
       </div>
-
       {editing && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative"
@@ -391,72 +502,106 @@ export default function ProfilePage() {
             >
               <X className="w-4 h-4" />
             </button>
-            
-            <h2 className="text-2xl font-bold mb-6 text-center">Update Profile</h2>
-            
+
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Update Profile
+            </h2>
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Name</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    Name
+                  </label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
                     <input
                       type="text"
                       value={tempProfile.displayName}
-                      onChange={(e) => setTempProfile({ ...tempProfile, displayName: e.target.value })}
+                      onChange={(e) =>
+                        setTempProfile({
+                          ...tempProfile,
+                          displayName: e.target.value,
+                        })
+                      }
                       className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                 </div>
 
                 <div className="col-span-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Bio</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    Bio
+                  </label>
                   <textarea
                     rows={3}
                     placeholder="Brief description..."
                     value={tempProfile.bio}
-                    onChange={(e) => setTempProfile({ ...tempProfile, bio: e.target.value })}
+                    onChange={(e) =>
+                      setTempProfile({ ...tempProfile, bio: e.target.value })
+                    }
                     className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600 resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Location</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    Location
+                  </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
                     <input
                       type="text"
                       placeholder="City, Country"
                       value={tempProfile.location}
-                      onChange={(e) => setTempProfile({ ...tempProfile, location: e.target.value })}
+                      onChange={(e) =>
+                        setTempProfile({
+                          ...tempProfile,
+                          location: e.target.value,
+                        })
+                      }
                       className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">Grade</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    Grade
+                  </label>
                   <div className="relative">
                     <GraduationCap className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
                     <input
                       type="text"
                       placeholder="Year 12"
                       value={tempProfile.grade}
-                      onChange={(e) => setTempProfile({ ...tempProfile, grade: e.target.value })}
+                      onChange={(e) =>
+                        setTempProfile({
+                          ...tempProfile,
+                          grade: e.target.value,
+                        })
+                      }
                       className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                 </div>
 
                 <div className="col-span-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">School / Institution</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    School / Institution
+                  </label>
                   <div className="relative">
                     <School className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
                     <input
                       type="text"
                       placeholder="University or High School Name"
                       value={tempProfile.school}
-                      onChange={(e) => setTempProfile({ ...tempProfile, school: e.target.value })}
+                      onChange={(e) =>
+                        setTempProfile({
+                          ...tempProfile,
+                          school: e.target.value,
+                        })
+                      }
                       className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                     />
                   </div>

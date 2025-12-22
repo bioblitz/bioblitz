@@ -1,5 +1,6 @@
 "use client";
 
+import { getAuth } from "firebase/auth";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,10 +17,15 @@ export default function MainNavbar() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const auth = getAuth();
+  const currentUserUid = auth.currentUser?.uid;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     }
@@ -57,7 +63,9 @@ export default function MainNavbar() {
 
   const renderUserNav = () => {
     if (loading) {
-      return <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />;
+      return (
+        <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />
+      );
     }
     if (!isAuthenticated || !user) {
       return null;
@@ -65,17 +73,17 @@ export default function MainNavbar() {
     return (
       <div className="relative" ref={dropdownRef}>
         <div className="flex items-center space-x-2">
-            <div className="relative">
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt={user.displayName}
-                  className="h-11 w-11 rounded-full"
-                />
-              ) : (
-                <DefaultAvatar name={user.displayName} />
-              )}
-            </div>
+          <div className="relative">
+            {user.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName}
+                className="h-11 w-11 rounded-full"
+              />
+            ) : (
+              <DefaultAvatar name={user.displayName} />
+            )}
+          </div>
 
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -99,7 +107,7 @@ export default function MainNavbar() {
 
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-40 bg-zinc-900 rounded-lg shadow-lg overflow-hidden z-50">
-            <Link href="/profile">
+            <Link href={`/profile/${auth.currentUser?.uid}`}>
               <span
                 className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
                 onClick={() => setDropdownOpen(false)}
@@ -167,7 +175,10 @@ export default function MainNavbar() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <item.icon size={18} className={isActive ? "text-violet-400" : ""} />
+                  <item.icon
+                    size={18}
+                    className={isActive ? "text-violet-400" : ""}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );
