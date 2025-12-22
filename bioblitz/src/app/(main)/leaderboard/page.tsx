@@ -24,6 +24,7 @@ interface LeaderboardUser {
   photoURL: string;
   bElo: number;
   school?: string;
+  username: string;
 }
 
 export default function LeaderboardPage() {
@@ -186,11 +187,8 @@ export default function LeaderboardPage() {
                           : "text-white"
                       }`}
                     >
-                      <Link href={`/profile/${user.uid}`}>
-                        <span className="cursor-pointer hover:underline">
-                          {user.displayName}
-                        </span>
-                      </Link>
+                      {user.displayName}
+                      {user.uid === currentUserUid}
                     </h3>
                     {user.school && (
                       <p className="text-xs text-zinc-500 truncate">

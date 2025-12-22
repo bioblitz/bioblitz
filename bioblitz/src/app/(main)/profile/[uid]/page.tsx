@@ -37,6 +37,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -48,6 +49,7 @@ const inter = Inter({
 interface UserProfile {
   uid: string;
   displayName: string;
+  username: string | null;
   email: string;
   photoURL: string;
   bElo: number;
@@ -63,12 +65,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const [tempProfile, setTempProfile] = useState({
     bio: "",
     location: "",
     grade: "",
     school: "",
     displayName: "",
+    username: "",
   });
   const [setsPlayed, setSetsPlayed] = useState<
     { name: string; score: number }[]
@@ -96,6 +100,7 @@ export default function ProfilePage() {
         grade: userProfile.grade || "",
         school: userProfile.school || "",
         displayName: userProfile.displayName || "",
+        username: userProfile.username || "",
       });
     }
   }, [userProfile]);
@@ -210,6 +215,21 @@ export default function ProfilePage() {
   };
 
   const saveChanges = async () => {
+    setEditError(null);
+
+    if (tempProfile.username !== userProfile?.username) {
+      if (tempProfile.username.length < 3) {
+        setEditError("Username must be at least 3 characters long.");
+        return;
+      }
+
+      const isUnique = await isUsernameUnique(tempProfile.username);
+      if (!isUnique) {
+        setEditError("This username is already taken.");
+        return;
+      }
+    }
+
     try {
       const userRef = doc(db, "users", auth.currentUser!.uid);
       await updateDoc(userRef, tempProfile);
@@ -217,6 +237,7 @@ export default function ProfilePage() {
       setEditing(false);
     } catch (err) {
       console.error(err);
+      setEditError("Failed to save changes. Please try again.");
     }
   };
 
@@ -348,7 +369,7 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                    {userProfile?.displayName}
+                    {userProfile?.username || userProfile?.displayName}
                   </h1>
                   <p className="text-zinc-500 text-sm mt-1 font-mono">
                     {userProfile?.email}
@@ -511,7 +532,26 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
-                    Name
+                    Username
+                  </label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={tempProfile.username}
+                      onChange={(e) =>
+                        setTempProfile({
+                          ...tempProfile,
+                          username: e.target.value,
+                        })
+                      }
+                      className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block ml-1">
+                    Display Name
                   </label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
@@ -607,7 +647,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-
+              {editError && (
+                <p className="text-red-500 text-sm mt-4">{editError}</p>
+              )}
               <div className="flex gap-3 mt-8 pt-4 border-t border-zinc-900">
                 <button
                   onClick={saveChanges}
