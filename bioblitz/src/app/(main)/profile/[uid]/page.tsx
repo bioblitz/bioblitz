@@ -11,8 +11,8 @@ import {
   collection,
   Timestamp,
   writeBatch, // <--- Added for Friend Requests
-  setDoc,     // <--- Added for Friend Requests
-  query, 
+  setDoc, // <--- Added for Friend Requests
+  query,
   where,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
@@ -90,9 +90,11 @@ export default function ProfilePage() {
   const [friendshipStatus, setFriendshipStatus] = useState<
     "none" | "sent" | "received" | "friends"
   >("none");
-  
+
   const params = useParams();
   const profileUid = params.uid as string;
+  const [friends, setFriends] = useState<UserProfile[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<UserProfile[]>([]);
 
   // ... (Existing useEffect for loading Profile Data remains the same) ...
   useEffect(() => {
@@ -144,8 +146,10 @@ export default function ProfilePage() {
         const sortedDocs = setsSnap.docs.sort((a, b) => {
           const dataA = a.data();
           const dataB = b.data();
-          const timeA = dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
-          const timeB = dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
+          const timeA =
+            dataA.lastPlayedAt?.toMillis() || dataA.playedAt?.toMillis() || 0;
+          const timeB =
+            dataB.lastPlayedAt?.toMillis() || dataB.playedAt?.toMillis() || 0;
           return timeA - timeB;
         });
 
@@ -167,13 +171,24 @@ export default function ProfilePage() {
 
   // --- UPDATED FRIENDSHIP CHECK (Sub-collection) ---
   useEffect(() => {
-    if (!userProfile || !auth.currentUser || auth.currentUser.uid === profileUid) return;
+    if (
+      !userProfile ||
+      !auth.currentUser ||
+      auth.currentUser.uid === profileUid
+    )
+      return;
 
     const checkFriendship = async () => {
       try {
-        // We only need to check MY list. 
+        // We only need to check MY list.
         // If I have a document for YOU, I know the status.
-        const myFriendDocRef = doc(db, "users", auth.currentUser!.uid, "friends", profileUid);
+        const myFriendDocRef = doc(
+          db,
+          "users",
+          auth.currentUser!.uid,
+          "friends",
+          profileUid
+        );
         const docSnap = await getDoc(myFriendDocRef);
 
         if (docSnap.exists()) {
@@ -190,6 +205,36 @@ export default function ProfilePage() {
     checkFriendship();
   }, [userProfile, auth.currentUser, db, profileUid]);
 
+  useEffect(() => {
+    if (!auth.currentUser) return;
+
+    const fetchFriendsAndRequests = async () => {
+      try {
+        // Friends: status === "friends"
+        const friendsQuery = query(
+          collection(db, "users", profileUid, "friends"),
+          where("status", "==", "friends")
+        );
+        const friendsSnap = await getDocs(friendsQuery);
+        setFriends(friendsSnap.docs.map((doc) => doc.data() as UserProfile));
+
+        // Incoming requests: status === "received"
+        const requestsQuery = query(
+          collection(db, "users", auth.currentUser.uid, "friends"),
+          where("status", "==", "received")
+        );
+        const requestsSnap = await getDocs(requestsQuery);
+        setIncomingRequests(
+          requestsSnap.docs.map((doc) => doc.data() as UserProfile)
+        );
+      } catch (err) {
+        console.error("Error fetching friends/requests:", err);
+      }
+    };
+
+    fetchFriendsAndRequests();
+  }, [auth.currentUser, db, profileUid]);
+
   // --- UPDATED ADD FRIEND FUNCTION (Batch Write) ---
   const sendFriendRequest = async () => {
     if (!auth.currentUser || !userProfile) return;
@@ -198,31 +243,104 @@ export default function ProfilePage() {
       const batch = writeBatch(db);
 
       // 1. Add to MY subcollection (Status: Sent)
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid
+      );
       batch.set(myRef, {
         uid: profileUid,
         status: "sent",
         createdAt: Timestamp.now(),
         displayName: userProfile.displayName, // Cache name
-        photoURL: userProfile.photoURL        // Cache photo
+        photoURL: userProfile.photoURL, // Cache photo
       });
 
       // 2. Add to THEIR subcollection (Status: Received)
-      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid
+      );
       batch.set(theirRef, {
         uid: auth.currentUser.uid,
         status: "received",
         createdAt: Timestamp.now(),
         displayName: auth.currentUser.displayName || "Unknown",
-        photoURL: auth.currentUser.photoURL || ""
+        photoURL: auth.currentUser.photoURL || "",
       });
 
       await batch.commit();
       setFriendshipStatus("sent");
-
     } catch (err) {
       console.error("Error sending friend request:", err);
       alert("Failed to send request. Check console.");
+    }
+  };
+
+  const acceptFriendRequest = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+      const batch = writeBatch(db);
+
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid
+      );
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid
+      );
+
+      batch.update(myRef, { status: "friends" });
+      batch.update(theirRef, { status: "friends" });
+
+      await batch.commit();
+      setFriendshipStatus("friends");
+    } catch (err) {
+      console.error("Accept failed:", err);
+    }
+  };
+
+  const declineFriendRequest = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+      const batch = writeBatch(db);
+
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid
+      );
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid
+      );
+
+      batch.delete(myRef);
+      batch.delete(theirRef);
+
+      await batch.commit();
+      setFriendshipStatus("none");
+    } catch (err) {
+      console.error("Decline failed:", err);
     }
   };
 
@@ -301,7 +419,9 @@ export default function ProfilePage() {
     );
 
   return (
-    <main className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}>
+    <main
+      className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
+    >
       <div className="absolute top-0 left-0 w-full h-[500px] bg-violet-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <motion.div
@@ -321,8 +441,13 @@ export default function ProfilePage() {
                 disabled={auth.currentUser?.uid !== profileUid}
               />
               <div
-                className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 relative ${auth.currentUser?.uid === profileUid ? "cursor-pointer" : ""}`}
-                onClick={() => auth.currentUser?.uid === profileUid && fileInputRef.current?.click()}
+                className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 relative ${
+                  auth.currentUser?.uid === profileUid ? "cursor-pointer" : ""
+                }`}
+                onClick={() =>
+                  auth.currentUser?.uid === profileUid &&
+                  fileInputRef.current?.click()
+                }
               >
                 {userProfile?.photoURL ? (
                   <img
@@ -336,15 +461,14 @@ export default function ProfilePage() {
                   </div>
                 )}
                 {auth.currentUser?.uid === profileUid && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Pencil className="w-8 h-8 text-white" />
-                    </div>
+                  </div>
                 )}
               </div>
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4 w-full">
-              
               {/* --- FRIENDSHIP BUTTONS --- */}
               {auth.currentUser?.uid !== profileUid && (
                 <div className="mt-4">
@@ -364,10 +488,20 @@ export default function ProfilePage() {
                   )}
 
                   {friendshipStatus === "received" && (
-                    <span className="px-4 py-2 bg-violet-900/50 border border-violet-500 rounded-full text-violet-200 cursor-default">
-                      Has requested you
-                    </span>
-                    // Note: You can add Accept/Decline buttons here later
+                    <div className="flex gap-2">
+                      <button
+                        onClick={acceptFriendRequest}
+                        className="px-4 py-2 bg-green-600 rounded-full text-white font-semibold hover:bg-green-500 transition"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={declineFriendRequest}
+                        className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-white transition"
+                      >
+                        Decline
+                      </button>
+                    </div>
                   )}
 
                   {friendshipStatus === "friends" && (
@@ -453,6 +587,133 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid lg:grid-cols-2 gap-6"
+        >
+          {/* Friends List */}
+          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-white mb-2">Friends</h3>
+            {friends.length === 0 ? (
+              <p className="text-zinc-400 text-sm">No friends yet.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {friends.map((friend) => (
+                  <Link
+                    key={friend.uid}
+                    href={`/profile/${friend.uid}`}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-800 transition"
+                  >
+                    <img
+                      src={friend.photoURL || ""}
+                      alt={friend.displayName}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-sm text-white">
+                      {friend.displayName}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Friend Requests */}
+          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Friend Requests
+            </h3>
+            {incomingRequests.length === 0 ? (
+              <p className="text-zinc-400 text-sm">No incoming requests.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {incomingRequests.map((request) => (
+                  <div
+                    key={request.uid}
+                    className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={request.photoURL || ""}
+                        alt={request.displayName}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span className="text-sm text-white">
+                        {request.displayName}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          // Accept request
+                          const batch = writeBatch(db);
+                          const myRef = doc(
+                            db,
+                            "users",
+                            auth.currentUser!.uid,
+                            "friends",
+                            request.uid
+                          );
+                          const theirRef = doc(
+                            db,
+                            "users",
+                            request.uid,
+                            "friends",
+                            auth.currentUser!.uid
+                          );
+                          batch.update(myRef, { status: "friends" });
+                          batch.update(theirRef, { status: "friends" });
+                          await batch.commit();
+
+                          // Update local state
+                          setIncomingRequests((prev) =>
+                            prev.filter((r) => r.uid !== request.uid)
+                          );
+                          setFriends((prev) => [...prev, request]);
+                        }}
+                        className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500 transition"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={async () => {
+                          // Decline request
+                          const batch = writeBatch(db);
+                          const myRef = doc(
+                            db,
+                            "users",
+                            auth.currentUser!.uid,
+                            "friends",
+                            request.uid
+                          );
+                          const theirRef = doc(
+                            db,
+                            "users",
+                            request.uid,
+                            "friends",
+                            auth.currentUser!.uid
+                          );
+                          batch.delete(myRef);
+                          batch.delete(theirRef);
+                          await batch.commit();
+
+                          setIncomingRequests((prev) =>
+                            prev.filter((r) => r.uid !== request.uid)
+                          );
+                        }}
+                        className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 text-sm hover:text-white transition"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+
         {/* ... (Recent Sets section remains the same) ... */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -524,7 +785,7 @@ export default function ProfilePage() {
           </Link>
         </div>
       </div>
-      
+
       {/* ... (Editing Modal remains the same) ... */}
       {editing && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
