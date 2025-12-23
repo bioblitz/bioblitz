@@ -137,16 +137,6 @@ export default function SettingsPage() {
     }
   };
 
-  const copyUserId = () => {
-    if (!user?.uid) return;
-    navigator.clipboard
-      .writeText(user.uid)
-      .then(() => {
-        setToastMessage("User ID copied");
-        setTimeout(() => setToastMessage(null), 2000); // disappear after 2s
-      })
-      .catch((err) => console.error("Failed to copy ID:", err));
-  };
   return (
     <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
@@ -200,13 +190,6 @@ export default function SettingsPage() {
           >
             View Profile
           </Link>
-
-          <button
-            onClick={copyUserId}
-            className="bg-zinc-800 ml-2  py-2 px-4 text-m rounded-xl  hover:bg-zinc-700  text-white font-medium transition-colors"
-          >
-            Copy My User ID
-          </button>
         </motion.section>
 
         <motion.section
