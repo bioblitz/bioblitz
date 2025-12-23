@@ -269,3 +269,74 @@ export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", 
         console.error("Failed to aggregate rating:", error);
     }
 });
+
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+
+// ... other code ...
+
+// ---------------------------------------------------------------------------
+// 4. SYNC USER PROFILE CHANGES (Handles Unlimited Games)
+// ---------------------------------------------------------------------------
+export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (event) => {
+    const newData = event.data?.after.data();
+    const oldData = event.data?.before.data();
+
+    if (!newData || !oldData) return;
+
+    // 1. Check if visual fields actually changed
+    const nameChanged = newData.displayName !== oldData.displayName;
+    const handleChanged = newData.username !== oldData.username; // Remember: Firestore 'username' maps to App 'handle'
+    const photoChanged = newData.photoURL !== oldData.photoURL;
+
+    if (!nameChanged && !handleChanged && !photoChanged) {
+        return;
+    }
+
+    console.log(`Syncing profile update for user ${event.params.userId}...`);
+    const db = admin.firestore();
+
+    // 2. Fetch ALL submissions (This reads them all, which is necessary)
+    // Note: If a user has 100k+ games, you would need a Recursive Query cursor, 
+    // but for <10k games, a single .get() is usually fine in Cloud Functions memory.
+    const submissionsQuery = db.collection("gameSubmissions")
+                               .where("userId", "==", event.params.userId);
+    
+    const snapshot = await submissionsQuery.get();
+    
+    if (snapshot.empty) return;
+
+    // 3. Prepare the Updates in Chunks of 500
+    const BATCH_SIZE = 500;
+    const batches: Promise<FirebaseFirestore.WriteResult[]>[] = [];
+    
+    let currentBatch = db.batch();
+    let operationCount = 0;
+
+    snapshot.docs.forEach((doc) => {
+        // Add update to the current batch
+        currentBatch.update(doc.ref, {
+            username: newData.displayName || "Unknown",
+            handle: newData.username || "",
+            photoURL: newData.photoURL || ""
+        });
+        
+        operationCount++;
+
+        // If we hit the limit, commit this batch and start a new one
+        if (operationCount === BATCH_SIZE) {
+            batches.push(currentBatch.commit());
+            currentBatch = db.batch(); // Reset
+            operationCount = 0; // Reset
+        }
+    });
+
+    // 4. Commit any remaining operations (the last partially filled batch)
+    if (operationCount > 0) {
+        batches.push(currentBatch.commit());
+    }
+
+    // 5. Wait for all batches to finish
+    await Promise.all(batches);
+
+    console.log(`Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`);
+});
