@@ -14,8 +14,8 @@ import {
   setDoc,
   query,
   where,
-  orderBy, // Added
-  limit, // Added
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useRouter, useParams } from "next/navigation";
@@ -31,8 +31,9 @@ import {
   User as UserIcon,
   Save,
   X,
-  TrendingUp, // Added
-  TrendingDown, // Added
+  TrendingUp,
+  TrendingDown,
+  Info, // Ensure Info is imported
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -44,7 +45,6 @@ import {
 } from "firebase/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
-import { Info } from "lucide-react";
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from "recharts";
 
 const inter = Inter({
@@ -113,69 +113,85 @@ export default function ProfilePage() {
   >("none");
   const [friends, setFriends] = useState<UserProfile[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<UserProfile[]>([]);
-  const [friendIdInput, setFriendIdInput] = useState("");
+  
+  // Renamed state variable for clarity
+  const [friendUsernameInput, setFriendUsernameInput] = useState("");
 
-  const addFriendById = async () => {
-    if (!auth.currentUser || !friendIdInput) return;
-
-    if (friendIdInput === auth.currentUser.uid) {
-      alert("You cannot add yourself!");
-      return;
-    }
+  // --- UPDATED ADD FRIEND FUNCTION ---
+  const addFriendByUsername = async () => {
+    if (!auth.currentUser || !friendUsernameInput) return;
 
     try {
-      const userDocRef = doc(db, "users", friendIdInput);
-      const userSnap = await getDoc(userDocRef);
+      // 1. Find the user by USERNAME (Query)
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", "==", friendUsernameInput));
+      const querySnapshot = await getDocs(q);
 
-      if (!userSnap.exists()) {
-        alert("User not found. Make sure the ID is correct.");
+      if (querySnapshot.empty) {
+        alert("User not found! Please check the username.");
         return;
       }
 
-      // Check if friendship document already exists
+      // 2. Get the UID from the found document
+      const targetUserDoc = querySnapshot.docs[0];
+      const targetUid = targetUserDoc.id;
+      const targetUserData = targetUserDoc.data();
+
+      // 3. Prevent adding self
+      if (targetUid === auth.currentUser.uid) {
+        alert("You cannot add yourself!");
+        return;
+      }
+
+      // 4. Check existing friendship using the found UID
       const myFriendDocRef = doc(
         db,
         "users",
         auth.currentUser.uid,
         "friends",
-        friendIdInput
+        targetUid
       );
       const myFriendSnap = await getDoc(myFriendDocRef);
 
       if (myFriendSnap.exists()) {
         const status = myFriendSnap.data().status;
         if (status === "friends") {
-          alert("You are already friends with this user.");
+          alert(`You are already friends with ${targetUserData.username || "this user"}.`);
           return;
         } else if (status === "sent") {
-          alert("Friend request already sent to this user.");
+          alert("Friend request already sent.");
           return;
         } else if (status === "received") {
-          alert("This user has already sent you a friend request.");
+          alert("This user has already sent you a request. Check your inbox!");
           return;
         }
       }
 
-      // If all checks pass, send friend request
+      // 5. Send Request (Batch Write)
       const batch = writeBatch(db);
 
+      // Add to MY list
       const myRef = doc(
         db,
         "users",
         auth.currentUser.uid,
         "friends",
-        friendIdInput
+        targetUid
       );
       batch.set(myRef, {
-        uid: friendIdInput,
+        uid: targetUid,
         status: "sent",
         createdAt: Timestamp.now(),
+        // Cache their info for easy display
+        displayName: targetUserData.displayName || "",
+        photoURL: targetUserData.photoURL || ""
       });
 
+      // Add to THEIR list
       const theirRef = doc(
         db,
         "users",
-        friendIdInput,
+        targetUid,
         "friends",
         auth.currentUser.uid
       );
@@ -188,10 +204,12 @@ export default function ProfilePage() {
       });
 
       await batch.commit();
-      alert("Friend request sent!");
+      alert(`Friend request sent to ${targetUserData.username}!`);
+      setFriendUsernameInput(""); // Clear input
+
     } catch (err) {
       console.error(err);
-      alert("Failed to send friend request.");
+      alert("An error occurred while adding friend.");
     }
   };
 
@@ -319,7 +337,6 @@ export default function ProfilePage() {
 
   // 5. Check Friendship Status
   useEffect(() => {
-    // FIX: TypeScript check for currentUser
     const currentUser = auth.currentUser;
     if (!userProfile || !currentUser || currentUser.uid === profileUid) return;
 
@@ -350,7 +367,6 @@ export default function ProfilePage() {
 
   // 6. Fetch Friends Lists
   useEffect(() => {
-    // FIX: TypeScript check for currentUser
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
@@ -860,47 +876,100 @@ export default function ProfilePage() {
           {/* Friend Requests (Only visible to owner) */}
           {auth.currentUser?.uid === profileUid && (
             <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
-              <h3 className="text-lg font-semibold text-white ">
+              <h3 className="text-lg font-semibold text-white mb-2">
                 Friend Requests
               </h3>
-
+              
+              {/* 1. THE LIST (Conditional) */}
               {incomingRequests.length === 0 ? (
-                <div className="flex flex-col gap-3">
-                  <p className="text-zinc-400 text-sm">No incoming requests.</p>
-
-                  <div className="flex gap-2 items-center">
-                    <div className="relative flex-shrink-0 group">
-                      <Info className="w-4 h-4 text-indigo-300 cursor-default" />
-                      <span className="absolute top-full mt-1  left-1/2 -translate-x-1/2 w-max px-2 py-1 text-xs text-white bg-zinc-900 rounded-md border border-zinc-800 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100">
-                        Find your User ID in Settings
-                      </span>
-                    </div>
-
-                    <input
-                      type="text"
-                      placeholder="Enter User ID to Search For a Friend"
-                      value={friendIdInput}
-                      onChange={(e) => setFriendIdInput(e.target.value)}
-                      className="flex-1 bg-indigo-500/20 text-white p-2.5 rounded-xl border border-indigo-400 focus:border-indigo-600 focus:outline-none placeholder:text-indigo-200 transition-colors"
-                    />
-                    <button
-                      onClick={addFriendById}
-                      className="px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-400 transition-colors font-semibold"
-                    >
-                      Add Friend
-                    </button>
-                  </div>
-                </div>
+                <p className="text-zinc-400 text-sm">No incoming requests.</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {incomingRequests.map((request) => (
                     <div
                       key={request.uid}
                       className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
-                    ></div>
+                    >
+                      <div className="flex items-center gap-3">
+                        {request.photoURL ? (
+                           <img
+                             src={request.photoURL}
+                             alt={request.displayName}
+                             className="w-8 h-8 rounded-full object-cover"
+                           />
+                        ) : (
+                           <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                              {request.displayName?.[0]}
+                           </div>
+                        )}
+                        <span className="text-sm text-white">
+                          {request.displayName}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            const batch = writeBatch(db);
+                            const myRef = doc(db, "users", auth.currentUser!.uid, "friends", request.uid);
+                            const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser!.uid);
+                            batch.update(myRef, { status: "friends" });
+                            batch.update(theirRef, { status: "friends" });
+                            await batch.commit();
+
+                            setIncomingRequests((prev) => prev.filter((r) => r.uid !== request.uid));
+                            setFriends((prev) => [...prev, request]);
+                          }}
+                          className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500 transition"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const batch = writeBatch(db);
+                            const myRef = doc(db, "users", auth.currentUser!.uid, "friends", request.uid);
+                            const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser!.uid);
+                            batch.delete(myRef);
+                            batch.delete(theirRef);
+                            await batch.commit();
+
+                            setIncomingRequests((prev) => prev.filter((r) => r.uid !== request.uid));
+                          }}
+                          className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 text-sm hover:text-white transition"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
+
+              {/* 2. THE SEARCH BAR (Always Visible) */}
+              <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col gap-3">
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-shrink-0 group">
+                      <Info className="w-4 h-4 text-indigo-300 cursor-default" />
+                      <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max px-2 py-1 text-xs text-white bg-zinc-900 rounded-md border border-zinc-800 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100">
+                        Ask a friend for their username
+                      </span>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Enter Username to Add Friend"
+                      value={friendUsernameInput}
+                      onChange={(e) => setFriendUsernameInput(e.target.value)}
+                      className="flex-1 bg-indigo-500/10 text-white text-sm p-2.5 rounded-xl border border-indigo-500/30 focus:border-indigo-500 focus:outline-none placeholder:text-indigo-200/50 transition-colors"
+                    />
+                    <button
+                      onClick={addFriendByUsername}
+                      className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap"
+                    >
+                      Add
+                    </button>
+                  </div>
+              </div>
+
             </div>
           )}
         </motion.div>
