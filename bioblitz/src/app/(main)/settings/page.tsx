@@ -42,6 +42,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   const router = useRouter();
   const db = getFirestore(app);
@@ -129,11 +130,23 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(userDocRef);
+
+        if (snap.exists()) {
+          setUsername(snap.data().username ?? null);
+        }
+      } else {
+        setUsername(null);
+      }
     });
+
     return () => unsubscribe();
-  }, []);
+  }, [db]);
 
   const handleSignOut = async () => {
     const auth = getAuth(app);
@@ -237,7 +250,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <Link
-            href={`/profile/${user?.uid}`}
+            href={username ? `/profile/${username}` : "#"}
             className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
