@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import {
   addDoc,
   onSnapshot,
@@ -51,16 +52,25 @@ type GameResult = {
   correctAnswers: { [key: number]: string };
 };
 
+type LeaderboardEntry = {
+  userId: string;
+  score: number;
+  timeTaken: number;
+  username?: string;
+  handle?: string;
+  photoURL?: string;
+};
+
 export default function GameRoomPage() {
   const { gameId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Read the 'ranked' query param passed from the previous page
-  // Defaults to false if missing (Practice mode)
   const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
+  const [userProfileData, setUserProfileData] = useState({ handle: "", photoURL: "" });
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
@@ -86,9 +96,26 @@ export default function GameRoomPage() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (isMounted.current) {
         setUser(currentUser);
+
+        if (currentUser) {
+          try {
+
+            const userDocRef = doc(firestore, "users", currentUser.uid);
+            const userSnap = await getDoc(userDocRef);
+            if (userSnap.exists()) {
+              const data = userSnap.data();
+              setUserProfileData({
+                handle: data.username || "",
+                photoURL: data.photoURL || currentUser.photoURL || ""
+              });
+            }
+          } catch (e) {
+            console.error("Error fetching user profile data", e);
+          }
+        }
       }
     });
     return () => unsubscribe();
@@ -113,7 +140,6 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
-          // Only recover session if user hasn't submitted yet
           const key = `startTime-${gameId}`;
           const savedStart = localStorage.getItem(key);
 
@@ -173,6 +199,18 @@ export default function GameRoomPage() {
 
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
+    const commonData = {
+      gameId: gameId,
+      userId: user.uid,
+      userAnswers: userAnswers,
+      timeTaken: timeTaken,
+      submittedAt: serverTimestamp(),
+      status: "pending_grading",
+      username: user.displayName || "Unknown",
+      handle: userProfileData.handle,
+      photoURL: userProfileData.photoURL
+    };
+
     try {
       let submissionRef;
 
@@ -181,24 +219,14 @@ export default function GameRoomPage() {
         const rankedRef = doc(firestore, "gameSubmissions", rankedId);
 
         await setDoc(rankedRef, {
-          gameId: gameId,
-          userId: user.uid,
-          userAnswers: userAnswers,
-          timeTaken: timeTaken,
-          submittedAt: serverTimestamp(),
-          status: "pending_grading",
+          ...commonData,
           ranked: true,
         });
 
         submissionRef = rankedRef;
       } else {
         submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
-          gameId: gameId,
-          userId: user.uid,
-          userAnswers: userAnswers,
-          timeTaken: timeTaken,
-          submittedAt: serverTimestamp(),
-          status: "pending_grading",
+          ...commonData,
           ranked: false,
         });
       }
@@ -264,14 +292,11 @@ export default function GameRoomPage() {
     if (totalSeconds === null) return "0 mins 0 secs";
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${
-      seconds !== 1 ? "s" : ""
-    }`;
+    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${seconds !== 1 ? "s" : ""
+      }`;
   };
 
-  const [leaderboard, setLeaderboard] = useState<
-    { userId: string; score: number; timeTaken: number }[]
-  >([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   useEffect(() => {
@@ -300,11 +325,7 @@ export default function GameRoomPage() {
           }
         });
 
-        const data = Object.values(firstByUser) as {
-          userId: string;
-          score: number;
-          timeTaken: number;
-        }[];
+        const data = Object.values(firstByUser) as LeaderboardEntry[];
         setLeaderboard(data);
       } catch (err) {
         console.error("Error fetching leaderboard:", err);
@@ -316,19 +337,46 @@ export default function GameRoomPage() {
     fetchLeaderboard();
   }, [submitted, activeTab, gameId]);
 
-  const [usersMap, setUsersMap] = useState<{ [uid: string]: string }>({});
+  const [usersMap, setUsersMap] = useState<{ [uid: string]: { name: string, handle: string } }>({});
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const snapshot = await getDocs(collection(firestore, "users"));
-      const map: { [uid: string]: string } = {};
-      snapshot.docs.forEach((doc) => {
-        map[doc.id] = doc.data().displayName || "Unknown";
-      });
-      setUsersMap(map);
+    if (leaderboard.length === 0) return;
+
+    const fetchSpecificUsers = async () => {
+      try {
+        const missingProfileIds = leaderboard
+          .filter(l => !l.username)
+          .map(l => l.userId);
+
+        if (missingProfileIds.length === 0) return;
+
+        const uniqueUserIds = Array.from(new Set(missingProfileIds));
+
+        const userPromises = uniqueUserIds.map(uid =>
+          getDoc(doc(firestore, "users", uid))
+        );
+
+        const userSnapshots = await Promise.all(userPromises);
+
+        const newMap: { [uid: string]: { name: string, handle: string } } = {};
+        userSnapshots.forEach(snap => {
+          if (snap.exists()) {
+            const d = snap.data();
+            newMap[snap.id] = {
+              name: d.displayName || "Unknown",
+              handle: d.username || ""
+            };
+          }
+        });
+
+        setUsersMap(newMap);
+      } catch (err) {
+        console.error("Error fetching user profiles:", err);
+      }
     };
-    fetchUsers();
-  }, []);
+
+    fetchSpecificUsers();
+  }, [leaderboard]);
 
   if (loading) {
     return (
@@ -389,21 +437,19 @@ export default function GameRoomPage() {
             <div className="mb-8 flex flex-wrap gap-4 justify-center md:justify-start">
               <button
                 onClick={() => setActiveTab("result")}
-                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
-                  activeTab === "result"
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${activeTab === "result"
                     ? "bg-violet-600 text-white shadow-violet-500/20"
                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                }`}
+                  }`}
               >
                 Results
               </button>
               <button
                 onClick={() => setActiveTab("leaderboard")}
-                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
-                  activeTab === "leaderboard"
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${activeTab === "leaderboard"
                     ? "bg-violet-600 text-white shadow-violet-500/20"
                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                }`}
+                  }`}
               >
                 Leaderboard
               </button>
@@ -467,11 +513,10 @@ export default function GameRoomPage() {
                               className={`group flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-200 ${bgClass}`}
                             >
                               <span
-                                className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${
-                                  isSelected
+                                className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${isSelected
                                     ? "bg-white/20 text-white"
                                     : "bg-black/20 text-zinc-400 group-hover:text-white"
-                                }`}
+                                  }`}
                               >
                                 {key}
                               </span>
@@ -646,16 +691,16 @@ export default function GameRoomPage() {
                   <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {leaderboard.map((entry, idx) => {
                       const isCurrentUser = entry.userId === user?.uid;
-                      const displayName = usersMap[entry.userId] || "Unknown";
+                      const displayName = entry.username || usersMap[entry.userId]?.name || "Unknown";
+                      const handle = entry.handle || usersMap[entry.userId]?.handle;
 
                       return (
                         <div
                           key={entry.userId}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${
-                            isCurrentUser
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${isCurrentUser
                               ? "bg-violet-600/20 border-violet-500 text-white font-semibold"
                               : "bg-zinc-800/50 text-zinc-300"
-                          }`}
+                            }`}
                         >
                           <div className="w-6 flex justify-center">
                             {idx === 0 ? (
@@ -677,9 +722,15 @@ export default function GameRoomPage() {
                             className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900"
                           />
 
-                          <span className="truncate flex-1 text-left">
-                            {displayName}
-                          </span>
+                          <div className="truncate flex-1 text-left">
+                            {handle ? (
+                              <Link href={`/profile/${handle}`} className="hover:underline hover:text-white transition-colors">
+                                {displayName}
+                              </Link>
+                            ) : (
+                              <span>{displayName}</span>
+                            )}
+                          </div>
 
                           <span className="font-mono text-lg text-right">
                             {entry.score}

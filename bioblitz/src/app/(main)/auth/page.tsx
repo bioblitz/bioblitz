@@ -71,7 +71,7 @@ export default function AuthenticationPage() {
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70">
-              Welcome to Bioblitz
+              Welcome to BioBlitz
             </h1>
             <p className="text-zinc-400 text-sm">
               Sign in to track your progress and compete.
