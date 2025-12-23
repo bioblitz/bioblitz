@@ -11,7 +11,7 @@ import {
   deleteUser,
   GoogleAuthProvider,
   reauthenticateWithPopup,
-  User
+  User,
 } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const [isPublic, setIsPublic] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -60,7 +61,7 @@ export default function SettingsPage() {
     localStorage.setItem("emailNotifications", emailNotifications.toString());
   }, [emailNotifications]);
 
- useEffect(() => {
+  useEffect(() => {
     if (gregoryMode) {
       document.body.style.filter = "sepia(1) hue-rotate(275deg) saturate(6)";
       document.body.style.transition = "none";
@@ -87,33 +88,40 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     const auth = getAuth(app);
     const currentUser = auth.currentUser;
-  
+
     if (!currentUser) return;
-  
-    const confirmed = confirm("Are you sure you want to permanently delete your account?");
+
+    const confirmed = confirm(
+      "Are you sure you want to permanently delete your account?"
+    );
     if (!confirmed) return;
-  
-    const walrusChorus = "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
-    const userInput = prompt(`Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`);
-  
+
+    const walrusChorus =
+      "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
+    const userInput = prompt(
+      `Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`
+    );
+
     if (userInput !== walrusChorus) {
       alert("Incorrect phrase. Deletion cancelled.");
       return;
     }
-  
+
     try {
       await deleteUser(currentUser);
       alert("Account deleted successfully.");
       router.push("/auth");
     } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        const reConfirm = confirm("For security, you must sign in again to confirm deletion. Sign in now?");
-        
+      if (error.code === "auth/requires-recent-login") {
+        const reConfirm = confirm(
+          "For security, you must sign in again to confirm deletion. Sign in now?"
+        );
+
         if (reConfirm) {
           try {
             const provider = new GoogleAuthProvider();
             await reauthenticateWithPopup(currentUser, provider);
-            
+
             await deleteUser(currentUser);
             alert("Account deleted successfully.");
             router.push("/auth");
@@ -129,10 +137,30 @@ export default function SettingsPage() {
     }
   };
 
+  const copyUserId = () => {
+    if (!user?.uid) return;
+    navigator.clipboard
+      .writeText(user.uid)
+      .then(() => {
+        setToastMessage("User ID copied");
+        setTimeout(() => setToastMessage(null), 2000); // disappear after 2s
+      })
+      .catch((err) => console.error("Failed to copy ID:", err));
+  };
   return (
     <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
     >
+      {toastMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-black px-4 py-2 rounded-xl shadow-lg z-50"
+        >
+          {toastMessage}
+        </motion.div>
+      )}
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">
           Settings & Preferences
@@ -167,11 +195,18 @@ export default function SettingsPage() {
             </div>
           </div>
           <Link
-            href="/profile"
+            href={`/profile/${user?.uid}`}
             className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
           </Link>
+
+          <button
+            onClick={copyUserId}
+            className="bg-zinc-800 ml-2  py-2 px-4 text-m rounded-xl  hover:bg-zinc-700  text-white font-medium transition-colors"
+          >
+            Copy My User ID
+          </button>
         </motion.section>
 
         <motion.section
@@ -214,7 +249,6 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
-       
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -263,19 +297,25 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
-         <motion.section
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
           className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
         >
           <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-            Experimental 
-            {gregoryMode && <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">ON</span>}
+            Experimental
+            {gregoryMode && (
+              <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">
+                ON
+              </span>
+            )}
           </h2>
           <div className="flex items-center justify-between">
             <div>
-               <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>Gregory Mode</p>
+              <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>
+                Gregory Mode
+              </p>
             </div>
             <Switch
               checked={gregoryMode}
@@ -287,7 +327,6 @@ export default function SettingsPage() {
             />
           </div>
         </motion.section>
-
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}
