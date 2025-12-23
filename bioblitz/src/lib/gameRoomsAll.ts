@@ -1,5 +1,6 @@
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { firestore } from "./firebase"; 
+
 export type Question = {
   id: string;
   a?: string;
@@ -26,7 +27,6 @@ export type gameRoom = {
   rating?: number;
   questions: Question[];
 };
-
 
 const formatTime = (totalSeconds: number): string => {
   if (isNaN(totalSeconds) || totalSeconds < 0) {
@@ -57,32 +57,27 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
       visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);
     }
 
-    const gameList = await Promise.all(
-      visibleDocs.map(async (doc: QueryDocumentSnapshot<DocumentData>) => {
-        const data = doc.data();
+ 
+    const gameList = visibleDocs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const data = doc.data();
 
-        const questionsCollection = collection(firestore, 'sets', doc.id, 'questions');
+      return {
+        id: doc.id,
+        title: data.title || '',
+        source: data.source || '',
         
-        const questionsSnapshot = await getDocs(questionsCollection);
-        const questions = questionsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Question[];
-        const questionCount = questionsSnapshot.size;
-
-        return {
-          id: doc.id,
-          title: data.title || '',
-          source: data.source || '',
-          number_of_questions: questionCount.toString(),
-          topic: data.topic,
-          difficulty: data.difficulty || 'Easy',
-          timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
-          description: data.description,
-          creator: data.creator,
-          creatorPfp: data.creatorPfp,
-          rating: data.rating,
-          questions: questions,
-        };
-      })
-    );
+        number_of_questions: (data.questionCount || 0).toString(),
+        
+        topic: data.topic,
+        difficulty: data.difficulty || 'Easy',
+        timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
+        description: data.description,
+        creator: data.creator,
+        creatorPfp: data.creatorPfp,
+        rating: data.averageRating || data.rating, 
+        questions: [], 
+      };
+    });
 
     return gameList;
     

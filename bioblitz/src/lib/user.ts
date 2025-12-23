@@ -99,7 +99,7 @@ export async function getUserProfileByUsername(username: string): Promise<UserPr
   if (!querySnapshot.empty) {
     const userDoc = querySnapshot.docs[0];
     const userProfile = userDoc.data() as UserProfile;
-    userProfile.uid = userDoc.id; // Set the UID from the document ID
+    userProfile.uid = userDoc.id;
     return userProfile;
   } else {
     return null;

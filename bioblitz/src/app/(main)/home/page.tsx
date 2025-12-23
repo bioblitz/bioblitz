@@ -4,7 +4,7 @@ import Link from "next/link";
 import { allGames, gameRoom } from "@/lib/gameRoomsAll";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Clock,  HelpCircle, User, Star, Filter, Loader2, CheckCircle2, SlidersHorizontal, ChevronDown, ChevronUp, Search } from "lucide-react"; 
+import { Clock, HelpCircle, User, Star, Filter, Loader2, CheckCircle2, SlidersHorizontal, ChevronDown, ChevronUp, Search } from "lucide-react"; 
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { app } from "@/lib/firebase";
@@ -303,10 +303,11 @@ export default function HomePage() {
                            <span className="font-semibold text-zinc-300">{game.timeLimit}</span>
                          </div>
                       </div>
-                      {game.rating && (
-                        <div className="flex items-center text-yellow-400 font-medium">
-                          <Star className="w-4 h-4 mr-1 fill-yellow-400" />
-                          <span>{game.rating}</span>
+                      {/* UPDATED: Styled Rating Badge using prop */}
+                      {game.rating && game.rating > 0 && (
+                        <div className="flex items-center text-yellow-400 font-medium bg-yellow-400/5 px-2 py-0.5 rounded-md border border-yellow-400/10">
+                          <Star className="w-3.5 h-3.5 mr-1 fill-yellow-400" />
+                          <span className="text-xs font-bold">{game.rating}</span>
                         </div>
                       )}
                     </div>

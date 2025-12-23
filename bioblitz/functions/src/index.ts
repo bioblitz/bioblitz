@@ -1,11 +1,15 @@
 import * as admin from "firebase-admin";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { FieldValue } from "firebase-admin/firestore"; // <--- Import FieldValue
 
+// 1. Initialize Once
 admin.initializeApp();
 const db = admin.firestore();
 
+// ---------------------------------------------------------------------------
+// 1. GRADE TEST (Calculates Score + Elo + History)
+// ---------------------------------------------------------------------------
 export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", async (event) => {
   const snap = event.data;
   if (!snap) {
@@ -26,7 +30,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     }
     const { gameId, userId, userAnswers, timeTaken } = submissionData;
 
-    const db = admin.firestore();
+    // Fetch Game Metadata
     const gameDocRef = db.collection("sets").doc(gameId);
     const gameDoc = await gameDocRef.get();
 
@@ -35,10 +39,10 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
       return snap.ref.update({ status: "error_game_not_found" });
     }
 
-    const gameTitle = gameDoc.data()?.title || gameDoc.data()?.name || "Woah so vintage";
+    const gameTitle = gameDoc.data()?.title || gameDoc.data()?.name || "Untitled Set";
     const timeTotal = gameDoc.data()?.timeLimit as number;
 
-    // --- 1. Fetch Questions & Calculate Score ---
+    // Fetch Questions
     const questionsColRef = gameDocRef.collection("questions");
     const questionsSnap = await questionsColRef.get();
     const totalQuestions = questionsSnap.size;
@@ -47,6 +51,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
       return snap.ref.update({ score: 0, status: "error_no_questions" });
     }
 
+    // Calculate Score
     const correctAnswersMap: { [key: number]: string } = {};
     questionsSnap.docs.forEach((doc, index) => {
       correctAnswersMap[index] = doc.data().correct;
@@ -65,10 +70,12 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
     const finalScore = Math.floor(accuracyScore + timeBonus);
 
+    // Check for Previous Plays (Replay Detection)
     const userRef = db.collection("users").doc(userId);
     const userHistoryDocRef = userRef.collection("setsPlayed").doc(gameId);
     const existingHistory = await userHistoryDocRef.get();
 
+    // --- REPLAY LOGIC ---
     if (existingHistory.exists) {
         console.log(`User ${userId} has played set ${gameId} before. Marking as Replay.`);
  
@@ -80,8 +87,8 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
               totalQuestions: totalQuestions,
               correctAnswers: correctAnswersMap,
               gradedAt: FieldValue.serverTimestamp(),
-              note: "Replay: Elo not updated."
-          }),
+              isFirstAttempt: false // Explicitly mark as false
+            }),
           userHistoryDocRef.update({
              history: FieldValue.arrayUnion(snap.id),
              lastPlayedAt: FieldValue.serverTimestamp(),
@@ -91,6 +98,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         return;
     }
 
+    // --- FIRST ATTEMPT LOGIC (Calculate Elo) ---
     const allSetsPlayedSnap = await userRef.collection("setsPlayed").get();
     
     let weightedScoreSum = 0;
@@ -112,16 +120,16 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         }
     });
 
-    // Add CURRENT game (Weight = 1.0)
+    // Add CURRENT game
     weightedScoreSum += finalScore * 1.0;
     totalWeight += 1.0;
 
     const newBElo = Math.round(weightedScoreSum / totalWeight);
 
-    // 4. Update Database for First Attempt
+    // Database Updates
     const userHistoryData = {
       submission: snap.id, 
-      history: [snap.id], // Initialize array with this submission
+      history: [snap.id],
       score: finalScore,
       title: gameTitle,
       playedAt: FieldValue.serverTimestamp(),
@@ -134,6 +142,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         totalQuestions: totalQuestions,
         correctAnswers: correctAnswersMap,
         status: "graded",
+        isFirstAttempt: true, // <--- CRITICAL FOR LEADERBOARD QUERY
         gradedAt: FieldValue.serverTimestamp(),
     };
 
@@ -142,7 +151,12 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     await Promise.all([
         snap.ref.update(submissionUpdateData),
         userHistoryDocRef.set(userHistoryData),
-        userRef.update({ bElo: newBElo })
+        userRef.update({ 
+            bElo: newBElo,
+            // Optimization: Update playedGameIds array on user profile
+            // This fixes your HomePage "read cost" issue
+            playedGameIds: FieldValue.arrayUnion(gameId) 
+        })
     ]);
 
     return;
@@ -156,6 +170,9 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
   }
 });
 
+// ---------------------------------------------------------------------------
+// 2. GET PUBLIC QUESTIONS (Callable)
+// ---------------------------------------------------------------------------
 export const getPublicQuestions = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be logged in to start a game.");
@@ -184,4 +201,71 @@ export const getPublicQuestions = onCall(async (request) => {
     console.error("Error fetching public questions:", error);
     throw new HttpsError("internal", "An error occurred while fetching the game.");
   }
+});
+
+// ---------------------------------------------------------------------------
+// 3. AGGREGATE RATINGS (Trigger)
+// ---------------------------------------------------------------------------
+export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", async (event) => {
+    const newData = event.data?.after.data();
+    const oldData = event.data?.before.data();
+
+    // Identify Game ID
+    const gameId = newData?.gameId || oldData?.gameId;
+    if (!gameId) {
+        console.error("No Game ID found in rating document.");
+        return;
+    }
+
+    const setRef = db.collection("sets").doc(gameId);
+
+    // Deltas
+    let countDelta = 0;
+    let scoreDelta = 0;
+
+    const isNew = !event.data?.before.exists;
+    const isDelete = !event.data?.after.exists;
+    const isUpdate = !isNew && !isDelete;
+
+    if (isNew) {
+        countDelta = 1;
+        scoreDelta = newData?.score || 0;
+    } else if (isDelete) {
+        countDelta = -1;
+        scoreDelta = -(oldData?.score || 0);
+    } else if (isUpdate) {
+        countDelta = 0;
+        scoreDelta = (newData?.score || 0) - (oldData?.score || 0);
+    }
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const setDoc = await transaction.get(setRef);
+
+            let currentCount = 0;
+            let currentSum = 0;
+
+            if (setDoc.exists) {
+                const data = setDoc.data();
+                currentCount = data?.ratingCount || 0;
+                currentSum = data?.ratingSum || 0;
+            }
+
+            const newCount = currentCount + countDelta;
+            const newSum = currentSum + scoreDelta;
+            const newAverage = newCount > 0 ? (newSum / newCount) : 0;
+            const roundedAverage = Math.round(newAverage * 10) / 10;
+
+            transaction.set(setRef, {
+                ratingCount: newCount,
+                ratingSum: newSum,
+                averageRating: roundedAverage,
+                lastRatingUpdate: FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
+
+        console.log(`Successfully aggregated rating for Game ID: ${gameId}`);
+    } catch (error) {
+        console.error("Failed to aggregate rating:", error);
+    }
 });

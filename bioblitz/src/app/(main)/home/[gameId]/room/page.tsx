@@ -56,8 +56,7 @@ export default function GameRoomPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Read the 'ranked' query param passed from the previous page
-  // Defaults to false if missing (Practice mode)
+ 
   const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
@@ -113,7 +112,6 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
-          // Only recover session if user hasn't submitted yet
           const key = `startTime-${gameId}`;
           const savedStart = localStorage.getItem(key);
 
@@ -188,6 +186,7 @@ export default function GameRoomPage() {
           submittedAt: serverTimestamp(),
           status: "pending_grading",
           ranked: true,
+          displayName: user.displayName,
         });
 
         submissionRef = rankedRef;
@@ -319,16 +318,33 @@ export default function GameRoomPage() {
   const [usersMap, setUsersMap] = useState<{ [uid: string]: string }>({});
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const snapshot = await getDocs(collection(firestore, "users"));
-      const map: { [uid: string]: string } = {};
-      snapshot.docs.forEach((doc) => {
-        map[doc.id] = doc.data().displayName || "Unknown";
-      });
-      setUsersMap(map);
+    if (leaderboard.length === 0) return;
+
+    const fetchSpecificUsers = async () => {
+      try {
+        const uniqueUserIds = Array.from(new Set(leaderboard.map(l => l.userId)));
+
+        const userPromises = uniqueUserIds.map(uid => 
+          getDoc(doc(firestore, "users", uid))
+        );
+
+        const userSnapshots = await Promise.all(userPromises);
+
+        const newMap: { [uid: string]: string } = {};
+        userSnapshots.forEach(snap => {
+          if (snap.exists()) {
+            newMap[snap.id] = snap.data().displayName || "Unknown";
+          }
+        });
+
+        setUsersMap(newMap);
+      } catch (err) {
+        console.error("Error fetching user profiles:", err);
+      }
     };
-    fetchUsers();
-  }, []);
+
+    fetchSpecificUsers();
+  }, [leaderboard]);
 
   if (loading) {
     return (
