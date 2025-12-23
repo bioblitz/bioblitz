@@ -8,6 +8,7 @@ import { Clock, HelpCircle, User, Star, Filter, Loader2, CheckCircle2, SlidersHo
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { app } from "@/lib/firebase";
+ import { doc, getDoc } from "firebase/firestore"; 
 
 export default function HomeClient({ initialGames }: { initialGames: gameRoom[] }) {
   // State Management
@@ -27,23 +28,6 @@ export default function HomeClient({ initialGames }: { initialGames: gameRoom[] 
   const topics = ["All Topics", "Animal", "Cell Bio", "Biochem", "Genetics", "Plants"];
 
   // User History Fetching
-  useEffect(() => {
-    const loadUserHistory = async () => {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          const historyRef = collection(db, "users", currentUser.uid, "setsPlayed");
-          const historySnap = await getDocs(historyRef);
-          const ids = new Set<string>();
-          historySnap.forEach(doc => ids.add(doc.id));
-          setPlayedGameIds(ids);
-        }
-    };
-    
-    const unsub = auth.onAuthStateChanged((user) => {
-        if (user) loadUserHistory();
-    });
-    return () => unsub();
-  }, [auth, db]);
 
   // Filter Logic
   const filteredGames = games.filter((game) => {
