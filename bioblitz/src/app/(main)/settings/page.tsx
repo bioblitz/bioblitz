@@ -16,6 +16,16 @@ import {
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
+import {
+  getFirestore,
+  collection,
+  getDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+} from "firebase/firestore";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,8 +44,55 @@ export default function SettingsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const router = useRouter();
+  const db = getFirestore(app);
 
-  // Load Settings on Mount
+  const deleteSubcollection = async (path: string) => {
+    const colRef = collection(db, path);
+    const colDocs = await getDocs(colRef);
+    await Promise.all(colDocs.docs.map((docSnap) => deleteDoc(docSnap.ref)));
+  };
+
+  const deleteUserData = async (uid: string) => {
+    try {
+      console.log("Starting deletion for UID:", uid);
+
+      const gameQuery = query(
+        collection(db, "gameSubmissions"),
+        where("userId", "==", uid)
+      );
+      const gameDocs = await getDocs(gameQuery);
+      await Promise.all(gameDocs.docs.map((gDoc) => deleteDoc(gDoc.ref)));
+
+      const directUserRef = doc(db, "users", uid);
+      const directUserSnap = await getDoc(directUserRef);
+
+      if (directUserSnap.exists()) {
+        console.log("Found user doc by ID. Deleting...");
+        await deleteSubcollection(`users/${uid}/setsPlayed`);
+        await deleteSubcollection(`users/${uid}/friends`);
+        await deleteDoc(directUserRef);
+      } else {
+        console.log("User doc not found by ID. Trying query...");
+        const userQuery = query(
+          collection(db, "users"),
+          where("uid", "==", uid)
+        );
+        const userDocs = await getDocs(userQuery);
+
+        for (const userDoc of userDocs.docs) {
+          const docId = userDoc.id;
+          await deleteSubcollection(`users/${docId}/setsPlayed`);
+          await deleteSubcollection(`users/${docId}/friends`);
+          await deleteDoc(userDoc.ref);
+        }
+      }
+
+      console.log("User data deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user data:", error);
+      throw error;
+    }
+  };
   useEffect(() => {
     const sound = localStorage.getItem("soundEnabled");
     const animation = localStorage.getItem("animationEnabled");
@@ -48,7 +105,6 @@ export default function SettingsPage() {
     if (gregory !== null) setGregoryMode(gregory === "true");
   }, []);
 
-  // Save regular settings automatically
   useEffect(() => {
     localStorage.setItem("soundEnabled", soundEnabled.toString());
   }, [soundEnabled]);
@@ -84,11 +140,9 @@ export default function SettingsPage() {
     await signOut(auth);
     router.push("/auth");
   };
-
   const handleDeleteAccount = async () => {
     const auth = getAuth(app);
     const currentUser = auth.currentUser;
-
     if (!currentUser) return;
 
     const confirmed = confirm(
@@ -101,29 +155,28 @@ export default function SettingsPage() {
     const userInput = prompt(
       `Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`
     );
-
     if (userInput !== walrusChorus) {
       alert("Incorrect phrase. Deletion cancelled.");
       return;
     }
 
     try {
+      await deleteUserData(currentUser.uid);
       await deleteUser(currentUser);
-      alert("Account deleted successfully.");
+      alert("Account and all associated data deleted successfully.");
       router.push("/auth");
     } catch (error: any) {
       if (error.code === "auth/requires-recent-login") {
         const reConfirm = confirm(
           "For security, you must sign in again to confirm deletion. Sign in now?"
         );
-
         if (reConfirm) {
           try {
             const provider = new GoogleAuthProvider();
             await reauthenticateWithPopup(currentUser, provider);
-
+            await deleteUserData(currentUser.uid);
             await deleteUser(currentUser);
-            alert("Account deleted successfully.");
+            alert("Account and all associated data deleted successfully.");
             router.push("/auth");
           } catch (reAuthError) {
             console.error("Re-auth failed", reAuthError);
@@ -136,7 +189,6 @@ export default function SettingsPage() {
       }
     }
   };
-
   return (
     <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}

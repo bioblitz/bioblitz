@@ -1,8 +1,15 @@
-import { getFirestore, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { app } from "@/lib/firebase"; // Ensure your firebase init is server-safe
-import LeaderboardClient from "./LeaderboardClient"; // We'll make this next
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
+import { app } from "@/lib/firebase";
+import LeaderboardClient from "./LeaderboardClient";
 
-export const revalidate = 60; // Cache the leaderboard for 60 seconds (Huge cost saver)
+export const revalidate = 60;
 
 interface LeaderboardUser {
   uid: string;
@@ -23,16 +30,15 @@ async function getLeaderboardData() {
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
-    if (typeof data.bElo === "number") {
-      leaderboardData.push({
-        uid: doc.id,
-        displayName: data.displayName || "It's a mystery",
-        photoURL: data.photoURL || "",
-        bElo: data.bElo,
-        school: data.school,
-        username: data.username
-      });
-    }
+    if (!data || typeof data.bElo !== "number" || !data.username) return;
+    leaderboardData.push({
+      uid: doc.id,
+      displayName: data.displayName || "It's a mystery",
+      photoURL: data.photoURL || "",
+      bElo: data.bElo,
+      school: data.school,
+      username: data.username,
+    });
   });
 
   return leaderboardData;
@@ -41,8 +47,5 @@ async function getLeaderboardData() {
 export default async function LeaderboardPage() {
   const users = await getLeaderboardData();
 
-  return (
-    // We pass the data to a Client Component to handle Auth highlighting
-    <LeaderboardClient initialUsers={users} />
-  );
+  return <LeaderboardClient initialUsers={users} />;
 }
