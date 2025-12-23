@@ -113,7 +113,7 @@ export default function MainNavbar() {
 
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-40 bg-zinc-900 rounded-lg shadow-lg overflow-hidden z-50">
-            <Link href={`/profile/${auth.currentUser?.uid}`}>
+            <Link href={`/profile/${user.username}`}>
               <span
                 className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
                 onClick={() => setDropdownOpen(false)}

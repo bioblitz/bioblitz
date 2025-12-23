@@ -54,10 +54,11 @@ export default function LeaderboardPage() {
           if (typeof data.bElo === "number") {
             leaderboardData.push({
               uid: doc.id,
-              displayName: data.displayName || "Anonymous User",
+              displayName: data.displayName || "It's a mystery",
               photoURL: data.photoURL || "",
               bElo: data.bElo,
               school: data.school,
+              username: data.username
             });
           }
         });
@@ -187,7 +188,7 @@ export default function LeaderboardPage() {
                           : "text-white"
                       }`}
                     >
-                      <Link href={`/profile/${user.uid}`}>
+                      <Link href={`/profile/${user.username}`}>
                         <span className="cursor-pointer hover:underline">
                           {user.displayName}
                         </span>
