@@ -107,16 +107,23 @@ export default function GameDetailPage() {
           collection(firestore, "gameSubmissions"),
           where("userId", "==", user.uid),
           where("gameId", "==", gameId),
-          orderBy("submittedAt", "desc")
+          where("status", "==", "graded"),
+          where("ranked", "==", true),
+          orderBy("score", "desc"),
+          limit(15)
         );
 
         const snapshot = await getDocs(q);
-        const attempts = snapshot.docs.map((doc) => ({
+        const rawAttempts = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })) as GameSubmission[];
 
-        setPreviousAttempts(attempts);
+        const uniqueAttempts = Array.from(
+          new Map(rawAttempts.map((s) => [s.userId, s])).values()
+        );
+
+        setPreviousAttempts(uniqueAttempts);
       } catch (err) {
         console.error("Error fetching attempts:", err);
       } finally {
@@ -142,12 +149,16 @@ export default function GameDetailPage() {
         );
 
         const snapshot = await getDocs(q);
-        const rawSubmissions = snapshot.docs.map(
-          (doc) => doc.data() as GameSubmission
+        const rawSubmissions = snapshot.docs
+          .map((doc) => doc.data() as GameSubmission)
+          .filter((submission) => submission.ranked);
+
+        const uniqueSubmissions = Array.from(
+          new Map(rawSubmissions.map((s) => [s.userId, s])).values()
         );
 
         const leaderboardData = await Promise.all(
-          rawSubmissions.map(async (submission) => {
+          uniqueSubmissions.map(async (submission) => {
             let displayName = "Unknown User";
             let handle = "";
 
@@ -155,11 +166,11 @@ export default function GameDetailPage() {
               const userDocRef = doc(firestore, "users", submission.userId);
               const userSnap = await getDoc(userDocRef);
 
-              if (userSnap.exists()) {
-                const userData = userSnap.data();
-                displayName = userData.displayName || "Unknown User";
-                handle = userData.username || "";
-              }
+              if (!userSnap.exists()) return null;
+
+              const userData = userSnap.data();
+              displayName = userData.displayName || "Unknown User";
+              handle = userData.username || "";
             } catch (e) {
               console.error("Failed to fetch user profile", e);
             }
@@ -174,7 +185,11 @@ export default function GameDetailPage() {
           })
         );
 
-        setLeaderboard(leaderboardData);
+        setLeaderboard(
+          leaderboardData.filter(
+            (entry) => entry !== null
+          ) as LeaderboardEntry[]
+        );
       } catch (err) {
         console.error("Error loading leaderboard:", err);
       } finally {
