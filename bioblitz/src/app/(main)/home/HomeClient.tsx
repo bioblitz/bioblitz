@@ -3,24 +3,21 @@
 import Link from "next/link";
 import { gameRoom } from "@/lib/gameRoomsAll";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Clock,
   HelpCircle,
   User,
   Star,
   Filter,
-  Loader2,
   CheckCircle2,
   SlidersHorizontal,
   ChevronDown,
   ChevronUp,
   Search,
 } from "lucide-react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 export default function HomeClient({
   initialGames,
@@ -40,6 +37,7 @@ export default function HomeClient({
 
   const [games, setGames] = useState<gameRoom[]>(initialGames);
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
+  const [user, setUser] = useState<any>(null); // Track user state locally
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -53,6 +51,42 @@ export default function HomeClient({
     "Plants",
   ];
 
+  // 1. Use onAuthStateChanged for reliable auth detection
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        fetchPlayedGames(currentUser.uid);
+      } else {
+        setPlayedGameIds(new Set());
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchPlayedGames = async (uid: string) => {
+    try {
+      const userGamesRef = collection(db, "users", uid, "setsPlayed");
+      const snapshot = await getDocs(userGamesRef);
+
+      const playedIds = new Set(
+        snapshot.docs
+          .map((doc) => {
+            const data = doc.data() as { gameId?: string };
+            // CRITICAL FIX: Check the data field FIRST.
+            // Only use doc.id as fallback if data.gameId is missing.
+            return data.gameId || doc.id;
+          })
+          .filter(Boolean) as string[]
+      );
+
+      setPlayedGameIds(playedIds);
+    } catch (error) {
+      console.error("Error fetching played games:", error);
+    }
+  };
+
   const filteredGames = games.filter((game) => {
     const matchesSearch = game.title
       .toLowerCase()
@@ -61,9 +95,8 @@ export default function HomeClient({
     const isPlayed = playedGameIds.has(game.id);
 
     let matchesStatus = true;
-    if (statusFilter === "Completed")
-      matchesStatus = playedGameIds.has(game.id);
-    if (statusFilter === "New") matchesStatus = !playedGameIds.has(game.id);
+    if (statusFilter === "Completed") matchesStatus = isPlayed;
+    if (statusFilter === "New") matchesStatus = !isPlayed;
 
     const hasSource = (game as any).source;
     const hasCreator = game.creator;
@@ -123,36 +156,6 @@ export default function HomeClient({
     (statusFilter !== "All" ? 1 : 0) +
     (typeFilter !== "All" ? 1 : 0) +
     (topic !== "All Topics" ? 1 : 0);
-  useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const fetchPlayedGames = async () => {
-      const userGamesRef = collection(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "setsPlayed"
-      );
-      const snapshot = await getDocs(userGamesRef);
-
-      const playedIds = new Set(
-        snapshot.docs
-          .map((doc) => {
-            if (doc.id) return doc.id;
-
-            const data = doc.data() as { gameId?: string };
-            if (data.gameId) return data.gameId;
-
-            return null;
-          })
-          .filter(Boolean) as string[]
-      );
-
-      setPlayedGameIds(playedIds);
-    };
-
-    fetchPlayedGames();
-  }, [auth.currentUser]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">

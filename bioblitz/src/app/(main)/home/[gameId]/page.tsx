@@ -107,8 +107,6 @@ export default function GameDetailPage() {
           collection(firestore, "gameSubmissions"),
           where("userId", "==", user.uid),
           where("gameId", "==", gameId),
-          where("status", "==", "graded"),
-          where("ranked", "==", true),
           orderBy("score", "desc"),
           limit(15)
         );
@@ -120,7 +118,9 @@ export default function GameDetailPage() {
         })) as GameSubmission[];
 
         const uniqueAttempts = Array.from(
-          new Map(rawAttempts.map((s) => [s.userId, s])).values()
+          new Map(
+            rawAttempts.map((s) => [s.userId + s.submittedAt, s])
+          ).values()
         );
 
         setPreviousAttempts(uniqueAttempts);
@@ -133,7 +133,6 @@ export default function GameDetailPage() {
 
     fetchAttempts();
   }, [user, gameId]);
-
   useEffect(() => {
     const fetchLeaderboard = async () => {
       if (!gameId) return;

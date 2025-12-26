@@ -11,7 +11,6 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-  arrayUnion,
   query,
   where,
   orderBy,
@@ -21,8 +20,7 @@ import {
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Crown, Medal } from "lucide-react";
+import { Loader2, AlertCircle, Crown, Medal } from "lucide-react";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -69,7 +67,12 @@ export default function GameRoomPage() {
   const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
-  const [userProfileData, setUserProfileData] = useState({ handle: "", photoURL: "" });
+  // NEW: Track if auth is still loading to prevent race conditions
+  const [authLoading, setAuthLoading] = useState(true);
+  const [userProfileData, setUserProfileData] = useState({
+    handle: "",
+    photoURL: "",
+  });
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +98,7 @@ export default function GameRoomPage() {
     };
   }, []);
 
+  // 1. Handle Auth State
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (isMounted.current) {
@@ -102,27 +106,29 @@ export default function GameRoomPage() {
 
         if (currentUser) {
           try {
-
             const userDocRef = doc(firestore, "users", currentUser.uid);
             const userSnap = await getDoc(userDocRef);
             if (userSnap.exists()) {
               const data = userSnap.data();
               setUserProfileData({
                 handle: data.username || "",
-                photoURL: data.photoURL || currentUser.photoURL || ""
+                photoURL: data.photoURL || currentUser.photoURL || "",
               });
             }
           } catch (e) {
             console.error("Error fetching user profile data", e);
           }
         }
+        setAuthLoading(false); // Auth check done
       }
     });
     return () => unsubscribe();
   }, []);
 
+  // 2. Load Game Data (DEPENDS ON USER and AUTHLOADING)
   useEffect(() => {
-    if (!gameId) return;
+    // CRITICAL FIX: Do not load game logic until Auth is finished.
+    if (!gameId || authLoading) return;
 
     const loadGameData = async () => {
       setLoading(true);
@@ -140,19 +146,29 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
-          const key = `startTime-${gameId}`;
-          const savedStart = localStorage.getItem(key);
+          // FIX: Scope the timer to the specific USER ID.
+          // This prevents "ghost" timers from other accounts or previous sessions.
+          if (user) {
+            const key = `startTime-${user.uid}-${gameId}`;
+            const savedStart = localStorage.getItem(key);
 
-          if (savedStart) {
-            const elapsed = Math.floor(
-              (Date.now() - parseInt(savedStart)) / 1000
-            );
-            const remaining = Math.max(0, data.timeLimit - elapsed);
-            setTimeLeft(remaining);
-          } else {
-            const startTime = Date.now();
-            localStorage.setItem(key, startTime.toString());
-            setTimeLeft(data.timeLimit);
+            if (savedStart) {
+              const elapsed = Math.floor(
+                (Date.now() - parseInt(savedStart)) / 1000
+              );
+              const remaining = Math.max(0, data.timeLimit - elapsed);
+
+              // Edge Case: If remaining is 0 immediately on load (stale session),
+              // and the user has NO submission in DB (which you deleted),
+              // we can treat it as a fresh start to avoid the "Glitch".
+              // However, strictly adhering to anti-cheat:
+              setTimeLeft(remaining);
+            } else {
+              // Start fresh
+              const startTime = Date.now();
+              localStorage.setItem(key, startTime.toString());
+              setTimeLeft(data.timeLimit);
+            }
           }
         }
 
@@ -178,7 +194,7 @@ export default function GameRoomPage() {
     };
 
     loadGameData();
-  }, [gameId, router]);
+  }, [gameId, router, authLoading, user]); // Added dependencies
 
   const handleSubmit = async (isAutoSubmit = false) => {
     if (submitted) return;
@@ -208,7 +224,7 @@ export default function GameRoomPage() {
       status: "pending_grading",
       username: user.displayName || "Unknown",
       handle: userProfileData.handle,
-      photoURL: userProfileData.photoURL
+      photoURL: userProfileData.photoURL,
     };
 
     try {
@@ -234,7 +250,11 @@ export default function GameRoomPage() {
       if (isMounted.current) {
         setSubmissionId(submissionRef.id);
       }
-      localStorage.removeItem(`startTime-${gameId}`);
+
+      // FIX: Remove the USER-SCOPED key
+      if (user) {
+        localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
+      }
     } catch (error) {
       console.error("Error submitting Blitz:", error);
       alert("There was an error submitting your Blitz. Please try again.");
@@ -292,8 +312,9 @@ export default function GameRoomPage() {
     if (totalSeconds === null) return "0 mins 0 secs";
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${seconds !== 1 ? "s" : ""
-      }`;
+    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${
+      seconds !== 1 ? "s" : ""
+    }`;
   };
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -337,7 +358,9 @@ export default function GameRoomPage() {
     fetchLeaderboard();
   }, [submitted, activeTab, gameId]);
 
-  const [usersMap, setUsersMap] = useState<{ [uid: string]: { name: string, handle: string } }>({});
+  const [usersMap, setUsersMap] = useState<{
+    [uid: string]: { name: string; handle: string };
+  }>({});
 
   useEffect(() => {
     if (leaderboard.length === 0) return;
@@ -345,26 +368,26 @@ export default function GameRoomPage() {
     const fetchSpecificUsers = async () => {
       try {
         const missingProfileIds = leaderboard
-          .filter(l => !l.username)
-          .map(l => l.userId);
+          .filter((l) => !l.username)
+          .map((l) => l.userId);
 
         if (missingProfileIds.length === 0) return;
 
         const uniqueUserIds = Array.from(new Set(missingProfileIds));
 
-        const userPromises = uniqueUserIds.map(uid =>
+        const userPromises = uniqueUserIds.map((uid) =>
           getDoc(doc(firestore, "users", uid))
         );
 
         const userSnapshots = await Promise.all(userPromises);
 
-        const newMap: { [uid: string]: { name: string, handle: string } } = {};
-        userSnapshots.forEach(snap => {
+        const newMap: { [uid: string]: { name: string; handle: string } } = {};
+        userSnapshots.forEach((snap) => {
           if (snap.exists()) {
             const d = snap.data();
             newMap[snap.id] = {
               name: d.displayName || "Unknown",
-              handle: d.username || ""
+              handle: d.username || "",
             };
           }
         });
@@ -378,7 +401,8 @@ export default function GameRoomPage() {
     fetchSpecificUsers();
   }, [leaderboard]);
 
-  if (loading) {
+  if (loading || authLoading) {
+    // Wait for Auth before showing UI
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
         <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
@@ -437,19 +461,21 @@ export default function GameRoomPage() {
             <div className="mb-8 flex flex-wrap gap-4 justify-center md:justify-start">
               <button
                 onClick={() => setActiveTab("result")}
-                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${activeTab === "result"
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
+                  activeTab === "result"
                     ? "bg-violet-600 text-white shadow-violet-500/20"
                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                  }`}
+                }`}
               >
                 Results
               </button>
               <button
                 onClick={() => setActiveTab("leaderboard")}
-                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${activeTab === "leaderboard"
+                className={`px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 shadow-md ${
+                  activeTab === "leaderboard"
                     ? "bg-violet-600 text-white shadow-violet-500/20"
                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                  }`}
+                }`}
               >
                 Leaderboard
               </button>
@@ -513,10 +539,11 @@ export default function GameRoomPage() {
                               className={`group flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-200 ${bgClass}`}
                             >
                               <span
-                                className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${isSelected
+                                className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm uppercase transition-colors ${
+                                  isSelected
                                     ? "bg-white/20 text-white"
                                     : "bg-black/20 text-zinc-400 group-hover:text-white"
-                                  }`}
+                                }`}
                               >
                                 {key}
                               </span>
@@ -691,16 +718,21 @@ export default function GameRoomPage() {
                   <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {leaderboard.map((entry, idx) => {
                       const isCurrentUser = entry.userId === user?.uid;
-                      const displayName = entry.username || usersMap[entry.userId]?.name || "Unknown";
-                      const handle = entry.handle || usersMap[entry.userId]?.handle;
+                      const displayName =
+                        entry.username ||
+                        usersMap[entry.userId]?.name ||
+                        "Unknown";
+                      const handle =
+                        entry.handle || usersMap[entry.userId]?.handle;
 
                       return (
                         <div
                           key={entry.userId}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${isCurrentUser
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl  transition ${
+                            isCurrentUser
                               ? "bg-violet-600/20 border-violet-500 text-white font-semibold"
                               : "bg-zinc-800/50 text-zinc-300"
-                            }`}
+                          }`}
                         >
                           <div className="w-6 flex justify-center">
                             {idx === 0 ? (
@@ -724,7 +756,10 @@ export default function GameRoomPage() {
 
                           <div className="truncate flex-1 text-left">
                             {handle ? (
-                              <Link href={`/profile/${handle}`} className="hover:underline hover:text-white transition-colors">
+                              <Link
+                                href={`/profile/${handle}`}
+                                className="hover:underline hover:text-white transition-colors"
+                              >
                                 {displayName}
                               </Link>
                             ) : (
@@ -805,7 +840,9 @@ export default function GameRoomPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => {
-                  localStorage.removeItem(`startTime-${gameId}`);
+                  if (user) {
+                    localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
+                  }
                   router.push("/home");
                 }}
                 className="flex-1 px-6 py-3 bg-red-600/10 text-red-500 border border-red-600/50 font-bold rounded-xl hover:bg-red-600 hover:text-white transition"

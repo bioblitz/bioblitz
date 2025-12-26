@@ -25,6 +25,7 @@ import {
   where,
   getDocs,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 const inter = Inter({
@@ -38,11 +39,10 @@ export default function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [volume, setVolume] = useState(70);
   const [gregoryMode, setGregoryMode] = useState(false);
-  const [isPublic, setIsPublic] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
 
   const router = useRouter();
   const db = getFirestore(app);
@@ -57,6 +57,16 @@ export default function SettingsPage() {
     try {
       console.log("Starting deletion for UID:", uid);
 
+      const myFriendsRef = collection(db, "users", uid, "friends");
+      const myFriendsSnap = await getDocs(myFriendsRef);
+
+      const removalPromises = myFriendsSnap.docs.map((friendDoc) => {
+        const friendId = friendDoc.id;
+        const refInFriendList = doc(db, "users", friendId, "friends", uid);
+        return deleteDoc(refInFriendList);
+      });
+      await Promise.all(removalPromises);
+      console.log("Removed user from all friend connections.");
       const gameQuery = query(
         collection(db, "gameSubmissions"),
         where("userId", "==", uid)
@@ -94,6 +104,7 @@ export default function SettingsPage() {
       throw error;
     }
   };
+
   useEffect(() => {
     const sound = localStorage.getItem("soundEnabled");
     const animation = localStorage.getItem("animationEnabled");
@@ -130,22 +141,28 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    let unsubscribeFirestore: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
-        const snap = await getDoc(userDocRef);
-
-        if (snap.exists()) {
-          setUsername(snap.data().username ?? null);
-        }
+        unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setProfileData(docSnap.data());
+          }
+        });
       } else {
-        setUsername(null);
+        setProfileData(null);
+        if (unsubscribeFirestore) unsubscribeFirestore();
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeFirestore) unsubscribeFirestore();
+    };
   }, [db]);
 
   const handleSignOut = async () => {
@@ -228,21 +245,23 @@ export default function SettingsPage() {
         >
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
           <div className="flex items-center gap-4 mb-4">
-            {user?.photoURL ? (
+            {profileData?.photoURL || user?.photoURL ? (
               <img
-                src={user.photoURL}
+                src={profileData?.photoURL || user?.photoURL}
                 alt="Profile picture"
                 className="w-16 h-16 rounded-full object-cover border border-zinc-700"
                 referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400">
-                ?
+                {profileData?.displayName?.[0] || user?.displayName?.[0] || "?"}
               </div>
             )}
             <div>
               <p className="font-medium">
-                {user?.displayName || "Unnamed User"}
+                {profileData?.displayName ||
+                  user?.displayName ||
+                  "Unnamed User"}
               </p>
               <p className="text-sm text-gray-400">
                 {user?.email || "No email available"}
@@ -250,7 +269,9 @@ export default function SettingsPage() {
             </div>
           </div>
           <Link
-            href={username ? `/profile/${username}` : "#"}
+            href={
+              profileData?.username ? `/profile/${profileData.username}` : "#"
+            }
             className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile

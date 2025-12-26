@@ -86,7 +86,7 @@ export default function MainNavbar() {
           aria-label="Toggle user menu"
         >
           <div className="text-left">
-            <h2 className="font-bold text-white">{user.username || ""}</h2>
+            <h2 className="font-bold text-white">{user.displayName || ""}</h2>
           </div>
 
           <div className="relative">

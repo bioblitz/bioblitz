@@ -33,7 +33,7 @@ import {
   TrendingUp,
   TrendingDown,
   Info,
-  Loader2, // Added Loader icon
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -691,7 +691,7 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                    {userProfile?.username || userProfile?.displayName}
+                    {userProfile?.displayName || userProfile?.username}{" "}
                   </h1>
                   {auth.currentUser?.uid === profileUid && (
                     <p className="text-zinc-500 text-sm mt-1 font-mono">
