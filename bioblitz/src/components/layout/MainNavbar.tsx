@@ -76,7 +76,14 @@ export default function MainNavbar() {
       );
     }
     if (!isAuthenticated || !user) {
-      return null;
+      return (
+        <Link
+          href="/auth"
+          className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+        >
+          Sign In
+        </Link>
+      );
     }
     return (
       <div className="relative" ref={dropdownRef}>

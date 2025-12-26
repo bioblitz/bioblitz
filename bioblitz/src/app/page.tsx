@@ -1,14 +1,12 @@
 import { getCurrentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import PageReloader from "@/components/PageReloader";
 
-export default async function mainPage({ searchParams }: { searchParams: {potato:string} }) {
+export default async function mainPage({
+  searchParams,
+}: {
+  searchParams: { potato: string };
+}) {
   const user = await getCurrentUser();
-  <PageReloader />
-  if (user) {
-    redirect("/home");
-  }
   return (
     <div className="min-h-screen flex flex-col items-center font-inter bg-black">
       <section className="w-full text-center py-40">
@@ -19,7 +17,7 @@ export default async function mainPage({ searchParams }: { searchParams: {potato
           <p className="text-5xl text-white mb-6 opacity-90 bold drop-shadow">
             should be fun
           </p>
-          
+
           <Link href="/home">
             <button className="bg-neutral-500 text-white font-bold py-3 px-8 rounded hover:bg-blue-600">
               Get Started
@@ -28,11 +26,37 @@ export default async function mainPage({ searchParams }: { searchParams: {potato
         </div>
         <div className="flex justify-center space-x-8 py-4">
           <div className="flex items-center text-gray-400 text-medium">
-            <svg className="w-8 h-8 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg
+              className="w-8 h-8 mr-2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
             USABO
           </div>
           <div className="flex items-center text-gray-400 text-medium">
-            <svg className="w-8 h-8 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg
+              className="w-8 h-8 mr-2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
             MCAT
           </div>
         </div>

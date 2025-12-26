@@ -242,42 +242,20 @@ export default function ProfilePage() {
   }, [profileUid, userProfile, db]);
 
   useEffect(() => {
+    if (!profileUid) return;
+
     const currentUser = auth.currentUser;
-    if (!profileUid || !currentUser || currentUser.uid === profileUid) return;
 
-    const checkFriendship = async () => {
-      try {
-        const myFriendDocRef = doc(
-          db,
-          "users",
-          currentUser.uid,
-          "friends",
-          profileUid
-        );
-        const docSnap = await getDoc(myFriendDocRef);
-
-        if (docSnap.exists()) {
-          setFriendshipStatus(docSnap.data().status);
-        } else {
-          setFriendshipStatus("none");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    checkFriendship();
-  }, [profileUid, auth.currentUser, db]);
-
-  // Fetch Friends & Requests
-  useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || !profileUid) return;
+    if (!currentUser) {
+      setLoadingFriends(false);
+      setFriends([]);
+      setIncomingRequests([]);
+      return;
+    }
 
     const fetchFriendsAndRequests = async () => {
-      setLoadingFriends(true); // Start loading
+      setLoadingFriends(true);
       try {
-        // --- A. Fetch Friends ---
         const friendsQuery = query(
           collection(db, "users", profileUid, "friends"),
           where("status", "==", "friends")
@@ -416,6 +394,43 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       alert("Error adding friend.");
+    }
+  };
+
+  const removeFriend = async () => {
+    if (!auth.currentUser || !profileUid) return;
+
+    // Optional: Add a confirmation dialog
+    if (!confirm("Are you sure you want to remove this friend?")) return;
+
+    try {
+      const batch = writeBatch(db);
+
+      // 1. Delete from YOUR friends list
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid
+      );
+      batch.delete(myRef);
+
+      // 2. Delete from THEIR friends list
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid
+      );
+      batch.delete(theirRef);
+
+      await batch.commit();
+      setFriendshipStatus("none");
+    } catch (err) {
+      console.error("Error removing friend:", err);
+      alert("Failed to remove friend. Please try again.");
     }
   };
 
@@ -651,39 +666,59 @@ export default function ProfilePage() {
             <div className="flex-1 text-center md:text-left space-y-4 w-full">
               {auth.currentUser?.uid !== profileUid && (
                 <div className="mt-4">
-                  {friendshipStatus === "none" && (
+                  {!auth.currentUser ? (
                     <button
-                      onClick={sendFriendRequest}
-                      className="px-4 py-2 bg-violet-600 rounded-full text-white font-semibold hover:bg-violet-500 transition"
+                      onClick={() => router.push("/auth")}
+                      className="px-4 py-2 bg-violet-600/40 border border-violet-600/40 rounded-full text-white font-semibold hover:bg-violet-800/40  transition"
                     >
-                      Add Friend
+                      Sign In to Add Friend
                     </button>
-                  )}
-                  {friendshipStatus === "sent" && (
-                    <span className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 cursor-default">
-                      Request Sent
-                    </span>
-                  )}
-                  {friendshipStatus === "received" && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={acceptFriendRequest}
-                        className="px-4 py-2 bg-green-600 rounded-full text-white font-semibold hover:bg-green-500 transition"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={declineFriendRequest}
-                        className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-white transition"
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  )}
-                  {friendshipStatus === "friends" && (
-                    <span className="px-4 py-2 bg-green-900/30 border border-green-600/50 rounded-full text-green-400">
-                      Friends
-                    </span>
+                  ) : (
+                    <>
+                      {friendshipStatus === "none" && (
+                        <button
+                          onClick={sendFriendRequest}
+                          className="px-4 py-2 bg-violet-600 rounded-full text-white font-semibold hover:bg-violet-500 transition"
+                        >
+                          Add Friend
+                        </button>
+                      )}
+                      {friendshipStatus === "sent" && (
+                        <span className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 cursor-default">
+                          Request Sent
+                        </span>
+                      )}
+                      {friendshipStatus === "received" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={acceptFriendRequest}
+                            className="px-4 py-2 bg-green-600 rounded-full text-white font-semibold hover:bg-green-500 transition"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={declineFriendRequest}
+                            className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-white transition"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+                      {friendshipStatus === "friends" && (
+                        <div className="flex items-center gap-2">
+                          <span className="px-4 py-2 bg-green-900/30 border border-green-600/50 rounded-full text-green-400 cursor-default font-medium">
+                            Friends
+                          </span>
+                          <button
+                            onClick={removeFriend}
+                            className="p-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-red-400 hover:border-red-900/50 hover:bg-red-900/10 transition-colors"
+                            title="Remove Friend"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}

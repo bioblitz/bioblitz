@@ -27,6 +27,7 @@ import {
   deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,10 +40,14 @@ export default function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [volume, setVolume] = useState(70);
   const [gregoryMode, setGregoryMode] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const [profileData, setProfileData] = useState<any>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const router = useRouter();
   const db = getFirestore(app);
@@ -56,10 +61,9 @@ export default function SettingsPage() {
   const deleteUserData = async (uid: string) => {
     try {
       console.log("Starting deletion for UID:", uid);
-
+      console.log("Removing user from friends' lists...");
       const myFriendsRef = collection(db, "users", uid, "friends");
       const myFriendsSnap = await getDocs(myFriendsRef);
-
       const removalPromises = myFriendsSnap.docs.map((friendDoc) => {
         const friendId = friendDoc.id;
         const refInFriendList = doc(db, "users", friendId, "friends", uid);
@@ -104,7 +108,6 @@ export default function SettingsPage() {
       throw error;
     }
   };
-
   useEffect(() => {
     const sound = localStorage.getItem("soundEnabled");
     const animation = localStorage.getItem("animationEnabled");
@@ -148,13 +151,19 @@ export default function SettingsPage() {
 
       if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
+
         unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
-            setProfileData(docSnap.data());
+            const data = docSnap.data();
+            setProfileData(data);
+            setUsername(data.username ?? null);
           }
+          setIsProfileLoading(false);
         });
       } else {
         setProfileData(null);
+        setUsername(null);
+        setIsProfileLoading(false);
         if (unsubscribeFirestore) unsubscribeFirestore();
       }
     });
@@ -245,7 +254,11 @@ export default function SettingsPage() {
         >
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
           <div className="flex items-center gap-4 mb-4">
-            {profileData?.photoURL || user?.photoURL ? (
+            {isProfileLoading ? (
+              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 animate-pulse">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+            ) : profileData?.photoURL || user?.photoURL ? (
               <img
                 src={profileData?.photoURL || user?.photoURL}
                 alt="Profile picture"
@@ -257,6 +270,7 @@ export default function SettingsPage() {
                 {profileData?.displayName?.[0] || user?.displayName?.[0] || "?"}
               </div>
             )}
+
             <div>
               <p className="font-medium">
                 {profileData?.displayName ||
@@ -269,9 +283,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <Link
-            href={
-              profileData?.username ? `/profile/${profileData.username}` : "#"
-            }
+            href={username ? `/profile/${username}` : "#"}
             className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
