@@ -253,6 +253,34 @@ export default function ProfilePage() {
       return;
     }
 
+    const checkRelationshipStatus = async () => {
+      if (currentUser.uid === profileUid) return;
+
+      try {
+        const relationshipRef = doc(
+          db,
+          "users",
+          currentUser.uid,
+          "friends",
+          profileUid
+        );
+        const relationshipSnap = await getDoc(relationshipRef);
+
+        if (relationshipSnap.exists()) {
+          const status = relationshipSnap.data().status;
+          setFriendshipStatus(
+            status as "none" | "sent" | "received" | "friends"
+          );
+        } else {
+          setFriendshipStatus("none");
+        }
+      } catch (err) {
+        console.error("Error checking relationship status:", err);
+      }
+    };
+
+    checkRelationshipStatus();
+
     const fetchFriendsAndRequests = async () => {
       setLoadingFriends(true);
       try {
