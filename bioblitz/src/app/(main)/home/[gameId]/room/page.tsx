@@ -21,6 +21,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { Loader2, AlertCircle, Crown, Medal } from "lucide-react";
+import { updateUserStreak } from "@/lib/user";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -67,7 +68,6 @@ export default function GameRoomPage() {
   const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
-  // NEW: Track if auth is still loading to prevent race conditions
   const [authLoading, setAuthLoading] = useState(true);
   const [userProfileData, setUserProfileData] = useState({
     handle: "",
@@ -98,7 +98,6 @@ export default function GameRoomPage() {
     };
   }, []);
 
-  // 1. Handle Auth State
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (isMounted.current) {
@@ -119,15 +118,13 @@ export default function GameRoomPage() {
             console.error("Error fetching user profile data", e);
           }
         }
-        setAuthLoading(false); // Auth check done
+        setAuthLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  // 2. Load Game Data (DEPENDS ON USER and AUTHLOADING)
   useEffect(() => {
-    // CRITICAL FIX: Do not load game logic until Auth is finished.
     if (!gameId || authLoading) return;
 
     const loadGameData = async () => {
@@ -146,8 +143,6 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
-          // FIX: Scope the timer to the specific USER ID.
-          // This prevents "ghost" timers from other accounts or previous sessions.
           if (user) {
             const key = `startTime-${user.uid}-${gameId}`;
             const savedStart = localStorage.getItem(key);
@@ -158,13 +153,8 @@ export default function GameRoomPage() {
               );
               const remaining = Math.max(0, data.timeLimit - elapsed);
 
-              // Edge Case: If remaining is 0 immediately on load (stale session),
-              // and the user has NO submission in DB (which you deleted),
-              // we can treat it as a fresh start to avoid the "Glitch".
-              // However, strictly adhering to anti-cheat:
               setTimeLeft(remaining);
             } else {
-              // Start fresh
               const startTime = Date.now();
               localStorage.setItem(key, startTime.toString());
               setTimeLeft(data.timeLimit);
@@ -194,7 +184,7 @@ export default function GameRoomPage() {
     };
 
     loadGameData();
-  }, [gameId, router, authLoading, user]); // Added dependencies
+  }, [gameId, router, authLoading, user]);
 
   const handleSubmit = async (isAutoSubmit = false) => {
     if (submitted) return;
@@ -251,7 +241,7 @@ export default function GameRoomPage() {
         setSubmissionId(submissionRef.id);
       }
 
-      // FIX: Remove the USER-SCOPED key
+      updateUserStreak(firestore, user.uid);
       if (user) {
         localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
       }
@@ -402,7 +392,6 @@ export default function GameRoomPage() {
   }, [leaderboard]);
 
   if (loading || authLoading) {
-    // Wait for Auth before showing UI
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
         <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
@@ -434,10 +423,8 @@ export default function GameRoomPage() {
         </div>
       )}
 
-      {/* Main Layout */}
       <div className="flex-1 flex justify-center py-8 px-4">
         <div className="w-full max-w-4xl relative">
-          {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
               <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">

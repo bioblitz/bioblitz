@@ -34,6 +34,8 @@ import {
   TrendingDown,
   Info,
   Loader2,
+  Flame,
+  Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -64,6 +66,7 @@ interface UserProfile {
   location: string;
   grade?: string;
   school?: string;
+  streak?: number;
 }
 
 interface EloHistoryPoint {
@@ -428,13 +431,11 @@ export default function ProfilePage() {
   const removeFriend = async () => {
     if (!auth.currentUser || !profileUid) return;
 
-    // Optional: Add a confirmation dialog
     if (!confirm("Are you sure you want to remove this friend?")) return;
 
     try {
       const batch = writeBatch(db);
 
-      // 1. Delete from YOUR friends list
       const myRef = doc(
         db,
         "users",
@@ -444,7 +445,6 @@ export default function ProfilePage() {
       );
       batch.delete(myRef);
 
-      // 2. Delete from THEIR friends list
       const theirRef = doc(
         db,
         "users",
@@ -627,6 +627,17 @@ export default function ProfilePage() {
     eloHistory.length >= 2 &&
     eloHistory[eloHistory.length - 1].elo >=
       eloHistory[eloHistory.length - 2].elo;
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const monthName = today.toLocaleString("default", { month: "long" });
+
+  const activeDates = new Set(
+    eloHistory.map((h) => new Date(h.fullDate).toDateString())
+  );
 
   if (loading)
     return (
@@ -1067,6 +1078,186 @@ export default function ProfilePage() {
             </div>
           )}
         </motion.div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 shadow-xl relative overflow-hidden w-fit mx-auto lg:mx-0"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] pointer-events-none" />
+
+            <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
+              <div className="w-full max-w-[300px] shrink-0 relative z-10">
+                <div className="flex flex-row items-end justify-between gap-4 mb-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-1.5 mb-1">
+                      <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
+                      Daily Streak
+                    </h2>
+                  </div>
+
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-sm font-bold text-zinc-200 block">
+                      {monthName} {currentYear}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 mb-1">
+                  {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
+                    <div
+                      key={i}
+                      className="text-center text-[9px] font-bold text-zinc-600 uppercase"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                    <div key={`empty-${i}`} />
+                  ))}
+
+                  {Array.from({ length: daysInMonth }).map((_, i) => {
+                    const dayNum = i + 1;
+
+                    const dateString = new Date(
+                      currentYear,
+
+                      currentMonth,
+
+                      dayNum
+                    ).toDateString();
+
+                    const isActive = activeDates.has(dateString);
+
+                    const isToday = dayNum === today.getDate();
+
+                    return (
+                      <div
+                        key={dayNum}
+                        className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-semibold relative group transition-all duration-300 border
+
+                ${
+                  isActive
+                    ? "bg-orange-500/10 border-orange-500/30 text-orange-200 shadow-[0_0_10px_rgba(249,115,22,0.15)]"
+                    : "bg-zinc-900/50 border-zinc-800 text-zinc-600 hover:border-zinc-700"
+                }
+
+                ${isToday && !isActive ? "border-zinc-500 text-white" : ""}
+
+              `}
+                      >
+                        {isActive && (
+                          <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+                            <Zap className="w-full h-full p-0.5 fill-orange-500 text-orange-500" />
+                          </div>
+                        )}
+
+                        <span className="relative z-10">{dayNum}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="hidden lg:block w-px bg-zinc-800/50 my-2 shrink-0" />
+
+              <div className="flex-1 flex flex-col items-center shrink-0 justify-center relative z-10 min-h-[280px] pr-0 lg:pl-0 lg:pr-6">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-zinc-500 mb-1 uppercase tracking-wider">
+                    Current Streak
+                  </div>
+                  {(() => {
+                    const streak = userProfile?.streak ?? 0;
+
+                    let textSize = "text-7xl lg:text-8xl"; //this formats nicely for streaks from 1-999, it looks a bit weird starting four digits but we can fix that later
+
+                    let emojiSize = "text-4xl lg:text-5xl";
+
+                    if (streak >= 100) {
+                      textSize = "text-5xl lg:text-6xl";
+
+                      emojiSize = "text-4xl lg:text-5xl";
+                    } else if (streak >= 10) {
+                      textSize = "text-6xl lg:text-7xl";
+
+                      emojiSize = "text-4xl lg:text-5xl";
+                    }
+
+                    return (
+                      <div
+                        className={`
+
+        font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-orange-100 to-orange-200 drop-shadow-2xl flex items-center justify-center gap-2
+
+        ${textSize}
+
+      `}
+                      >
+                        {streak}
+
+                        <span
+                          className={`text-orange-500 mt-4 animate-bounce ${emojiSize}`}
+                        >
+                          🔥
+                        </span>
+                      </div>
+                    );
+                  })()}{" "}
+                  <div className="mt-6 flex flex-col items-center justify-center w-full">
+                    <span
+                      className={`
+
+          text-[10px] sm:text-xs px-4 py-2 rounded-full border font-bold tracking-wide transition-all duration-500 shadow-lg mx-auto
+
+          text-center whitespace-normal leading-tight max-w-[180px]
+
+          ${(() => {
+            const s = userProfile?.streak ?? 0;
+
+            if (s >= 30)
+              return "bg-purple-500/10 border-purple-500/30 text-purple-300 shadow-purple-500/20";
+
+            if (s >= 14)
+              return "bg-blue-500/10 border-blue-500/30 text-blue-300 shadow-blue-500/10";
+
+            if (s >= 7)
+              return "bg-amber-500/10 border-amber-500/30 text-amber-300 shadow-amber-500/10";
+
+            if (s >= 3)
+              return "bg-yellow-500/10 border-yellow-500/30 text-yellow-200 shadow-yellow-500/10";
+
+            return "bg-orange-500/10 border-orange-500/30 text-orange-400 shadow-orange-500/10";
+          })()}
+
+    `}
+                    >
+                      {(() => {
+                        const s = userProfile?.streak ?? 0;
+
+                        if (s >= 30) return "Tier: Long-Term Potentiation";
+
+                        if (s >= 14) return "Tier: Neuroplasticity";
+
+                        if (s >= 7) return "Tier: Synaptic Fire";
+
+                        if (s >= 3) return "Tier: Action Potential";
+
+                        return "Tier: Ionic Spark";
+                      })()}
+                    </span>
+                  </div>
+                  <p className="text-zinc-500 text-xs mt-3">
+                    Every day counts.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1108,7 +1299,7 @@ export default function ProfilePage() {
               setsPlayed.map((set, i) => (
                 <div
                   key={i}
-                  className="min-w-[240px] bg-zinc-900/50 border border-zinc-800/50 p-5 rounded-2xl hover:border-violet-500/30 transition-all group"
+                  className="min-w-60 bg-zinc-900/50 border border-zinc-800/50 p-5 rounded-2xl hover:border-violet-500/30 transition-all group"
                 >
                   <div className="flex flex-col h-full justify-between gap-4">
                     <span className="text-zinc-300 font-medium line-clamp-2 text-sm group-hover:text-white transition-colors">
