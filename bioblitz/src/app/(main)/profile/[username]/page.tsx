@@ -36,6 +36,7 @@ import {
   Loader2,
   Flame,
   Zap,
+  BrainCircuit,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
@@ -47,8 +48,18 @@ import {
 } from "firebase/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from "recharts";
-
+import {
+  AreaChart,
+  Area,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  Cell,
+  CartesianGrid,
+  YAxis,
+} from "recharts";
 const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -95,8 +106,17 @@ export default function ProfilePage() {
     username: "",
   });
 
+  const CHART_COLORS = [
+    "#8b5cf6", // Violet
+    "#3b82f6", // Blue
+    "#10b981", // Emerald
+    "#f59e0b", // Amber
+    "#ec4899", // Pink
+    "#06b6d4", // Cyan
+  ];
+
   const [setsPlayed, setSetsPlayed] = useState<
-    { name: string; score: number }[]
+    { name: string; score: number; topic: string }[]
   >([]);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
 
@@ -135,7 +155,6 @@ export default function ProfilePage() {
 
         const userDoc = snapshot.docs[0];
         const userData = userDoc.data() as UserProfile;
-
         setProfileUid(userDoc.id);
         setUserProfile({ ...userData, uid: userDoc.id });
       } catch (err) {
@@ -182,13 +201,77 @@ export default function ProfilePage() {
           return timeB - timeA;
         });
 
-        const setsData = sortedDocs.map((doc) => {
-          const data = doc.data();
-          return {
-            name: data.title || "Unknown Set",
-            score: data.score || 0,
-          };
-        });
+        const setsData = await Promise.all(
+          sortedDocs.map(async (playedDoc) => {
+            const playedData = playedDoc.data();
+
+            const originalSetId =
+              playedData.setId ||
+              playedData.setID ||
+              playedData.id ||
+              playedDoc.id;
+
+            let topic =
+              playedData.topic ||
+              playedData.Topic ||
+              playedData.category ||
+              "General";
+            let title = playedData.title || "Unknown Set";
+
+            let foundOriginal = false;
+
+            if (originalSetId) {
+              try {
+                const originalSetRef = doc(db, "sets", originalSetId);
+                const originalSetSnap = await getDoc(originalSetRef);
+
+                if (originalSetSnap.exists()) {
+                  const originalData = originalSetSnap.data();
+                  topic =
+                    originalData.topic ||
+                    originalData.Topic ||
+                    originalData.category ||
+                    topic;
+                  // If we found it via ID, we trust this title more
+                  title = originalData.title || title;
+                  foundOriginal = true;
+                }
+              } catch (e) {
+                console.error("ID lookup failed", e);
+              }
+            }
+
+            // STRATEGY B: Fallback - Search by Title (If ID failed)
+            if (!foundOriginal && playedData.title) {
+              try {
+                const q = query(
+                  collection(db, "sets"),
+                  where("title", "==", playedData.title),
+                  limit(1)
+                );
+                const querySnap = await getDocs(q);
+
+                if (!querySnap.empty) {
+                  const originalData = querySnap.docs[0].data();
+                  topic =
+                    originalData.topic ||
+                    originalData.Topic ||
+                    originalData.category ||
+                    topic;
+                  // console.log(`Recovered topic "${topic}" using title search: "${playedData.title}"`);
+                }
+              } catch (e) {
+                console.error("Title lookup failed", e);
+              }
+            }
+
+            return {
+              name: title,
+              score: playedData.score || 0,
+              topic: topic,
+            };
+          })
+        );
 
         setSetsPlayed(setsData);
       } catch (err) {
@@ -197,7 +280,6 @@ export default function ProfilePage() {
     };
     fetchSetsPlayed();
   }, [profileUid, db]);
-
   useEffect(() => {
     if (!profileUid || !userProfile) return;
 
@@ -639,6 +721,31 @@ export default function ProfilePage() {
     eloHistory.map((h) => new Date(h.fullDate).toDateString())
   );
 
+  const topicStats = setsPlayed.reduce((acc, set) => {
+    // Normalize topic casing if needed, or use as is
+    const topic = set.topic || "General";
+
+    if (!acc[topic]) {
+      acc[topic] = {
+        name: topic,
+        totalScore: 0,
+        sets: 0,
+        avg: 0,
+      };
+    }
+
+    acc[topic].totalScore += set.score;
+    acc[topic].sets += 1;
+    return acc;
+  }, {} as Record<string, { name: string; totalScore: number; sets: number; avg: number }>);
+
+  const chartData = Object.values(topicStats)
+    .map((stat) => ({
+      ...stat,
+      avg: Math.round(stat.totalScore / stat.sets),
+    }))
+    .sort((a, b) => b.totalScore - a.totalScore) // Sort by highest score
+    .slice(0, 5); // Top 5
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
@@ -948,197 +1055,198 @@ export default function ProfilePage() {
                 ))}
               </div>
             )}
-          </div>
 
-          {auth.currentUser?.uid === profileUid && (
-            <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Friend Requests
-              </h3>
+            {auth.currentUser?.uid === profileUid && (
+              <div className="bg-zinc-950/50 backdrop-blur-sm rounded-3xl p-2 flex flex-col gap-4 shadow-xl">
+                <div className="h-px bg-zinc-800 w-full mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Friend Requests
+                </h3>
 
-              {loadingFriends ? (
-                <div className="flex justify-center py-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-zinc-700" />
-                </div>
-              ) : incomingRequests.length === 0 ? (
-                <p className="text-zinc-400 text-sm">No incoming requests.</p>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {incomingRequests.map((request) => (
-                    <div
-                      key={request.uid}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
-                    >
-                      <div className="flex items-center gap-3">
-                        {request.photoURL ? (
-                          <img
-                            src={request.photoURL}
-                            alt={request.displayName}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
-                            {request.displayName?.[0]}
-                          </div>
-                        )}
-                        <span className="text-sm text-white">
-                          {request.displayName}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={async () => {
-                            const batch = writeBatch(db);
-                            const myRef = doc(
-                              db,
-                              "users",
-                              auth.currentUser!.uid,
-                              "friends",
-                              request.uid
-                            );
-                            const theirRef = doc(
-                              db,
-                              "users",
-                              request.uid,
-                              "friends",
-                              auth.currentUser!.uid
-                            );
-                            batch.update(myRef, { status: "friends" });
-                            batch.update(theirRef, { status: "friends" });
-                            await batch.commit();
-
-                            setIncomingRequests((prev) =>
-                              prev.filter((r) => r.uid !== request.uid)
-                            );
-                            setFriends((prev) => [...prev, request]);
-                          }}
-                          className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={async () => {
-                            const batch = writeBatch(db);
-                            const myRef = doc(
-                              db,
-                              "users",
-                              auth.currentUser!.uid,
-                              "friends",
-                              request.uid
-                            );
-                            const theirRef = doc(
-                              db,
-                              "users",
-                              request.uid,
-                              "friends",
-                              auth.currentUser!.uid
-                            );
-                            batch.delete(myRef);
-                            batch.delete(theirRef);
-                            await batch.commit();
-
-                            setIncomingRequests((prev) =>
-                              prev.filter((r) => r.uid !== request.uid)
-                            );
-                          }}
-                          className="px-3 py-1 bg-zinc-800 rounded-full text-zinc-400 text-sm hover:text-white"
-                        >
-                          Decline
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col gap-3">
-                <div className="flex gap-2 items-center">
-                  <div className="relative shrink-0 group">
-                    <Info className="w-4 h-4 text-indigo-300 cursor-default" />
-                    <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max px-2 py-1 text-xs text-white bg-zinc-900 rounded-md border border-zinc-800 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100">
-                      Ask for their Username
-                    </span>
+                {loadingFriends ? (
+                  <div className="flex justify-center py-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-zinc-700" />
                   </div>
+                ) : incomingRequests.length === 0 ? (
+                  <p className="text-zinc-400 text-sm">No incoming requests.</p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {incomingRequests.map((request) => (
+                      <div
+                        key={request.uid}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-800 transition"
+                      >
+                        <div className="flex items-center gap-3">
+                          {request.photoURL ? (
+                            <img
+                              src={request.photoURL}
+                              alt={request.displayName}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                              {request.displayName?.[0]}
+                            </div>
+                          )}
+                          <span className="text-sm text-white">
+                            {request.displayName}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={async () => {
+                              const batch = writeBatch(db);
+                              const myRef = doc(
+                                db,
+                                "users",
+                                auth.currentUser!.uid,
+                                "friends",
+                                request.uid
+                              );
+                              const theirRef = doc(
+                                db,
+                                "users",
+                                request.uid,
+                                "friends",
+                                auth.currentUser!.uid
+                              );
+                              batch.update(myRef, { status: "friends" });
+                              batch.update(theirRef, { status: "friends" });
+                              await batch.commit();
 
-                  <input
-                    type="text"
-                    placeholder="Enter Username to Add"
-                    value={friendUsernameInput}
-                    onChange={(e) => setFriendUsernameInput(e.target.value)}
-                    className="flex-1 bg-indigo-500/10 text-white text-sm p-2.5 rounded-xl border border-indigo-500/30 focus:border-indigo-500 focus:outline-none placeholder:text-indigo-200/50 transition-colors"
-                  />
-                  <button
-                    onClick={addFriendByUsername}
-                    className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap"
-                  >
-                    Add
-                  </button>
+                              setIncomingRequests((prev) =>
+                                prev.filter((r) => r.uid !== request.uid)
+                              );
+                              setFriends((prev) => [...prev, request]);
+                            }}
+                            className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const batch = writeBatch(db);
+                              const myRef = doc(
+                                db,
+                                "users",
+                                auth.currentUser!.uid,
+                                "friends",
+                                request.uid
+                              );
+                              const theirRef = doc(
+                                db,
+                                "users",
+                                request.uid,
+                                "friends",
+                                auth.currentUser!.uid
+                              );
+                              batch.delete(myRef);
+                              batch.delete(theirRef);
+                              await batch.commit();
+
+                              setIncomingRequests((prev) =>
+                                prev.filter((r) => r.uid !== request.uid)
+                              );
+                            }}
+                            className="px-3 py-1 bg-zinc-800 rounded-full text-zinc-400 text-sm hover:text-white"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col gap-3">
+                  <div className="flex gap-2 items-center">
+                    <div className="relative shrink-0 group">
+                      <Info className="w-4 h-4 text-indigo-300 cursor-default" />
+                      <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max px-2 py-1 text-xs text-white bg-zinc-900 rounded-md border border-zinc-800 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100">
+                        Ask for their Username
+                      </span>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Enter Username to Add"
+                      value={friendUsernameInput}
+                      onChange={(e) => setFriendUsernameInput(e.target.value)}
+                      className="flex-1 bg-indigo-500/10 text-white text-sm p-2.5 rounded-xl border border-indigo-500/30 focus:border-indigo-500 focus:outline-none placeholder:text-indigo-200/50 transition-colors"
+                    />
+                    <button
+                      onClick={addFriendByUsername}
+                      className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </motion.div>
-        <div className="grid lg:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 shadow-xl relative overflow-hidden w-fit mx-auto lg:mx-0"
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] pointer-events-none" />
+            )}
+          </div>
 
-            <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
-              <div className="w-full max-w-[300px] shrink-0 relative z-10">
-                <div className="flex flex-row items-end justify-between gap-4 mb-3">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white flex items-center gap-1.5 mb-1">
-                      <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
-                      Daily Streak
-                    </h2>
-                  </div>
+          <div className="grid lg:grid-cols-3 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="lg:col-span-2 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 shadow-xl relative w-full lg:w-[calc(100%+195px)] lg:-mr-20"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] pointer-events-none" />
 
-                  <div className="text-right whitespace-nowrap">
-                    <span className="text-sm font-bold text-zinc-200 block">
-                      {monthName} {currentYear}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 mb-1">
-                  {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-                    <div
-                      key={i}
-                      className="text-center text-[9px] font-bold text-zinc-600 uppercase"
-                    >
-                      {day}
+              <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
+                <div className="w-full max-w-[300px] shrink-0 relative z-10">
+                  <div className="flex flex-row items-end justify-between gap-4 mb-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-1.5 mb-1">
+                        <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
+                        Daily Streak
+                      </h2>
                     </div>
-                  ))}
-                </div>
 
-                <div className="grid grid-cols-7 gap-1">
-                  {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                    <div key={`empty-${i}`} />
-                  ))}
+                    <div className="text-right whitespace-nowrap">
+                      <span className="text-sm font-bold text-zinc-200 block">
+                        {monthName} {currentYear}
+                      </span>
+                    </div>
+                  </div>
 
-                  {Array.from({ length: daysInMonth }).map((_, i) => {
-                    const dayNum = i + 1;
-
-                    const dateString = new Date(
-                      currentYear,
-
-                      currentMonth,
-
-                      dayNum
-                    ).toDateString();
-
-                    const isActive = activeDates.has(dateString);
-
-                    const isToday = dayNum === today.getDate();
-
-                    return (
+                  <div className="grid grid-cols-7 gap-1 mb-1">
+                    {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
                       <div
-                        key={dayNum}
-                        className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-semibold relative group transition-all duration-300 border
+                        key={i}
+                        className="text-center text-[9px] font-bold text-zinc-600 uppercase"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                      <div key={`empty-${i}`} />
+                    ))}
+
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const dayNum = i + 1;
+
+                      const dateString = new Date(
+                        currentYear,
+
+                        currentMonth,
+
+                        dayNum
+                      ).toDateString();
+
+                      const isActive = activeDates.has(dateString);
+
+                      const isToday = dayNum === today.getDate();
+
+                      return (
+                        <div
+                          key={dayNum}
+                          className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-semibold relative group transition-all duration-300 border
 
                 ${
                   isActive
@@ -1149,67 +1257,67 @@ export default function ProfilePage() {
                 ${isToday && !isActive ? "border-zinc-500 text-white" : ""}
 
               `}
-                      >
-                        {isActive && (
-                          <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
-                            <Zap className="w-full h-full p-0.5 fill-orange-500 text-orange-500" />
-                          </div>
-                        )}
+                        >
+                          {isActive && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+                              <Zap className="w-full h-full p-0.5 fill-orange-500 text-orange-500" />
+                            </div>
+                          )}
 
-                        <span className="relative z-10">{dayNum}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="hidden lg:block w-px bg-zinc-800/50 my-2 shrink-0" />
-
-              <div className="flex-1 flex flex-col items-center shrink-0 justify-center relative z-10 min-h-[280px] pr-0 lg:pl-0 lg:pr-6">
-                <div className="text-center">
-                  <div className="text-sm font-medium text-zinc-500 mb-1 uppercase tracking-wider">
-                    Current Streak
+                          <span className="relative z-10">{dayNum}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {(() => {
-                    const streak = userProfile?.streak ?? 0;
+                </div>
 
-                    let textSize = "text-7xl lg:text-8xl"; //this formats nicely for streaks from 1-999, it looks a bit weird starting four digits but we can fix that later
+                <div className="hidden lg:block w-px bg-zinc-800/50 my-2 shrink-0" />
 
-                    let emojiSize = "text-4xl lg:text-5xl";
+                <div className=" flex flex-col items-center shrink-0 justify-center relative z-10 min-h-[280px] pr-0 lg:pl-0 lg:pr-6">
+                  <div className="text-center">
+                    <div className="text-sm font-medium text-zinc-500 mb-1 uppercase tracking-wider">
+                      Current Streak
+                    </div>
+                    {(() => {
+                      const streak = userProfile?.streak ?? 0;
 
-                    if (streak >= 100) {
-                      textSize = "text-5xl lg:text-6xl";
+                      let textSize = "text-7xl lg:text-8xl"; //this formats nicely for streaks from 1-999, it looks a bit weird starting four digits but we can fix that later
 
-                      emojiSize = "text-4xl lg:text-5xl";
-                    } else if (streak >= 10) {
-                      textSize = "text-6xl lg:text-7xl";
+                      let emojiSize = "text-4xl lg:text-5xl";
 
-                      emojiSize = "text-4xl lg:text-5xl";
-                    }
+                      if (streak >= 100) {
+                        textSize = "text-5xl lg:text-6xl";
 
-                    return (
-                      <div
-                        className={`
+                        emojiSize = "text-4xl lg:text-5xl";
+                      } else if (streak >= 10) {
+                        textSize = "text-6xl lg:text-7xl";
+
+                        emojiSize = "text-4xl lg:text-5xl";
+                      }
+
+                      return (
+                        <div
+                          className={`
 
         font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-orange-100 to-orange-200 drop-shadow-2xl flex items-center justify-center gap-2
 
         ${textSize}
 
       `}
-                      >
-                        {streak}
-
-                        <span
-                          className={`text-orange-500 mt-4 animate-bounce ${emojiSize}`}
                         >
-                          🔥
-                        </span>
-                      </div>
-                    );
-                  })()}{" "}
-                  <div className="mt-6 flex flex-col items-center justify-center w-full">
-                    <span
-                      className={`
+                          {streak}
+
+                          <span
+                            className={`text-orange-500 mt-4 animate-bounce ${emojiSize}`}
+                          >
+                            🔥
+                          </span>
+                        </div>
+                      );
+                    })()}{" "}
+                    <div className="mt-6 flex flex-col items-center justify-center w-full">
+                      <span
+                        className={`
 
           text-[10px] sm:text-xs px-4 py-2 rounded-full border font-bold tracking-wide transition-all duration-500 shadow-lg mx-auto
 
@@ -1234,30 +1342,154 @@ export default function ProfilePage() {
           })()}
 
     `}
-                    >
-                      {(() => {
-                        const s = userProfile?.streak ?? 0;
+                      >
+                        {(() => {
+                          const s = userProfile?.streak ?? 0;
 
-                        if (s >= 30) return "Tier: Long-Term Potentiation";
+                          if (s >= 30) return "Tier: Long-Term Potentiation";
 
-                        if (s >= 14) return "Tier: Neuroplasticity";
+                          if (s >= 14) return "Tier: Neuroplasticity";
 
-                        if (s >= 7) return "Tier: Synaptic Fire";
+                          if (s >= 7) return "Tier: Synaptic Fire";
 
-                        if (s >= 3) return "Tier: Action Potential";
+                          if (s >= 3) return "Tier: Action Potential";
 
-                        return "Tier: Ionic Spark";
-                      })()}
-                    </span>
+                          return "Tier: Ionic Spark";
+                        })()}
+                      </span>
+                    </div>
+                    <p className="text-zinc-500 text-xs mt-3">
+                      Every day counts.
+                    </p>
                   </div>
-                  <p className="text-zinc-500 text-xs mt-3">
-                    Every day counts.
-                  </p>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
+
+              {/* ----------------- IMPROVED CHART SECTION ----------------- */}
+              <div className="mt-6 pt-5 border-t border-zinc-800/50 w-full flex-1 min-h-[250px] flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <BrainCircuit className="w-5 h-5 text-violet-500" />
+                      Domain Mastery
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-1">
+                      Cumulative Score Per Topic
+                    </p>
+                  </div>
+                </div>
+
+                {chartData.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center text-xs text-zinc-600 italic">
+                    No sets played yet.
+                  </div>
+                ) : (
+                  <div className="flex-1 w-full bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4">
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                      minHeight={200}
+                    >
+                      <BarChart
+                        data={chartData}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
+                        {/* 1. Add the Background Grid */}
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="#27272a"
+                        />
+
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{
+                            fill: "#a1a1aa",
+                            fontSize: 11,
+                            fontWeight: 500,
+                          }}
+                          dy={10}
+                        />
+
+                        {/* 2. Show YAxis for context, but keep it subtle */}
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#52525b", fontSize: 10 }}
+                        />
+
+                        <Tooltip
+                          cursor={{ fill: "#27272a", opacity: 0.6 }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
+                                  <p className="text-white font-bold text-xs mb-2">
+                                    {data.name}
+                                  </p>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-zinc-400 text-[10px]">
+                                        Total Score
+                                      </span>
+                                      {/* Added .toLocaleString() for commas (e.g. 1,466) */}
+                                      <span className="text-violet-400 font-mono text-xs">
+                                        {data.totalScore.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-zinc-400 text-[10px]">
+                                        Sets Played
+                                      </span>
+                                      <span className="text-white font-mono text-xs">
+                                        {data.sets}
+                                      </span>
+                                    </div>
+                                    {/* --- FIX IS HERE --- */}
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-zinc-400 text-[10px]">
+                                        Avg. Score
+                                      </span>
+                                      <span className="text-emerald-400 font-mono text-xs">
+                                        {data.avg.toLocaleString()}{" "}
+                                        {/* Removed the % sign */}
+                                      </span>
+                                    </div>
+                                    {/* ------------------- */}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+
+                        <Bar
+                          dataKey="totalScore"
+                          radius={[6, 6, 0, 0]} // Smoother rounded corners
+                          barSize={32}
+                          animationDuration={1500}
+                        >
+                          {/* 3. Map over data to assign different colors per bar */}
+                          {chartData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={CHART_COLORS[index % CHART_COLORS.length]}
+                              strokeWidth={0}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
