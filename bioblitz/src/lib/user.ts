@@ -108,19 +108,19 @@ export async function getUserProfile(uid: string) {
   }
 }
 
-export async function getUserProfileByUsername(
-  username: string
-): Promise<UserProfile | null> {
+export async function getUserProfileByUsername(username: string): Promise<UserProfile | null> {
   const usersRef = collection(firestore, "users");
   const q = query(usersRef, where("username", "==", username));
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
+    console.log("User found with username:", username);
     const userDoc = querySnapshot.docs[0];
     const userProfile = userDoc.data() as UserProfile;
     userProfile.uid = userDoc.id;
     return userProfile;
   } else {
+    console.log("User not found with username:", username);
     return null;
   }
 }

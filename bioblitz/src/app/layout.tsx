@@ -3,6 +3,14 @@ import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { UsernameChecker } from "@/components/auth/UsernameChecker";
 
+export const metadata = {
+  title: 'BioBlitz',
+  description: '...',
+  icons: {
+    icon: '/icons/favicon.svg',
+  },
+}; 
+
 export default async function RootLayout({
   children,
 }: {

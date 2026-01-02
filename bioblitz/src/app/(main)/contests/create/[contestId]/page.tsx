@@ -6,10 +6,11 @@ import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay, Question } from "@/types";
 import { Plus, Trash2 } from "lucide-react";
-import { createContest } from "@/lib/actions";
+import { createContest, getContestById } from "@/lib/actions";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { debounce } from '@/lib/utils';
+import { useParams } from "next/navigation";
 
 
 const generateChoiceKey = (index: number): string => {
@@ -79,6 +80,9 @@ function SubmitButton() {
 const TOPICS = ["Animal", "CellBio", "Plants", "Biochem", "Genetics", "Other"];
 
 export default function CreateContestPage() {
+  const params = useParams();
+  const urlContestId = params.contestId as string;
+
   const [state, formAction] = useActionState(createContest, initialState);
   const [questions, setQuestions] = useState<EditableQuestion[]>([
     initialQuestion(),
@@ -95,6 +99,7 @@ export default function CreateContestPage() {
   const [title, setTitle] = useState("Untitled Contest");
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState<number>(600);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -110,10 +115,47 @@ export default function CreateContestPage() {
   }, []);
 
   useEffect(() => {
-    if (!contestId) {
+    if (urlContestId && urlContestId !== "create") {
+      setContestId(urlContestId);
+    } else if (!contestId) {
       setContestId(uuidv4());
     }
-  }, [contestId]);
+  }, [urlContestId, contestId]);
+
+  useEffect(() => {
+    async function loadContestData() {
+      if (contestId && contestId !== "create" && !loading) {
+        const fetchedContest = await getContestById(contestId);
+        if (fetchedContest) {
+          setTitle(fetchedContest.title);
+          setDescription(fetchedContest.description || "");
+          setTimeLimit(Number(fetchedContest.timeLimit) || 600);
+          setSelectedTopic(fetchedContest.topic || TOPICS[0]);
+          if (!TOPICS.includes(fetchedContest.topic || "")) {
+            setSelectedTopic("Other");
+            setCustomTopic(fetchedContest.topic || "");
+          }
+          if (fetchedContest.questions) {
+            const editableQuestions: EditableQuestion[] = fetchedContest.questions.map(q => ({
+                id: q.id,
+                content: q.question,
+                imageUrl: "",
+                choices: q.answers.map((ans, index) => ({ id: (index + 1).toString(), text: ans })),
+                correctAnswerId: q.answers.findIndex(ans => ans === q.correctAnswer) !== -1 ? (q.answers.findIndex(ans => ans === q.correctAnswer) + 1).toString() : "",
+            }));
+            setQuestions(editableQuestions.length > 0 ? editableQuestions : [initialQuestion()]);
+            setActiveQuestionId(editableQuestions[0]?.id || null);
+          } else {
+            setQuestions([initialQuestion()]);
+          }
+        }
+        setLoading(false);
+      } else if (!urlContestId || urlContestId === "create") {
+        setLoading(false);
+      }
+    }
+    loadContestData();
+  }, [contestId, urlContestId]);
 
   const addQuestion = () => {
     const newQuestion = initialQuestion();
@@ -177,10 +219,10 @@ export default function CreateContestPage() {
   const debouncedSave = useMemo(() => debounce(handleSaveDraft, 1000), [handleSaveDraft]);
 
   useEffect(() => {
-    if (contestId && idToken) { 
+    if (contestId && idToken && !loading) {
         debouncedSave();
     }
-  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave]);
+  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave, loading]);
 
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -250,6 +292,14 @@ export default function CreateContestPage() {
   };
 
   const topicValue = selectedTopic === "Other" ? customTopic : selectedTopic;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12 flex items-center justify-center">
+        <p>Loading contest...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12">
