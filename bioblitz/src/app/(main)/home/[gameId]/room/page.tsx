@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import {
   addDoc,
   onSnapshot,
@@ -10,7 +11,6 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-  arrayUnion,
   query,
   where,
   orderBy,
@@ -20,8 +20,8 @@ import {
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Crown, Medal } from "lucide-react";
+import { Loader2, AlertCircle, Crown, Medal } from "lucide-react";
+import { updateUserStreak } from "@/lib/user";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -51,16 +51,29 @@ type GameResult = {
   correctAnswers: { [key: number]: string };
 };
 
+type LeaderboardEntry = {
+  userId: string;
+  score: number;
+  timeTaken: number;
+  username?: string;
+  handle?: string;
+  photoURL?: string;
+};
+
 export default function GameRoomPage() {
   const { gameId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Read the 'ranked' query param passed from the previous page
-  // Defaults to false if missing (Practice mode)
   const isRanked = searchParams.get("ranked") === "true";
 
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [userProfileData, setUserProfileData] = useState({
+    handle: "",
+    photoURL: "",
+  });
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
@@ -86,16 +99,33 @@ export default function GameRoomPage() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (isMounted.current) {
         setUser(currentUser);
+
+        if (currentUser) {
+          try {
+            const userDocRef = doc(firestore, "users", currentUser.uid);
+            const userSnap = await getDoc(userDocRef);
+            if (userSnap.exists()) {
+              const data = userSnap.data();
+              setUserProfileData({
+                handle: data.username || "",
+                photoURL: data.photoURL || currentUser.photoURL || "",
+              });
+            }
+          } catch (e) {
+            console.error("Error fetching user profile data", e);
+          }
+        }
+        setAuthLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!gameId) return;
+    if (!gameId || authLoading) return;
 
     const loadGameData = async () => {
       setLoading(true);
@@ -113,20 +143,22 @@ export default function GameRoomPage() {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
 
-          // Only recover session if user hasn't submitted yet
-          const key = `startTime-${gameId}`;
-          const savedStart = localStorage.getItem(key);
+          if (user) {
+            const key = `startTime-${user.uid}-${gameId}`;
+            const savedStart = localStorage.getItem(key);
 
-          if (savedStart) {
-            const elapsed = Math.floor(
-              (Date.now() - parseInt(savedStart)) / 1000
-            );
-            const remaining = Math.max(0, data.timeLimit - elapsed);
-            setTimeLeft(remaining);
-          } else {
-            const startTime = Date.now();
-            localStorage.setItem(key, startTime.toString());
-            setTimeLeft(data.timeLimit);
+            if (savedStart) {
+              const elapsed = Math.floor(
+                (Date.now() - parseInt(savedStart)) / 1000
+              );
+              const remaining = Math.max(0, data.timeLimit - elapsed);
+
+              setTimeLeft(remaining);
+            } else {
+              const startTime = Date.now();
+              localStorage.setItem(key, startTime.toString());
+              setTimeLeft(data.timeLimit);
+            }
           }
         }
 
@@ -152,7 +184,7 @@ export default function GameRoomPage() {
     };
 
     loadGameData();
-  }, [gameId, router]);
+  }, [gameId, router, authLoading, user]);
 
   const handleSubmit = async (isAutoSubmit = false) => {
     if (submitted) return;
@@ -173,6 +205,18 @@ export default function GameRoomPage() {
 
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
+    const commonData = {
+      gameId: gameId,
+      userId: user.uid,
+      userAnswers: userAnswers,
+      timeTaken: timeTaken,
+      submittedAt: serverTimestamp(),
+      status: "pending_grading",
+      username: user.displayName || "Unknown",
+      handle: userProfileData.handle,
+      photoURL: userProfileData.photoURL,
+    };
+
     try {
       let submissionRef;
 
@@ -181,24 +225,14 @@ export default function GameRoomPage() {
         const rankedRef = doc(firestore, "gameSubmissions", rankedId);
 
         await setDoc(rankedRef, {
-          gameId: gameId,
-          userId: user.uid,
-          userAnswers: userAnswers,
-          timeTaken: timeTaken,
-          submittedAt: serverTimestamp(),
-          status: "pending_grading",
+          ...commonData,
           ranked: true,
         });
 
         submissionRef = rankedRef;
       } else {
         submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
-          gameId: gameId,
-          userId: user.uid,
-          userAnswers: userAnswers,
-          timeTaken: timeTaken,
-          submittedAt: serverTimestamp(),
-          status: "pending_grading",
+          ...commonData,
           ranked: false,
         });
       }
@@ -206,7 +240,11 @@ export default function GameRoomPage() {
       if (isMounted.current) {
         setSubmissionId(submissionRef.id);
       }
-      localStorage.removeItem(`startTime-${gameId}`);
+
+      updateUserStreak(firestore, user.uid);
+      if (user) {
+        localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
+      }
     } catch (error) {
       console.error("Error submitting Blitz:", error);
       alert("There was an error submitting your Blitz. Please try again.");
@@ -269,9 +307,7 @@ export default function GameRoomPage() {
     }`;
   };
 
-  const [leaderboard, setLeaderboard] = useState<
-    { userId: string; score: number; timeTaken: number }[]
-  >([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   useEffect(() => {
@@ -300,11 +336,7 @@ export default function GameRoomPage() {
           }
         });
 
-        const data = Object.values(firstByUser) as {
-          userId: string;
-          score: number;
-          timeTaken: number;
-        }[];
+        const data = Object.values(firstByUser) as LeaderboardEntry[];
         setLeaderboard(data);
       } catch (err) {
         console.error("Error fetching leaderboard:", err);
@@ -316,21 +348,50 @@ export default function GameRoomPage() {
     fetchLeaderboard();
   }, [submitted, activeTab, gameId]);
 
-  const [usersMap, setUsersMap] = useState<{ [uid: string]: string }>({});
+  const [usersMap, setUsersMap] = useState<{
+    [uid: string]: { name: string; handle: string };
+  }>({});
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const snapshot = await getDocs(collection(firestore, "users"));
-      const map: { [uid: string]: string } = {};
-      snapshot.docs.forEach((doc) => {
-        map[doc.id] = doc.data().displayName || "Unknown";
-      });
-      setUsersMap(map);
-    };
-    fetchUsers();
-  }, []);
+    if (leaderboard.length === 0) return;
 
-  if (loading) {
+    const fetchSpecificUsers = async () => {
+      try {
+        const missingProfileIds = leaderboard
+          .filter((l) => !l.username)
+          .map((l) => l.userId);
+
+        if (missingProfileIds.length === 0) return;
+
+        const uniqueUserIds = Array.from(new Set(missingProfileIds));
+
+        const userPromises = uniqueUserIds.map((uid) =>
+          getDoc(doc(firestore, "users", uid))
+        );
+
+        const userSnapshots = await Promise.all(userPromises);
+
+        const newMap: { [uid: string]: { name: string; handle: string } } = {};
+        userSnapshots.forEach((snap) => {
+          if (snap.exists()) {
+            const d = snap.data();
+            newMap[snap.id] = {
+              name: d.displayName || "Unknown",
+              handle: d.username || "",
+            };
+          }
+        });
+
+        setUsersMap(newMap);
+      } catch (err) {
+        console.error("Error fetching user profiles:", err);
+      }
+    };
+
+    fetchSpecificUsers();
+  }, [leaderboard]);
+
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
         <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-500">
@@ -362,10 +423,8 @@ export default function GameRoomPage() {
         </div>
       )}
 
-      {/* Main Layout */}
       <div className="flex-1 flex justify-center py-8 px-4">
         <div className="w-full max-w-4xl relative">
-          {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
               <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
@@ -646,7 +705,12 @@ export default function GameRoomPage() {
                   <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {leaderboard.map((entry, idx) => {
                       const isCurrentUser = entry.userId === user?.uid;
-                      const displayName = usersMap[entry.userId] || "Unknown";
+                      const displayName =
+                        entry.username ||
+                        usersMap[entry.userId]?.name ||
+                        "Unknown";
+                      const handle =
+                        entry.handle || usersMap[entry.userId]?.handle;
 
                       return (
                         <div
@@ -677,9 +741,18 @@ export default function GameRoomPage() {
                             className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900"
                           />
 
-                          <span className="truncate flex-1 text-left">
-                            {displayName}
-                          </span>
+                          <div className="truncate flex-1 text-left">
+                            {handle ? (
+                              <Link
+                                href={`/profile/${handle}`}
+                                className="hover:underline hover:text-white transition-colors"
+                              >
+                                {displayName}
+                              </Link>
+                            ) : (
+                              <span>{displayName}</span>
+                            )}
+                          </div>
 
                           <span className="font-mono text-lg text-right">
                             {entry.score}
@@ -754,7 +827,9 @@ export default function GameRoomPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => {
-                  localStorage.removeItem(`startTime-${gameId}`);
+                  if (user) {
+                    localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
+                  }
                   router.push("/home");
                 }}
                 className="flex-1 px-6 py-3 bg-red-600/10 text-red-500 border border-red-600/50 font-bold rounded-xl hover:bg-red-600 hover:text-white transition"

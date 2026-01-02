@@ -7,6 +7,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { Zap, House, Trophy, Menu, X } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { app } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -35,13 +38,10 @@ export default function MainNavbar() {
 
   const handleSignOut = async () => {
     try {
-      const res = await fetch("/api/sign-out");
-      if (res.ok) {
-        setIsAuthenticated(false);
-        router.push("/auth");
-      } else {
-        console.error("Failed to sign out");
-      }
+      const auth = getAuth(app);
+      await signOut(auth);
+      setIsAuthenticated(false);
+      router.push("/auth");
     } catch (error) {
       console.error("Error during sign out:", error);
     }
@@ -61,6 +61,14 @@ export default function MainNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setIsAuthenticated(!!currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const renderUserNav = () => {
     if (loading) {
       return (
@@ -68,7 +76,14 @@ export default function MainNavbar() {
       );
     }
     if (!isAuthenticated || !user) {
-      return null;
+      return (
+        <Link
+          href="/auth"
+          className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+        >
+          Sign In
+        </Link>
+      );
     }
     return (
       <div className="relative" ref={dropdownRef}>
@@ -77,43 +92,43 @@ export default function MainNavbar() {
           className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
           aria-label="Toggle user menu"
         >
-        <div className="text-left">
-          <h2 className="font-bold text-white">{user.username || ""}</h2>
-        </div>
+          <div className="text-left">
+            <h2 className="font-bold text-white">{user.displayName || ""}</h2>
+          </div>
 
-        <div className="relative">
-          {user.photoURL ? (
-          <img
-            src={user.photoURL}
-            alt={user.displayName}
-            className="h-11 w-11 rounded-full object-cover"
-          />
-          ) : (
-        <DefaultAvatar name={user.displayName} />
-      )}
-    </div>
+          <div className="relative">
+            {user.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName}
+                className="h-11 w-11 rounded-full object-cover"
+              />
+            ) : (
+              <DefaultAvatar name={user.displayName} />
+            )}
+          </div>
 
-    <div className="text-zinc-400 group-hover:text-white transition-colors">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        className={`w-5 h-5 transition-transform duration-200 ${
-          dropdownOpen ? "rotate-180" : ""
-        }`}
-      >
-      <path
-        fillRule="evenodd"
-        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-        clipRule="evenodd"
-      />
-      </svg>
-        </div>
+          <div className="text-zinc-400 group-hover:text-white transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className={`w-5 h-5 transition-transform duration-200 ${
+                dropdownOpen ? "rotate-180" : ""
+              }`}
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
         </button>
 
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-40 bg-zinc-900 rounded-lg shadow-lg overflow-hidden z-50">
-            <Link href={`/profile/${auth.currentUser?.uid}`}>
+            <Link href={`/profile/${user.username}`}>
               <span
                 className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
                 onClick={() => setDropdownOpen(false)}
@@ -121,7 +136,9 @@ export default function MainNavbar() {
                 Profile
               </span>
             </Link>
-            <Link href={user?.username ? `/channel/${user.username}` : '/channel'}>
+            <Link
+              href={user?.username ? `/channel/${user.username}` : "/channel"}
+            >
               <span
                 className="block px-4 py-2 text-white hover:bg-cyan-700/20 cursor-pointer"
                 onClick={() => setDropdownOpen(false)}

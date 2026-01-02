@@ -11,11 +11,23 @@ import {
   deleteUser,
   GoogleAuthProvider,
   reauthenticateWithPopup,
-  User
+  User,
 } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
+import {
+  getFirestore,
+  collection,
+  getDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,10 +43,71 @@ export default function SettingsPage() {
   const [isPublic, setIsPublic] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profileVisibility, setProfileVisibility] = useState("public");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const [profileData, setProfileData] = useState<any>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const router = useRouter();
+  const db = getFirestore(app);
 
-  // Load Settings on Mount
+  const deleteSubcollection = async (path: string) => {
+    const colRef = collection(db, path);
+    const colDocs = await getDocs(colRef);
+    await Promise.all(colDocs.docs.map((docSnap) => deleteDoc(docSnap.ref)));
+  };
+
+  const deleteUserData = async (uid: string) => {
+    try {
+      console.log("Starting deletion for UID:", uid);
+      console.log("Removing user from friends' lists...");
+      const myFriendsRef = collection(db, "users", uid, "friends");
+      const myFriendsSnap = await getDocs(myFriendsRef);
+      const removalPromises = myFriendsSnap.docs.map((friendDoc) => {
+        const friendId = friendDoc.id;
+        const refInFriendList = doc(db, "users", friendId, "friends", uid);
+        return deleteDoc(refInFriendList);
+      });
+      await Promise.all(removalPromises);
+      console.log("Removed user from all friend connections.");
+      const gameQuery = query(
+        collection(db, "gameSubmissions"),
+        where("userId", "==", uid)
+      );
+      const gameDocs = await getDocs(gameQuery);
+      await Promise.all(gameDocs.docs.map((gDoc) => deleteDoc(gDoc.ref)));
+
+      const directUserRef = doc(db, "users", uid);
+      const directUserSnap = await getDoc(directUserRef);
+
+      if (directUserSnap.exists()) {
+        console.log("Found user doc by ID. Deleting...");
+        await deleteSubcollection(`users/${uid}/setsPlayed`);
+        await deleteSubcollection(`users/${uid}/friends`);
+        await deleteDoc(directUserRef);
+      } else {
+        console.log("User doc not found by ID. Trying query...");
+        const userQuery = query(
+          collection(db, "users"),
+          where("uid", "==", uid)
+        );
+        const userDocs = await getDocs(userQuery);
+
+        for (const userDoc of userDocs.docs) {
+          const docId = userDoc.id;
+          await deleteSubcollection(`users/${docId}/setsPlayed`);
+          await deleteSubcollection(`users/${docId}/friends`);
+          await deleteDoc(userDoc.ref);
+        }
+      }
+
+      console.log("User data deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user data:", error);
+      throw error;
+    }
+  };
   useEffect(() => {
     const sound = localStorage.getItem("soundEnabled");
     const animation = localStorage.getItem("animationEnabled");
@@ -47,7 +120,6 @@ export default function SettingsPage() {
     if (gregory !== null) setGregoryMode(gregory === "true");
   }, []);
 
-  // Save regular settings automatically
   useEffect(() => {
     localStorage.setItem("soundEnabled", soundEnabled.toString());
   }, [soundEnabled]);
@@ -60,7 +132,7 @@ export default function SettingsPage() {
     localStorage.setItem("emailNotifications", emailNotifications.toString());
   }, [emailNotifications]);
 
- useEffect(() => {
+  useEffect(() => {
     if (gregoryMode) {
       document.body.style.filter = "sepia(1) hue-rotate(275deg) saturate(6)";
       document.body.style.transition = "none";
@@ -72,50 +144,78 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    let unsubscribeFirestore: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+
+        unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setProfileData(data);
+            setUsername(data.username ?? null);
+          }
+          setIsProfileLoading(false);
+        });
+      } else {
+        setProfileData(null);
+        setUsername(null);
+        setIsProfileLoading(false);
+        if (unsubscribeFirestore) unsubscribeFirestore();
+      }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeFirestore) unsubscribeFirestore();
+    };
+  }, [db]);
 
   const handleSignOut = async () => {
     const auth = getAuth(app);
     await signOut(auth);
     router.push("/auth");
   };
-
   const handleDeleteAccount = async () => {
     const auth = getAuth(app);
     const currentUser = auth.currentUser;
-  
     if (!currentUser) return;
-  
-    const confirmed = confirm("Are you sure you want to permanently delete your account?");
+
+    const confirmed = confirm(
+      "Are you sure you want to permanently delete your account?"
+    );
     if (!confirmed) return;
-  
-    const walrusChorus = "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
-    const userInput = prompt(`Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`);
-  
+
+    const walrusChorus =
+      "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
+    const userInput = prompt(
+      `Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`
+    );
     if (userInput !== walrusChorus) {
       alert("Incorrect phrase. Deletion cancelled.");
       return;
     }
-  
+
     try {
+      await deleteUserData(currentUser.uid);
       await deleteUser(currentUser);
-      alert("Account deleted successfully.");
+      alert("Account and all associated data deleted successfully.");
       router.push("/auth");
     } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        const reConfirm = confirm("For security, you must sign in again to confirm deletion. Sign in now?");
-        
+      if (error.code === "auth/requires-recent-login") {
+        const reConfirm = confirm(
+          "For security, you must sign in again to confirm deletion. Sign in now?"
+        );
         if (reConfirm) {
           try {
             const provider = new GoogleAuthProvider();
             await reauthenticateWithPopup(currentUser, provider);
-            
+            await deleteUserData(currentUser.uid);
             await deleteUser(currentUser);
-            alert("Account deleted successfully.");
+            alert("Account and all associated data deleted successfully.");
             router.push("/auth");
           } catch (reAuthError) {
             console.error("Re-auth failed", reAuthError);
@@ -128,11 +228,20 @@ export default function SettingsPage() {
       }
     }
   };
-
   return (
     <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
     >
+      {toastMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-black px-4 py-2 rounded-xl shadow-lg z-50"
+        >
+          {toastMessage}
+        </motion.div>
+      )}
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">
           Settings & Preferences
@@ -145,21 +254,28 @@ export default function SettingsPage() {
         >
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
           <div className="flex items-center gap-4 mb-4">
-            {user?.photoURL ? (
+            {isProfileLoading ? (
+              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 animate-pulse">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+            ) : profileData?.photoURL || user?.photoURL ? (
               <img
-                src={user.photoURL}
+                src={profileData?.photoURL || user?.photoURL}
                 alt="Profile picture"
                 className="w-16 h-16 rounded-full object-cover border border-zinc-700"
                 referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400">
-                ?
+                {profileData?.displayName?.[0] || user?.displayName?.[0] || "?"}
               </div>
             )}
+
             <div>
               <p className="font-medium">
-                {user?.displayName || "Unnamed User"}
+                {profileData?.displayName ||
+                  user?.displayName ||
+                  "Unnamed User"}
               </p>
               <p className="text-sm text-gray-400">
                 {user?.email || "No email available"}
@@ -167,7 +283,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <Link
-            href="/profile"
+            href={username ? `/profile/${username}` : "#"}
             className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
@@ -214,7 +330,6 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
-       
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -263,19 +378,25 @@ export default function SettingsPage() {
           </div>
         </motion.section>
 
-         <motion.section
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
           className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
         >
           <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-            Experimental 
-            {gregoryMode && <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">ON</span>}
+            Experimental
+            {gregoryMode && (
+              <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">
+                ON
+              </span>
+            )}
           </h2>
           <div className="flex items-center justify-between">
             <div>
-               <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>Gregory Mode</p>
+              <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>
+                Gregory Mode
+              </p>
             </div>
             <Switch
               checked={gregoryMode}
@@ -287,7 +408,6 @@ export default function SettingsPage() {
             />
           </div>
         </motion.section>
-
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}

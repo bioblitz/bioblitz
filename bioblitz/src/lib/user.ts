@@ -1,7 +1,18 @@
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { firestore } from "./firebase";
-import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  increment,
+  FieldValue,
+  Timestamp,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export interface UserProfile {
   uid: string;
@@ -28,15 +39,21 @@ export async function isUsernameUnique(username: string): Promise<boolean> {
   return querySnapshot.empty;
 }
 
-export async function updateUsername(uid: string, username: string): Promise<void> {
+export async function updateUsername(
+  uid: string,
+  username: string
+): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
     username: username,
-    nameChangedAt: serverTimestamp()
+    nameChangedAt: serverTimestamp(),
   });
 }
 
-export async function updateUserBanner(uid: string, bannerURL: string): Promise<void> {
+export async function updateUserBanner(
+  uid: string,
+  bannerURL: string
+): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
     bannerURL: bannerURL,
@@ -45,12 +62,12 @@ export async function updateUserBanner(uid: string, bannerURL: string): Promise<
 
 export async function createUserProfile(user: any) {
   const userRef = doc(firestore, "users", user.uid);
-  
+
   const userSnap = await getDoc(userRef);
 
   if (userSnap.exists()) {
     await updateDoc(userRef, {
-      lastLogin: serverTimestamp()
+      lastLogin: serverTimestamp(),
     });
     const userProfile = userSnap.data() as UserProfile;
     userProfile.uid = user.uid;
@@ -92,7 +109,6 @@ export async function getUserProfile(uid: string) {
 }
 
 export async function getUserProfileByUsername(username: string): Promise<UserProfile | null> {
-  console.log("Searching for user with username:", username);
   const usersRef = collection(firestore, "users");
   const q = query(usersRef, where("username", "==", username));
   const querySnapshot = await getDocs(q);
@@ -108,3 +124,53 @@ export async function getUserProfileByUsername(username: string): Promise<UserPr
     return null;
   }
 }
+
+export const updateUserStreak = async (db: any, userId: string) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      const lastDate = data.lastStreakDate?.toDate();
+      const now = new Date();
+
+      if (!lastDate) {
+        await updateDoc(userRef, {
+          streak: 1,
+          lastStreakDate: serverTimestamp(),
+        });
+        return;
+      }
+
+      const lastDateUTC = Date.UTC(
+        lastDate.getUTCFullYear(),
+        lastDate.getUTCMonth(),
+        lastDate.getUTCDate()
+      );
+
+      const todayUTC = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+      );
+
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const diffDays = Math.floor((todayUTC - lastDateUTC) / msPerDay);
+
+      if (diffDays === 1) {
+        await updateDoc(userRef, {
+          streak: increment(1),
+          lastStreakDate: serverTimestamp(),
+        });
+      } else if (diffDays > 1) {
+        await updateDoc(userRef, {
+          streak: 1,
+          lastStreakDate: serverTimestamp(),
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error updating streak:", error);
+  }
+};
