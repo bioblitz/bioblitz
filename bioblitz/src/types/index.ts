@@ -6,7 +6,7 @@ export type Question = {
 };
 
 export type gameRoom = {
-  id: string;
+  id:string;
   title: string;
   source: string;
   number_of_questions: string;
@@ -18,6 +18,7 @@ export type gameRoom = {
   creatorPfp?: string;
   rating?: number;
   questions?: Question[];
+  status?: string;
 };
 
 export interface Contest {
@@ -32,4 +33,27 @@ export interface FilterState {
   search: string;
   status: "all" | "active" | "upcoming" | "past";
   sort: "newest" | "oldest" | "popularity";
+}
+
+export interface AnswerChoice {
+  id: string;
+  text: string;
+}
+
+export interface EditableQuestion {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  choices: AnswerChoice[];
+  correctAnswerId: string;
+}
+
+export interface IQuestionForDisplay {
+  content: string;
+  imgURL?: string;
+  a?: string;
+  b?: string;
+  c?: string;
+  d?: string;
+  e?: string;
 }

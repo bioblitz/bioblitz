@@ -75,7 +75,7 @@ export default function GameDetailPage() {
 
       if (!currentUser) {
         setLoadingAttempts(false);
-        setPreviousAttempts([]); // IMPORTANT: clear stale data
+        setPreviousAttempts([]);
       }
     });
 
