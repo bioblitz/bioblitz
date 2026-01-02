@@ -15,7 +15,7 @@ import {
   ChevronUp,
   Search,
 } from "lucide-react";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 
@@ -164,10 +164,10 @@ export default function HomeClient({
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                Join a Blitz
+                Welcome back!
               </h1>
               <p className="text-zinc-400 mt-1">
-                Select a topic to start competing
+                Select a Blitz to start competing
               </p>
             </div>
 

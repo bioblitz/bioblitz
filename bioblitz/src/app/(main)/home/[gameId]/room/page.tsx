@@ -21,7 +21,6 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { Loader2, AlertCircle, Crown, Medal } from "lucide-react";
-import { updateUserStreak } from "@/lib/user";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -241,7 +240,6 @@ export default function GameRoomPage() {
         setSubmissionId(submissionRef.id);
       }
 
-      updateUserStreak(firestore, user.uid);
       if (user) {
         localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
       }

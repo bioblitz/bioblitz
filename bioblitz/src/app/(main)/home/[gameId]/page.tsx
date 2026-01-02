@@ -407,7 +407,7 @@ export default function GameDetailPage() {
             ) : previousAttempts.length === 0 ? (
               <div className="bg-zinc-900/50 border border-zinc-800 border-dashed rounded-2xl p-8 text-center">
                 <p className="text-zinc-500">
-                  No attempts yet. Be the first to play!
+                  You haven't played this Blitz yet.
                 </p>
               </div>
             ) : (
