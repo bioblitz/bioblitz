@@ -1,11 +1,12 @@
-export default function POTD() {
-  return (
+import { getCachedPuzzles } from "@/lib/potd";
+import PotdClient from "./PotdClient";
 
-<main className="flex-1 flex flex-col items-center justify-center space-y-6 bg-black">
+// Revalidate the cache every hour (matches the lib configuration)
+export const revalidate = 3600;
 
-      <h1 className="text-5xl">Welcome to the problem of the day!</h1>
-      <p className="">Coming soon...</p>
+export default async function PotdPage() {
+  // Fetch from the shared server cache
+  const puzzles = await getCachedPuzzles();
 
-</main>
-  );
+  return <PotdClient initialPuzzles={puzzles} />;
 }

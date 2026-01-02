@@ -15,7 +15,7 @@ import {
   ChevronUp,
   Search,
 } from "lucide-react";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 
