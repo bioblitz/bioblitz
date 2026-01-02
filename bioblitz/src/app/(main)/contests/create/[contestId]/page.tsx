@@ -115,7 +115,6 @@ export default function CreateContestPage() {
   }, []);
 
   useEffect(() => {
-    // Initialize contestId from URL or generate new
     if (urlContestId && urlContestId !== "create") {
       setContestId(urlContestId);
     } else if (!contestId) {
@@ -125,8 +124,7 @@ export default function CreateContestPage() {
 
   useEffect(() => {
     async function loadContestData() {
-      if (contestId && contestId !== "create" && !loading) { // Only load if contestId is from URL and not loading already
-        setLoading(true);
+      if (contestId && contestId !== "create" && !loading) {
         const fetchedContest = await getContestById(contestId);
         if (fetchedContest) {
           setTitle(fetchedContest.title);
@@ -138,12 +136,10 @@ export default function CreateContestPage() {
             setCustomTopic(fetchedContest.topic || "");
           }
           if (fetchedContest.questions) {
-            // Transform fetched Questions back to EditableQuestions if necessary
-            // For simplicity, assuming direct compatibility for now or handling conversion
             const editableQuestions: EditableQuestion[] = fetchedContest.questions.map(q => ({
                 id: q.id,
                 content: q.question,
-                imageUrl: "", // Assuming imageUrl is not stored in gameRoom, or needs to be fetched
+                imageUrl: "",
                 choices: q.answers.map((ans, index) => ({ id: (index + 1).toString(), text: ans })),
                 correctAnswerId: q.answers.findIndex(ans => ans === q.correctAnswer) !== -1 ? (q.answers.findIndex(ans => ans === q.correctAnswer) + 1).toString() : "",
             }));
@@ -155,11 +151,11 @@ export default function CreateContestPage() {
         }
         setLoading(false);
       } else if (!urlContestId || urlContestId === "create") {
-        setLoading(false); // If creating a new contest, stop loading
+        setLoading(false);
       }
     }
     loadContestData();
-  }, [contestId, urlContestId]); // Depend on contestId and urlContestId
+  }, [contestId, urlContestId]);
 
   const addQuestion = () => {
     const newQuestion = initialQuestion();
@@ -223,7 +219,7 @@ export default function CreateContestPage() {
   const debouncedSave = useMemo(() => debounce(handleSaveDraft, 1000), [handleSaveDraft]);
 
   useEffect(() => {
-    if (contestId && idToken && !loading) { // Only autosave if not loading existing data
+    if (contestId && idToken && !loading) {
         debouncedSave();
     }
   }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave, loading]);
