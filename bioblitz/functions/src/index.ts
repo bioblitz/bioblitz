@@ -2,6 +2,8 @@ import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+
 
 // 1. Initialize Once
 admin.initializeApp();
@@ -340,3 +342,66 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
 
     console.log(`Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`);
 });
+
+
+
+export const resetStreaksDaily = onSchedule(
+  {
+    schedule: "0 0 * * *", 
+    timeZone: "America/Los_Angeles", 
+    timeoutSeconds: 540, 
+    memory: "512MiB",
+  },
+  async (event) => {
+    console.log("🔥 Starting Daily Streak Reset...");
+
+    const now = new Date();
+    // Calculate 24 hours ago from "now" (which is midnight PST)
+    const cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // Query: Find users who have a streak > 0 AND haven't played in the last 24h
+    // Note: You might need a composite index in Firestore for this query to work.
+    // If so, checking the logs after the first run will give you a link to create it instantly.
+    const usersSnapshot = await db.collection("users")
+      .where("streak", ">", 0)
+      .where("lastStreakDate", "<", admin.firestore.Timestamp.fromDate(cutoffDate))
+      .get();
+
+    if (usersSnapshot.empty) {
+      console.log("✅ No streaks to reset today.");
+      return;
+    }
+
+    console.log(`Found ${usersSnapshot.size} users with broken streaks.`);
+
+    // BATCH UPDATE LOGIC
+    // Firestore batches allow 500 writes at a time. We chunk the updates.
+    const batchSize = 500;
+    const batches = [];
+    let currentBatch = db.batch();
+    let operationCounter = 0;
+
+    usersSnapshot.docs.forEach((doc) => {
+      // Set streak to 0
+      currentBatch.update(doc.ref, { streak: 0 });
+      operationCounter++;
+
+      // If batch is full, push it to array and start a new one
+      if (operationCounter === batchSize) {
+        batches.push(currentBatch.commit());
+        currentBatch = db.batch();
+        operationCounter = 0;
+      }
+    });
+
+    // Push any remaining operations
+    if (operationCounter > 0) {
+      batches.push(currentBatch.commit());
+    }
+
+    // Wait for all batches to complete
+    await Promise.all(batches);
+
+    console.log(`Successfully reset streaks for ${usersSnapshot.size} users.`);
+  }
+);
