@@ -35,6 +35,9 @@ import {
   Info,
   Loader2,
   Flame,
+  Flag,
+  AlertTriangle,
+  CheckCircle,
   Zap,
   BrainCircuit,
 } from "lucide-react";
@@ -744,8 +747,59 @@ export default function ProfilePage() {
       ...stat,
       avg: Math.round(stat.totalScore / stat.sets),
     }))
-    .sort((a, b) => b.totalScore - a.totalScore) // Sort by highest score
-    .slice(0, 5); // Top 5
+    .sort((a, b) => b.totalScore - a.totalScore)
+    .slice(0, 5);
+
+  const [reporting, setReporting] = useState(false);
+  const [reportCategory, setReportCategory] = useState("Inappropriate Content");
+  const [reportDescription, setReportDescription] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+
+  const REPORT_CATEGORIES = [
+    "Inappropriate Content",
+    "Harassment or Bullying",
+    "Spam or Bot",
+    "Cheating / Smurfing",
+    "Offensive Username/Bio",
+    "Other",
+  ];
+
+  const handleReportSubmit = async () => {
+    if (!reportDescription.trim()) return alert("Please add a description.");
+
+    setIsSubmittingReport(true);
+    try {
+      const response = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportedUser: userProfile?.username || "Unknown",
+          reporterUser: auth.currentUser?.displayName || "Anonymous",
+          category: reportCategory,
+          description: reportDescription,
+          url: window.location.href,
+        }),
+      });
+
+      if (response.ok) {
+        setReportSuccess(true);
+        setTimeout(() => {
+          setReporting(false);
+          setReportSuccess(false);
+          setReportDescription("");
+        }, 2500);
+      } else {
+        alert("Failed to send report.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error sending report.");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
@@ -880,15 +934,30 @@ export default function ProfilePage() {
                     </p>
                   )}
                 </div>
-                {auth.currentUser?.uid === profileUid && (
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
-                  >
-                    <Pencil className="w-3 h-3 group-hover:text-violet-400" />
-                    Edit Profile
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* IF IT IS MY PROFILE -> SHOW EDIT */}
+                  {auth.currentUser?.uid === profileUid ? (
+                    <button
+                      onClick={() => setEditing(true)}
+                      className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
+                    >
+                      <Pencil className="w-3 h-3 group-hover:text-violet-400" />
+                      Edit Profile
+                    </button>
+                  ) : (
+                    /* IF IT IS NOT MY PROFILE -> SHOW REPORT */
+                    auth.currentUser && (
+                      <button
+                        onClick={() => setReporting(true)}
+                        className="px-4 py-2 bg-zinc-900/30 border border-zinc-800 hover:bg-red-900/10 hover:border-red-500/30 hover:text-red-400 text-zinc-500 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2"
+                        title="Report User"
+                      >
+                        <Flag className="w-3 h-3" />
+                        Report
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
 
               <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
@@ -1712,6 +1781,110 @@ export default function ProfilePage() {
                 </button>
               </div>
             </div>
+          </motion.div>
+        </div>
+      )}
+      {/* REPORT MODAL */}
+      {reporting && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative overflow-hidden"
+          >
+            {/* Red Glow Effect */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/5 blur-[60px] pointer-events-none" />
+
+            <button
+              onClick={() => setReporting(false)}
+              className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-white bg-zinc-900 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {reportSuccess ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Report Submitted
+                  </h2>
+                  <p className="text-zinc-400 text-sm mt-1">
+                    Thank you for helping keep the community safe.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      Report User
+                    </h2>
+                    <p className="text-zinc-500 text-sm">
+                      We take reports seriously. Please provide details.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                      Reason
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={reportCategory}
+                        onChange={(e) => setReportCategory(e.target.value)}
+                        className="w-full appearance-none bg-zinc-900 text-white p-3 pr-10 rounded-xl border border-zinc-800 focus:border-red-500/50 focus:outline-none transition-colors"
+                      >
+                        {REPORT_CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-3.5 pointer-events-none text-zinc-500">
+                        <ChevronRight className="w-4 h-4 rotate-90" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                      Description
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={reportDescription}
+                      onChange={(e) => setReportDescription(e.target.value)}
+                      placeholder="Please describe the violation..."
+                      className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-red-500/50 focus:outline-none transition-colors resize-none placeholder:text-zinc-700"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleReportSubmit}
+                    disabled={isSubmittingReport}
+                    className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmittingReport ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Submit Report"
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       )}
