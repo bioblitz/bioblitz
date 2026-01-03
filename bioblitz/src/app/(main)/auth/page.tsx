@@ -40,6 +40,16 @@ export default function AuthenticationPage() {
         setLoading(false);
       }
     } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        setLoading(false);
+        return;
+      }
+
       console.error("Error during sign-in:", error);
       setLoading(false);
     }

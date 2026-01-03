@@ -48,6 +48,7 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState<any>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const router = useRouter();
   const db = getFirestore(app);
@@ -147,9 +148,14 @@ export default function SettingsPage() {
     let unsubscribeFirestore: (() => void) | undefined;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (!currentUser) {
+        // 1. If no user, redirect immediately
+        router.push("/auth");
+      } else {
+        // 2. If user exists, save them and stop loading
+        setUser(currentUser);
+        setCheckingAuth(false);
 
-      if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
 
         unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
@@ -160,11 +166,6 @@ export default function SettingsPage() {
           }
           setIsProfileLoading(false);
         });
-      } else {
-        setProfileData(null);
-        setUsername(null);
-        setIsProfileLoading(false);
-        if (unsubscribeFirestore) unsubscribeFirestore();
       }
     });
 
@@ -172,7 +173,7 @@ export default function SettingsPage() {
       unsubscribeAuth();
       if (unsubscribeFirestore) unsubscribeFirestore();
     };
-  }, [db]);
+  }, [db, router]);
 
   const handleSignOut = async () => {
     const auth = getAuth(app);
@@ -228,6 +229,14 @@ export default function SettingsPage() {
       }
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <main className="min-h-screen bg-black flex items-center justify-center text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </main>
+    );
+  }
   return (
     <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
