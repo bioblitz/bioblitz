@@ -2,14 +2,15 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { UsernameChecker } from "@/components/auth/UsernameChecker";
+import ActivityTracker from "../components/ActivityTracker";
 
 export const metadata = {
-  title: 'BioBlitz',
-  description: '...',
+  title: "BioBlitz",
+  description: "...",
   icons: {
-    icon: '/icons/favicon.svg',
+    icon: "/icons/favicon.svg",
   },
-}; 
+};
 
 export default async function RootLayout({
   children,
@@ -20,6 +21,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
+          <ActivityTracker />
           <UsernameChecker />
           <NavbarWrapper />
           {children}

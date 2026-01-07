@@ -10,7 +10,8 @@ import { Zap, House, Trophy, Menu, X, Flame } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, onSnapshot } from "firebase/firestore"; 
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -20,13 +21,13 @@ export default function MainNavbar() {
   const router = useRouter();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+
   // Streak State
   const [streak, setStreak] = useState(0);
   const [streakActive, setStreakActive] = useState(false); // New state for "Today" check
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -45,7 +46,7 @@ export default function MainNavbar() {
     if (user?.uid) {
       const db = getFirestore(app);
       const userRef = doc(db, "users", user.uid);
-      
+
       const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
@@ -53,32 +54,35 @@ export default function MainNavbar() {
 
           // CHECK IF STREAK IS ACTIVE TODAY (PST)
           if (data.lastStreakDate) {
-             const lastDate = data.lastStreakDate.toDate();
-             const now = new Date();
+            const lastDate = data.lastStreakDate.toDate();
+            const now = new Date();
 
-             // Format both to PST "YYYY-MM-DD" to compare the specific calendar day
-             const pstOptions: Intl.DateTimeFormatOptions = {
-                 timeZone: "America/Los_Angeles",
-                 year: "numeric",
-                 month: "2-digit",
-                 day: "2-digit"
-             };
-             
-             const lastDatePst = lastDate.toLocaleDateString("en-US", pstOptions);
-             const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
+            // Format both to PST "YYYY-MM-DD" to compare the specific calendar day
+            const pstOptions: Intl.DateTimeFormatOptions = {
+              timeZone: "America/Los_Angeles",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            };
 
-             // If the strings match, the last update was "Today" in PST
-             setStreakActive(lastDatePst === nowDatePst);
+            const lastDatePst = lastDate.toLocaleDateString(
+              "en-US",
+              pstOptions
+            );
+            const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
+
+            // If the strings match, the last update was "Today" in PST
+            setStreakActive(lastDatePst === nowDatePst);
           } else {
-             setStreakActive(false);
+            setStreakActive(false);
           }
         }
       });
 
       return () => unsubscribe();
     } else {
-        setStreak(0);
-        setStreakActive(false);
+      setStreak(0);
+      setStreakActive(false);
     }
   }, [user]);
 
@@ -134,105 +138,114 @@ export default function MainNavbar() {
     }
     return (
       <div className="flex items-center gap-4">
-        
         {/* STREAK BADGE */}
         {/* Always visible on Desktop if logged in */}
-        <div className="hidden md:flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full" title="Current Streak">
-            {/* Logic: Text is always orange. Fill is orange ONLY if active. No Pulse. */}
-            <Flame 
-                className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`} 
-            />
-            <span className="text-sm font-bold text-orange-400">{streak}</span>
+        <div
+          className="hidden md:flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full"
+          title="Current Streak"
+        >
+          {/* Logic: Text is always orange. Fill is orange ONLY if active. No Pulse. */}
+          <Flame
+            className={`w-4 h-4 text-orange-500 ${
+              streakActive ? "fill-orange-500" : "fill-transparent"
+            }`}
+          />
+          <span className="text-sm font-bold text-orange-400">{streak}</span>
         </div>
-
+        <NotificationBell />
         <div className="relative" ref={dropdownRef}>
-            <button
+          <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
             aria-label="Toggle user menu"
-            >
+          >
             <div className="text-left hidden lg:block">
-                <h2 className="font-bold text-white text-sm">{user.displayName || ""}</h2>
+              <h2 className="font-bold text-white text-sm">
+                {user.displayName || ""}
+              </h2>
             </div>
 
             <div className="relative">
-                {user.photoURL ? (
+              {user.photoURL ? (
                 <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="h-10 w-10 rounded-full object-cover border border-zinc-700"
+                  src={user.photoURL}
+                  alt={user.displayName}
+                  className="h-10 w-10 rounded-full object-cover border border-zinc-700"
                 />
-                ) : (
+              ) : (
                 <DefaultAvatar name={user.displayName} />
-                )}
+              )}
             </div>
 
             <div className="text-zinc-400 group-hover:text-white transition-colors">
-                <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 className={`w-5 h-5 transition-transform duration-200 ${
-                    dropdownOpen ? "rotate-180" : ""
+                  dropdownOpen ? "rotate-180" : ""
                 }`}
-                >
+              >
                 <path
-                    fillRule="evenodd"
-                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                    clipRule="evenodd"
+                  fillRule="evenodd"
+                  d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                  clipRule="evenodd"
                 />
-                </svg>
+              </svg>
             </div>
-            </button>
+          </button>
 
-            {dropdownOpen && (
+          {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
-                
-                {/* Mobile Streak Show inside Dropdown */}
-                <div className="md:hidden px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
-                     <span className="text-zinc-400 text-sm">Streak</span>
-                     <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-                        <Flame className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`} />
-                        {streak}
-                     </div>
+              {/* Mobile Streak Show inside Dropdown */}
+              <div className="md:hidden px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                <span className="text-zinc-400 text-sm">Streak</span>
+                <div className="flex items-center gap-1.5 text-orange-400 font-bold">
+                  <Flame
+                    className={`w-4 h-4 text-orange-500 ${
+                      streakActive ? "fill-orange-500" : "fill-transparent"
+                    }`}
+                  />
+                  {streak}
                 </div>
+              </div>
 
-                <Link href={`/profile/${user.username}`}>
+              <Link href={`/profile/${user.username}`}>
                 <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                  onClick={() => setDropdownOpen(false)}
                 >
-                    Profile
+                  Profile
                 </span>
-                </Link>
-                <Link
+              </Link>
+              <Link
                 href={user?.username ? `/channel/${user.username}` : "/channel"}
-                >
+              >
                 <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                  onClick={() => setDropdownOpen(false)}
                 >
-                    Channel
+                  Channel
                 </span>
-                </Link>
-                <Link href="/settings">
+              </Link>
+              <Link href="/settings">
                 <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                  onClick={() => setDropdownOpen(false)}
                 >
-                    Settings
+                  Settings
                 </span>
-                </Link>
-                <div className="border-t border-zinc-800 mt-1">
-                    <span
-                    className="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"
-                    onClick={handleSignOut}
-                    >
-                    Sign Out
-                    </span>
-                </div>
+              </Link>
+              <div className="border-t border-zinc-800 mt-1">
+                <span
+                  className="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </span>
+              </div>
             </div>
-            )}
+          )}
         </div>
       </div>
     );
@@ -267,11 +280,13 @@ export default function MainNavbar() {
 
               if (isActive) {
                 if (isDaily) {
-                    activeClass = "bg-orange-600/20 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)] border border-orange-500/20";
-                    iconClass = "text-orange-400";
+                  activeClass =
+                    "bg-orange-600/20 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)] border border-orange-500/20";
+                  iconClass = "text-orange-400";
                 } else {
-                    activeClass = "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10";
-                    iconClass = "text-violet-400";
+                  activeClass =
+                    "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10";
+                  iconClass = "text-violet-400";
                 }
               } else {
                 activeClass = "text-zinc-400 hover:text-white hover:bg-white/5";
@@ -284,10 +299,7 @@ export default function MainNavbar() {
                   href={item.href}
                   className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${activeClass}`}
                 >
-                  <item.icon
-                    size={18}
-                    className={iconClass}
-                  />
+                  <item.icon size={18} className={iconClass} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -318,15 +330,17 @@ export default function MainNavbar() {
             const isDaily = item.href === "/daily";
 
             let activeClass = "";
-            
+
             if (isActive) {
-                if (isDaily) {
-                     activeClass = "bg-orange-600/20 text-orange-300 border border-orange-500/20";
-                } else {
-                     activeClass = "bg-violet-600/20 text-violet-300 border border-violet-500/20";
-                }
+              if (isDaily) {
+                activeClass =
+                  "bg-orange-600/20 text-orange-300 border border-orange-500/20";
+              } else {
+                activeClass =
+                  "bg-violet-600/20 text-violet-300 border border-violet-500/20";
+              }
             } else {
-                activeClass = "text-zinc-400 hover:bg-white/5 hover:text-white";
+              activeClass = "text-zinc-400 hover:bg-white/5 hover:text-white";
             }
 
             return (

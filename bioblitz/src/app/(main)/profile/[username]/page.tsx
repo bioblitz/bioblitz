@@ -67,6 +67,7 @@ import {
   CartesianGrid,
   YAxis,
 } from "recharts";
+import { createNotification } from "@/lib/notifications";
 const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -553,7 +554,9 @@ export default function ProfilePage() {
 
   const sendFriendRequest = async () => {
     if (!auth.currentUser || !userProfile || !profileUid) return;
-
+    const myDocSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    const myData = myDocSnap.data() as UserProfile;
+    const myUsername = myData?.username || auth.currentUser.uid;
     try {
       const batch = writeBatch(db);
 
@@ -589,6 +592,16 @@ export default function ProfilePage() {
 
       await batch.commit();
       setFriendshipStatus("sent");
+      await createNotification(
+        profileUid,
+        "friend_request",
+        "New Friend Request",
+        `${auth.currentUser.displayName || "Someone"} wants to be friends!`,
+        `/profile/${myUsername}`,
+        auth.currentUser.uid,
+        myData.photoURL || "",
+        auth.currentUser.displayName || "A user"
+      );
     } catch (err) {
       console.error(err);
       alert("Failed to send request.");
@@ -597,6 +610,9 @@ export default function ProfilePage() {
 
   const acceptFriendRequest = async () => {
     if (!auth.currentUser || !profileUid) return;
+    const myDocSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    const myData = myDocSnap.data() as UserProfile;
+    const myUsername = myData?.username || auth.currentUser.uid;
     try {
       const batch = writeBatch(db);
       const myRef = doc(
@@ -617,6 +633,19 @@ export default function ProfilePage() {
       batch.update(theirRef, { status: "friends" });
       await batch.commit();
       setFriendshipStatus("friends");
+
+      await createNotification(
+        profileUid,
+        "friend_accept",
+        "Friend Request Accepted",
+        `${
+          auth.currentUser?.displayName || "User"
+        } accepted your friend request!`,
+        `/profile/${myUsername}`,
+        auth.currentUser.uid,
+        auth.currentUser.photoURL || "",
+        auth.currentUser.displayName || "A user"
+      );
     } catch (err) {
       console.error(err);
     }
@@ -1241,6 +1270,19 @@ export default function ProfilePage() {
                                 prev.filter((r) => r.uid !== request.uid)
                               );
                               setFriends((prev) => [...prev, request]);
+                              const myUsername =
+                                userProfile?.username || auth.currentUser!.uid;
+                              await createNotification(
+                                request.uid,
+                                "friend_accept",
+                                "Friend Request Accepted",
+                                `${
+                                  auth.currentUser?.displayName || "User"
+                                } accepted your friend request!`,
+                                `/profile/${myUsername}`,
+                                auth.currentUser!.uid,
+                                auth.currentUser!.photoURL || ""
+                              );
                             }}
                             className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500"
                           >
