@@ -27,7 +27,7 @@ import {
   deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -302,46 +302,6 @@ export default function SettingsPage() {
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
-        >
-          <h2 className="text-2xl font-semibold mb-4">Sound & Animation</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p>Sound Effects</p>
-              <Switch
-                checked={soundEnabled}
-                onCheckedChange={setSoundEnabled}
-                className="transition-colors duration-200 data-[state=checked]:bg-indigo-500 data-[state=unchecked]:bg-zinc-800"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <p>Animation Effects</p>
-              <Switch
-                checked={animationEnabled}
-                onCheckedChange={setAnimationEnabled}
-                className="transition-colors duration-200 data-[state=checked]:bg-indigo-500 data-[state=unchecked]:bg-zinc-800"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <p>Volume</p>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-40 accent-[#5CA3FF]/80"
-              />
-
-              <span>{volume}%</span>
-            </div>
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
         >
@@ -355,8 +315,8 @@ export default function SettingsPage() {
             />
           </div>
           <p className="text-sm text-gray-400 mt-3">
-            Turn on/off email notifications for updates, announcements, and game
-            summaries.
+            Turn on/off email notifications for updates, announcements, and
+            other notifications
           </p>
         </motion.section>
 
@@ -366,41 +326,25 @@ export default function SettingsPage() {
           transition={{ delay: 0.3 }}
           className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
         >
-          <h2 className="text-2xl font-semibold mb-4">Privacy & Security</h2>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <p>Who can see your profile?</p>
-              <select
-                value={profileVisibility}
-                onChange={(e) => setProfileVisibility(e.target.value)}
-                className="bg-zinc-900 text-white rounded-xl p-2 border border-zinc-700"
-              >
-                <option value="public">Everyone</option>
-                <option value="friends">Friends only</option>
-                <option value="private">Only me</option>
-              </select>
-            </div>
-            <p className="text-sm text-gray-400">
-              Choose who can view your profile and search for your information.
-            </p>
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
-        >
-          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-            Experimental
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-2xl font-semibold">Experimental</h2>
             {gregoryMode && (
-              <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">
+              <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full animate-bounce">
                 ON
               </span>
             )}
-          </h2>
+
+            {/* Tooltip Implementation */}
+            <div className="group relative flex items-center">
+              <Info className="w-5 h-5 text-zinc-500 cursor-help hover:text-pink-400 transition-colors" />
+              <div className="absolute left-full ml-3 w-64 p-3 bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
+                This was inspired by a friend of ours who loves hot pink. We
+                don&apos;t recommend using it unless your eyes are quite
+                resilient.
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>

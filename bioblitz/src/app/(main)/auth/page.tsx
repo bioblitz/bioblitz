@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -13,9 +13,17 @@ export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
-  const { setIsAuthenticated } = useAuth();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    loading: authLoading,
+  } = useAuth();
   const provider = new GoogleAuthProvider();
-
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace("/home");
+    }
+  }, [authLoading, isAuthenticated, router]);
   const handleClick = async () => {
     setLoading(true);
     try {
@@ -65,7 +73,7 @@ export default function AuthenticationPage() {
     description: string;
   }) => (
     <div className="flex items-start space-x-4">
-      <div className="bg-indigo-900/50 p-2 rounded-lg shrink-0">
+      <div className="bg-[#0F1422] p-2 rounded-lg shrink-0">
         <Icon className="w-5 h-5 text-indigo-300" />
       </div>
       <div>
@@ -75,6 +83,9 @@ export default function AuthenticationPage() {
     </div>
   );
 
+  if (!authLoading && isAuthenticated) {
+    return null;
+  }
   return (
     <div className="min-h-screen w-full bg-zinc-950 text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
