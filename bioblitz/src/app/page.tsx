@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
-import DemoModal from "@/components/DemoModal"; // Update path as needed
+import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 
 export default async function mainPage({
   searchParams,
@@ -16,6 +16,53 @@ export default async function mainPage({
   const timeLeft = 43;
   const timeTotal = 60;
   const dashOffset = circumference * (1 - timeLeft / timeTotal);
+  const cards = [
+    {
+      title: "Animal Anatomy & Physiology",
+      weight: "25%",
+      color: "border-violet-500/50",
+      bg: "bg-violet-500/20", // Slightly stronger opacity for the glow
+      text: "text-violet-400",
+      icon: <HeartPulse className="w-16 h-16" />,
+      desc: "Animal body systems, organ functions, and physiological regulation.",
+    },
+    {
+      title: "Cell & Molecular Biology",
+      weight: "20%",
+      color: "border-fuchsia-500/50",
+      bg: "bg-fuchsia-500/20",
+      text: "text-fuchsia-400",
+      icon: <Microscope className="w-16 h-16" />,
+      desc: "Cellular structures, biomolecules, and molecular processes.",
+    },
+    {
+      title: "Genetics & Evolution",
+      weight: "20%",
+      color: "border-blue-500/50",
+      bg: "bg-blue-500/20",
+      text: "text-blue-400",
+      icon: <Dna className="w-16 h-16" />,
+      desc: "Inheritance, genetic variation, and evolutionary mechanisms.",
+    },
+    {
+      title: "Plant Anatomy & Physiology",
+      weight: "15%",
+      color: "border-green-500/50",
+      bg: "bg-green-500/20",
+      text: "text-green-400",
+      icon: <Leaf className="w-16 h-16" />,
+      desc: "Plant structures, transport systems, and metabolic processes.",
+    },
+    {
+      title: "Ecology, Ethology, & Biosystematics",
+      weight: "20%",
+      color: "border-orange-500/50",
+      bg: "bg-orange-500/20",
+      text: "text-orange-400",
+      icon: <Globe className="w-16 h-16" />,
+      desc: "Species interactions, animal behavior, and biological classification.",
+    },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-[#020204] text-slate-200 selection:bg-violet-500 selection:text-white overflow-x-hidden">
@@ -37,22 +84,23 @@ export default async function mainPage({
 
       <main className="relative z-10 flex-grow flex flex-col items-center w-full pt-20">
         {/* --- HERO SECTION --- */}
-        <section className="w-full max-w-6xl px-6 pt-20 pb-10 text-center flex flex-col items-center">
+        <section className="w-full max-w-6xl px-6 pt-15 pb-q text-center flex flex-col items-center">
           <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tight mb-8 drop-shadow-2xl leading-[0.9]">
             Biology is now <br />
             <span
               className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-violet-300
 "
             >
-              Competitive.
+              beyond the books.
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 leading-relaxed">
             Stop memorizing textbooks alone. Join the competitive platform for{" "}
             <span className="text-slate-200 font-medium">USABO</span> and{" "}
-            <span className="text-slate-200 font-medium">MCAT</span> aspirants.
-            Grind problems, raise your Elo, and dominate the leaderboard.
+            <span className="text-slate-200 font-medium">IBO</span> aspirants.
+            Grind challenging problems, boost your Elo, and climb up the
+            leaderboard.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mb-10">
@@ -61,46 +109,11 @@ export default async function mainPage({
                 Start Competing
               </button>
             </Link>
-            <DemoModal videoId="dQw4w9WgXcQ" />
-          </div>
-
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-800 border-y border-slate-800 bg-[#020204]/50 backdrop-blur w-full max-w-4xl">
-            <div className="py-6 px-4">
-              <div className="text-3xl font-mono font-bold text-white">
-                12k+
-              </div>
-              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mt-1">
-                Problems
-              </div>
-            </div>
-            <div className="py-6 px-4">
-              <div className="text-3xl font-mono font-bold text-violet-400">
-                ~1400
-              </div>
-              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mt-1">
-                Avg Rating
-              </div>
-            </div>
-            <div className="py-6 px-4">
-              <div className="text-3xl font-mono font-bold text-white">20+</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mt-1">
-                Countries
-              </div>
-            </div>
-            <div className="py-6 px-4">
-              <div className="text-3xl font-mono font-bold text-fuchsia-400">
-                Top 1%
-              </div>
-              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mt-1">
-                Success Rate
-              </div>
-            </div>
           </div>
         </section>
 
         {/* --- INTERFACE PREVIEW (THE ARENA) --- */}
-        <section className="w-full py-10 px-6 relative bg-[#020204]">
+        <section className="w-full py-8 px-6 relative bg-[#020204]">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-sm font-mono text-violet-400 mb-2 tracking-widest uppercase">
@@ -241,117 +254,107 @@ export default async function mainPage({
             </div>
           </div>
         </section>
-
         {/* --- CURRICULUM BENTO GRID (USABO FOCUSED) --- */}
+        {/* --- CURRICULUM BENTO GRID (UNIFORM SIZE) --- */}
         <section
           id="curriculum"
-          className="w-full bg-[#050505] py-24 border-t border-slate-900"
+          className="w-full bg-[#050505] py-8 border-t border-slate-900"
         >
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-4">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="mb-12">
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
                 Complete USABO Coverage
               </h2>
               <p className="text-slate-400">
-                Aligned with the 7 official USABO content areas.
+                The Full USABO Framework; Play now to master the 7 official
+                syllabus areas.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:auto-rows-[250px]">
-              {/* Card: Animal Anatomy (25%) - Large Priority */}
-              <div className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl bg-[#0F1422] border border-slate-800 hover:border-violet-500/50 transition-all p-8 flex flex-col justify-between">
-                <div className="absolute top-0 right-0 p-32 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none"></div>
-                <div className="relative z-10">
-                  <div className="inline-block px-3 py-1 bg-violet-900/30 text-violet-300 rounded-full text-xs font-bold mb-4 border border-violet-500/30">
-                    25% of Exam
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {cards.map((card, i) => (
+                <div
+                  key={i}
+                  className="group h-[320px] w-full [perspective:1000px]"
+                >
+                  {/* Inner Container: This is the element that actually rotates */}
+                  <div className="relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    {/* === FRONT FACE (Icon + Title) === */}
+                    <div className="absolute inset-0 h-full w-full rounded-2xl bg-[#0F1422] border border-slate-800 p-6 flex flex-col items-center justify-center [backface-visibility:hidden]">
+                      {/* Subtle Background Glow */}
+                      <div
+                        className={`absolute top-0 right-0 w-32 h-32 ${card.bg} blur-[60px] rounded-full opacity-50`}
+                      ></div>
+
+                      <div
+                        className={`mb-6 ${card.text} transition-transform duration-300 group-hover:scale-110`}
+                      >
+                        {card.icon}
+                      </div>
+
+                      <div className="text-center z-10">
+                        <div
+                          className={`text-xs font-black uppercase tracking-widest ${card.text} mb-2`}
+                        >
+                          Section 0{i + 1}
+                        </div>
+                        <h3 className="text-xl font-bold text-white leading-tight">
+                          {card.title}
+                        </h3>
+                      </div>
+
+                      <div className="absolute bottom-4 text-slate-600 text-[10px] uppercase tracking-wider font-mono">
+                        Hover to Reveal
+                      </div>
+                    </div>
+
+                    {/* === BACK FACE (Description + Stats) === */}
+                    <div
+                      className={`absolute inset-0 h-full w-full rounded-2xl bg-[#0F1422] border ${card.color} p-6 flex flex-col justify-between [transform:rotateY(180deg)] [backface-visibility:hidden]`}
+                    >
+                      {/* Background Glow */}
+                      <div
+                        className={`absolute -bottom-10 -left-10 w-40 h-40 ${card.bg} blur-[50px] rounded-full opacity-40`}
+                      ></div>
+
+                      <div className="relative z-10">
+                        <div
+                          className={`text-xs font-black uppercase tracking-widest ${card.text} mb-4`}
+                        >
+                          Section 0{i + 1}
+                        </div>
+                        <h3 className="text-lg font-bold text-white leading-tight mb-3">
+                          {card.title}
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                          {card.desc}
+                        </p>
+                      </div>
+
+                      <div className="relative z-10 mt-auto flex items-end justify-between border-t border-slate-800/50 pt-4">
+                        <div>
+                          <div className="text-[10px] text-slate-500 font-mono uppercase tracking-tighter">
+                            Weightage
+                          </div>
+                          <div
+                            className={`h-1 w-12 rounded-full ${card.text.replace(
+                              "text",
+                              "bg"
+                            )} opacity-60 mt-1`}
+                          ></div>
+                        </div>
+                        <div className="text-3xl font-black text-white/90">
+                          {card.weight}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-2">
-                    Animal Anatomy & Physiology
-                  </h3>
-                  <p className="text-slate-400 leading-relaxed max-w-sm">
-                    Comprehensive coverage of digestion, respiration,
-                    circulation, excretion, regulation, and immunity.
-                  </p>
                 </div>
-                {/* Visual bar graph style decoration */}
-                <div className="flex gap-2 items-end h-24 relative z-10 opacity-50">
-                  <div className="w-4 bg-violet-500 h-[40%] rounded-t-sm"></div>
-                  <div className="w-4 bg-violet-500 h-[70%] rounded-t-sm"></div>
-                  <div className="w-4 bg-white h-[90%] rounded-t-sm"></div>
-                  <div className="w-4 bg-violet-500 h-[60%] rounded-t-sm"></div>
-                  <div className="w-4 bg-violet-500 h-[30%] rounded-t-sm"></div>
-                </div>
-              </div>
-
-              {/* Card: Cell Bio (20%) */}
-              <div className="md:col-span-1 md:row-span-2 relative group overflow-hidden rounded-2xl bg-[#0F1422] border border-slate-800 hover:border-fuchsia-500/50 transition-all p-6 flex flex-col">
-                <div className="w-10 h-10 bg-fuchsia-900/20 rounded text-fuchsia-400 flex items-center justify-center mb-6">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">
-                  Cell Biology
-                </h3>
-                <div className="text-xs text-fuchsia-400 font-mono mb-4">
-                  20% Weight
-                </div>
-                <p className="text-sm text-slate-400 mt-auto">
-                  Organelle structure and function, membrane transport, and cell
-                  cycle regulation.
-                </p>
-              </div>
-
-              {/* Card: Genetics (20%) */}
-              <div className="md:col-span-1 md:row-span-1 relative group overflow-hidden rounded-2xl bg-[#0F1422] border border-slate-800 hover:border-blue-500/50 transition-all p-6">
-                <h3 className="text-lg font-bold text-white">
-                  Genetics & Evolution
-                </h3>
-                <div className="w-full bg-slate-800 h-1 mt-4 rounded-full overflow-hidden">
-                  <div className="bg-blue-500 w-[80%] h-full"></div>
-                </div>
-                <div className="text-[10px] text-right text-slate-500 mt-1">
-                  20% Weight
-                </div>
-              </div>
-
-              {/* Card: Plant Anatomy (15%) */}
-              <div className="md:col-span-1 md:row-span-1 relative group overflow-hidden rounded-2xl bg-[#0F1422] border border-slate-800 hover:border-green-500/50 transition-all p-6">
-                <h3 className="text-lg font-bold text-white">Plant Anatomy</h3>
-                <div className="w-full bg-slate-800 h-1 mt-4 rounded-full overflow-hidden">
-                  <div className="bg-green-500 w-[60%] h-full"></div>
-                </div>
-                <div className="text-[10px] text-right text-slate-500 mt-1">
-                  15% Weight
-                </div>
-              </div>
-
-              {/* Card: Ecology & Ethology (10%) */}
-              <div className="md:col-span-2 md:row-span-1 relative group overflow-hidden rounded-2xl bg-[#0F1422] border border-slate-800 hover:border-orange-500/50 transition-all p-6 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-white">
-                    Ecology, Ethology & Biosystematics
-                  </h3>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Population dynamics, communities, and animal behavior.
-                  </p>
-                </div>
-                <div className="text-2xl font-bold text-orange-500">~20%</div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
-
         {/* --- SOCIAL PROOF / REVIEWS --- */}
         <section
           id="reviews"
@@ -409,10 +412,15 @@ export default async function mainPage({
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
-              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all">
+              {/* Q1: The Streak Mechanic (Mandatory per your request) */}
+
+              {/* Q2: The "Mathdash" Core Mechanic */}
+              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all duration-300">
                 <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-200">
-                  <span>Is this suitable for AP Biology?</span>
-                  <span className="transition group-open:rotate-180">
+                  <span>
+                    What is the difference between a Ranked and Practice Blitz?
+                  </span>
+                  <span className="transition-transform duration-300 group-open:rotate-180">
                     <svg
                       fill="none"
                       height="24"
@@ -428,16 +436,19 @@ export default async function mainPage({
                     </svg>
                   </span>
                 </summary>
-                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-                  Yes. While BioBlitz is optimized for USABO and MCAT, the
-                  content covers 100% of the AP Biology curriculum but at a
-                  higher depth.
+                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  Your first attempt at any Blitz is automatically "Ranked" and
+                  affects your global Elo rating based on speed and accuracy.
+                  Any subsequent attempts on that same problem set are
+                  "Practice" modes—great for reviewing mistakes, but they won't
+                  alter your leaderboard standing.
                 </div>
               </details>
-              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all">
+
+              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all duration-300">
                 <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-200">
-                  <span>How does the Elo rating work?</span>
-                  <span className="transition group-open:rotate-180">
+                  <span>How do I build my Streak?</span>
+                  <span className="transition-transform duration-300 group-open:rotate-180">
                     <svg
                       fill="none"
                       height="24"
@@ -453,10 +464,95 @@ export default async function mainPage({
                     </svg>
                   </span>
                 </summary>
-                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-                  Just like in chess. You gain points for solving problems
-                  correctly and lose points for incorrect attempts. Harder
-                  problems yield more points.
+                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  Streaks are exclusively tied to the Problem of the Day (POTD).
+                  Completing standard Blitzes contributes to your Elo, but to
+                  keep your fire burning, you must solve the official daily
+                  problem every 24 hours. Miss a day, and the streak resets.
+                </div>
+              </details>
+              {/* Q3: Content Source (Critical for USABO/IBO context) */}
+
+              {/* Q4: The Elo System (Adjusted for Batch/Set Mechanics) */}
+              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all duration-300">
+                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-200">
+                  <span>How is my Elo rating calculated?</span>
+                  <span className="transition-transform duration-300 group-open:rotate-180">
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  Your rating is dynamic. It updates after every full Blitz
+                  submission based on your performance relative to the set's
+                  difficulty. High accuracy, paired with fast completion on
+                  harder sets, leads to the greatest rating gains.
+                </div>
+              </details>
+
+              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all duration-300">
+                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-200">
+                  <span>Is the content aligned with USABO & Campbell?</span>
+                  <span className="transition-transform duration-300 group-open:rotate-180">
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  Yes. Our question bank is rigorously aligned with{" "}
+                  <em>Campbell Biology (12th Ed)</em>,{" "}
+                  <em>Raven's Biology of Plants</em>, and past USABO
+                  Open/Semifinal exams. We cover all 7 official syllabus areas,
+                  from Cell Biology to Biosystematics.
+                </div>
+              </details>
+              {/* Q5: Difficulty Scaling */}
+              <details className="group border border-slate-800 rounded-lg bg-[#0F1422] open:border-violet-500/50 transition-all duration-300">
+                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-200">
+                  <span>Is this useful for AP Biology or MCAT?</span>
+                  <span className="transition-transform duration-300 group-open:rotate-180">
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="group-open:animate-fadeIn mt-0 px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  Absolutely. While BioBlitz is optimized for Olympiad-level
+                  difficulty, it serves as "weight training" for AP Bio and MCAT
+                  aspirants. If you can handle a USABO Blitz, standard exams
+                  will feel significantly easier.
                 </div>
               </details>
             </div>
@@ -464,19 +560,19 @@ export default async function mainPage({
         </section>
 
         {/* --- CTA FOOTER --- */}
-        <section className="w-full py-20 px-6 text-center relative overflow-hidden">
+        <section className="w-full py-10 px-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 z-0 bg-violet-900/5"></div>
-          <div className="max-w-3xl mx-auto bg-[#0F1422] rounded-3xl p-12 border border-white/5 relative z-10 shadow-2xl">
+          <div className="max-w-3xl mx-auto bg-[#0F1422] rounded-3xl p-6 border border-white/5 relative z-10 shadow-2xl">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Ready to start your streak?
             </h2>
-            <p className="text-slate-300 mb-8 text-lg">
+            <p className="text-slate-300 mb-6 text-lg">
               Join thousands of students mastering biology today.
             </p>
 
             <Link href="/home">
               <button className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-slate-200 transition-colors shadow-lg shadow-white/10">
-                Get Started Free
+                Get Started
               </button>
             </Link>
           </div>
