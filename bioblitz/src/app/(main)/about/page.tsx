@@ -28,7 +28,8 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-lg text-slate-400 leading-relaxed">
-            We are a team of three high school students, developing a better platform to learn biology.
+            We are a team of three high school students, developing a better
+            platform to learn biology.
           </p>
         </section>
 
@@ -43,15 +44,19 @@ export default function AboutPage() {
                 The Origin Story
               </h2>
               <p>
-                It began at HackTJ, a hackathon for high school students. We spent 18 hours coding the original version of BioBlitz, getting about half an hour of sleep. Although it was crude, it worked. Unfortunately, the judges didn't like the project.
+                It began at HackTJ, a hackathon for high school students. We
+                spent 18 hours coding the original version of BioBlitz, getting
+                about half an hour of sleep. Although it was crude, it worked.
+                Unfortunately, the judges didn't like the project.
               </p>
               <p>
-                But we knew it was an idea that had potential. So we spent the next 10 months developing it during our school breaks.
+                But we knew it was an idea that had potential. So we spent the
+                next 10 months developing it during our school breaks.
               </p>
               <p>
-                Soon enough, we arrived at the product of our work. BioBlitz is here, giving bio kids a place to grind and build community :) 
+                Soon enough, we arrived at the product of our work. BioBlitz is
+                here, giving bio kids a place to grind and build community :)
               </p>
-          
             </div>
           </div>
         </section>
@@ -79,10 +84,11 @@ export default function AboutPage() {
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Passionate about many fields, Aarnav likes to create interdisciplinary projects like BioBlitz. 
-                He enjoys learning about neuroscience, programming, and is fluent in four languages.
+                Passionate about many fields, Aarnav likes to create
+                interdisciplinary projects like BioBlitz. He enjoys learning
+                about neuroscience, programming, and is fluent in four
+                languages.
               </p>
-    
             </div>
 
             {/* Person 2 */}
@@ -92,16 +98,11 @@ export default function AboutPage() {
                   <div className="w-full h-full bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">
-                    Eli Feldman
-                  </h3>
+                  <h3 className="text-white font-bold text-lg">Eli Feldman</h3>
                   <p className="text-fuchsia-400 text-sm">Co-Founder</p>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed mb-4">
-               
-              </p>
-              
+              <p className="text-slate-400 text-sm leading-relaxed mb-4"></p>
             </div>
 
             {/* Person 3 */}
@@ -111,14 +112,18 @@ export default function AboutPage() {
                   <div className="w-full h-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">Dipisha Subedi</h3>
+                  <h3 className="text-white font-bold text-lg">
+                    Dipisha Subedi
+                  </h3>
                   <p className="text-blue-400 text-sm">Co-Founder</p>
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                
+                Dipisha is passionate about using AI and computer science to
+                make an impact in healthcare. She enjoys using technology to
+                solve problems and hopes that BioBlitz will help other students
+                who love biology as much as she does.
               </p>
-              
             </div>
           </div>
         </section>
@@ -192,12 +197,6 @@ export default function AboutPage() {
             </Link>
             <Link href="/about" className="text-violet-400 transition-colors">
               About
-            </Link>
-            <Link
-              href="/home"
-              className="hover:text-violet-400 transition-colors"
-            >
-              Game
             </Link>
           </div>
           © {new Date().getFullYear()} BioBlitz. Powered by{" "}

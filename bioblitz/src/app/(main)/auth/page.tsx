@@ -74,7 +74,7 @@ export default function AuthenticationPage() {
   }) => (
     <div className="flex items-start space-x-4">
       <div className="bg-[#0F1422] p-2 rounded-lg shrink-0">
-        <Icon className="w-5 h-5 text-indigo-300" />
+        <Icon className="w-5 h-5 text-indigo-400" />
       </div>
       <div>
         <h3 className="text-white font-medium text-sm">{title}</h3>
@@ -87,12 +87,13 @@ export default function AuthenticationPage() {
     return null;
   }
   return (
-    <div className="min-h-screen w-full bg-zinc-950 text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
+    <div className="min-h-screen w-full bg-black text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-black blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-4xl">
-        <div className="bg-indigo-950/60  backdrop-blur-xl rounded-2xl shadow-xl  transition-shadow duration-300 overflow-hidden">
+        <div className="bg-indigo-500/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-500/10 overflow-hidden">
+          {" "}
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="p-5 md:p-8 flex flex-col justify-center md:border-r border-indigo-900/30 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full bg-indigo-600/5 pointer-events-none z-0"></div>
@@ -107,7 +108,11 @@ export default function AuthenticationPage() {
                 </div>
 
                 <h2 className="text-3xl font-bold tracking-tight mb-4 text-white">
-                  Master Biology, <br /> One Blitz at a Time.
+                  Master Biology, <br />
+                  <div className="text-3x1 font-bold tracking-tight mb-4 text-white">
+                    {" "}
+                    One Blitz at a Time.
+                  </div>
                 </h2>
                 <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
                   Join the fastest-growing community of biology enthusiasts.
@@ -150,7 +155,7 @@ export default function AuthenticationPage() {
                   <GoogleButton onClick={handleClick} disabled={loading} />
                 </div>
 
-                <div className="relative flex items-center py-2">
+                <div className="relative flex items-center py-0">
                   <div className="grow border-t border-white/10"></div>
                   <span className="shrink-0 mx-4 text-xs text-slate-500 uppercase tracking-widest">
                     Secure Login
