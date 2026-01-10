@@ -791,9 +791,9 @@ export default function ProfilePage() {
 
   const REPORT_CATEGORIES = [
     "Inappropriate Content",
-    "Harassment or Bullying",
+    "Harassment/Bullying",
     "Spam or Bot",
-    "Cheating / Smurfing",
+    "Cheating",
     "Offensive Username/Bio",
     "Other",
   ];

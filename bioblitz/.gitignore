@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
+/importer/node_modules
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -12,6 +13,7 @@
 
 #firebase
 /firebase-service-account.json
+/importer/serviceAccountKey.json
 
 # testing
 /coverage
@@ -43,3 +45,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { gameRoom } from "@/lib/gameRoomsAll";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Added useMemo for performance
 import {
   Clock,
   HelpCircle,
@@ -26,18 +26,16 @@ export default function HomeClient({
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
-
   const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">(
-    "All"
-  );
-  const [typeFilter, setTypeFilter] = useState<
-    "All" | "Official" | "Community"
-  >("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
+  const [typeFilter, setTypeFilter] = useState<"All" | "Official" | "Community">("All");
 
-  const [games, setGames] = useState<gameRoom[]>(initialGames);
+  // FIX 1: Removed `const [games, setGames]...` 
+  // We use `initialGames` directly. This ensures that if Next.js revalidates 
+  // the page on the server, the client immediately sees the new data.
+
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
-  const [user, setUser] = useState<any>(null); // Track user state locally
+  const [user, setUser] = useState<any>(null);
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -51,7 +49,6 @@ export default function HomeClient({
     "Plants",
   ];
 
-  // 1. Use onAuthStateChanged for reliable auth detection
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -74,8 +71,6 @@ export default function HomeClient({
         snapshot.docs
           .map((doc) => {
             const data = doc.data() as { gameId?: string };
-            // CRITICAL FIX: Check the data field FIRST.
-            // Only use doc.id as fallback if data.gameId is missing.
             return data.gameId || doc.id;
           })
           .filter(Boolean) as string[]
@@ -87,29 +82,30 @@ export default function HomeClient({
     }
   };
 
-  const filteredGames = games.filter((game) => {
-    const matchesSearch = game.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesTopic = topic === "All Topics" || game.topic === topic;
-    const isPlayed = playedGameIds.has(game.id);
+  // FIX 2: Wrapped in useMemo to prevent expensive re-filtering on every minor render
+  const filteredGames = useMemo(() => {
+    return initialGames.filter((game) => {
+      const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTopic = topic === "All Topics" || game.topic === topic;
+      const isPlayed = playedGameIds.has(game.id);
 
-    let matchesStatus = true;
-    if (statusFilter === "Completed") matchesStatus = isPlayed;
-    if (statusFilter === "New") matchesStatus = !isPlayed;
+      let matchesStatus = true;
+      if (statusFilter === "Completed") matchesStatus = isPlayed;
+      if (statusFilter === "New") matchesStatus = !isPlayed;
 
-    const hasSource = (game as any).source;
-    const hasCreator = game.creator;
-    let matchesType = true;
+      const hasSource = (game as any).source;
+      const hasCreator = game.creator;
+      let matchesType = true;
 
-    if (typeFilter === "Official") {
-      matchesType = !!hasSource || !hasCreator;
-    } else if (typeFilter === "Community") {
-      matchesType = !!hasCreator && !hasSource;
-    }
+      if (typeFilter === "Official") {
+        matchesType = !!hasSource || !hasCreator;
+      } else if (typeFilter === "Community") {
+        matchesType = !!hasCreator && !hasSource;
+      }
 
-    return matchesSearch && matchesTopic && matchesStatus && matchesType;
-  });
+      return matchesSearch && matchesTopic && matchesStatus && matchesType;
+    });
+  }, [initialGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
 
   const getTopicColors = (topic: string | undefined) => {
     switch (topic) {
@@ -161,6 +157,7 @@ export default function HomeClient({
     <div className="min-h-screen bg-zinc-950 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
+          {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
@@ -180,7 +177,7 @@ export default function HomeClient({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search titles..."
                   className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600"
-                  suppressHydrationWarning
+                  suppressHydrationWarning // Good use of suppression here
                 />
               </div>
 
@@ -211,6 +208,7 @@ export default function HomeClient({
             </div>
           </div>
 
+          {/* Filters Panel */}
           {showFilters && (
             <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -290,6 +288,7 @@ export default function HomeClient({
           )}
         </div>
 
+        {/* Games Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredGames.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
@@ -334,7 +333,7 @@ export default function HomeClient({
                         )}
 
                         {isPlayed && (
-                          <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                          <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide animate-in fade-in">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>Completed</span>
                           </div>

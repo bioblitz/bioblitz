@@ -22,15 +22,13 @@ export default function AboutPage() {
         {/* --- HERO: THE HUMAN HOOK --- */}
         <section className="w-full max-w-3xl px-6 pt-16 pb-20 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-8 leading-tight">
-            We are just <br />
+            We are <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300">
-              biology nerds.
+              BioBlitz.
             </span>
           </h1>
           <p className="text-lg text-slate-400 leading-relaxed">
-            We aren't a big ed-tech corporation. We are a small team of
-            students, researchers, and former competitors who simply loved the
-            subject too much to let it be taught poorly.
+            We are a team of three high school students, developing a better platform to learn biology.
           </p>
         </section>
 
@@ -45,30 +43,15 @@ export default function AboutPage() {
                 The Origin Story
               </h2>
               <p>
-                It started in a library at 2 AM. We were surrounded by stacks of
-                Campbell Biology, highlighting sentences we had already read
-                three times. We realized that despite loving the material, the{" "}
-                <em>process</em> of learning it felt isolating and passive.
+                It began at HackTJ, a hackathon for high school students. We spent 18 hours coding the original version of BioBlitz, getting about half an hour of sleep. Although it was crude, it worked. Unfortunately, the judges didn't like the project.
               </p>
               <p>
-                We asked ourselves a simple question:{" "}
-                <strong>
-                  Why does learning the code of life feel so lifeless?
-                </strong>
+                But we knew it was an idea that had potential. So we spent the next 10 months developing it during our school breaks.
               </p>
               <p>
-                BioBlitz wasn't built to be a "product." It started as a tool we
-                built for ourselves to quiz each other before exams. We wanted a
-                way to visualize the complex systems we were studying—from the
-                Krebs cycle to population genetics—in a way that felt engaging
-                and active.
+                Soon enough, we arrived at the product of our work. BioBlitz is here, giving bio kids a place to grind and build community :) 
               </p>
-              <p>
-                What began as a shared Google Doc turned into a script, which
-                turned into this platform. Our mission isn't to sell
-                subscriptions; it's to build the community we wish we had when
-                we were starting out.
-              </p>
+          
             </div>
           </div>
         </section>
@@ -79,7 +62,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Meet the Team
             </h2>
-            <p className="text-slate-400">The humans behind the screen.</p>
+            <p className="text-slate-400">The people behind the platform.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -91,23 +74,15 @@ export default function AboutPage() {
                   <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">Alex Chen</h3>
-                  <p className="text-indigo-400 text-sm">Founder & Developer</p>
+                  <h3 className="text-white font-bold text-lg">Aarnav Suwal</h3>
+                  <p className="text-indigo-400 text-sm">Co-Founder</p>
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Former USABO Finalist who realized he liked coding almost as
-                much as botany. He built the first version of BioBlitz in his
-                dorm room to procrastinate studying for O-Chem.
+                Passionate about many fields, Aarnav likes to create interdisciplinary projects like BioBlitz. 
+                He enjoys learning about neuroscience, programming, and is fluent in four languages.
               </p>
-              <div className="mt-auto pt-4 border-t border-slate-800/50">
-                <span className="text-xs text-slate-500 uppercase tracking-widest font-semibold">
-                  Favorite Topic:
-                </span>
-                <span className="text-slate-300 text-sm ml-2">
-                  Plant Physiology
-                </span>
-              </div>
+    
             </div>
 
             {/* Person 2 */}
@@ -118,24 +93,15 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-lg">
-                    Sarah Jenkins
+                    Eli Feldman
                   </h3>
-                  <p className="text-fuchsia-400 text-sm">Content Lead</p>
+                  <p className="text-fuchsia-400 text-sm">Co-Founder</p>
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Currently a PhD candidate researching signal transduction. Sarah
-                ensures that every question on the platform isn't just "hard,"
-                but scientifically accurate and relevant.
+               
               </p>
-              <div className="mt-auto pt-4 border-t border-slate-800/50">
-                <span className="text-xs text-slate-500 uppercase tracking-widest font-semibold">
-                  Favorite Topic:
-                </span>
-                <span className="text-slate-300 text-sm ml-2">
-                  Cell Signaling
-                </span>
-              </div>
+              
             </div>
 
             {/* Person 3 */}
@@ -145,21 +111,14 @@ export default function AboutPage() {
                   <div className="w-full h-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">David Okonjo</h3>
-                  <p className="text-blue-400 text-sm">Community</p>
+                  <h3 className="text-white font-bold text-lg">Dipisha Subedi</h3>
+                  <p className="text-blue-400 text-sm">Co-Founder</p>
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                A medical student who swears he wouldn't have passed the MCAT
-                without active recall. David manages our Discord and helps
-                students find study partners.
+                
               </p>
-              <div className="mt-auto pt-4 border-t border-slate-800/50">
-                <span className="text-xs text-slate-500 uppercase tracking-widest font-semibold">
-                  Favorite Topic:
-                </span>
-                <span className="text-slate-300 text-sm ml-2">Immunology</span>
-              </div>
+              
             </div>
           </div>
         </section>

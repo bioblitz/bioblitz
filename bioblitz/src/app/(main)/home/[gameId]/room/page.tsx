@@ -421,8 +421,12 @@ export default function GameRoomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24">
-      {showTimeUpAlert && (
+    //! please don't cheat :(
+<div
+      className={`min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24 ${
+        submitted ? "select-text" : "select-none"
+      }`}
+    >      {showTimeUpAlert && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-violet-900/90 border border-violet-500/50 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
             <AlertCircle className="text-violet-300 w-6 h-6" />
