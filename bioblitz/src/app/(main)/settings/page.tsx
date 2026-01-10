@@ -24,6 +24,7 @@ import {
   query,
   where,
   getDocs,
+  updateDoc,
   deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
@@ -35,14 +36,9 @@ const inter = Inter({
 });
 
 export default function SettingsPage() {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [animationEnabled, setAnimationEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [volume, setVolume] = useState(70);
   const [gregoryMode, setGregoryMode] = useState(false);
-  const [isPublic, setIsPublic] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [profileVisibility, setProfileVisibility] = useState("public");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [profileData, setProfileData] = useState<any>(null);
@@ -110,25 +106,39 @@ export default function SettingsPage() {
     }
   };
   useEffect(() => {
-    const sound = localStorage.getItem("soundEnabled");
-    const animation = localStorage.getItem("animationEnabled");
     const email = localStorage.getItem("emailNotifications");
     const gregory = localStorage.getItem("gregoryMode");
 
-    if (sound !== null) setSoundEnabled(sound === "true");
-    if (animation !== null) setAnimationEnabled(animation === "true");
     if (email !== null) setEmailNotifications(email === "true");
     if (gregory !== null) setGregoryMode(gregory === "true");
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("soundEnabled", soundEnabled.toString());
-  }, [soundEnabled]);
+    if (profileData) {
+      const preference = profileData.emailNotifications ?? true;
+      setEmailNotifications(preference);
+    }
+  }, [profileData]);
 
-  useEffect(() => {
-    localStorage.setItem("animationEnabled", animationEnabled.toString());
-  }, [animationEnabled]);
+  const handleEmailToggle = async (checked: boolean) => {
+    setEmailNotifications(checked);
+    localStorage.setItem("emailNotifications", checked.toString());
 
+    if (user) {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          emailNotifications: checked,
+        });
+        console.log("Email preference saved to Firestore");
+      } catch (error) {
+        console.error("Failed to save email preference:", error);
+        setEmailNotifications(!checked);
+        setToastMessage("Failed to save setting");
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    }
+  };
   useEffect(() => {
     localStorage.setItem("emailNotifications", emailNotifications.toString());
   }, [emailNotifications]);
@@ -149,10 +159,8 @@ export default function SettingsPage() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
-        // 1. If no user, redirect immediately
         router.push("/auth");
       } else {
-        // 2. If user exists, save them and stop loading
         setUser(currentUser);
         setCheckingAuth(false);
 
@@ -310,7 +318,7 @@ export default function SettingsPage() {
             <p>Receive Email Notifications</p>
             <Switch
               checked={emailNotifications}
-              onCheckedChange={setEmailNotifications}
+              onCheckedChange={handleEmailToggle}
               className="transition-colors duration-200 data-[state=checked]:bg-indigo-500 data-[state=unchecked]:bg-zinc-800"
             />
           </div>

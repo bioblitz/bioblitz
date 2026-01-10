@@ -30,7 +30,18 @@ export async function POST(request: Request) {
     const email = userData?.email;
     const lastActive = userData?.lastActive?.toDate(); // Get lastActive timestamp
 
+    const emailEnabled = userData?.emailNotifications ?? true;
+
+    console.log("👤 3. User Data:", { email, emailEnabled });
+
     console.log("👤 3. Found User Email:", email);
+
+    if (emailEnabled === false) {
+      return NextResponse.json({
+        success: true,
+        message: "Skipped (User disabled email notifications)",
+      });
+    }
 
     if (!email) {
       return NextResponse.json({ error: "User has no email" }, { status: 400 });

@@ -124,7 +124,13 @@ export default function ProfilePage() {
   ];
 
   const [setsPlayed, setSetsPlayed] = useState<
-    { name: string; score: number; topic: string }[]
+    {
+      name: string;
+      score: number;
+      topic: string;
+      setId: string;
+      playedAt: number;
+    }[]
   >([]);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
 
@@ -212,7 +218,10 @@ export default function ProfilePage() {
         const setsData = await Promise.all(
           sortedDocs.map(async (playedDoc) => {
             const playedData = playedDoc.data();
-
+            const playedAt =
+              playedData.lastPlayedAt?.toMillis() ||
+              playedData.playedAt?.toMillis() ||
+              0;
             const originalSetId =
               playedData.setId ||
               playedData.setID ||
@@ -277,6 +286,8 @@ export default function ProfilePage() {
               name: title,
               score: playedData.score || 0,
               topic: topic,
+              setId: originalSetId,
+              playedAt: playedAt,
             };
           })
         );
@@ -746,19 +757,68 @@ export default function ProfilePage() {
     eloHistory[eloHistory.length - 1].elo >=
       eloHistory[eloHistory.length - 2].elo;
 
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-  const monthName = today.toLocaleString("default", { month: "long" });
+  const [calendarViewDate, setCalendarViewDate] = useState(new Date());
+
+  const handlePrevMonth = () => {
+    setCalendarViewDate(
+      new Date(
+        calendarViewDate.getFullYear(),
+        calendarViewDate.getMonth() - 1,
+        1
+      )
+    );
+  };
+
+  const handleNextMonth = () => {
+    const nextDate = new Date(
+      calendarViewDate.getFullYear(),
+      calendarViewDate.getMonth() + 1,
+      1
+    );
+    if (nextDate <= new Date()) {
+      setCalendarViewDate(nextDate);
+    }
+  };
+
+  const viewYear = calendarViewDate.getFullYear();
+  const viewMonth = calendarViewDate.getMonth();
+  const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfViewMonth = new Date(viewYear, viewMonth, 1).getDay();
+  const viewMonthName = calendarViewDate.toLocaleString("default", {
+    month: "long",
+  });
 
   const activeDates = new Set(
-    eloHistory.map((h) => new Date(h.fullDate).toDateString())
+    setsPlayed.map((set) => {
+      const date = set.playedAt ? new Date(set.playedAt) : new Date();
+      return date.toDateString();
+    })
   );
 
-  const topicStats = setsPlayed.reduce((acc, set) => {
-    // Normalize topic casing if needed, or use as is
+  const isCurrentMonth =
+    new Date().getMonth() === viewMonth &&
+    new Date().getFullYear() === viewYear;
+
+  const uniqueRatedSets = Array.from(
+    setsPlayed
+      .reduce((map, set) => {
+        // Safety check: ensure we actually have an ID to group by
+        if (!set.setId) return map;
+
+        const existing = map.get(set.setId);
+
+        // Logic: If we haven't stored this game yet, OR this attempt is OLDER
+        // than the one we have, assume this is the "First Attempt"
+        if (!existing || (set.playedAt && set.playedAt < existing.playedAt)) {
+          map.set(set.setId, set);
+        }
+        return map;
+      }, new Map<string, (typeof setsPlayed)[0]>())
+      .values()
+  );
+
+  // B. Calculate stats using ONLY the unique sets (Rated ones)
+  const topicStats = uniqueRatedSets.reduce((acc, set) => {
     const topic = set.topic || "General";
 
     if (!acc[topic]) {
@@ -1362,21 +1422,38 @@ export default function ProfilePage() {
 
               <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
                 <div className="w-full max-w-[300px] shrink-0 relative z-10">
-                  <div className="flex flex-row items-end justify-between gap-4 mb-3">
-                    <div>
-                      <h2 className="text-lg font-semibold text-white flex items-center gap-1.5 mb-1">
-                        <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
-                        Daily Streak
-                      </h2>
-                    </div>
+                  {/* Calendar Header with Navigation */}
+                  <div className="flex flex-row items-center justify-between gap-2 mb-4">
+                    <h2 className="text-lg font-semibold text-white whitespace-nowrap items-center gap-1.5">
+                      Daily Streak
+                    </h2>
 
-                    <div className="text-right whitespace-nowrap">
-                      <span className="text-sm font-bold text-zinc-200 block">
-                        {monthName} {currentYear}
+                    {/* Navigation Controls */}
+                    <div className="flex items-center gap-2 bg-zinc-900/50 rounded-lg p-1 border border-zinc-800">
+                      <button
+                        onClick={handlePrevMonth}
+                        className="p-1 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="text-xs font-bold text-zinc-200 min-w-[100px] text-center select-none">
+                        {viewMonthName} {viewYear}
                       </span>
+                      <button
+                        onClick={handleNextMonth}
+                        disabled={isCurrentMonth}
+                        className={`p-1 rounded-md transition-colors ${
+                          isCurrentMonth
+                            ? "text-zinc-700 cursor-not-allowed"
+                            : "hover:bg-zinc-800 text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
 
+                  {/* Day Names Header */}
                   <div className="grid grid-cols-7 gap-1 mb-1">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
                       <div
@@ -1388,47 +1465,48 @@ export default function ProfilePage() {
                     ))}
                   </div>
 
+                  {/* Calendar Grid */}
                   <div className="grid grid-cols-7 gap-1">
-                    {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                    {/* Empty slots for previous month */}
+                    {Array.from({ length: firstDayOfViewMonth }).map((_, i) => (
                       <div key={`empty-${i}`} />
                     ))}
 
-                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                    {/* Actual Days */}
+                    {Array.from({ length: daysInViewMonth }).map((_, i) => {
                       const dayNum = i + 1;
 
-                      const dateString = new Date(
-                        currentYear,
-
-                        currentMonth,
-
-                        dayNum
-                      ).toDateString();
+                      // Construct the date for this specific grid cell
+                      const cellDate = new Date(viewYear, viewMonth, dayNum);
+                      const dateString = cellDate.toDateString();
 
                       const isActive = activeDates.has(dateString);
 
-                      const isToday = dayNum === today.getDate();
+                      // Check if this cell is literally "Today"
+                      const isLiterallyToday =
+                        cellDate.toDateString() === new Date().toDateString();
 
                       return (
                         <div
                           key={dayNum}
                           className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-semibold relative group transition-all duration-300 border
-
-                ${
-                  isActive
-                    ? "bg-orange-500/10 border-orange-500/30 text-orange-200 shadow-[0_0_10px_rgba(249,115,22,0.15)]"
-                    : "bg-zinc-900/50 border-zinc-800 text-zinc-600 hover:border-zinc-700"
-                }
-
-                ${isToday && !isActive ? "border-zinc-500 text-white" : ""}
-
-              `}
+                            ${
+                              isActive
+                                ? "bg-orange-500/10 border-orange-500/30 text-orange-200 shadow-[0_0_10px_rgba(249,115,22,0.15)]"
+                                : "bg-zinc-900/50 border-zinc-800 text-zinc-600 hover:border-zinc-700"
+                            }
+                            ${
+                              isLiterallyToday && !isActive
+                                ? "border-zinc-500 text-white"
+                                : ""
+                            }
+                          `}
                         >
                           {isActive && (
                             <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
                               <Zap className="w-full h-full p-0.5 fill-orange-500 text-orange-500" />
                             </div>
                           )}
-
                           <span className="relative z-10">{dayNum}</span>
                         </div>
                       );

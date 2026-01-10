@@ -567,7 +567,7 @@ export default async function mainPage({
               Ready to start your streak?
             </h2>
             <p className="text-slate-300 mb-6 text-lg">
-              Join thousands of students mastering biology today.
+              Join the top students across the nation mastering biology today.
             </p>
 
             <Link href="/home">
