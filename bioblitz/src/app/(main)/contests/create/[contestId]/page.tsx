@@ -2,16 +2,15 @@
 
 import React, { useState, useActionState, useMemo, useEffect, useCallback } from "react";
 import { useFormStatus } from "react-dom";
+import { useParams, useRouter } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay, Question } from "@/types";
-import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
-import { createContest, getContestById } from "@/lib/actions";
+import { Plus, Trash2 } from "lucide-react";
+import { createContest } from "@/lib/actions";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { debounce } from '@/lib/utils';
-import { useParams } from "next/navigation";
-import { uploadImage } from "@/lib/storage";
 
 
 const generateChoiceKey = (index: number): string => {
@@ -80,22 +79,15 @@ function SubmitButton() {
 
 const TOPICS = ["Animal", "CellBio", "Plants", "Biochem", "Genetics", "Other"];
 
-export default function CreateContestPage() {
+export default function EditContestPage() {
   const params = useParams();
-  const urlContestId = params.contestId as string;
+  const router = useRouter();
+  const routeContestId = (params as any)?.contestId as string | undefined;
 
   const [state, formAction] = useActionState(createContest, initialState);
-  const [questions, setQuestions] = useState<EditableQuestion[]>([
-    initialQuestion(),
-  ]);
-  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(
-    questions[0]?.id || null
-  );
-  const [contestId, setContestId] = useState<string | null>(null);
-  
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
-
+  const [questions, setQuestions] = useState<EditableQuestion[]>([initialQuestion()]);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(questions[0]?.id || null);
+  const [contestId, setContestId] = useState<string | null>(routeContestId || null);
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -104,7 +96,6 @@ export default function CreateContestPage() {
   const [title, setTitle] = useState("Untitled Contest");
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState<number>(600);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -120,48 +111,45 @@ export default function CreateContestPage() {
   }, []);
 
   useEffect(() => {
-    if (urlContestId && urlContestId !== "create") {
-      setContestId(urlContestId);
-    } else if (!contestId) {
-      setContestId(uuidv4());
+    if (!contestId) {
+      if (routeContestId) setContestId(routeContestId);
+      else setContestId(uuidv4());
     }
-  }, [urlContestId, contestId]);
+  }, [contestId, routeContestId]);
 
+  // Fetch existing contest if present
   useEffect(() => {
-    async function loadContestData() {
-      if (contestId && contestId !== "create" && !loading) {
-        const fetchedContest = await getContestById(contestId);
-        if (fetchedContest) {
-          setTitle(fetchedContest.title);
-          setDescription(fetchedContest.description || "");
-          setTimeLimit(Number(fetchedContest.timeLimit) || 600);
-          setSelectedTopic(fetchedContest.topic || TOPICS[0]);
-          setBannerUrl(fetchedContest.bannerUrl || null);
-          if (!TOPICS.includes(fetchedContest.topic || "")) {
-            setSelectedTopic("Other");
-            setCustomTopic(fetchedContest.topic || "");
-          }
-          if (fetchedContest.questions) {
-            const editableQuestions: EditableQuestion[] = fetchedContest.questions.map(q => ({
-                id: q.id,
-                content: q.question,
-                imageUrl: "",
-                choices: q.answers.map((ans, index) => ({ id: (index + 1).toString(), text: ans })),
-                correctAnswerId: q.answers.findIndex(ans => ans === q.correctAnswer) !== -1 ? (q.answers.findIndex(ans => ans === q.correctAnswer) + 1).toString() : "",
-            }));
-            setQuestions(editableQuestions.length > 0 ? editableQuestions : [initialQuestion()]);
-            setActiveQuestionId(editableQuestions[0]?.id || null);
-          } else {
-            setQuestions([initialQuestion()]);
+    if (!routeContestId) return;
+    async function fetchContest() {
+      try {
+        const res = await fetch(`/api/contests/${routeContestId}`);
+        if (res.ok) {
+          const contest = await res.json();
+          if (contest) {
+            setTitle(contest.title || "Untitled Contest");
+            setDescription(contest.description || "");
+            setTimeLimit(Number(contest.timeLimit) || 600);
+            setSelectedTopic(contest.topic || TOPICS[0]);
+            if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
+              // convert stored Question[] to EditableQuestion[]
+              const editable = (contest.questions as Question[]).map((q) => ({
+                id: q.id || Date.now().toString(),
+                content: q.question || "",
+                imageUrl: (q as any).imgURL || "",
+                choices: q.answers.map((a, idx) => ({ id: String(idx + 1), text: a })),
+                correctAnswerId: String((q.answers.findIndex(a => a === q.correctAnswer) + 1) || ""),
+              } as EditableQuestion));
+              setQuestions(editable);
+              setActiveQuestionId(editable[0]?.id || null);
+            }
           }
         }
-        setLoading(false);
-      } else if (!urlContestId || urlContestId === "create") {
-        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch contest:', err);
       }
     }
-    loadContestData();
-  }, [contestId, urlContestId]);
+    fetchContest();
+  }, [routeContestId]);
 
   const addQuestion = () => {
     const newQuestion = initialQuestion();
@@ -186,21 +174,6 @@ export default function CreateContestPage() {
     );
     setQuestions(newQuestions);
   };
-
-  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0] && contestId) {
-      const file = event.target.files[0];
-      setUploadingBanner(true);
-      try {
-        const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
-        setBannerUrl(downloadURL);
-      } catch (error) {
-        console.error("Error uploading banner image:", error);
-      } finally {
-        setUploadingBanner(false);
-      }
-    }
-  };
   
   const convertToQuestions = (editableQuestions: EditableQuestion[]): Question[] => {
     return editableQuestions.map((eq) => {
@@ -210,7 +183,7 @@ export default function CreateContestPage() {
         question: eq.content,
         answers: eq.choices.map((c) => c.text),
         correctAnswer: correctAnswer,
-      };
+      } as Question;
     });
   };
 
@@ -226,9 +199,6 @@ export default function CreateContestPage() {
     formData.append("timeLimit", timeLimit.toString());
     formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
     formData.append("status", "incomplete");
-    if (bannerUrl) {
-      formData.append("bannerUrl", bannerUrl);
-    }
 
     try {
         await createContest({
@@ -238,15 +208,15 @@ export default function CreateContestPage() {
     } catch (error) {
         console.error("Failed to autosave draft:", error);
     }
-  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
+  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic]);
 
   const debouncedSave = useMemo(() => debounce(handleSaveDraft, 1000), [handleSaveDraft]);
 
   useEffect(() => {
-    if (contestId && idToken && !loading) {
+    if (contestId && idToken) { 
         debouncedSave();
     }
-  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave, loading, bannerUrl]);
+  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave]);
 
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -310,23 +280,12 @@ export default function CreateContestPage() {
       formData.append("timeLimit", timeLimit.toString());
       formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
       formData.append("status", "completed");
-      if (bannerUrl) {
-        formData.append("bannerUrl", bannerUrl);
-      }
       
       formAction(formData); 
     }
   };
 
   const topicValue = selectedTopic === "Other" ? customTopic : selectedTopic;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12 flex items-center justify-center">
-        <p>Loading contest...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12">
@@ -369,25 +328,6 @@ export default function CreateContestPage() {
                   <input type="text" id="custom-topic" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" />
                 </div>
               )}
-              <div>
-                <label className="block text-sm font-medium text-gray-300">Contest Banner</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    {bannerUrl ? (
-                      <img src={bannerUrl} alt="Banner" className="mx-auto h-48 w-auto" />
-                    ) : (
-                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    )}
-                    <div className="flex text-sm text-gray-400">
-                      <label htmlFor="banner-upload" className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-indigo-400 hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-800 focus-within:ring-indigo-500">
-                        <span>{uploadingBanner ? "Uploading..." : "Upload a file"}</span>
-                        <input id="banner-upload" name="banner-upload" type="file" className="sr-only" accept="image/*" onChange={handleBannerUpload} disabled={uploadingBanner} />
-                      </label>
-                    </div>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                  </div>
-                </div>
-              </div>
 
 
               <button
