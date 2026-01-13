@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useActionState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useActionState, useMemo, useEffect, useCallback, startTransition, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
@@ -8,6 +8,7 @@ import ContestQuestionView from "@/components/features/contests/ContestQuestionV
 import { EditableQuestion, IQuestionForDisplay, Question } from "@/types";
 import { Plus, Trash2 } from "lucide-react";
 import { createContest } from "@/lib/actions";
+import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { debounce } from '@/lib/utils';
@@ -96,6 +97,9 @@ export default function EditContestPage() {
   const [title, setTitle] = useState("Untitled Contest");
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState<number>(600);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const lastSavedSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -130,6 +134,7 @@ export default function EditContestPage() {
             setDescription(contest.description || "");
             setTimeLimit(Number(contest.timeLimit) || 600);
             setSelectedTopic(contest.topic || TOPICS[0]);
+            setBannerUrl(contest.bannerUrl || null);
             if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
               // convert stored Question[] to EditableQuestion[]
               const editable = (contest.questions as Question[]).map((q) => ({
@@ -187,36 +192,110 @@ export default function EditContestPage() {
     });
   };
 
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0] && contestId) {
+      const file = event.target.files[0];
+      setUploadingBanner(true);
+      try {
+        const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
+        setBannerUrl(downloadURL);
+      } catch (error) {
+        console.error("Error uploading banner image:", error);
+      } finally {
+        setUploadingBanner(false);
+      }
+    }
+  };
+
   const handleSaveDraft = useCallback(async () => {
-    if (!contestId || !idToken) return;
+    if (!contestId) return;
+
+    // Refresh the ID token to avoid using an expired token
+    const token = await auth.currentUser?.getIdToken(true);
+    if (!token) return;
+    setIdToken(token);
+
+    // build compact snapshot of important fields
+    const snapshot = JSON.stringify({
+      title,
+      description,
+      timeLimit,
+      topic: selectedTopic === "Other" ? customTopic : selectedTopic,
+      questions: convertToQuestions(questions),
+      bannerUrl,
+    });
+
+    // avoid saving if nothing meaningful changed since last save
+    if (lastSavedSnapshotRef.current === snapshot) return;
 
     const formData = new FormData();
     formData.append("contestId", contestId);
-    formData.append("idToken", idToken);
+    formData.append("idToken", token);
     formData.append("questions", JSON.stringify(convertToQuestions(questions)));
     formData.append("title", title);
     formData.append("description", description);
     formData.append("timeLimit", timeLimit.toString());
     formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
     formData.append("status", "incomplete");
+    if (bannerUrl) {
+      formData.append("bannerUrl", bannerUrl);
+    }
 
     try {
-        await createContest({
-          message: ""
-        }, formData);
-        console.log("Contest draft saved automatically.");
+      // preemptively set snapshot to avoid duplicate saves while request is in-flight
+      lastSavedSnapshotRef.current = snapshot;
+      startTransition(() => {
+        formAction(formData);
+      });
+      console.log("Contest draft saved automatically.");
     } catch (error) {
-        console.error("Failed to autosave draft:", error);
+      console.error("Failed to autosave draft:", error);
+      // Clear snapshot on failure so subsequent changes retry
+      lastSavedSnapshotRef.current = null;
     }
-  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic]);
+  }, [contestId, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
 
-  const debouncedSave = useMemo(() => debounce(handleSaveDraft, 1000), [handleSaveDraft]);
-
+  //save only on exit
   useEffect(() => {
-    if (contestId && idToken) { 
-        debouncedSave();
-    }
-  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave]);
+    if (!contestId) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      try {
+        const payload = {
+          idToken: idToken,
+          questions: convertToQuestions(questions),
+          title,
+          description,
+          timeLimit: timeLimit.toString(),
+          topic: selectedTopic === "Other" ? customTopic : selectedTopic,
+          status: "incomplete",
+          incomplete: true,
+          tags: ["incomplete"],
+          bannerUrl,
+          contestId,
+        };
+
+        const url = `/api/contests/${contestId}`;
+
+        if (navigator.sendBeacon) {
+          const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+          navigator.sendBeacon(url, blob);
+        } else {
+          fetch(url, {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch (e) {
+        // best-effort; ignore errors during unload
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
 
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -271,17 +350,44 @@ export default function EditContestPage() {
     setErrors(newErrors);
 
     if (isValid) {
-      const formData = new FormData(); 
-      formData.append("contestId", contestId || '');
-      formData.append("idToken", idToken || '');
+      // Ensure we have a fresh ID token before submitting
+      const token = await auth.currentUser?.getIdToken(true);
+      if (!token) {
+        setErrors({ general: ["You must be logged in to submit the contest."] });
+        return;
+      }
+      setIdToken(token);
+
+      const formData = new FormData();
+      formData.append("contestId", contestId || "");
+      formData.append("idToken", token);
       formData.append("questions", JSON.stringify(convertToQuestions(questions)));
       formData.append("title", title);
       formData.append("description", description);
       formData.append("timeLimit", timeLimit.toString());
       formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
+      if (bannerUrl) {
+        formData.append("bannerUrl", bannerUrl);
+      }
       formData.append("status", "completed");
-      
-      formAction(formData); 
+
+      // update snapshot so unload handler doesn't resend the same draft
+      try {
+        lastSavedSnapshotRef.current = JSON.stringify({
+          title,
+          description,
+          timeLimit,
+          topic: selectedTopic === "Other" ? customTopic : selectedTopic,
+          questions: convertToQuestions(questions),
+          bannerUrl,
+        });
+      } catch (e) {
+        // ignore
+      }
+
+      startTransition(() => {
+        formAction(formData);
+      });
     }
   };
 
@@ -311,6 +417,22 @@ export default function EditContestPage() {
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-300">Description</label>
                 <textarea id="description" name="description" rows={3} placeholder="The first 10 questions of the 2013 USABO opens" className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300">Contest Banner</label>
+                <div className="mt-1 flex items-center gap-4">
+                  {bannerUrl ? (
+                    <img src={bannerUrl} alt="Banner preview" className="h-24 w-auto rounded-md object-cover" />
+                  ) : (
+                    <div className="h-24 w-40 bg-zinc-800 rounded-md flex items-center justify-center text-zinc-500">No banner</div>
+                  )}
+                  <div>
+                    <label className="cursor-pointer inline-flex items-center px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-indigo-400 hover:text-indigo-300">
+                      <span>{uploadingBanner ? 'Uploading...' : 'Upload banner'}</span>
+                      <input type="file" accept="image/*" onChange={handleBannerUpload} className="sr-only" disabled={uploadingBanner} />
+                    </label>
+                  </div>
+                </div>
               </div>
               <div>
                 <label htmlFor="timeLimit" className="block text-sm font-medium text-gray-300">Time Limit (seconds)</label>

@@ -1,15 +1,14 @@
-import admin from 'firebase-admin';
+import * as admin from 'firebase-admin';
+import path from 'path';
+
+const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
 
 if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY!))
-    });
-  } catch (error) {
-    console.log('Firebase admin initialization error', error.stack);
-  }
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccountPath),
+  });
 }
 
-export default admin;
 export const adminAuth = admin.auth();
 export const adminFirestore = admin.firestore();
+export default admin;

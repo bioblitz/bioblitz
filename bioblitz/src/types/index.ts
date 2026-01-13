@@ -16,6 +16,7 @@ export type gameRoom = {
   description?: string;
   creator?: string;
   creatorPfp?: string;
+  creatorUsername?: string;
   rating?: number;
   questions?: Question[];
   status?: string;

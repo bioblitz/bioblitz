@@ -1,14 +1,46 @@
 
 "use server";
 import { firestore, auth } from "./firebase";
+import { adminAuth, adminFirestore } from "./firebase-admin";
 import { collection, addDoc, setDoc, doc, query, where, getDocs, getDoc } from "firebase/firestore";
 import { gameRoom, Question } from "@/types";
 import { revalidatePath } from "next/cache";
 
 export async function createContest(prevState: { message: string }, formData: FormData) {
-  const user = auth.currentUser;
+  const idToken = (formData.get("idToken") as string) || null;
 
-  if (!user) {
+  if (!idToken) {
+    return { message: "You must be logged in to create a contest." };
+  }
+
+  // Verify the ID token on the server using the Admin SDK
+  let uid: string;
+  let creatorPfp = "/images/logo.svg";
+  let creatorUsername = "";
+  try {
+    const decoded = await adminAuth.verifyIdToken(idToken);
+    uid = decoded.uid;
+    // Try to fetch additional user info
+    try {
+      const userRecord = await adminAuth.getUser(uid);
+      if (userRecord.photoURL) creatorPfp = userRecord.photoURL;
+      if (userRecord.displayName) creatorUsername = userRecord.displayName;
+    } catch (e) {
+      // ignore
+    }
+
+    try {
+      const userDoc = await adminFirestore.collection("users").doc(uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data() as any;
+        if (data.photoURL) creatorPfp = data.photoURL;
+        if (data.username) creatorUsername = data.username;
+      }
+    } catch (e) {
+      // ignore
+    }
+  } catch (e) {
+    console.error("Invalid ID token:", e);
     return { message: "You must be logged in to create a contest." };
   }
 
@@ -25,8 +57,9 @@ export async function createContest(prevState: { message: string }, formData: Fo
     difficulty: formData.get("difficulty") as string,
     timeLimit: formData.get("timeLimit") as string,
     description: formData.get("description") as string,
-    creator: user.uid,
-    creatorPfp: user.photoURL || "/images/logo.svg",
+    creator: uid,
+    creatorPfp: creatorPfp,
+    creatorUsername: creatorUsername,
     rating: Number(formData.get("rating")) || 0,
     questions: questions,
     status: status,
@@ -34,17 +67,18 @@ export async function createContest(prevState: { message: string }, formData: Fo
   };
 
   try {
-    let docRef;
+    let savedId: string | null = null;
     if (contestId) {
-      docRef = doc(firestore, "sets", contestId);
-      await setDoc(docRef, contest, { merge: true });
+      await adminFirestore.collection("sets").doc(contestId).set(contest, { merge: true });
+      savedId = contestId;
       console.log("Document updated with ID: ", contestId);
     } else {
-      docRef = await addDoc(collection(firestore, "sets"), contest);
-      console.log("Document written with ID: ", docRef.id);
+      const ref = await adminFirestore.collection("sets").add(contest);
+      savedId = ref.id;
+      console.log("Document written with ID: ", ref.id);
     }
     revalidatePath("/contests");
-    return { message: `Contest saved with ID: ${docRef.id}` };
+    return { message: `Contest saved with ID: ${savedId}` };
   } catch (e) {
     console.error("Error saving document: ", e);
     return { message: "Failed to save contest" };

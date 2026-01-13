@@ -52,9 +52,14 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
             {contest.title}
           </h2>
           <div className="space-y-1">
+            <div className="flex items-center text-sm text-zinc-400">
+              <span>By</span>
+              <span className="ml-2 font-semibold truncate">{contest.creatorUsername || contest.creator}</span>
+            </div>
             {contest.creatorPfp && (
-              <div className="flex items-center text-sm text-zinc-400">
-                By <span className="ml-1 truncate">{contest.creator}</span>
+              <div className="flex items-center text-sm text-zinc-400 mt-1">
+                <img src={contest.creatorPfp} alt="creator" className="w-6 h-6 rounded-full mr-2 object-cover" />
+                <span className="truncate">{contest.creatorUsername || contest.creator}</span>
               </div>
             )}
             {contest.source && (
