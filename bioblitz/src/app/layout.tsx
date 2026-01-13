@@ -5,10 +5,26 @@ import { UsernameChecker } from "@/components/auth/UsernameChecker";
 import ActivityTracker from "../components/ActivityTracker";
 
 export const metadata = {
-  title: "BioBlitz",
-  description: "...",
-  icons: {
-    icon: "/icons/favicon.svg",
+  title: "BioBlitz | Competitive Biology Platform",
+  description:
+    "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+  openGraph: {
+    title: "BioBlitz | Competitive Biology Platform",
+    description:
+      "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+    url: "https://bioblitz.net",
+    images: [
+      {
+        url: "https://bioblitz.net/images/BIOBLITZ.png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BioBlitz | Competitive Biology Platform",
+    description:
+      "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+    images: ["https://bioblitz.net/images/BIOBLITZ.png"],
   },
 };
 
