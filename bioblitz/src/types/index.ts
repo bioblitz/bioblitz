@@ -19,6 +19,7 @@ export type gameRoom = {
   rating?: number;
   questions?: Question[];
   status?: string;
+  bannerUrl?: string;
 };
 
 export interface Contest {

@@ -30,6 +30,7 @@ export async function createContest(prevState: { message: string }, formData: Fo
     rating: Number(formData.get("rating")) || 0,
     questions: questions,
     status: status,
+    bannerUrl: formData.get("bannerUrl") as string || "",
   };
 
   try {
@@ -87,7 +88,8 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
 
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() } as gameRoom;
-    } else {
+    }
+    else {
       console.log("No such contest document!");
       return null;
     }

@@ -5,12 +5,13 @@ import { useFormStatus } from "react-dom";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay, Question } from "@/types";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import { createContest, getContestById } from "@/lib/actions";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { debounce } from '@/lib/utils';
 import { useParams } from "next/navigation";
+import { uploadImage } from "@/lib/storage";
 
 
 const generateChoiceKey = (index: number): string => {
@@ -91,6 +92,10 @@ export default function CreateContestPage() {
     questions[0]?.id || null
   );
   const [contestId, setContestId] = useState<string | null>(null);
+  
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -131,6 +136,7 @@ export default function CreateContestPage() {
           setDescription(fetchedContest.description || "");
           setTimeLimit(Number(fetchedContest.timeLimit) || 600);
           setSelectedTopic(fetchedContest.topic || TOPICS[0]);
+          setBannerUrl(fetchedContest.bannerUrl || null);
           if (!TOPICS.includes(fetchedContest.topic || "")) {
             setSelectedTopic("Other");
             setCustomTopic(fetchedContest.topic || "");
@@ -180,6 +186,21 @@ export default function CreateContestPage() {
     );
     setQuestions(newQuestions);
   };
+
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0] && contestId) {
+      const file = event.target.files[0];
+      setUploadingBanner(true);
+      try {
+        const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
+        setBannerUrl(downloadURL);
+      } catch (error) {
+        console.error("Error uploading banner image:", error);
+      } finally {
+        setUploadingBanner(false);
+      }
+    }
+  };
   
   const convertToQuestions = (editableQuestions: EditableQuestion[]): Question[] => {
     return editableQuestions.map((eq) => {
@@ -205,6 +226,9 @@ export default function CreateContestPage() {
     formData.append("timeLimit", timeLimit.toString());
     formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
     formData.append("status", "incomplete");
+    if (bannerUrl) {
+      formData.append("bannerUrl", bannerUrl);
+    }
 
     try {
         await createContest({
@@ -214,7 +238,7 @@ export default function CreateContestPage() {
     } catch (error) {
         console.error("Failed to autosave draft:", error);
     }
-  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic]);
+  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
 
   const debouncedSave = useMemo(() => debounce(handleSaveDraft, 1000), [handleSaveDraft]);
 
@@ -222,7 +246,7 @@ export default function CreateContestPage() {
     if (contestId && idToken && !loading) {
         debouncedSave();
     }
-  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave, loading]);
+  }, [questions, title, description, timeLimit, selectedTopic, customTopic, contestId, idToken, debouncedSave, loading, bannerUrl]);
 
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -286,6 +310,9 @@ export default function CreateContestPage() {
       formData.append("timeLimit", timeLimit.toString());
       formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
       formData.append("status", "completed");
+      if (bannerUrl) {
+        formData.append("bannerUrl", bannerUrl);
+      }
       
       formAction(formData); 
     }
@@ -342,6 +369,25 @@ export default function CreateContestPage() {
                   <input type="text" id="custom-topic" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" />
                 </div>
               )}
+              <div>
+                <label className="block text-sm font-medium text-gray-300">Contest Banner</label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md">
+                  <div className="space-y-1 text-center">
+                    {bannerUrl ? (
+                      <img src={bannerUrl} alt="Banner" className="mx-auto h-48 w-auto" />
+                    ) : (
+                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    )}
+                    <div className="flex text-sm text-gray-400">
+                      <label htmlFor="banner-upload" className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-indigo-400 hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-800 focus-within:ring-indigo-500">
+                        <span>{uploadingBanner ? "Uploading..." : "Upload a file"}</span>
+                        <input id="banner-upload" name="banner-upload" type="file" className="sr-only" accept="image/*" onChange={handleBannerUpload} disabled={uploadingBanner} />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+              </div>
 
 
               <button

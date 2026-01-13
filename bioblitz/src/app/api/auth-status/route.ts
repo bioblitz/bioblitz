@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getUserProfile, createUserProfile, UserProfile } from '@/lib/user';
+import { getUserProfile, createUserProfile, updateUserPhoto, UserProfile } from '@/lib/user';
 
 export async function GET() {
   try {
@@ -17,6 +17,16 @@ export async function GET() {
           email: decodedIdToken.email || '',
           photoURL: decodedIdToken.picture || '',
         });
+      } else {
+        // If the server profile exists but lacks a photoURL, persist the auth picture
+        if ((!userProfile.photoURL || userProfile.photoURL === '') && decodedIdToken.picture) {
+          try {
+            await updateUserPhoto(decodedIdToken.uid, decodedIdToken.picture);
+            userProfile.photoURL = decodedIdToken.picture;
+          } catch (err) {
+            console.error('Failed to update user photoURL in Firestore:', err);
+          }
+        }
       }
     }
 

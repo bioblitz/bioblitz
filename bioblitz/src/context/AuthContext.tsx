@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getAuth } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import { UserProfile } from '@/lib/user';
 
@@ -28,7 +29,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const data = await res.json();
           setIsAuthenticated(data.isAuthenticated);
           if (data.isAuthenticated) {
-            setUser(data.user);
+            // prefer server-provided user profile, but if it lacks a photoURL
+            // fall back to Firebase Auth's currentUser.photoURL so the navbar
+            // can show the user's pfp immediately
+            const serverUser = data.user;
+            const auth = getAuth();
+            const currentAuthUser = auth.currentUser;
+
+            if (serverUser) {
+              if (!serverUser.photoURL && currentAuthUser?.photoURL) {
+                serverUser.photoURL = currentAuthUser.photoURL as string;
+              }
+            }
+
+            setUser(serverUser);
           }
         } else {
           setIsAuthenticated(false);

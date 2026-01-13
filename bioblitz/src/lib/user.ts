@@ -60,6 +60,13 @@ export async function updateUserBanner(
   });
 }
 
+export async function updateUserPhoto(uid: string, photoURL: string): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await updateDoc(userRef, {
+    photoURL: photoURL,
+  });
+}
+
 export async function createUserProfile(user: any) {
   const userRef = doc(firestore, "users", user.uid);
 
