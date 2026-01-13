@@ -1,17 +1,13 @@
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentWritten, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-
 
 // 1. Initialize Once
 admin.initializeApp();
 const db = admin.firestore();
 
-// ---------------------------------------------------------------------------
-// 1. GRADE TEST (Calculates Score + Elo + History)
-// ---------------------------------------------------------------------------
 export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", async (event) => {
   const snap = event.data;
   if (!snap) {
@@ -72,10 +68,15 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
     const finalScore = Math.floor(accuracyScore + timeBonus);
 
-    // Check for Previous Plays (Replay Detection)
     const userRef = db.collection("users").doc(userId);
     const userHistoryDocRef = userRef.collection("setsPlayed").doc(gameId);
     const existingHistory = await userHistoryDocRef.get();
+
+    const gameSetUpdate = gameDocRef.update({
+        totalPlays: FieldValue.increment(1),
+        trendingScore: FieldValue.increment(10), 
+        lastPlayedAt: FieldValue.serverTimestamp()
+    });
 
     // --- REPLAY LOGIC ---
     if (existingHistory.exists) {
@@ -89,18 +90,18 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
               totalQuestions: totalQuestions,
               correctAnswers: correctAnswersMap,
               gradedAt: FieldValue.serverTimestamp(),
-              isFirstAttempt: false // Explicitly mark as false
+              isFirstAttempt: false
             }),
           userHistoryDocRef.update({
              history: FieldValue.arrayUnion(snap.id),
              lastPlayedAt: FieldValue.serverTimestamp(),
              title: gameTitle 
-          })
+          }),
+          gameSetUpdate 
         ]);
         return;
     }
 
-    // --- FIRST ATTEMPT LOGIC (Calculate Elo) ---
     const allSetsPlayedSnap = await userRef.collection("setsPlayed").get();
     
     let weightedScoreSum = 0;
@@ -122,13 +123,11 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         }
     });
 
-    // Add CURRENT game
     weightedScoreSum += finalScore * 1.0;
     totalWeight += 1.0;
 
     const newBElo = Math.round(weightedScoreSum / totalWeight);
 
-    // Database Updates
     const userHistoryData = {
       submission: snap.id, 
       history: [snap.id],
@@ -144,7 +143,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         totalQuestions: totalQuestions,
         correctAnswers: correctAnswersMap,
         status: "graded",
-        isFirstAttempt: true, // <--- CRITICAL FOR LEADERBOARD QUERY
+        isFirstAttempt: true,
         gradedAt: FieldValue.serverTimestamp(),
     };
 
@@ -155,10 +154,9 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         userHistoryDocRef.set(userHistoryData),
         userRef.update({ 
             bElo: newBElo,
-            // Optimization: Update playedGameIds array on user profile
-            // This fixes your HomePage "read cost" issue
             playedGameIds: FieldValue.arrayUnion(gameId) 
-        })
+        }),
+        gameSetUpdate
     ]);
 
     return;
@@ -172,9 +170,6 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
   }
 });
 
-// ---------------------------------------------------------------------------
-// 2. GET PUBLIC QUESTIONS (Callable)
-// ---------------------------------------------------------------------------
 export const getPublicQuestions = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be logged in to start a game.");
@@ -205,14 +200,10 @@ export const getPublicQuestions = onCall(async (request) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// 3. AGGREGATE RATINGS (Trigger)
-// ---------------------------------------------------------------------------
 export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", async (event) => {
     const newData = event.data?.after.data();
     const oldData = event.data?.before.data();
 
-    // Identify Game ID
     const gameId = newData?.gameId || oldData?.gameId;
     if (!gameId) {
         console.error("No Game ID found in rating document.");
@@ -221,7 +212,6 @@ export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", 
 
     const setRef = db.collection("sets").doc(gameId);
 
-    // Deltas
     let countDelta = 0;
     let scoreDelta = 0;
 
@@ -272,22 +262,16 @@ export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", 
     }
 });
 
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 
-// ... other code ...
-
-// ---------------------------------------------------------------------------
-// 4. SYNC USER PROFILE CHANGES (Handles Unlimited Games)
-// ---------------------------------------------------------------------------
 export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (event) => {
     const newData = event.data?.after.data();
     const oldData = event.data?.before.data();
 
     if (!newData || !oldData) return;
 
-    // 1. Check if visual fields actually changed
+    // check if visual fields actually changed
     const nameChanged = newData.displayName !== oldData.displayName;
-    const handleChanged = newData.username !== oldData.username; // Remember: Firestore 'username' maps to App 'handle'
+    const handleChanged = newData.username !== oldData.username; 
     const photoChanged = newData.photoURL !== oldData.photoURL;
 
     if (!nameChanged && !handleChanged && !photoChanged) {
@@ -295,11 +279,8 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
     }
 
     console.log(`Syncing profile update for user ${event.params.userId}...`);
-    const db = admin.firestore();
-
-    // 2. Fetch ALL submissions (This reads them all, which is necessary)
-    // Note: If a user has 100k+ games, you would need a Recursive Query cursor, 
-    // but for <10k games, a single .get() is usually fine in Cloud Functions memory.
+    
+    // fetch ALL submissions 
     const submissionsQuery = db.collection("gameSubmissions")
                                .where("userId", "==", event.params.userId);
     
@@ -307,7 +288,6 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
     
     if (snapshot.empty) return;
 
-    // 3. Prepare the Updates in Chunks of 500
     const BATCH_SIZE = 500;
     const batches: Promise<FirebaseFirestore.WriteResult[]>[] = [];
     
@@ -315,7 +295,6 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
     let operationCount = 0;
 
     snapshot.docs.forEach((doc) => {
-        // Add update to the current batch
         currentBatch.update(doc.ref, {
             username: newData.displayName || "Unknown",
             handle: newData.username || "",
@@ -324,7 +303,7 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
         
         operationCount++;
 
-        // If we hit the limit, commit this batch and start a new one
+        // if we hit limit, reset batch
         if (operationCount === BATCH_SIZE) {
             batches.push(currentBatch.commit());
             currentBatch = db.batch(); // Reset
@@ -332,17 +311,14 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
         }
     });
 
-    // 4. Commit any remaining operations (the last partially filled batch)
     if (operationCount > 0) {
         batches.push(currentBatch.commit());
     }
 
-    // 5. Wait for all batches to finish
     await Promise.all(batches);
 
     console.log(`Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`);
 });
-
 
 
 export const resetStreaksDaily = onSchedule(
@@ -353,40 +329,32 @@ export const resetStreaksDaily = onSchedule(
     memory: "512MiB",
   },
   async (event) => {
-    console.log("🔥 Starting Daily Streak Reset...");
+    console.log("Starting Daily Streak Reset...");
 
     const now = new Date();
-    // Calculate 24 hours ago from "now" (which is midnight PST)
     const cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    // Query: Find users who have a streak > 0 AND haven't played in the last 24h
-    // Note: You might need a composite index in Firestore for this query to work.
-    // If so, checking the logs after the first run will give you a link to create it instantly.
     const usersSnapshot = await db.collection("users")
       .where("streak", ">", 0)
       .where("lastStreakDate", "<", admin.firestore.Timestamp.fromDate(cutoffDate))
       .get();
 
     if (usersSnapshot.empty) {
-      console.log("✅ No streaks to reset today.");
+      console.log(" No streaks to reset today.");
       return;
     }
 
     console.log(`Found ${usersSnapshot.size} users with broken streaks.`);
 
-    // BATCH UPDATE LOGIC
-    // Firestore batches allow 500 writes at a time. We chunk the updates.
     const batchSize = 500;
     const batches = [];
     let currentBatch = db.batch();
     let operationCounter = 0;
 
     usersSnapshot.docs.forEach((doc) => {
-      // Set streak to 0
       currentBatch.update(doc.ref, { streak: 0 });
       operationCounter++;
 
-      // If batch is full, push it to array and start a new one
       if (operationCounter === batchSize) {
         batches.push(currentBatch.commit());
         currentBatch = db.batch();
@@ -394,14 +362,66 @@ export const resetStreaksDaily = onSchedule(
       }
     });
 
-    // Push any remaining operations
     if (operationCounter > 0) {
       batches.push(currentBatch.commit());
     }
 
-    // Wait for all batches to complete
     await Promise.all(batches);
 
     console.log(`Successfully reset streaks for ${usersSnapshot.size} users.`);
+  }
+);
+
+export const decayTrendingScores = onSchedule(
+  {
+    schedule: "0 * * * *",
+    timeZone: "America/Los_Angeles",
+    timeoutSeconds: 540,
+    memory: "512MiB",
+  },
+  async (event) => {
+    console.log("📉 Starting Trending Score Decay...");
+
+    const setsRef = db.collection("sets");
+    const activeSetsSnapshot = await setsRef
+      .where("trendingScore", ">", 0)
+      .get();
+
+    if (activeSetsSnapshot.empty) {
+      console.log("✅ No active trending games to decay.");
+      return;
+    }
+
+    console.log(`Decaying scores for ${activeSetsSnapshot.size} active games.`);
+
+    const batchSize = 500;
+    const batches: Promise<FirebaseFirestore.WriteResult[]>[] = [];
+    let currentBatch = db.batch();
+    let operationCount = 0;
+
+    activeSetsSnapshot.docs.forEach((doc) => {
+      const currentScore = doc.data().trendingScore || 0;
+      
+      const newScore = Math.floor(currentScore * 0.95);
+
+      currentBatch.update(doc.ref, { 
+        trendingScore: newScore 
+      });
+      
+      operationCount++;
+
+      if (operationCount === batchSize) {
+        batches.push(currentBatch.commit());
+        currentBatch = db.batch();
+        operationCount = 0;
+      }
+    });
+
+    if (operationCount > 0) {
+      batches.push(currentBatch.commit());
+    }
+
+    await Promise.all(batches);
+    console.log(" trending scores updated successfully.");
   }
 );

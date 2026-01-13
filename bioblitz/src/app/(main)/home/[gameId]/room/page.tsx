@@ -158,6 +158,16 @@ export default function GameRoomPage() {
               localStorage.setItem(key, startTime.toString());
               setTimeLeft(data.timeLimit);
             }
+
+            const answerKey = `answers-${user.uid}-${gameId}`;
+            const savedAnswers = localStorage.getItem(answerKey);
+            if (savedAnswers) {
+              try {
+                setUserAnswers(JSON.parse(savedAnswers));
+              } catch (e) {
+                console.error("Failed to parse saved answers", e);
+              }
+            }
           }
         }
 
@@ -242,6 +252,7 @@ export default function GameRoomPage() {
 
       if (user) {
         localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
+        localStorage.removeItem(`answers-${user.uid}-${gameId}`);
       }
     } catch (error) {
       console.error("Error submitting Blitz:", error);
@@ -389,6 +400,13 @@ export default function GameRoomPage() {
     fetchSpecificUsers();
   }, [leaderboard]);
 
+  useEffect(() => {
+    if (user && gameId && Object.keys(userAnswers).length > 0 && !submitted) {
+      const answerKey = `answers-${user.uid}-${gameId}`;
+      localStorage.setItem(answerKey, JSON.stringify(userAnswers));
+    }
+  }, [userAnswers, user, gameId, submitted]);
+
   if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
@@ -403,8 +421,12 @@ export default function GameRoomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24">
-      {showTimeUpAlert && (
+    //! please don't cheat :(
+    <div
+      className={`min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24 ${
+        submitted ? "select-text" : "select-none"
+      }`}
+    >      {showTimeUpAlert && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-violet-900/90 border border-violet-500/50 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
             <AlertCircle className="text-violet-300 w-6 h-6" />
@@ -820,14 +842,13 @@ export default function GameRoomPage() {
               Quit the Blitz?
             </h2>
             <p className="text-zinc-400 mb-8">
-              Your progress will be lost and you will return to the home screen.
+              Your current answers will be submitted and you will return to the
+              home screen.
             </p>
             <div className="flex justify-center gap-4">
               <button
-                onClick={() => {
-                  if (user) {
-                    localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
-                  }
+                onClick={async () => {
+                  await handleSubmit(true);
                   router.push("/home");
                 }}
                 className="flex-1 px-6 py-3 bg-red-600/10 text-red-500 border border-red-600/50 font-bold rounded-xl hover:bg-red-600 hover:text-white transition"

@@ -23,6 +23,7 @@ import {
   MapPin,
   School,
   GraduationCap,
+  Library,
   Activity,
   Calendar,
   ChevronLeft,
@@ -37,6 +38,9 @@ import {
   Flame,
   Flag,
   AlertTriangle,
+  ArrowUpRight,
+  BookOpen,
+  Users,
   CheckCircle,
   Zap,
   BrainCircuit,
@@ -63,6 +67,7 @@ import {
   CartesianGrid,
   YAxis,
 } from "recharts";
+import { createNotification } from "@/lib/notifications";
 const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -549,7 +554,9 @@ export default function ProfilePage() {
 
   const sendFriendRequest = async () => {
     if (!auth.currentUser || !userProfile || !profileUid) return;
-
+    const myDocSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    const myData = myDocSnap.data() as UserProfile;
+    const myUsername = myData?.username || auth.currentUser.uid;
     try {
       const batch = writeBatch(db);
 
@@ -585,6 +592,16 @@ export default function ProfilePage() {
 
       await batch.commit();
       setFriendshipStatus("sent");
+      await createNotification(
+        profileUid,
+        "friend_request",
+        "New Friend Request",
+        `${auth.currentUser.displayName || "Someone"} wants to be friends!`,
+        `/profile/${myUsername}`,
+        auth.currentUser.uid,
+        myData.photoURL || "",
+        auth.currentUser.displayName || "A user"
+      );
     } catch (err) {
       console.error(err);
       alert("Failed to send request.");
@@ -593,6 +610,9 @@ export default function ProfilePage() {
 
   const acceptFriendRequest = async () => {
     if (!auth.currentUser || !profileUid) return;
+    const myDocSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    const myData = myDocSnap.data() as UserProfile;
+    const myUsername = myData?.username || auth.currentUser.uid;
     try {
       const batch = writeBatch(db);
       const myRef = doc(
@@ -613,6 +633,19 @@ export default function ProfilePage() {
       batch.update(theirRef, { status: "friends" });
       await batch.commit();
       setFriendshipStatus("friends");
+
+      await createNotification(
+        profileUid,
+        "friend_accept",
+        "Friend Request Accepted",
+        `${
+          auth.currentUser?.displayName || "User"
+        } accepted your friend request!`,
+        `/profile/${myUsername}`,
+        auth.currentUser.uid,
+        auth.currentUser.photoURL || "",
+        auth.currentUser.displayName || "A user"
+      );
     } catch (err) {
       console.error(err);
     }
@@ -758,9 +791,9 @@ export default function ProfilePage() {
 
   const REPORT_CATEGORIES = [
     "Inappropriate Content",
-    "Harassment or Bullying",
+    "Harassment/Bullying",
     "Spam or Bot",
-    "Cheating / Smurfing",
+    "Cheating",
     "Offensive Username/Bio",
     "Other",
   ];
@@ -1087,46 +1120,95 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="grid lg:grid-cols-2 gap-6"
         >
-          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-white ">Friends</h3>
-            {loadingFriends ? (
-              <div className="flex flex-col items-center justify-center py-6 text-zinc-500 gap-2">
-                <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
-                <span className="text-sm animate-pulse">
-                  Loading friends...
-                </span>
-              </div>
-            ) : friends.length === 0 ? (
-              <p className="text-zinc-400 text-sm">No friends yet.</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {friends.map((friend) => (
-                  <Link
-                    key={friend.uid}
-                    href={`/profile/${friend.username || friend.uid}`}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-800 transition"
-                  >
-                    {friend.photoURL ? (
-                      <img
-                        src={friend.photoURL}
-                        alt={friend.displayName}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
-                        {friend.displayName?.[0]}
-                      </div>
-                    )}
-                    <span className="text-sm text-white">
-                      {friend.displayName}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            )}
+          <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl h-[42rem]">
+            {" "}
+            <div className="mb-2 shrink-0 ">
+              <Link
+                href={`/channel/${userProfile?.username || usernameParam}`}
+                className="group relative block w-full overflow-hidden rounded-2xl bg-zinc-900/50 border border-zinc-800 p-4 transition-all duration-300 hover:border-violet-500/50 hover:bg-zinc-900 hover:shadow-lg hover:shadow-violet-500/10"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
+                <div className="relative z-10 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/10 text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all duration-300">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors">
+                        {userProfile?.displayName ||
+                          userProfile?.username ||
+                          "User"}
+                        's Channel{" "}
+                      </h3>
+                      <p className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                        View public sets & stats
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-zinc-600 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-violet-400" />
+                </div>
+
+                <div className="relative z-10 mt-4 flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 rounded-md bg-black/40 px-2.5 py-1.5 border border-zinc-800/50">
+                    <Users className="h-3.5 w-3.5 text-zinc-500" />
+                    <span className="text-xs font-medium text-zinc-300">
+                      Subscribers
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-md bg-black/40 px-2.5 py-1.5 border border-zinc-800/50">
+                    <Library className="h-3.5 w-3.5 text-zinc-500" />{" "}
+                    <span className="text-xs font-medium text-zinc-300">
+                      Public Sets
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+            <div className="h-px w-full bg-zinc-800/50 shrink-0" />{" "}
+            <h3 className="text-lg font-semibold text-white shrink-0 ">
+              Friends
+            </h3>
+            <div className="flex-1 overflow-y-auto pr-2 min-h-0 space-y-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
+              {" "}
+              {loadingFriends ? (
+                <div className="flex flex-col items-center justify-center py-6 text-zinc-500 gap-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
+                  <span className="text-sm animate-pulse">
+                    Loading friends...
+                  </span>
+                </div>
+              ) : friends.length === 0 ? (
+                <p className="text-zinc-400 text-sm">No friends yet.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {friends.map((friend) => (
+                    <Link
+                      key={friend.uid}
+                      href={`/profile/${friend.username || friend.uid}`}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-800 transition"
+                    >
+                      {friend.photoURL ? (
+                        <img
+                          src={friend.photoURL}
+                          alt={friend.displayName}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                          {friend.displayName?.[0]}
+                        </div>
+                      )}
+                      <span className="text-sm text-white">
+                        {friend.displayName}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             {auth.currentUser?.uid === profileUid && (
-              <div className="bg-zinc-950/50 backdrop-blur-sm rounded-3xl p-2 flex flex-col gap-4 shadow-xl">
+              <div className="bg-zinc-950/50 backdrop-blur-sm rounded-3xl p-0 flex flex-col gap-4 shadow-xl">
                 <div className="h-px bg-zinc-800 w-full mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">
                   Friend Requests
@@ -1139,7 +1221,8 @@ export default function ProfilePage() {
                 ) : incomingRequests.length === 0 ? (
                   <p className="text-zinc-400 text-sm">No incoming requests.</p>
                 ) : (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500  [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0 [&::-webkit-scrollbar-corner]:bg-transparent">
+                    {" "}
                     {incomingRequests.map((request) => (
                       <div
                         key={request.uid}
@@ -1187,6 +1270,19 @@ export default function ProfilePage() {
                                 prev.filter((r) => r.uid !== request.uid)
                               );
                               setFriends((prev) => [...prev, request]);
+                              const myUsername =
+                                userProfile?.username || auth.currentUser!.uid;
+                              await createNotification(
+                                request.uid,
+                                "friend_accept",
+                                "Friend Request Accepted",
+                                `${
+                                  auth.currentUser?.displayName || "User"
+                                } accepted your friend request!`,
+                                `/profile/${myUsername}`,
+                                auth.currentUser!.uid,
+                                auth.currentUser!.photoURL || ""
+                              );
                             }}
                             className="px-3 py-1 bg-green-600 rounded-full text-white text-sm hover:bg-green-500"
                           >

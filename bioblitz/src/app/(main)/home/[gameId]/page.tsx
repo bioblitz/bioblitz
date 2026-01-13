@@ -13,6 +13,10 @@ import {
   Medal,
   Crown,
   Star,
+  AlertTriangle,
+  ArrowUpRight,
+  ChevronRight,
+  Timer, 
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
@@ -67,6 +71,9 @@ export default function GameDetailPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
+  const [showStartConfirmation, setShowStartConfirmation] = useState(false);
+
+  const [activeSession, setActiveSession] = useState<{ timeLeft: number } | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -96,6 +103,35 @@ export default function GameDetailPage() {
 
     loadGameData();
   }, [gameId]);
+
+  useEffect(() => {
+    if (!user || !gameId || !game) return;
+
+    const checkSession = () => {
+      const key = `startTime-${user.uid}-${gameId}`;
+      const savedStart = localStorage.getItem(key);
+
+      if (savedStart) {
+        const startTime = parseInt(savedStart);
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - startTime) / 1000);
+        const remaining = parseInt(game.timeLimit)*60 - elapsedSeconds;
+
+        if (remaining > 0) {
+          setActiveSession({ timeLeft: remaining });
+        } else {
+          setActiveSession(null);
+        }
+      } else {
+        setActiveSession(null);
+      }
+    };
+
+    checkSession();
+
+    const interval = setInterval(checkSession, 1000);
+    return () => clearInterval(interval);
+  }, [user, gameId, game]);
 
   useEffect(() => {
     const fetchAttempts = async () => {
@@ -133,6 +169,7 @@ export default function GameDetailPage() {
 
     fetchAttempts();
   }, [user, gameId]);
+
   useEffect(() => {
     const fetchLeaderboard = async () => {
       if (!gameId) return;
@@ -143,7 +180,7 @@ export default function GameDetailPage() {
           collection(firestore, "gameSubmissions"),
           where("gameId", "==", gameId),
           where("status", "==", "graded"),
-          orderBy("score", "desc"),
+          orderBy("submittedAt", "desc"),
           limit(20)
         );
 
@@ -200,7 +237,6 @@ export default function GameDetailPage() {
   }, [gameId]);
 
   const isFirstAttempt = !loadingAttempts && previousAttempts.length === 0;
-
   const hasPlayed = !loadingAttempts && previousAttempts.length > 0;
 
   const handleJoinGame = () => {
@@ -209,6 +245,12 @@ export default function GameDetailPage() {
       return;
     }
     if (loadingAttempts) return;
+
+    setShowStartConfirmation(true);
+  };
+
+  const proceedToGame = () => {
+    setShowStartConfirmation(false);
     router.push(`/home/${gameId}/room?ranked=${isFirstAttempt}`);
   };
 
@@ -217,6 +259,12 @@ export default function GameDetailPage() {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}m ${s}s`;
+  };
+
+  const formatCountdown = (totalSeconds: number) => {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
   const formatDate = (timestamp: Timestamp) => {
@@ -343,12 +391,40 @@ export default function GameDetailPage() {
             </div>
 
             <div className="flex flex-col gap-3">
+              {activeSession && (
+                <button
+                  onClick={proceedToGame}
+                  className="w-full relative group overflow-hidden rounded-xl p-5 bg-amber-500/10 border border-amber-500/50 hover:bg-amber-500/20 transition-all duration-300 transform active:scale-[0.98] mb-1"
+                >
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-amber-500/20 p-2 rounded-lg">
+                        <Timer className="w-6 h-6 text-amber-500 animate-pulse" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="text-lg font-bold text-amber-500 leading-none">
+                          Attempt in Progress
+                        </span>
+                        <span className="text-xs font-medium text-amber-200/70 mt-1">
+                          Click to Resume
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-mono font-bold text-amber-500 tabular-nums">
+                      {formatCountdown(activeSession.timeLeft)}
+                    </div>
+                  </div>
+                </button>
+              )}
+
               <button
                 onClick={handleJoinGame}
-                disabled={loadingAttempts || !authResolved}
+                disabled={loadingAttempts || !authResolved || activeSession !== null}
                 className={`w-full relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
                   loadingAttempts
                     ? "bg-zinc-800 cursor-wait opacity-70"
+                    : activeSession !== null
+                    ? "bg-zinc-800 opacity-50 cursor-not-allowed"
                     : isFirstAttempt
                     ? "bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-900/20"
                     : "bg-white text-black hover:bg-zinc-200"
@@ -364,6 +440,8 @@ export default function GameDetailPage() {
                       <Play className="w-6 h-6" />
                       <span className="text-lg font-bold">Sign in to Play</span>
                     </>
+                  ) : activeSession ? (
+                     <span className="text-zinc-500 font-bold">Finish your current attempt first</span>
                   ) : isFirstAttempt ? (
                     <>
                       <Trophy className="w-6 h-6" />
@@ -413,15 +491,16 @@ export default function GameDetailPage() {
             ) : (
               <div className="space-y-3">
                 {previousAttempts.map((attempt) => (
-                  <div
+                  <Link
+                    href={`/home/${gameId}/review/${attempt.id}`}
                     key={attempt.id}
-                    className={`group flex items-center justify-between p-4 rounded-xl border transition-all ${
+                    className={`group flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
                       attempt.ranked
-                        ? "bg-zinc-900 border-violet-500/20 hover:border-violet-500/40"
-                        : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                        ? "bg-zinc-900 border-violet-500/20 hover:border-violet-500/50 hover:bg-zinc-900/80"
+                        : "bg-zinc-900 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 z-10">
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
                           attempt.ranked
@@ -450,13 +529,17 @@ export default function GameDetailPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-zinc-400 text-sm font-mono flex items-center gap-1 justify-end">
-                        <Clock className="w-3 h-3" />{" "}
-                        {formatTimePlayed(attempt.timeTaken)}
+                    
+                    <div className="flex items-center gap-4 z-10">
+                      <div className="text-right">
+                        <div className="text-zinc-400 text-sm font-mono flex items-center gap-1 justify-end">
+                          <Clock className="w-3 h-3" />{" "}
+                          {formatTimePlayed(attempt.timeTaken)}
+                        </div>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -537,6 +620,58 @@ export default function GameDetailPage() {
           )}
         </motion.aside>
       </div>
+
+      {showStartConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[80px] pointer-events-none" />
+
+            <div className="flex flex-col items-center text-center relative z-10">
+              <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-yellow-500/20">
+                <AlertTriangle className="w-8 h-8 text-yellow-500" />
+              </div>
+
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Ready to Begin?
+              </h2>
+
+              <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                The{" "}
+                <span className="text-white font-bold">
+                  timer will start immediately
+                </span>{" "}
+                once you confirm.
+                <br />
+                <br />
+                <span className="inline-flex items-center gap-2 text-yellow-500/90 font-medium bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/10">
+                  <AlertTriangle className="w-3 h-3" />
+                  The timer keeps running even if you exit!
+                </span>
+              </p>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowStartConfirmation(false)}
+                  className="flex-1 py-3.5 rounded-xl font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent hover:border-zinc-800 transition-all"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={proceedToGame}
+                  className="flex-1 py-3.5 rounded-xl font-bold bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
+                >
+                  Begin Blitz <ArrowUpRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

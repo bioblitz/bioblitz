@@ -1,0 +1,151 @@
+{
+  "setDoc": {
+    "setId": "2025_july_challenge",
+    "averageRating": 0,
+    "description": "The Mitosisphere 2025 July Monthly Challenge",
+    "hidden": false,
+    "lastRatingUpdate": null,
+    "questionCount": 11,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "source": "Mitosisphere",
+    "timeLimit": 0,
+    "title": "July Monthly Challenge MCQ",
+    "topic": "Multiple",
+    "type": "USABO"
+  },
+  "questions": [
+    {
+      "docId": "q1",
+      "a": "LNPs are unlikely to elicit an unfavorable immune response.",
+      "b": "LNPs allow for a higher degree of control to where drugs are released.",
+      "c": "LNPs protect the mRNA from degradation by enzymes en route.",
+      "d": "LNPs provide a long circulation period in the bloodstream.",
+      "e": "LNPs may improve the solubility and stability of certain drugs.",
+      "correct": "d",
+      "content": "Lipid nanoparticles (LNPs) are small, lipid-based particles utilized as drug delivery vehicles. Specifically, instead of heat killed viruses, they provide an efficient and effective way to deliver mRNA to patients. LNPs are typically spherical vesicles composed of a variety of lipids in order to maintain stability as well as facilitate interactions with target cells.\n\nWhich of the following choices is NOT a reason why LNPs may be preferable to other forms of mRNA delivery?",
+      "imgURL": "",
+      "solution": "D, LNPs are cleared from the blood faster than other forms of mRNA delivery, not slower. All other options are true."
+    },
+    {
+      "docId": "q2",
+      "a": "Fatigue",
+      "b": "Excessive bleeding",
+      "c": "Muscle cramps",
+      "d": "Impaired coordination",
+      "e": "Impaired immune function",
+      "correct": "e",
+      "content": "John Billington has recently decided to go on a diet to prepare for his upcoming fight. However, he has limited what he is eating so much that he has begun suffering from various nutrient deficiencies. Specifically, he has become deficient in vitamin K (phylloquinone), Vitamin B3 (Niacin), and Viramin B5 (Pantothenic acid).\n\nWhich of the following symptoms is John LEAST LIKELY to be experiencing?",
+      "imgURL": "",
+      "solution": "E, While impaired immune function may result, it is the least directly correlated with these deficiencies. Fatigue would result from B3 deficiency, excessive bleeding from K deficiency, and muscle cramps as well as impaired coordination from B5 deficiency."
+    },
+    {
+      "docId": "q3",
+      "a": "Pericentric regions",
+      "b": "Telomeres",
+      "c": "Transposable elements",
+      "d": "X-inactivation regions",
+      "e": "Short tandem repeats",
+      "correct": "d",
+      "content": "Histone H3 lysine 9 trimethylation (H3K9me3) is the most common form of constitutive methylation in eukaryotes.\n\nIn which of the following regions would you least expect to find H3K9me3 modifications?",
+      "imgURL": "",
+      "solution": "D, X-inactivation regions are facultatively methylated, not constitutively methylated. All other choices would likely be constitutively methylated."
+    },
+    {
+      "docId": "q4",
+      "a": "Increased fluorescence after exposure to peanuts indicating lower antibody concentration in Connor’s blood.",
+      "b": "Decreased fluorescence after exposure to peanuts indicating lower antibody concentration in Connor’s blood.",
+      "c": "Increased fluorescence after exposure to peanuts indicating higher antibody concentration in Connor’s blood.",
+      "d": "Decreased fluorescence after exposure to peanuts indicating higher antibody concentration in Connor’s blood.",
+      "e": "Equal levels of fluorescence since the amount of fluorescent labeled antibodies is the same in both tests.",
+      "correct": "d",
+      "content": "Suzuko, who has taken a deep interest in Connor’s peanut allergy, has decided to run an experiment to measure the relative concentration of antibodies present in Connor’s blood before and after he gives him some Nutter Butters. In his experiment, he has a membrane with small bits of peanuts fixed to it. He runs both samples of Connor’s blood (pre and post nutter butter exposure) across the membrane in the presence of fluorophore-conjugated antibodies which bind to the same antigen as Connor’s peanut antibody.\n\nWhich of the following choices best describes the data Suzuko would likely encounter and how he should interpret it?",
+      "imgURL": "",
+      "solution": "D, This is an example of a competitive assay. We know that higher antibody concentration would result from exposure to nutter butters since they would trigger an immune response. This would result in decreased fluorescence since Connor’s antibodies are directly competing with the fluorophore-bound antibody for binding spots on the membrane. If we have more antibodies in Connor’s blood, then that means less fluorophore bound antibodies will bind to the membrane."
+    },
+    {
+      "docId": "q5",
+      "a": "7/64",
+      "b": "1/8",
+      "c": "21/32",
+      "d": "57/64",
+      "e": "63/64",
+      "correct": "d",
+      "content": "Connor is studying the inheritance of elbow pointiness in gophers. He has concluded that 3 genes A, B, and C, all add quantitatively to increase elbow pointiness. Assuming each dominant allele for A, B, and C each provides 1 “point” of pointiness, and that pointiness ranges from 0-6.\n\nIn a trihybrid cross, what fraction of offspring would you expect to have less than 5 points of “pointiness?”",
+      "imgURL": "",
+      "solution": "D, For there to be less than 5 points of pointiness, we may have anywhere from 0-4 dominant alleles. Rather than counting this, we’ll count the number of ways we can have 5 or 6 dominant alleles and subtract this from the total number of possibilities. This is [2^6 − (C(6,6) + C(6,5))]/2^6 = 57/64."
+    },
+    {
+      "docId": "q6",
+      "a": "If FEMBAO acted genetically downstream of SOX9, Joseph would have observed different results on his western blot.",
+      "b": "In a cross between a heterozygous female and a WT male mouse, 25 percent of offspring would show mutant phenotypes.",
+      "c": "FB-siRNA is insufficient to rescue the heterozygous condition of FEMBAO for proper development of testis.",
+      "d": "Female mice homozygous for the mutant FEMBAO gene would be indistinguishable from heterozygote females.",
+      "e": "The mutant form of FEMBAO may disrupt wild type FEMBAO by directly interacting with it.",
+      "correct": "c",
+      "content": "Joseph has recently discovered the protein FEMBAO, which he is studying in mice. Specifically, he is interested in its effects on the expression of SOX9, a gene located on chromosome 17 responsible for the proper formation of testis. In order to better understand the mechanisms behind FEMBAO, Joseph has decided to run a western blot in the presence of siRNAs for FEMBAO (FB-siRNA). The data may be found below.\n\nWhich of the following statements is NOT true?",
+      "imgURL": "",
+      "solution": "C, Looking at the western blot, we can see that the lane with the heterozygous condition +/m and FB-siRNA shows little to no expression of FEMBAO, as well as rescued expression of SOX9."
+    },
+    {
+      "docId": "q7",
+      "a": "The ratio of left to right mouthed fish in a lake periodically oscillates.",
+      "b": "Antibiotic resistant bacteria becoming more prevalent over time.",
+      "c": "Black mice become more prevalent after lava has cooled into igneous rocks.",
+      "d": "Multiple toxic species of butterflies resemble one another.",
+      "e": "A certain population of finches evolves to have either extremely short or extremely long beaks.",
+      "correct": "a",
+      "content": "Which of the following is an example of negative frequency-dependent selection?",
+      "imgURL": "",
+      "solution": "A, The periodic oscillation indicates that as left and right mouthed fish become more prevalent respectively, they are selected against. Definitionally, that is negative frequency dependent selection."
+    },
+    {
+      "docId": "q8",
+      "a": "The two hormones being studied work antagonistically in regulating seed germination.",
+      "b": "Linoleic acid was radioactively labeled with 13C.",
+      "c": "Both hormones being studied influence protein relocalization.",
+      "d": "The hormone radioactively labeled with 3H is involved in the plant’s response to xerophytic conditions.",
+      "e": "Neither hormone being studied incorporates nitrogen.",
+      "correct": "a",
+      "content": "In order to determine the function of 2 unnamed plant hormones, you decide to inject 5 different groups of Arabidopsis thaliana samples with radioactively labeled linoleic acid and beta-carotene. You scan the plants after injection and proceed to subject group 1 to hungry grasshoppers, group 2 to flooding, group 3 to mechanical stress, group 4 to ethylene, and group 5 is your control, which receives just water. Then, you rescan all the plants and observe the following data:\n\nWhich of the following statements is false?",
+      "imgURL": "",
+      "solution": "A, The two hormones being studied are jasmonic acid and abscisic acid. Jasmonic acid plays no role in seed germination. B is true since linoleic acid is the precursor to jasmonic acid. C is true since both hormones influence protein relocalization. D is true since ABA regulates response to xerophytic conditions. E is true since neither hormone incorporates nitrogen."
+    },
+    {
+      "docId": "q9",
+      "a": "Keystone species",
+      "b": "Pioneer species",
+      "c": "Indicator species",
+      "d": "Invasive species",
+      "e": "Flagship species",
+      "correct": "c",
+      "content": "Johnny the jackrabbit has recently turned green (Oh no!) following the dropping of large amounts of garbage onto his grassland. Feeling horrible since this garbage was released from your helicopter, you decide to go on a mission to clean up all the trash you dropped. Miraculously, after cleaning up all the garbage, Johnny begins to gain his normal color back.\n\nWhich of the following types of species best describes Johnny?",
+      "imgURL": "",
+      "solution": "C, An indicator species is a species whose abundance or health can provide insights into the health of an ecosystem. Since Johnny’s color seems to be directly correlated with the level of trash in the grassland, he can best be described as an indicator species."
+    },
+    {
+      "docId": "q10",
+      "a": "Fixed ratio",
+      "b": "Fixed interval",
+      "c": "Variable ratio",
+      "d": "Variable interval",
+      "e": "C or D",
+      "correct": "b",
+      "content": "You’ve recently decided to start training your cat Sparky to use and flush the toilet himself. You need to get this done within the next month or so, since your family is coming for Christmas and you want to impress them. You only see them once a year though, so you do not care if he continues to do so after they’ve left.\n\nIn order to train Sparky, which of the following reinforcement schedules should you use?",
+      "imgURL": "",
+      "solution": "B, The fixed interval schedule is reliable and consistent, and since you have adequate time to prepare, Sparky will likely adapt. Fixed interval schedules are also highly susceptible to extinction after ceasing them, and since you do not care whether Sparky continues after your family leaves, this makes fixed interval the best option."
+    },
+    {
+      "docId": "q11",
+      "a": "Archeagnatha",
+      "b": "Zygenotema",
+      "c": "Orthoptera",
+      "d": "Hymenoptera",
+      "e": "Himenptera",
+      "correct": "d",
+      "content": "While on a hike through the Costa Rican jungle, you notice a colony of ants all traveling together towards their ant hill. Fascinated by their behavior, your tour guide tells you these ants can carry tens of times their body weight and that these ants are all bringing these leaves to their queen within the ant hill.\n\nWhich of the following orders of insects are these ants a part of?",
+      "imgURL": "",
+      "solution": "D, Hymenoptera includes colony animals such as ants, bees, and wasps."
+    }
+  ]
+}

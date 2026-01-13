@@ -1,0 +1,32 @@
+{
+  "potd": [
+    {
+      "docId": "2026-1-9",
+      "title": "Daily Problem 238",
+      "topic": "Ecology",
+      "question": "Which of the following biomes has the lowest rate of decomposition?",
+      "a": "Temperate seasonal forest",
+      "b": "Savanna",
+      "c": "Peatland",
+      "d": "Tropical rainforest",
+      "e": "Shrubland",
+      "correct": ["c"],
+      "multiSelect": false,
+      "solution": "Low oxygen conditions in peatlands do not allow for decomposers; this is why bodies may be preserved for so long in peatlands."
+    },
+    {
+      "docId": "2026-1-10",
+      "title": "Daily Problem 239",
+      "topic": "Ethology",
+      "question": "While observing a honeybee perform the waggle-dance, you see it making 8 waggles per run at an angle of 40 degrees to the right of the vertical between the sun and hive. Shortly later, you place the bee in a simulated environment with flowers located somewhere completely new, but keeping all else the same. If the bee continues to perform the same waggle dance as before (8 waggles, 40 degrees right), which of the following best describes its behavior?",
+      "a": "Fixed action pattern",
+      "b": "Associative learning",
+      "c": "Spatial learning",
+      "d": "Pheromones",
+      "e": "Imprinting",
+      "correct": ["c"],
+      "multiSelect": false,
+      "solution": "The bee is basing its behavior on the establishment of a memory that reflects its environment’s spatial structure."
+    }
+  ]
+}
