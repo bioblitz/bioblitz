@@ -290,8 +290,7 @@ export default function HomeClient({
           )}
         </div>
 
-        {/* Games Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
           {filteredGames.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
               <Filter className="w-12 h-12 text-zinc-700 mx-auto mb-3" />

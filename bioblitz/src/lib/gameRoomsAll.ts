@@ -44,13 +44,14 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
       visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);
     }
 
-    const creatorCache = new Map<string, { username?: string; banner?: string }>();
+    const creatorCache = new Map<string, { username?: string; banner?: string; pfp?: string }>();
 
     const gameList = await Promise.all(visibleDocs.map(async (docSnap: QueryDocumentSnapshot<DocumentData>) => {
       const data = docSnap.data();
 
       let creatorUsername = data.creatorUsername;
       let creatorBanner = data.creatorBanner;
+      let creatorPfp = data.creatorPfp;
       
       if (data.creator && !creatorCache.has(data.creator)) {
         try {
@@ -61,9 +62,11 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
             creatorCache.set(data.creator, {
               username: userData.username,
               banner: userData.bannerURL,
+              pfp: userData.photoURL,
             });
             creatorUsername = creatorUsername || userData.username;
             creatorBanner = creatorBanner || userData.bannerURL;
+            creatorPfp = creatorPfp || userData.photoURL;
           }
         } catch (e) {
           console.error("Error fetching creator data:", e);
@@ -72,6 +75,7 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
         const cached = creatorCache.get(data.creator);
         creatorUsername = creatorUsername || cached?.username;
         creatorBanner = creatorBanner || cached?.banner;
+        creatorPfp = creatorPfp || cached?.pfp;
       }
 
       return {
@@ -84,7 +88,7 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
         timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
         description: data.description,
         creator: data.creator,
-        creatorPfp: data.creatorPfp,
+        creatorPfp,
         creatorUsername,
         creatorBanner,
         rating: data.averageRating || data.rating,

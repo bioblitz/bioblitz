@@ -94,9 +94,11 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
     
     // Fetch creator's banner once
     let creatorBanner: string | undefined;
+    let creatorPfp: string | undefined;
     try {
       const creatorProfile = await getUserProfile(creatorUid);
       creatorBanner = creatorProfile?.bannerURL;
+      creatorPfp = creatorProfile?.photoURL;
     } catch (e) {
       console.error("Error fetching creator banner:", e);
     }
@@ -113,6 +115,7 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
+        creatorPfp: data.creatorPfp || creatorPfp,
         // Convert Timestamp to ISO string if it exists
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
@@ -132,24 +135,28 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
     const contests: gameRoom[] = [];
     
     // Create a map to cache creator banners
-    const creatorBanners = new Map<string, string | undefined>();
+    const creatorBanners = new Map<string, { banner?: string; pfp?: string }>();
     
     for (const docSnap of querySnapshot.docs) {
       const data = docSnap.data();
       
       // Fetch creator banner if we have a creator and haven't cached it yet
       let creatorBanner: string | undefined;
+      let creatorPfp: string | undefined;
       if (data.creator && !creatorBanners.has(data.creator)) {
         try {
           const creatorProfile = await getUserProfile(data.creator);
           creatorBanner = creatorProfile?.bannerURL;
-          creatorBanners.set(data.creator, creatorBanner);
+          creatorPfp = creatorProfile?.photoURL;
+          creatorBanners.set(data.creator, { banner: creatorBanner, pfp: creatorPfp });
         } catch (e) {
           console.error("Error fetching creator banner:", e);
-          creatorBanners.set(data.creator, undefined);
+          creatorBanners.set(data.creator, {});
         }
       } else {
-        creatorBanner = creatorBanners.get(data.creator);
+        const cached = creatorBanners.get(data.creator);
+        creatorBanner = cached?.banner;
+        creatorPfp = cached?.pfp;
       }
       
       // Calculate number_of_questions from questions array if available
@@ -162,6 +169,7 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
+        creatorPfp: data.creatorPfp || creatorPfp,
         // Convert Timestamp to ISO string if it exists
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
@@ -184,10 +192,12 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
       
       // Fetch creator banner
       let creatorBanner: string | undefined;
+      let creatorPfp: string | undefined;
       if (data.creator) {
         try {
           const creatorProfile = await getUserProfile(data.creator);
           creatorBanner = creatorProfile?.bannerURL;
+          creatorPfp = creatorProfile?.photoURL;
         } catch (e) {
           console.error("Error fetching creator banner:", e);
         }
@@ -203,6 +213,7 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
+        creatorPfp: data.creatorPfp || creatorPfp,
         // Convert Timestamp to ISO string if it exists
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
