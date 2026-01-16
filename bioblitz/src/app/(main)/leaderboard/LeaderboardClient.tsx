@@ -140,9 +140,13 @@ export default function LeaderboardClient({
 
                     <div className="flex-grow min-w-0 pr-4">
                         <h3 className={`font-bold truncate text-sm sm:text-base ${user.uid === currentUserUid ? "text-violet-400" : "text-white"}`}>
-                        <Link href={`/profile/${user.username}`}>
-                            <span className="cursor-pointer hover:underline">{user.displayName}</span>
-                        </Link>
+                        {user.username ? (
+                          <Link href={`/profile/${user.username}`}>
+                              <span className="cursor-pointer hover:underline">{user.displayName}</span>
+                          </Link>
+                        ) : (
+                          <span>{user.displayName}</span>
+                        )}
                         </h3>
                         {user.school && <p className="text-xs text-zinc-500 truncate">{user.school}</p>}
                     </div>

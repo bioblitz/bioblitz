@@ -23,7 +23,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       <div
         className={`relative h-full flex flex-col justify-between bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}
       >
-        {contest.bannerUrl && (
+        {contest.bannerUrl && contest.bannerUrl.trim() !== "" && (
           <img src={contest.bannerUrl} alt={`${contest.title} banner`} className="w-full h-32 object-cover rounded-t-2xl" />
         )}
         <div className="p-5">

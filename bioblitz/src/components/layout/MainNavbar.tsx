@@ -210,14 +210,16 @@ export default function MainNavbar() {
                 </div>
               </div>
 
-              <Link href={`/profile/${user.username}`}>
-                <span
-                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  Profile
-                </span>
-              </Link>
+              {user?.username && (
+                <Link href={`/profile/${user.username}`}>
+                  <span
+                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Profile
+                  </span>
+                </Link>
+              )}
               <Link
                 href={user?.username ? `/channel/${user.username}` : "/channel"}
               >

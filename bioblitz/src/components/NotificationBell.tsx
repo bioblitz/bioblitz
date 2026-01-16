@@ -86,7 +86,9 @@ export default function NotificationBell() {
 
   const handleNotificationClick = (link: string) => {
     setIsOpen(false);
-    router.push(link);
+    if (link && link.trim() !== "") {
+      router.push(link);
+    }
   };
 
   if (!currentUser) return null;
@@ -125,9 +127,9 @@ export default function NotificationBell() {
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => handleNotificationClick(notification.link)}
+                  onClick={() => notification.link && handleNotificationClick(notification.link)}
                   className={`
-                    p-4 border-b border-zinc-800/50 cursor-pointer transition-colors flex gap-3
+                    p-4 border-b border-zinc-800/50 ${notification.link ? 'cursor-pointer' : 'cursor-default'} transition-colors flex gap-3
                     ${
                       notification.read
                         ? "bg-transparent hover:bg-zinc-900/50"

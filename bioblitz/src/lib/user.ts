@@ -117,8 +117,10 @@ export async function getUserProfile(uid: string) {
 
 export async function getUserProfileByUsername(username: string): Promise<UserProfile | null> {
   const usersRef = collection(firestore, "users");
-  const q = query(usersRef, where("username", "==", username));
-  const querySnapshot = await getDocs(q);
+  
+  // Try exact match first
+  let q = query(usersRef, where("username", "==", username));
+  let querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
     console.log("User found with username:", username);
@@ -126,8 +128,25 @@ export async function getUserProfileByUsername(username: string): Promise<UserPr
     const userProfile = userDoc.data() as UserProfile;
     userProfile.uid = userDoc.id;
     return userProfile;
-  } else {
-    console.log("User not found with username:", username);
-    return null;
   }
+  
+  // If no exact match, try case-insensitive search
+  console.log("Exact match not found, trying case-insensitive search for:", username);
+  const normalizedUsername = username.toLowerCase();
+  const allUsersSnapshot = await getDocs(usersRef);
+  
+  const matchingDoc = allUsersSnapshot.docs.find(doc => {
+    const docUsername = doc.data().username;
+    return docUsername && docUsername.toLowerCase() === normalizedUsername;
+  });
+
+  if (matchingDoc) {
+    console.log("User found with case-insensitive match:", matchingDoc.data().username);
+    const userProfile = matchingDoc.data() as UserProfile;
+    userProfile.uid = matchingDoc.id;
+    return userProfile;
+  }
+  
+  console.log("User not found with username:", username);
+  return null;
 }

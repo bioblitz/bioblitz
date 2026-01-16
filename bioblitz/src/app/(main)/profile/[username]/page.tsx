@@ -155,13 +155,32 @@ export default function ProfilePage() {
     const fetchUserByUsername = async () => {
       try {
         setLoading(true);
-        const q = query(
+        
+        // Try exact match first
+        let q = query(
           collection(db, "users"),
           where("username", "==", usernameParam)
         );
-        const snapshot = await getDocs(q);
+        let snapshot = await getDocs(q);
 
+        // If no exact match, try case-insensitive search
         if (snapshot.empty) {
+          const normalizedUsername = usernameParam.toLowerCase();
+          const allUsersSnapshot = await getDocs(collection(db, "users"));
+          
+          const matchingDoc = allUsersSnapshot.docs.find(doc => {
+            const username = doc.data().username;
+            return username && username.toLowerCase() === normalizedUsername;
+          });
+
+          if (matchingDoc) {
+            const userData = matchingDoc.data() as UserProfile;
+            setProfileUid(matchingDoc.id);
+            setUserProfile({ ...userData, uid: matchingDoc.id });
+            setLoading(false);
+            return;
+          }
+          
           setError("User not found.");
           setLoading(false);
           return;

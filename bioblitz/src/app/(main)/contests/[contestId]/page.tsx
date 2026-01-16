@@ -19,7 +19,7 @@ export default async function ContestPage({ params }: ContestPageParams) {
   return (
     <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12">
       <div className="container mx-auto max-w-4xl px-4">
-        {contest.bannerUrl && (
+        {contest.bannerUrl && contest.bannerUrl.trim() !== "" && (
           <div className="relative w-full h-64 mb-8 rounded-2xl overflow-hidden">
             <Image
               src={contest.bannerUrl}

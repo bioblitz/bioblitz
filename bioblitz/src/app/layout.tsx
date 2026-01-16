@@ -11,8 +11,6 @@ export const metadata = {
   icons: {
     icon: "/icons/favicon.ico",
     shortcut: "/icons/favicon.ico",
-    apple: ""
-    
   },
   openGraph: {
     title: "BioBlitz | Competitive Biology Platform",

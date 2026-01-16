@@ -91,7 +91,14 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
     querySnapshot.forEach((doc) => {
-      contests.push({ id: doc.id, ...doc.data() } as gameRoom);
+      const data = doc.data();
+      // Serialize the data to remove Timestamp objects and other non-serializable fields
+      contests.push({ 
+        id: doc.id, 
+        ...data,
+        // Convert Timestamp to ISO string if it exists
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+      } as gameRoom);
     });
     return contests;
   } catch (e) {
@@ -106,7 +113,14 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
     querySnapshot.forEach((doc) => {
-      contests.push({ id: doc.id, ...doc.data() } as gameRoom);
+      const data = doc.data();
+      // Serialize the data to remove Timestamp objects and other non-serializable fields
+      contests.push({ 
+        id: doc.id, 
+        ...data,
+        // Convert Timestamp to ISO string if it exists
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+      } as gameRoom);
     });
     return contests;
   } catch (e) {
@@ -121,7 +135,14 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as gameRoom;
+      const data = docSnap.data();
+      // Serialize the data to remove Timestamp objects and other non-serializable fields
+      return { 
+        id: docSnap.id, 
+        ...data,
+        // Convert Timestamp to ISO string if it exists
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+      } as gameRoom;
     }
     else {
       console.log("No such contest document!");
