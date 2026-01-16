@@ -82,7 +82,9 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
         id: docSnap.id,
         title: data.title || '',
         source: data.source || '',
-        number_of_questions: (data.questionCount || 0).toString(),
+        number_of_questions: (data.questions && Array.isArray(data.questions) 
+          ? data.questions.length 
+          : (data.number_of_questions ? parseInt(data.number_of_questions) : (data.questionCount || 0))).toString(),
         topic: data.topic,
         difficulty: data.difficulty || 'Easy',
         timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),

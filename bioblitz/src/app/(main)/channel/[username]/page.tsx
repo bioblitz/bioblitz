@@ -3,10 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { PencilIcon, PlusIcon, HelpCircle, Clock, Star, CheckCircle2 } from "lucide-react";
+import { PencilIcon, PlusIcon, HelpCircle, Clock, Star, CheckCircle2, Check, X } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import { uploadImage } from "../../../../lib/storage";
-import { updateUserBanner, getUserProfileByUsername, UserProfile } from "../../../../lib/user";
+import { updateUserBanner, updateChannelName, getUserProfileByUsername, UserProfile } from "../../../../lib/user";
 import { getContestsByCreator } from "../../../../lib/actions";
 import { gameRoom } from "@/types";
 import ContestCard from "@/components/features/contests/ContestCard";
@@ -25,9 +25,36 @@ export default function ChannelPage() {
   const [loading, setLoading] = useState(true);
   const [bannerLoading, setBannerLoading] = useState(false);
   const [userContests, setUserContests] = useState<gameRoom[]>([]);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newChannelName, setNewChannelName] = useState("");
+  const [nameError, setNameError] = useState("");
   
   const handleBannerUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleEditNameClick = () => {
+    setNewChannelName(channelOwnerProfile?.channelName || channelOwnerProfile?.username || "");
+    setIsEditingName(true);
+    setNameError("");
+  };
+
+  const handleSaveChannelName = async () => {
+    if (!authUser || !newChannelName.trim()) return;
+    
+    try {
+      const trimmedName = newChannelName.trim();
+      await updateChannelName(authUser.uid, trimmedName);
+      setChannelOwnerProfile(prev => prev ? { ...prev, channelName: trimmedName } : null);
+      setIsEditingName(false);
+    } catch (error: any) {
+      setNameError(error.message || "Failed to update channel name");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setNameError("");
   };
   
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +135,8 @@ export default function ChannelPage() {
           style={{
             backgroundImage: channelOwnerProfile?.bannerURL 
             ? `url(${channelOwnerProfile.bannerURL})` 
+            : channelOwnerProfile?.photoURL
+            ? `url(${channelOwnerProfile.photoURL})`
             : `linear-gradient(to bottom, #18181b, #000000)`
           }}
         >
@@ -132,7 +161,50 @@ export default function ChannelPage() {
       )}
       
       <div className="p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{channelOwnerProfile?.username || channelOwnerProfile?.displayName}'s Channel</h1>
+        <div className="flex items-center gap-3">
+          {isEditingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newChannelName}
+                onChange={(e) => setNewChannelName(e.target.value)}
+                className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-xl font-bold"
+                placeholder="Channel name"
+                autoFocus
+              />
+              <button
+                onClick={handleSaveChannelName}
+                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded"
+                title="Save"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded"
+                title="Cancel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold">
+                {(channelOwnerProfile?.channelName || channelOwnerProfile?.username || channelOwnerProfile?.displayName)}'s Channel
+              </h1>
+              {isOwner && (
+                <button
+                  onClick={handleEditNameClick}
+                  className="p-1 hover:bg-zinc-800 rounded transition-colors"
+                  title="Edit channel name"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
         {isOwner && (
             <button 
                 onClick={handleCreateNewContest}

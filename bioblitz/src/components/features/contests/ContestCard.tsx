@@ -11,6 +11,7 @@ interface ContestCardProps {
 
 const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
   const timeInMinutes = contest.timeLimit ? parseInt(contest.timeLimit) : 0;
+  const questionCount = parseInt(contest.number_of_questions) || 0;
 
   return (
     <Link
@@ -43,6 +44,13 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
             <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black" />
           )}
           
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <p className="text-white text-sm font-semibold text-center px-4">
+              {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
+            </p>
+          </div>
+          
           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-xs font-semibold">{timeInMinutes} min</span>
@@ -50,45 +58,56 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
         </div>
 
         <div className="flex-1 p-3 flex flex-col">
-          
-
-          <div className="flex mb-2 items-center gap-2">
+          <div className="flex items-start gap-3">
+            {/* Profile Picture */}
             {contest.creatorPfp ? (
               <img 
                 src={contest.creatorPfp} 
                 alt={contest.creatorUsername || "Creator"} 
-                className="w-8 h-8 rounded-full object-cover border-2 border-zinc-700"
+                className="w-12 h-12 rounded-full object-cover border-2 border-zinc-700 flex-shrink-0"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-8 h-8">
+              <div className="w-12 h-12 flex-shrink-0">
                 <DefaultAvatar name={""} />
               </div>
             )}
             
+            {/* Info Section */}
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white line-clamp-1">
+              {/* Contest Title */}
+              <h2 className="text-base font-bold text-white line-clamp-2 mb-1">
                 {contest.title}
               </h2>
+              
+              {/* Channel Name */}
               {contest.creatorUsername && (
-                <p className="text-xs text-zinc-400 truncate">
+                <span 
+                  className="text-xs text-zinc-400 hover:underline block truncate mb-1 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = `/channel/${contest.creatorUsername}`;
+                  }}
+                >
                   {contest.creatorUsername}
-                </p>
+                </span>
               )}
-            </div>
-            
-          </div>
-          <div className="flex items-center gap-3 mb-2 text-xs">
-            <div className="flex items-center gap-1 text-zinc-400">
-              <Users className="w-3.5 h-3.5" />
-              <span className="font-medium">{(contest as any).totalPlays || 0}</span>
-            </div>
-            {contest.rating && contest.rating > 0 && (
-              <div className="flex items-center gap-1 text-yellow-400">
-                <Star className="w-3.5 h-3.5 fill-yellow-400" />
-                <span className="font-medium">{contest.rating.toFixed(1)}</span>
+              
+              {/* Rating and Plays */}
+              <div className="flex items-center gap-3 text-xs">
+                {contest.rating && contest.rating > 0 && (
+                  <div className="flex items-center gap-1 text-yellow-400">
+                    <Star className="w-3 h-3 fill-yellow-400" />
+                    <span className="font-medium">{contest.rating.toFixed(1)}/5</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1 text-zinc-400">
+                  <Users className="w-3 h-3" />
+                  <span className="font-medium">{contest.totalPlays || 0} plays</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

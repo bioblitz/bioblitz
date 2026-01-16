@@ -30,6 +30,7 @@ export interface UserProfile {
   lastLogin: Timestamp | FieldValue;
   nameChangedAt: Timestamp | FieldValue;
   bannerURL?: string;
+  channelName?: string;
 }
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
@@ -57,6 +58,16 @@ export async function updateUserBanner(
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
     bannerURL: bannerURL,
+  });
+}
+
+export async function updateChannelName(
+  uid: string,
+  channelName: string
+): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await updateDoc(userRef, {
+    channelName: channelName,
   });
 }
 
