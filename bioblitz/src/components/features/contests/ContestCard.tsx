@@ -13,6 +13,17 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
   const timeInMinutes = contest.timeLimit ? parseInt(contest.timeLimit) : 0;
   const questionCount = parseInt(contest.number_of_questions) || 0;
 
+  const getTopicColor = (topic?: string) => {
+    if (!topic) return "bg-violet-600";
+    
+    const topicLower = topic.toLowerCase();
+    if (topicLower.includes("animal")) return "bg-rose-600";
+    if (topicLower.includes("eco")) return "bg-emerald-600";
+    if (topicLower.includes("genetic")) return "bg-lime-600";
+    if (topicLower.includes("plant")) return "bg-green-600";
+    return "bg-violet-600";
+  };
+
   return (
     <Link
       key={contest.id}
@@ -44,22 +55,30 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
             <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black" />
           )}
           
-          {/* Hover Overlay */}
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <p className="text-white text-sm font-semibold text-center px-4">
               {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
             </p>
           </div>
           
-          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs font-semibold">{timeInMinutes} min</span>
+          {contest.topic && (
+            <div className="absolute bottom-2 left-2 z-10">
+              <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}>
+                {contest.topic}
+              </span>
+            </div>
+          )}
+          
+          <div className="absolute bottom-2 right-2 z-10">
+            <div className="flex items-center gap-1 bg-black/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="text-xs font-semibold">{timeInMinutes} min</span>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 p-3 flex flex-col">
           <div className="flex items-start gap-3">
-            {/* Profile Picture */}
             {contest.creatorPfp ? (
               <img 
                 src={contest.creatorPfp} 

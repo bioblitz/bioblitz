@@ -184,9 +184,7 @@ export default function GameDetailPage() {
         const q = query(
           collection(firestore, "gameSubmissions"),
           where("gameId", "==", gameId),
-          where("status", "==", "graded"),
-          orderBy("submittedAt", "desc"),
-          limit(20)
+          where("status", "==", "graded")
         );
 
         const snapshot = await getDocs(q);
@@ -226,11 +224,19 @@ export default function GameDetailPage() {
           })
         );
 
-        setLeaderboard(
-          leaderboardData.filter(
-            (entry) => entry !== null
-          ) as LeaderboardEntry[]
-        );
+        const filteredData = leaderboardData.filter(
+          (entry) => entry !== null
+        ) as LeaderboardEntry[];
+        
+        // Sort by score (desc), then by time (asc)
+        filteredData.sort((a, b) => {
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+          return a.timeTaken - b.timeTaken;
+        });
+        
+        setLeaderboard(filteredData.slice(0, 50));
       } catch (err) {
         console.error("Error loading leaderboard:", err);
       } finally {

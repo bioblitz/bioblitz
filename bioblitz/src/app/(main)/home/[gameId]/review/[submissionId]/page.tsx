@@ -40,7 +40,6 @@ export default function ReviewPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch the specific submission
         const subRef = doc(firestore, "gameSubmissions", submissionId as string);
         const subSnap = await getDoc(subRef);
 
@@ -52,7 +51,6 @@ export default function ReviewPage() {
         const subData = subSnap.data() as SubmissionData;
         setSubmission(subData);
 
-        // 2. Fetch the questions (text content) via Cloud Function
         const functions = getFunctions();
         const getPublicQuestions = httpsCallable(
           functions,
@@ -72,7 +70,6 @@ export default function ReviewPage() {
     }
   }, [gameId, submissionId, router]);
 
-  // Helper to match the GameRoom format exactly
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -144,7 +141,6 @@ export default function ReviewPage() {
             </div>
           </div>
 
-          {/* Question List - Matches "Result" tab exactly */}
           <div className="space-y-8">
             {questions.map((question, idx) => {
               const choices = ["a", "b", "c", "d", "e"]
@@ -155,7 +151,6 @@ export default function ReviewPage() {
                 }));
               
               const userAnswer = submission.userAnswers[idx];
-              // Use safe navigation in case correctAnswers is missing for legacy data
               const correctAnswer = submission.correctAnswers
                 ? submission.correctAnswers[idx]
                 : "";
@@ -171,9 +166,10 @@ export default function ReviewPage() {
                     </span>
                   </div>
 
-                  <p className="mb-6 text-xl text-zinc-100">
-                    {question.content}
-                  </p>
+                  <div 
+                    className="mb-6 text-xl text-zinc-100"
+                    dangerouslySetInnerHTML={{ __html: question.content }}
+                  />
 
                   {question.imgURL && (
                     <img
@@ -207,7 +203,10 @@ export default function ReviewPage() {
                           <span className="font-bold mr-4 uppercase w-6">
                             {key}
                           </span>
-                          <span className="font-medium">{text}</span>
+                          <span 
+                            className="font-medium"
+                            dangerouslySetInnerHTML={{ __html: text }}
+                          />
                           {isCorrect && (
                             <span className="ml-auto text-emerald-500 font-bold text-sm">
                               CORRECT
