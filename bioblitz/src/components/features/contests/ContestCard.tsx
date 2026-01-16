@@ -1,98 +1,90 @@
 import React from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { HelpCircle, Clock, Star, CheckCircle2 } from "lucide-react";
-import { getTopicColors } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
+import { Clock, Star, Users } from "lucide-react";
+import DefaultAvatar from "@/components/ui/DefaultAvatar";
 
 interface ContestCardProps {
   contest: gameRoom;
+  href?: string;
 }
 
-const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
-  const { user: authUser } = useAuth();
-  const theme = getTopicColors(contest.topic);
-  const isCreator = contest.creator === authUser?.uid;
+const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
+  // Parse time limit to extract minutes
+  const timeInMinutes = contest.timeLimit ? parseInt(contest.timeLimit) : 0;
 
   return (
     <Link
       key={contest.id}
-      href={`/contests/${contest.id}`}
-      className="block group"
+      href={href || `/contests/${contest.id}`}
+      className="block group max-w-sm"
     >
-      <div
-        className={`relative h-full flex flex-col justify-between bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}
-      >
-        {contest.bannerUrl && contest.bannerUrl.trim() !== "" && (
-          <img src={contest.bannerUrl} alt={`${contest.title} banner`} className="w-full h-32 object-cover rounded-t-2xl" />
-        )}
-        <div className="p-5">
-          <div className="flex justify-between items-start mb-3">
-            {contest.topic && (
-              <span
-                className={`${theme.badge} text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}
-              >
-                {contest.topic}
-              </span>
-            )}
-
-            {contest.status === "incomplete" && isCreator && (
-              <div className="flex items-center gap-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                <span>Incomplete</span>
-              </div>
-            )}
-            {contest.status === "completed" && (
-              <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                <CheckCircle2 className="w-3 h-3" />
-                <span>Completed</span>
-              </div>
-            )}
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight transition-colors">
-            {contest.title}
-          </h2>
-          <div className="space-y-1">
-            <div className="flex items-center text-sm text-zinc-400">
-              <span>By</span>
-              <span className="ml-2 font-semibold truncate">{contest.creatorUsername || contest.creator}</span>
-            </div>
-            {contest.creatorPfp && (
-              <div className="flex items-center text-sm text-zinc-400 mt-1">
-                <img src={contest.creatorPfp} alt="creator" className="w-6 h-6 rounded-full mr-2 object-cover" />
-                <span className="truncate">{contest.creatorUsername || contest.creator}</span>
-              </div>
-            )}
-            {contest.source && (
-              <div className="flex items-center text-sm text-zinc-500">
-                <span className="text-xs border border-zinc-700 px-1.5 rounded">
-                  {contest.source}
-                </span>
-              </div>
-            )}
-            {!contest.creator && !contest.source && <div className="h-6"></div>}
+      <div className="relative h-full flex flex-col bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10">
+        {/* Banner Section */}
+        <div className="relative w-full h-28 bg-black">
+          {contest.bannerUrl && contest.bannerUrl.trim() !== "" ? (
+            <img 
+              src={contest.bannerUrl} 
+              alt={`${contest.title} banner`} 
+              className="w-full h-full object-cover"
+            />
+          ) : contest.creatorBanner ? (
+            <img 
+              src={contest.creatorBanner} 
+              alt={`${contest.creatorUsername}'s banner`} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black" />
+          )}
+          
+          {/* Time Badge - Bottom Left */}
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-xs font-semibold">{timeInMinutes} min</span>
           </div>
         </div>
-        <div className="px-5 py-4 bg-black/20 border-t border-white/5 flex justify-between items-center text-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center text-zinc-400" title="Questions">
-              <HelpCircle className="w-4 h-4 mr-1.5 opacity-70" />
-              <span className="font-semibold text-zinc-300">
-                {contest.number_of_questions}
-              </span>
+
+        {/* Content Section */}
+        <div className="flex-1 p-3 flex flex-col">
+          {/* Stats Row */}
+          <div className="flex items-center gap-3 mb-2 text-xs">
+            <div className="flex items-center gap-1 text-zinc-400">
+              <Users className="w-3.5 h-3.5" />
+              <span className="font-medium">{(contest as any).totalPlays || 0}</span>
             </div>
-            <div className="flex items-center text-zinc-400" title="Time Limit">
-              <Clock className="w-4 h-4 mr-1.5 opacity-70" />
-              <span className="font-semibold text-zinc-300">
-                {contest.timeLimit}
-              </span>
+            {contest.rating && contest.rating > 0 && (
+              <div className="flex items-center gap-1 text-yellow-400">
+                <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                <span className="font-medium">{contest.rating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Creator Info */}
+          <div className="flex items-center gap-2">
+            {contest.creatorPfp ? (
+              <img 
+                src={contest.creatorPfp} 
+                alt={contest.creatorUsername || "Creator"} 
+                className="w-8 h-8 rounded-full object-cover border-2 border-zinc-700"
+              />
+            ) : (
+              <div className="w-8 h-8">
+                <DefaultAvatar />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-bold text-white line-clamp-1">
+                {contest.title}
+              </h2>
+              {contest.creatorUsername && (
+                <p className="text-xs text-zinc-400 truncate">
+                  {contest.creatorUsername}
+                </p>
+              )}
             </div>
           </div>
-          {contest.rating && contest.rating > 0 && (
-            <div className="flex items-center text-yellow-400 font-medium bg-yellow-400/5 px-2 py-0.5 rounded-md border border-yellow-400/10">
-              <Star className="w-3.5 h-3.5 mr-1 fill-yellow-400" />
-              <span className="text-xs font-bold">{contest.rating}</span>
-            </div>
-          )}
         </div>
       </div>
     </Link>

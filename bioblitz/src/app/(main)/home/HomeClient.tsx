@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { gameRoom } from "@/lib/gameRoomsAll";
-import { useEffect, useState, useMemo } from "react"; // Added useMemo for performance
+import { gameRoom } from "@/types";
+import { allGames } from "@/lib/gameRoomsAll";
+import { useEffect, useState, useMemo } from "react";
+import ContestCard from "@/components/features/contests/ContestCard";
 import {
   Clock,
   HelpCircle,
@@ -309,92 +311,9 @@ export default function HomeClient({
               </button>
             </div>
           ) : (
-            filteredGames.map((game) => {
-              const theme = getTopicColors(game.topic);
-              const isPlayed = playedGameIds.has(game.id);
-
-              return (
-                <Link
-                  key={game.id}
-                  href={`/home/${game.id}`}
-                  className="block group"
-                >
-                  <div
-                    className={`relative h-full flex flex-col justify-between bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}
-                  >
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-3">
-                        {game.topic && (
-                          <span
-                            className={`${theme.badge} text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}
-                          >
-                            {game.topic}
-                          </span>
-                        )}
-
-                        {isPlayed && (
-                          <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide animate-in fade-in">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Completed</span>
-                          </div>
-                        )}
-                      </div>
-                      <h2 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight transition-colors">
-                        {game.title}
-                      </h2>
-                      <div className="space-y-1">
-                        {game.creator && (
-                          <div className="flex items-center text-sm text-zinc-400">
-                            <User className="w-3 h-3 mr-2" />
-                            <span className="truncate">{game.creator}</span>
-                          </div>
-                        )}
-                        {(game as any).source && (
-                          <div className="flex items-center text-sm text-zinc-500">
-                            <span className="text-xs border border-zinc-700 px-1.5 rounded">
-                              {(game as any).source}
-                            </span>
-                          </div>
-                        )}
-                        {!game.creator && !(game as any).source && (
-                          <div className="h-6"></div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="px-5 py-4 bg-black/20 border-t border-white/5 flex justify-between items-center text-sm">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex items-center text-zinc-400"
-                          title="Questions"
-                        >
-                          <HelpCircle className="w-4 h-4 mr-1.5 opacity-70" />
-                          <span className="font-semibold text-zinc-300">
-                            {game.number_of_questions}
-                          </span>
-                        </div>
-                        <div
-                          className="flex items-center text-zinc-400"
-                          title="Time Limit"
-                        >
-                          <Clock className="w-4 h-4 mr-1.5 opacity-70" />
-                          <span className="font-semibold text-zinc-300">
-                            {game.timeLimit}
-                          </span>
-                        </div>
-                      </div>
-                      {game.rating && game.rating > 0 && (
-                        <div className="flex items-center text-yellow-400 font-medium bg-yellow-400/5 px-2 py-0.5 rounded-md border border-yellow-400/10">
-                          <Star className="w-3.5 h-3.5 mr-1 fill-yellow-400" />
-                          <span className="text-xs font-bold">
-                            {game.rating}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })
+            filteredGames.map((game) => (
+              <ContestCard key={game.id} contest={game} href={`/home/${game.id}`} />
+            ))
           )}
         </div>
       </main>

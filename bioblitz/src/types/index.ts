@@ -17,10 +17,14 @@ export type gameRoom = {
   creator?: string;
   creatorPfp?: string;
   creatorUsername?: string;
+  creatorBanner?: string;
   rating?: number;
   questions?: Question[];
   status?: string;
   bannerUrl?: string;
+  totalPlays?: number;
+  lastPlayedAt?: string | null;
+  lastRatingUpdate?: string | null;
 };
 
 export interface Contest {

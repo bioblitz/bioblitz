@@ -2,7 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { allGames, gameRoom } from "@/lib/gameRoomsAll";
+import { allGames } from "@/lib/gameRoomsAll";
+import { gameRoom } from "@/types";
 import {
   Loader2,
   History,

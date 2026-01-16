@@ -1,5 +1,6 @@
-import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
-import { firestore } from "./firebase"; 
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData, doc, getDoc } from "firebase/firestore";
+import { firestore } from "./firebase";
+import { gameRoom } from "@/types";
 
 export type Question = {
   id: string;
@@ -13,20 +14,6 @@ export type Question = {
   [key: string]: any;
 };
 
-export type gameRoom = {
-  id: string;
-  title: string;
-  source: string;
-  number_of_questions: string;
-  topic: string;
-  difficulty: string;
-  timeLimit: string;
-  description?: string;
-  creator?: string;
-  creatorPfp?: string;
-  rating?: number;
-  questions: Question[];
-};
 
 const formatTime = (totalSeconds: number): string => {
   if (isNaN(totalSeconds) || totalSeconds < 0) {
@@ -57,27 +44,57 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
       visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);
     }
 
- 
-    const gameList = visibleDocs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
-      const data = doc.data();
+    const creatorCache = new Map<string, { username?: string; banner?: string }>();
+
+    const gameList = await Promise.all(visibleDocs.map(async (docSnap: QueryDocumentSnapshot<DocumentData>) => {
+      const data = docSnap.data();
+
+      let creatorUsername = data.creatorUsername;
+      let creatorBanner = data.creatorBanner;
+      
+      if (data.creator && !creatorCache.has(data.creator)) {
+        try {
+          const userDocRef = doc(firestore, "users", data.creator);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            creatorCache.set(data.creator, {
+              username: userData.username,
+              banner: userData.bannerURL,
+            });
+            creatorUsername = creatorUsername || userData.username;
+            creatorBanner = creatorBanner || userData.bannerURL;
+          }
+        } catch (e) {
+          console.error("Error fetching creator data:", e);
+        }
+      } else if (data.creator && creatorCache.has(data.creator)) {
+        const cached = creatorCache.get(data.creator);
+        creatorUsername = creatorUsername || cached?.username;
+        creatorBanner = creatorBanner || cached?.banner;
+      }
 
       return {
-        id: doc.id,
+        id: docSnap.id,
         title: data.title || '',
         source: data.source || '',
-        
         number_of_questions: (data.questionCount || 0).toString(),
-        
         topic: data.topic,
         difficulty: data.difficulty || 'Easy',
         timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
         description: data.description,
         creator: data.creator,
         creatorPfp: data.creatorPfp,
-        rating: data.averageRating || data.rating, 
-        questions: [], 
+        creatorUsername,
+        creatorBanner,
+        rating: data.averageRating || data.rating,
+        totalPlays: data.totalPlays || 0,
+        bannerUrl: data.bannerUrl,
+        questions: [],
+        lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
       };
-    });
+    }));
 
     return gameList;
     

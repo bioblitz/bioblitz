@@ -518,11 +518,12 @@ export default function GameRoomPage() {
                         </span>
                       </div>
 
-                      <p className="mb-6 text-xl leading-relaxed text-zinc-100 font-medium">
-                        {question.content}
-                      </p>
+<div 
+                        className="mb-6 text-xl leading-relaxed text-zinc-100 font-medium"
+                        dangerouslySetInnerHTML={{ __html: question.content }}
+                      />
 
-                      {question.imgURL && (
+                          {question.imgURL && (
                         <div className="mb-6 rounded-xl overflow-hidden border border-zinc-700 bg-black">
                           <img
                             src={question.imgURL}
@@ -554,7 +555,10 @@ export default function GameRoomPage() {
                               >
                                 {key}
                               </span>
-                              <span className="text-lg">{text}</span>
+                              <span 
+                                className="text-lg"
+                                dangerouslySetInnerHTML={{ __html: text }}
+                              />
                             </button>
                           );
                         })}
@@ -645,9 +649,10 @@ export default function GameRoomPage() {
                             </span>
                           </div>
 
-                          <p className="mb-6 text-xl text-zinc-100">
-                            {question.content}
-                          </p>
+                          <div 
+                            className="mb-6 text-xl text-zinc-100"
+                            dangerouslySetInnerHTML={{ __html: question.content }}
+                          />
 
                           {question.imgURL && (
                             <img
@@ -681,7 +686,10 @@ export default function GameRoomPage() {
                                   <span className="font-bold mr-4 uppercase w-6">
                                     {key}
                                   </span>
-                                  <span className="font-medium">{text}</span>
+                                  <span 
+                                    className="font-medium"
+                                    dangerouslySetInnerHTML={{ __html: text }}
+                                  />
                                   {isCorrect && (
                                     <span className="ml-auto text-emerald-500 font-bold text-sm">
                                       CORRECT

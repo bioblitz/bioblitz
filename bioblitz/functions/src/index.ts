@@ -42,21 +42,29 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
 
     const gameTitle = gameDoc.data()?.title || gameDoc.data()?.name || "Untitled Set";
     const timeTotal = gameDoc.data()?.timeLimit as number;
+    const gameData = gameDoc.data();
 
-    // Fetch Questions
-    const questionsColRef = gameDocRef.collection("questions");
-    const questionsSnap = await questionsColRef.get();
-    const totalQuestions = questionsSnap.size;
+    let totalQuestions = 0;
+    const correctAnswersMap: { [key: number]: string } = {};
+    
+    if (gameData?.questions && Array.isArray(gameData.questions) && gameData.questions.length > 0) {
+      totalQuestions = gameData.questions.length;
+      gameData.questions.forEach((q: any, index: number) => {
+        correctAnswersMap[index] = q.correctAnswer || "";
+      });
+    } else {
+      const questionsColRef = gameDocRef.collection("questions");
+      const questionsSnap = await questionsColRef.get();
+      totalQuestions = questionsSnap.size;
+      
+      questionsSnap.docs.forEach((doc, index) => {
+        correctAnswersMap[index] = doc.data().correct;
+      });
+    }
 
     if (totalQuestions === 0) {
       return snap.ref.update({ score: 0, status: "error_no_questions" });
     }
-
-    // Calculate Score
-    const correctAnswersMap: { [key: number]: string } = {};
-    questionsSnap.docs.forEach((doc, index) => {
-      correctAnswersMap[index] = doc.data().correct;
-    });
 
     let correctCount = 0;
     for (let i = 0; i < totalQuestions; i++) {
@@ -71,20 +79,16 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
     const finalScore = Math.floor(accuracyScore + timeBonus);
 
-    // Check for Previous Plays (Replay Detection)
     const userRef = db.collection("users").doc(userId);
     const userHistoryDocRef = userRef.collection("setsPlayed").doc(gameId);
     const existingHistory = await userHistoryDocRef.get();
 
-    // <--- NEW: Prepare the Game Set Update (Trending Logic) --->
-    // Increments 'trendingScore' by 10 and updates 'lastPlayedAt'
     const gameSetUpdate = gameDocRef.update({
         totalPlays: FieldValue.increment(1),
         trendingScore: FieldValue.increment(10), 
         lastPlayedAt: FieldValue.serverTimestamp()
     });
 
-    // --- REPLAY LOGIC ---
     if (existingHistory.exists) {
         console.log(`User ${userId} has played set ${gameId} before. Marking as Replay.`);
  
@@ -103,12 +107,11 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
              lastPlayedAt: FieldValue.serverTimestamp(),
              title: gameTitle 
           }),
-          gameSetUpdate // <--- ADDED HERE
+          gameSetUpdate 
         ]);
         return;
     }
 
-    // --- FIRST ATTEMPT LOGIC (Calculate Elo) ---
     const allSetsPlayedSnap = await userRef.collection("setsPlayed").get();
     
     let weightedScoreSum = 0;
@@ -130,13 +133,11 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
         }
     });
 
-    // Add CURRENT game
     weightedScoreSum += finalScore * 1.0;
     totalWeight += 1.0;
 
     const newBElo = Math.round(weightedScoreSum / totalWeight);
 
-    // Database Updates
     const userHistoryData = {
       submission: snap.id, 
       history: [snap.id],
@@ -193,6 +194,38 @@ export const getPublicQuestions = onCall(async (request) => {
   }
 
   try {
+    const setDocRef = db.collection("sets").doc(gameId);
+    const setDoc = await setDocRef.get();
+    
+    if (setDoc.exists) {
+      const setData = setDoc.data();
+      
+      if (setData?.questions && Array.isArray(setData.questions) && setData.questions.length > 0) {
+        const publicQuestions = setData.questions.map((q: any) => {
+          const transformed: any = {
+            id: q.id,
+            content: q.question || q.content || "",
+          };
+          
+          if (q.answers && Array.isArray(q.answers)) {
+            const choiceKeys = ['a', 'b', 'c', 'd', 'e'];
+            q.answers.forEach((answer: string, index: number) => {
+              if (index < choiceKeys.length) {
+                transformed[choiceKeys[index]] = answer;
+              }
+            });
+          }
+          
+          if (q.imgURL || q.imageUrl) {
+            transformed.imgURL = q.imgURL || q.imageUrl;
+          }
+          
+          return transformed;
+        });
+        return { questions: publicQuestions };
+      }
+    }
+    
     const questionsColRef = db.collection("sets").doc(gameId).collection("questions");
     const questionsSnap = await questionsColRef.get();
 
