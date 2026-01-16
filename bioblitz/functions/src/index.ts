@@ -355,10 +355,10 @@ export const resetStreaksDaily = onSchedule(
     memory: "512MiB",
   },
   async (event) => {
-    console.log("🔥 Starting Daily Streak Reset...");
+    console.log("Starting Daily Streak Reset...");
 
     const now = new Date();
-    // Calculate 24 hours ago from "now" (which is midnight PST)
+    // midnight pst
     const cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     const usersSnapshot = await db.collection("users")
@@ -367,20 +367,20 @@ export const resetStreaksDaily = onSchedule(
       .get();
 
     if (usersSnapshot.empty) {
-      console.log("✅ No streaks to reset today.");
+      console.log("No streaks to reset today.");
       return;
     }
 
     console.log(`Found ${usersSnapshot.size} users with broken streaks.`);
 
-    // BATCH UPDATE LOGIC
+    // batch update
     const batchSize = 500;
     const batches = [];
     let currentBatch = db.batch();
     let operationCounter = 0;
 
     usersSnapshot.docs.forEach((doc) => {
-      // Set streak to 0
+      // set streak to 0
       currentBatch.update(doc.ref, { streak: 0 });
       operationCounter++;
 
@@ -421,7 +421,7 @@ export const decayTrendingScores = onSchedule(
       .get();
 
     if (activeSetsSnapshot.empty) {
-      console.log("✅ No active trending games to decay.");
+      console.log("No active trending games to decay.");
       return;
     }
 

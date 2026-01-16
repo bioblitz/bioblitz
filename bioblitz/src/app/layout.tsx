@@ -8,6 +8,12 @@ export const metadata = {
   title: "BioBlitz | Competitive Biology Platform",
   description:
     "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+  icons: {
+    icon: "/icons/favicon.ico",
+    shortcut: "/icons/favicon.ico",
+    apple: ""
+    
+  },
   openGraph: {
     title: "BioBlitz | Competitive Biology Platform",
     description:
