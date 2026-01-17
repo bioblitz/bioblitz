@@ -18,6 +18,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
     
     const topicLower = topic.toLowerCase();
     if (topicLower.includes("animal")) return "bg-rose-600";
+    if (topicLower.includes("multiple")) return "bg-yellow-600";
     if (topicLower.includes("eco")) return "bg-emerald-600";
     if (topicLower.includes("genetic")) return "bg-lime-600";
     if (topicLower.includes("plant")) return "bg-green-600";
@@ -92,14 +93,11 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
               </div>
             )}
             
-            {/* Info Section */}
             <div className="flex-1 min-w-0">
-              {/* Contest Title */}
               <h2 className="text-base font-bold text-white line-clamp-2 mb-1">
                 {contest.title}
               </h2>
               
-              {/* Channel Name */}
               {contest.creatorUsername && (
                 <span 
                   className="text-xs text-zinc-400 hover:underline block truncate mb-1 cursor-pointer"
@@ -113,7 +111,6 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
                 </span>
               )}
               
-              {/* Rating and Plays */}
               <div className="flex items-center gap-3 text-xs">
                 {contest.rating && contest.rating > 0 && (
                   <div className="flex items-center gap-1 text-yellow-400">

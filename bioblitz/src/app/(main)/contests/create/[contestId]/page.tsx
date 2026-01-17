@@ -78,7 +78,7 @@ function SubmitButton() {
   );
 }
 
-const TOPICS = ["Animal", "CellBio", "Plants", "Biochem", "Genetics", "Other"];
+const TOPICS = ["Animal", "CellBio", "Plants", "Biochem", "Genetics", "Multiple"];
 
 export default function EditContestPage() {
   const params = useParams();
@@ -121,7 +121,6 @@ export default function EditContestPage() {
     }
   }, [contestId, routeContestId]);
 
-  // Fetch existing contest if present
   useEffect(() => {
     if (!routeContestId) return;
     async function fetchContest() {
@@ -136,7 +135,6 @@ export default function EditContestPage() {
             setSelectedTopic(contest.topic || TOPICS[0]);
             setBannerUrl(contest.bannerUrl || null);
             if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
-              // convert stored Question[] to EditableQuestion[]
               const editable = (contest.questions as Question[]).map((q) => ({
                 id: q.id || Date.now().toString(),
                 content: q.question || "",
@@ -210,7 +208,6 @@ export default function EditContestPage() {
   const handleSaveDraft = useCallback(async () => {
     if (!contestId) return;
 
-    // Refresh the ID token to avoid using an expired token
     const token = await auth.currentUser?.getIdToken(true);
     if (!token) return;
     setIdToken(token);
@@ -220,7 +217,7 @@ export default function EditContestPage() {
       title,
       description,
       timeLimit,
-      topic: selectedTopic === "Other" ? customTopic : selectedTopic,
+      topic: selectedTopic,
       questions: convertToQuestions(questions),
       bannerUrl,
     });
@@ -242,7 +239,6 @@ export default function EditContestPage() {
     }
 
     try {
-      // preemptively set snapshot to avoid duplicate saves while request is in-flight
       lastSavedSnapshotRef.current = snapshot;
       startTransition(() => {
         formAction(formData);
@@ -250,12 +246,10 @@ export default function EditContestPage() {
       console.log("Contest draft saved automatically.");
     } catch (error) {
       console.error("Failed to autosave draft:", error);
-      // Clear snapshot on failure so subsequent changes retry
       lastSavedSnapshotRef.current = null;
     }
   }, [contestId, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
 
-  //save only on exit
   useEffect(() => {
     if (!contestId) return;
 
@@ -289,7 +283,6 @@ export default function EditContestPage() {
           }).catch(() => {});
         }
       } catch (e) {
-        // best-effort; ignore errors during unload
       }
     };
 
@@ -350,7 +343,6 @@ export default function EditContestPage() {
     setErrors(newErrors);
 
     if (isValid) {
-      // Ensure we have a fresh ID token before submitting
       const token = await auth.currentUser?.getIdToken(true);
       if (!token) {
         setErrors({ general: ["You must be logged in to submit the contest."] });
