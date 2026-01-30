@@ -53,8 +53,9 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { isUsernameUnique } from "@/lib/user";
+import { isUsernameUnique, updateUserPhoto } from "@/lib/user";
 import Link from "next/link";
+import ImageCropper from "@/components/ui/ImageCropper";
 import {
   AreaChart,
   Area,
@@ -148,6 +149,9 @@ export default function ProfilePage() {
   const [friends, setFriends] = useState<UserProfile[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<UserProfile[]>([]);
   const [friendUsernameInput, setFriendUsernameInput] = useState("");
+  const [imageToEdit, setImageToEdit] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<string>("image/jpeg");
+  const [pfpLoading, setPfpLoading] = useState(false);
 
   const [loadingFriends, setLoadingFriends] = useState(true);
 
@@ -711,19 +715,45 @@ export default function ProfilePage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !userProfile || !auth.currentUser) return;
     const file = e.target.files[0];
+    
+    const type = file.type || "image/jpeg";
+    setImageType(type);
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToEdit(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedImage: Blob) => {
+    if (!auth.currentUser || !userProfile) return;
+    
+    setPfpLoading(true);
+    setImageToEdit(null);
+    
     try {
+      const extension = imageType.split("/")[1] || "jpg";
+      const file = new File([croppedImage], `pfp-${Date.now()}.${extension}`, { type: imageType });
       const profileRef = storageRef(
         storage,
-        `profilePictures/${auth.currentUser.uid}`
+        `profilePictures/${auth.currentUser.uid}/${file.name}`
       );
       await uploadBytes(profileRef, file);
       const downloadURL = await getDownloadURL(profileRef);
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        photoURL: downloadURL,
-      });
+      await updateUserPhoto(auth.currentUser.uid, downloadURL);
       setUserProfile({ ...userProfile, photoURL: downloadURL });
     } catch (err) {
       console.error(err);
+    } finally {
+      setPfpLoading(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setImageToEdit(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -927,7 +957,19 @@ export default function ProfilePage() {
     );
 
   return (
-    <main
+    <>
+      {imageToEdit && (
+        <ImageCropper
+          image={imageToEdit}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspect={1}
+          shape="round"
+          title="Adjust Profile Picture"
+          imageType={imageType}
+        />
+      )}
+      <main
       className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
     >
       <div className="absolute top-0 left-0 w-full h-125 bg-violet-900/10 blur-[100px] pointer-events-none" />
@@ -943,7 +985,7 @@ export default function ProfilePage() {
                 ref={fileInputRef}
                 type="file"
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                 className="hidden"
                 disabled={auth.currentUser?.uid !== profileUid}
               />
@@ -953,10 +995,15 @@ export default function ProfilePage() {
                 }`}
                 onClick={() =>
                   auth.currentUser?.uid === profileUid &&
+                  !pfpLoading &&
                   fileInputRef.current?.click()
                 }
               >
-                {userProfile?.photoURL ? (
+                {pfpLoading ? (
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
+                  </div>
+                ) : userProfile?.photoURL ? (
                   <img
                     src={userProfile.photoURL}
                     alt="Profile"
@@ -2083,5 +2130,6 @@ export default function ProfilePage() {
         </div>
       )}
     </main>
+    </>
   );
 }

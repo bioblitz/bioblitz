@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getAuth,
   onAuthStateChanged,
@@ -28,7 +28,10 @@ import {
   deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, Camera } from "lucide-react";
+import ImageCropper from "@/components/ui/ImageCropper";
+import { uploadImage } from "@/lib/storage";
+import { updateUserPhoto } from "@/lib/user";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,9 +48,62 @@ export default function SettingsPage() {
   const [username, setUsername] = useState<string | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [imageToEdit, setImageToEdit] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<string>("image/jpeg");
+  const [pfpLoading, setPfpLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
   const db = getFirestore(app);
+
+  const handlePfpUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const type = file.type || "image/jpeg";
+      setImageType(type);
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToEdit(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedImage: Blob) => {
+    if (!user) return;
+    
+    setPfpLoading(true);
+    setImageToEdit(null);
+    
+    try {
+      const extension = imageType.split("/")[1] || "jpg";
+      const file = new File([croppedImage], `pfp-${Date.now()}.${extension}`, { type: imageType });
+      const filePath = `userPhotos/${user.uid}/${file.name}`;
+      const downloadURL = await uploadImage(file, filePath);
+      await updateUserPhoto(user.uid, downloadURL);
+      
+      setProfileData((prev: any) => ({
+        ...prev,
+        photoURL: downloadURL,
+      }));
+    } catch (error) {
+      console.error("Error uploading profile photo:", error);
+    } finally {
+      setPfpLoading(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setImageToEdit(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const deleteSubcollection = async (path: string) => {
     const colRef = collection(db, path);
@@ -246,7 +302,19 @@ export default function SettingsPage() {
     );
   }
   return (
-    <main
+    <>
+      {imageToEdit && (
+        <ImageCropper
+          image={imageToEdit}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspect={1}
+          shape="round"
+          title="Adjust Profile Picture"
+          imageType={imageType}
+        />
+      )}
+      <main
       className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
     >
       {toastMessage && (
@@ -270,24 +338,45 @@ export default function SettingsPage() {
           className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
         >
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+          />
           <div className="flex items-center gap-4 mb-4">
-            {isProfileLoading ? (
-              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 animate-pulse">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : profileData?.photoURL || user?.photoURL ? (
-              <img
-                src={profileData?.photoURL || user?.photoURL}
-                alt="Profile picture"
-                className="w-16 h-16 rounded-full object-cover border border-zinc-700"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400">
-                {profileData?.displayName?.[0] || user?.displayName?.[0] || "?"}
-              </div>
-            )}
-
+            <div className="relative group">
+              {isProfileLoading || pfpLoading ? (
+                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 animate-pulse">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                </div>
+              ) : profileData?.photoURL || user?.photoURL ? (
+                <>
+                  <img
+                    src={profileData?.photoURL || user?.photoURL}
+                    alt="Profile picture"
+                    className="w-16 h-16 rounded-full object-cover border border-zinc-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <button
+                    onClick={handlePfpUploadClick}
+                    className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    title="Change profile picture"
+                  >
+                    <Camera className="w-5 h-5 text-white" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handlePfpUploadClick}
+                  className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-zinc-700 transition-colors"
+                  title="Upload profile picture"
+                >
+                  <Camera className="w-5 h-5" />
+                </button>
+              )}
+            </div>
             <div>
               <p className="font-medium">
                 {profileData?.displayName ||
@@ -342,7 +431,6 @@ export default function SettingsPage() {
               </span>
             )}
 
-            {/* Tooltip Implementation */}
             <div className="group relative flex items-center">
               <Info className="w-5 h-5 text-zinc-500 cursor-help hover:text-pink-400 transition-colors" />
               <div className="absolute left-full ml-3 w-64 p-3 bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
@@ -409,5 +497,6 @@ export default function SettingsPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }

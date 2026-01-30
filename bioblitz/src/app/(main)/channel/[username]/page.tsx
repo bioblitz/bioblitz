@@ -12,6 +12,7 @@ import { gameRoom } from "@/types";
 import ContestCard from "@/components/features/contests/ContestCard";
 import { getTopicColors } from "@/lib/utils";
 import { v4 as uuidv4 } from 'uuid';
+import ImageCropper from "@/components/ui/ImageCropper";
 
 
 export default function ChannelPage() {
@@ -28,6 +29,9 @@ export default function ChannelPage() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [newChannelName, setNewChannelName] = useState("");
   const [nameError, setNameError] = useState("");
+  const [imageToEdit, setImageToEdit] = useState<string | null>(null);
+  const [cropperAspect, setCropperAspect] = useState<number>(16 / 9);
+  const [imageType, setImageType] = useState<string>("image/jpeg");
   
   const handleBannerUploadClick = () => {
     fileInputRef.current?.click();
@@ -59,24 +63,49 @@ export default function ChannelPage() {
   
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && authUser) {
-      setBannerLoading(true);
-      try {
-        const filePath = `userBanners/${authUser.uid}/${file.name}`;
-        const downloadURL = await uploadImage(file, filePath);
-        await updateUserBanner(authUser.uid, downloadURL);
-        
-        setChannelOwnerProfile(prevProfile => {
-          if (prevProfile) {
-            return { ...prevProfile, bannerURL: downloadURL };
-          }
-          return null;
-        });
-      } catch (error) {
-        console.error("Error uploading banner image:", error);
-      } finally {
-        setBannerLoading(false);
-      }
+    if (file) {
+      const type = file.type || "image/jpeg";
+      setImageType(type);
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToEdit(reader.result as string);
+        setCropperAspect(16 / 9);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedImage: Blob) => {
+    if (!authUser) return;
+    
+    setBannerLoading(true);
+    setImageToEdit(null);
+    
+    try {
+      const extension = imageType.split("/")[1] || "jpg";
+      const file = new File([croppedImage], `banner-${Date.now()}.${extension}`, { type: imageType });
+      const filePath = `userBanners/${authUser.uid}/${file.name}`;
+      const downloadURL = await uploadImage(file, filePath);
+      await updateUserBanner(authUser.uid, downloadURL);
+      
+      setChannelOwnerProfile(prevProfile => {
+        if (prevProfile) {
+          return { ...prevProfile, bannerURL: downloadURL };
+        }
+        return null;
+      });
+    } catch (error) {
+      console.error("Error uploading banner image:", error);
+    } finally {
+      setBannerLoading(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setImageToEdit(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
   
@@ -114,16 +143,27 @@ export default function ChannelPage() {
   };
 
   return (
+    <>
+      {imageToEdit && (
+        <ImageCropper
+          image={imageToEdit}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspect={cropperAspect}
+          title="Adjust Banner"
+          imageType={imageType}
+        />
+      )}
 
-    <div className="bg-black justify-center h-screen pt-16 text-white">
-    <div className ="w-11/12 mx-auto">
+      <div className="bg-black justify-center h-screen pt-16 text-white">
+      <div className ="w-11/12 mx-auto">
 
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
       />
       {loading ? (
         <div className="h-48 bg-zinc-800 flex items-center justify-center animate-pulse">
@@ -247,8 +287,9 @@ export default function ChannelPage() {
           <p className="text-zinc-400">No contests created yet.</p>
         )}
       </div>
-    </div>
-    </div>
+      </div>
+      </div>
+    </>
   );
 }
 
