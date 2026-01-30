@@ -14,14 +14,12 @@ export async function createContest(prevState: { message: string }, formData: Fo
     return { message: "You must be logged in to create a contest." };
   }
 
-  // Verify the ID token on the server using the Admin SDK
   let uid: string;
   let creatorPfp = "/images/logo.svg";
   let creatorUsername = "";
   try {
     const decoded = await adminAuth.verifyIdToken(idToken);
     uid = decoded.uid;
-    // Try to fetch additional user info
     try {
       const userRecord = await adminAuth.getUser(uid);
       if (userRecord.photoURL) creatorPfp = userRecord.photoURL;
@@ -65,6 +63,7 @@ export async function createContest(prevState: { message: string }, formData: Fo
     questions: questions,
     status: status,
     bannerUrl: formData.get("bannerUrl") as string || "",
+    creation: null
   };
 
   try {
@@ -92,7 +91,6 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
     
-    // Fetch creator's banner once
     let creatorBanner: string | undefined;
     let creatorPfp: string | undefined;
     try {
@@ -105,21 +103,19 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // Calculate number_of_questions from questions array if available
       const questionCount = data.questions && Array.isArray(data.questions) 
         ? data.questions.length.toString() 
         : data.number_of_questions || data.questionCount?.toString() || "0";
-      // Serialize the data to remove Timestamp objects and other non-serializable fields
-      contests.push({ 
-        id: doc.id, 
+      contests.push({
+        id: doc.id,
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
         creatorPfp: data.creatorPfp || creatorPfp,
-        // Convert Timestamp to ISO string if it exists
-        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
-        lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
-      } as gameRoom);
+        creation: data.creation?.toDate?.()?.getTime() || null,
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.getTime() || null,
+        lastPlayedAt: data.lastPlayedAt?.toDate?.()?.getTime() || null,
+      } as unknown as gameRoom);
     });
     return contests;
   } catch (e) {
@@ -134,13 +130,11 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
     
-    // Create a map to cache creator banners
     const creatorBanners = new Map<string, { banner?: string; pfp?: string }>();
     
     for (const docSnap of querySnapshot.docs) {
       const data = docSnap.data();
       
-      // Fetch creator banner if we have a creator and haven't cached it yet
       let creatorBanner: string | undefined;
       let creatorPfp: string | undefined;
       if (data.creator && !creatorBanners.has(data.creator)) {
@@ -159,18 +153,15 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
         creatorPfp = cached?.pfp;
       }
       
-      // Calculate number_of_questions from questions array if available
       const questionCount = data.questions && Array.isArray(data.questions) 
         ? data.questions.length.toString() 
         : data.number_of_questions || data.questionCount?.toString() || "0";
-      // Serialize the data to remove Timestamp objects and other non-serializable fields
       contests.push({ 
         id: docSnap.id, 
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
         creatorPfp: data.creatorPfp || creatorPfp,
-        // Convert Timestamp to ISO string if it exists
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
       } as gameRoom);
@@ -190,7 +181,6 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
     if (docSnap.exists()) {
       const data = docSnap.data();
       
-      // Fetch creator banner
       let creatorBanner: string | undefined;
       let creatorPfp: string | undefined;
       if (data.creator) {
@@ -203,18 +193,15 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
         }
       }
       
-      // Calculate number_of_questions from questions array if available
       const questionCount = data.questions && Array.isArray(data.questions) 
         ? data.questions.length.toString() 
         : data.number_of_questions || data.questionCount?.toString() || "0";
-      // Serialize the data to remove Timestamp objects and other non-serializable fields
       return { 
         id: docSnap.id, 
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
         creatorPfp: data.creatorPfp || creatorPfp,
-        // Convert Timestamp to ISO string if it exists
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
       } as gameRoom;

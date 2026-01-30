@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react"; // 👈 Import these
+import { useEffect, useState } from "react";
 import MainNavbar from "./MainNavbar";
 import MarketingNavbar from "./MarketingNavbar";
 

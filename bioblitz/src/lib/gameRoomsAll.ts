@@ -97,8 +97,9 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
         totalPlays: data.totalPlays || 0,
         bannerUrl: data.bannerUrl,
         questions: [],
-        lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
-        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+        creation: data.creation?.toDate?.()?.getTime() || null,
+        lastPlayedAt: data.lastPlayedAt?.toDate?.()?.getTime() || null,
+        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.getTime() || null,
       };
     }));
 

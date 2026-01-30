@@ -22,9 +22,8 @@ export default function MainNavbar() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Streak State
   const [streak, setStreak] = useState(0);
-  const [streakActive, setStreakActive] = useState(false); // New state for "Today" check
+  const [streakActive, setStreakActive] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +40,6 @@ export default function MainNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
 
-  // Listen to User Document for Real-time Streak Updates
   useEffect(() => {
     if (user?.uid) {
       const db = getFirestore(app);
@@ -52,12 +50,10 @@ export default function MainNavbar() {
           const data = docSnapshot.data();
           setStreak(data.streak || 0);
 
-          // CHECK IF STREAK IS ACTIVE TODAY (PST)
           if (data.lastStreakDate) {
             const lastDate = data.lastStreakDate.toDate();
             const now = new Date();
 
-            // Format both to PST "YYYY-MM-DD" to compare the specific calendar day
             const pstOptions: Intl.DateTimeFormatOptions = {
               timeZone: "America/Los_Angeles",
               year: "numeric",
@@ -71,7 +67,6 @@ export default function MainNavbar() {
             );
             const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
 
-            // If the strings match, the last update was "Today" in PST
             setStreakActive(lastDatePst === nowDatePst);
           } else {
             setStreakActive(false);
@@ -138,13 +133,10 @@ export default function MainNavbar() {
     }
     return (
       <div className="flex items-center gap-4">
-        {/* STREAK BADGE */}
-        {/* Always visible on Desktop if logged in */}
         <div
           className="hidden md:flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full"
           title="Current Streak"
         >
-          {/* Logic: Text is always orange. Fill is orange ONLY if active. No Pulse. */}
           <Flame
             className={`w-4 h-4 text-orange-500 ${
               streakActive ? "fill-orange-500" : "fill-transparent"
@@ -197,7 +189,6 @@ export default function MainNavbar() {
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
-              {/* Mobile Streak Show inside Dropdown */}
               <div className="md:hidden px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
                 <span className="text-zinc-400 text-sm">Streak</span>
                 <div className="flex items-center gap-1.5 text-orange-400 font-bold">

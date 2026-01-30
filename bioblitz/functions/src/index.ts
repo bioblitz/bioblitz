@@ -4,13 +4,9 @@ import { onDocumentCreated, onDocumentWritten, onDocumentUpdated } from "firebas
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-// 1. Initialize Once
 admin.initializeApp();
 const db = admin.firestore();
 
-// ---------------------------------------------------------------------------
-// 1. GRADE TEST (Calculates Score + Elo + History + UPDATES TRENDING)
-// ---------------------------------------------------------------------------
 export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", async (event) => {
   const snap = event.data;
   if (!snap) {
@@ -166,7 +162,7 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
             bElo: newBElo,
             playedGameIds: FieldValue.arrayUnion(gameId) 
         }),
-        gameSetUpdate // <--- ADDED HERE
+        gameSetUpdate
     ]);
 
     return;
@@ -180,9 +176,6 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
   }
 });
 
-// ---------------------------------------------------------------------------
-// 2. GET PUBLIC QUESTIONS (Callable)
-// ---------------------------------------------------------------------------
 export const getPublicQuestions = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be logged in to start a game.");
@@ -245,14 +238,10 @@ export const getPublicQuestions = onCall(async (request) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// 3. AGGREGATE RATINGS (Trigger)
-// ---------------------------------------------------------------------------
 export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", async (event) => {
     const newData = event.data?.after.data();
     const oldData = event.data?.before.data();
 
-    // Identify Game ID
     const gameId = newData?.gameId || oldData?.gameId;
     if (!gameId) {
         console.error("No Game ID found in rating document.");
@@ -261,7 +250,6 @@ export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", 
 
     const setRef = db.collection("sets").doc(gameId);
 
-    // Deltas
     let countDelta = 0;
     let scoreDelta = 0;
 
@@ -312,16 +300,12 @@ export const aggregateGameRating = onDocumentWritten("user_ratings/{ratingId}", 
     }
 });
 
-// ---------------------------------------------------------------------------
-// 4. SYNC USER PROFILE CHANGES (Handles Unlimited Games)
-// ---------------------------------------------------------------------------
 export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (event) => {
     const newData = event.data?.after.data();
     const oldData = event.data?.before.data();
 
     if (!newData || !oldData) return;
 
-    // 1. Check if visual fields actually changed
     const nameChanged = newData.displayName !== oldData.displayName;
     const handleChanged = newData.username !== oldData.username; 
     const photoChanged = newData.photoURL !== oldData.photoURL;
@@ -332,7 +316,6 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
 
     console.log(`Syncing profile update for user ${event.params.userId}...`);
     
-    // 2. Fetch ALL submissions 
     const submissionsQuery = db.collection("gameSubmissions")
                                .where("userId", "==", event.params.userId);
     
@@ -340,7 +323,6 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
     
     if (snapshot.empty) return;
 
-    // 3. Prepare the Updates in Chunks of 500
     const BATCH_SIZE = 500;
     const batches: Promise<FirebaseFirestore.WriteResult[]>[] = [];
     
@@ -348,7 +330,6 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
     let operationCount = 0;
 
     snapshot.docs.forEach((doc) => {
-        // Add update to the current batch
         currentBatch.update(doc.ref, {
             username: newData.displayName || "Unknown",
             handle: newData.username || "",
@@ -357,29 +338,23 @@ export const onUserProfileUpdate = onDocumentUpdated("users/{userId}", async (ev
         
         operationCount++;
 
-        // If we hit the limit, commit this batch and start a new one
         if (operationCount === BATCH_SIZE) {
             batches.push(currentBatch.commit());
-            currentBatch = db.batch(); // Reset
-            operationCount = 0; // Reset
+            currentBatch = db.batch();
+            operationCount = 0;
         }
     });
 
-    // 4. Commit any remaining operations 
     if (operationCount > 0) {
         batches.push(currentBatch.commit());
     }
 
-    // 5. Wait for all batches to finish
     await Promise.all(batches);
 
     console.log(`Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`);
 });
 
 
-// ---------------------------------------------------------------------------
-// 5. DAILY STREAK RESET (Scheduled)
-// ---------------------------------------------------------------------------
 export const resetStreaksDaily = onSchedule(
   {
     schedule: "0 0 * * *", 
@@ -434,12 +409,9 @@ export const resetStreaksDaily = onSchedule(
   }
 );
 
-// ---------------------------------------------------------------------------
-// 6. DECAY TRENDING SCORES (Runs Hourly) - [NEW FUNCTION]
-// ---------------------------------------------------------------------------
 export const decayTrendingScores = onSchedule(
   {
-    schedule: "0 * * * *", // Runs at minute 0 of every hour
+    schedule: "0 * * * *", // runs at minute 0 of every hour
     timeZone: "America/Los_Angeles",
     timeoutSeconds: 540,
     memory: "512MiB",
@@ -447,7 +419,6 @@ export const decayTrendingScores = onSchedule(
   async (event) => {
     console.log("📉 Starting Trending Score Decay...");
 
-    // Optimization: Only fetch games that actually have a score > 0.
     const setsRef = db.collection("sets");
     const activeSetsSnapshot = await setsRef
       .where("trendingScore", ">", 0)
@@ -468,7 +439,7 @@ export const decayTrendingScores = onSchedule(
     activeSetsSnapshot.docs.forEach((doc) => {
       const currentScore = doc.data().trendingScore || 0;
       
-      // Decay by 5% every hour
+      // decay by 5% every hour
       const newScore = Math.floor(currentScore * 0.95);
 
       currentBatch.update(doc.ref, { 
@@ -489,6 +460,6 @@ export const decayTrendingScores = onSchedule(
     }
 
     await Promise.all(batches);
-    console.log("📉 Trending scores updated successfully.");
+    console.log("Trending scores updated successfully.");
   }
 );

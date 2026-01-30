@@ -23,8 +23,9 @@ export type gameRoom = {
   status?: string;
   bannerUrl?: string;
   totalPlays?: number;
-  lastPlayedAt?: string | null;
-  lastRatingUpdate?: string | null;
+  creation: number | null;
+  lastPlayedAt?: number | null;
+  lastRatingUpdate?: number | null;
 };
 
 export interface Contest {
@@ -34,6 +35,14 @@ export interface Contest {
   popularity: number;
   createdAt: Date;
 }
+export type GameRoomClient = Omit<
+  gameRoom,
+  "creation" | "lastPlayedAt" | "lastRatingUpdate"
+> & {
+  creation: number | null;
+  lastPlayedAt?: number | null;
+  lastRatingUpdate?: number | null;
+};
 
 export interface FilterState {
   search: string;

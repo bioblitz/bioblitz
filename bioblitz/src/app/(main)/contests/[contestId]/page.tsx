@@ -10,6 +10,7 @@ type ContestPageParams = {
 };
 
 export default async function ContestPage({ params }: ContestPageParams) {
+  await params;
   const contest = await getContestById(params.contestId);
 
   if (!contest) {

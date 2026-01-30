@@ -3,7 +3,7 @@ import Link from "next/link";
 import { gameRoom } from "@/types";
 import { Clock, Star, Users } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-
+import { GameRoomClient } from "@/types";
 interface ContestCardProps {
   contest: gameRoom;
   href?: string;
@@ -33,29 +33,34 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
     >
       <div className="relative h-full flex flex-col bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10">
         <div className="relative w-full h-28 bg-black">
-          {contest.bannerUrl && contest.bannerUrl.trim() !== "" ? (
-            <img 
-              src={contest.bannerUrl} 
-              alt={`${contest.title} banner`} 
-              className="w-full h-full object-cover"
-            />
-          ) : contest.creatorBanner ? (
-            <img 
-              src={contest.creatorBanner} 
-              alt={`${contest.creatorUsername}'s banner`} 
-              className="w-full h-full object-cover"
-            />
-          ) : contest.creatorPfp ? (
-            <img 
-              src={contest.creatorPfp} 
-              alt={`${contest.creatorUsername}'s profile`} 
-              className="w-full h-full object-cover"
+      {contest?.bannerUrl ? (
+      <div
+      className="absolute inset-0 bg-cover bg-center"
+      style={{ backgroundImage: `url(${contest.bannerUrl})` }}
+      />
+    ) : contest.creatorPfp? (
+    <>
+      <img
+        src={contest.creatorPfp}
+        className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+        alt=""
+        aria-hidden
+        referrerPolicy="no-referrer"
+      />
+      <div className="absolute inset-0 bg-black/60" />
+
+          <div className="relative h-full flex items-center justify-center">
+            <img
+              src={contest.creatorPfp}
+              alt="Channel owner"
+              className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
               referrerPolicy="no-referrer"
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black" />
-          )}
-          
+          </div>
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+      )}          
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <p className="text-white text-sm font-semibold text-center px-4">
               {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}

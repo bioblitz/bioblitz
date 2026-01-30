@@ -130,16 +130,35 @@ export default function ChannelPage() {
           <p>Loading channel...</p>
         </div>
       ) : (
-        <div
-          className="relative h-48 bg-cover bg-center flex items-center justify-center"
-          style={{
-            backgroundImage: channelOwnerProfile?.bannerURL 
-            ? `url(${channelOwnerProfile.bannerURL})` 
-            : channelOwnerProfile?.photoURL
-            ? `url(${channelOwnerProfile.photoURL})`
-            : `linear-gradient(to bottom, #18181b, #000000)`
-          }}
-        >
+    <div className="relative h-48 overflow-hidden">
+      {channelOwnerProfile?.bannerURL ? (
+      <div
+      className="absolute inset-0 bg-cover bg-center"
+      style={{ backgroundImage: `url(${channelOwnerProfile.bannerURL})` }}
+      />
+    ) : channelOwnerProfile?.photoURL ? (
+    <>
+      <img
+        src={channelOwnerProfile.photoURL}
+        className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+        alt=""
+        aria-hidden
+        referrerPolicy="no-referrer"
+      />
+      <div className="absolute inset-0 bg-black/60" />
+
+          <div className="relative h-full flex items-center justify-center">
+            <img
+              src={channelOwnerProfile.photoURL}
+              alt="Channel owner"
+              className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+      )}
           {isOwner && (
             <button
               onClick={handleBannerUploadClick}
