@@ -1,13 +1,25 @@
-
 "use server";
 import { firestore, auth } from "./firebase";
 import { adminAuth, adminFirestore } from "./firebase-admin";
-import { collection, addDoc, setDoc, doc, query, where, getDocs, getDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+  getDoc,
+} from "firebase/firestore";
 import { gameRoom, Question } from "@/types";
 import { revalidatePath } from "next/cache";
 import { getUserProfile } from "./user";
+import { FieldValue } from "firebase-admin/firestore";
 
-export async function createContest(prevState: { message: string }, formData: FormData) {
+export async function createContest(
+  prevState: { message: string },
+  formData: FormData,
+) {
   const idToken = (formData.get("idToken") as string) || null;
 
   if (!idToken) {
@@ -45,8 +57,10 @@ export async function createContest(prevState: { message: string }, formData: Fo
 
   const contestId = formData.get("contestId") as string | null;
   const questionsString = formData.get("questions") as string;
-  const questions: Question[] = questionsString ? JSON.parse(questionsString) : [];
-  const status = formData.get("status") as string || "incomplete";
+  const questions: Question[] = questionsString
+    ? JSON.parse(questionsString)
+    : [];
+  const status = (formData.get("status") as string) || "incomplete";
 
   const contest: Omit<gameRoom, "id"> = {
     title: formData.get("title") as string,
@@ -62,14 +76,17 @@ export async function createContest(prevState: { message: string }, formData: Fo
     rating: Number(formData.get("rating")) || 0,
     questions: questions,
     status: status,
-    bannerUrl: formData.get("bannerUrl") as string || "",
-    creation: null
+    bannerUrl: (formData.get("bannerUrl") as string) || "",
+    creation: null,
   };
 
   try {
     let savedId: string | null = null;
     if (contestId) {
-      await adminFirestore.collection("sets").doc(contestId).set(contest, { merge: true });
+      await adminFirestore
+        .collection("sets")
+        .doc(contestId)
+        .set(contest, { merge: true });
       savedId = contestId;
       console.log("Document updated with ID: ", contestId);
     } else {
@@ -77,6 +94,13 @@ export async function createContest(prevState: { message: string }, formData: Fo
       savedId = ref.id;
       console.log("Document written with ID: ", ref.id);
     }
+    if (status === "completed") {
+      await adminFirestore
+        .collection("users")
+        .doc(uid)
+        .set({ publicSetCount: FieldValue.increment(1) }, { merge: true });
+    }
+
     revalidatePath("/contests");
     return { message: `Contest saved with ID: ${savedId}` };
   } catch (e) {
@@ -85,12 +109,17 @@ export async function createContest(prevState: { message: string }, formData: Fo
   }
 }
 
-export async function getContestsByCreator(creatorUid: string): Promise<gameRoom[]> {
+export async function getContestsByCreator(
+  creatorUid: string,
+): Promise<gameRoom[]> {
   try {
-    const q = query(collection(firestore, "sets"), where("creator", "==", creatorUid));
+    const q = query(
+      collection(firestore, "sets"),
+      where("creator", "==", creatorUid),
+    );
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
-    
+
     let creatorBanner: string | undefined;
     let creatorPfp: string | undefined;
     try {
@@ -100,12 +129,13 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
     } catch (e) {
       console.error("Error fetching creator banner:", e);
     }
-    
+
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      const questionCount = data.questions && Array.isArray(data.questions) 
-        ? data.questions.length.toString() 
-        : data.number_of_questions || data.questionCount?.toString() || "0";
+      const questionCount =
+        data.questions && Array.isArray(data.questions)
+          ? data.questions.length.toString()
+          : data.number_of_questions || data.questionCount?.toString() || "0";
       contests.push({
         id: doc.id,
         ...data,
@@ -126,15 +156,18 @@ export async function getContestsByCreator(creatorUid: string): Promise<gameRoom
 
 export async function getCompletedContests(): Promise<gameRoom[]> {
   try {
-    const q = query(collection(firestore, "sets"), where("status", "==", "completed"));
+    const q = query(
+      collection(firestore, "sets"),
+      where("status", "==", "completed"),
+    );
     const querySnapshot = await getDocs(q);
     const contests: gameRoom[] = [];
-    
+
     const creatorBanners = new Map<string, { banner?: string; pfp?: string }>();
-    
+
     for (const docSnap of querySnapshot.docs) {
       const data = docSnap.data();
-      
+
       let creatorBanner: string | undefined;
       let creatorPfp: string | undefined;
       if (data.creator && !creatorBanners.has(data.creator)) {
@@ -142,7 +175,10 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
           const creatorProfile = await getUserProfile(data.creator);
           creatorBanner = creatorProfile?.bannerURL;
           creatorPfp = creatorProfile?.photoURL;
-          creatorBanners.set(data.creator, { banner: creatorBanner, pfp: creatorPfp });
+          creatorBanners.set(data.creator, {
+            banner: creatorBanner,
+            pfp: creatorPfp,
+          });
         } catch (e) {
           console.error("Error fetching creator banner:", e);
           creatorBanners.set(data.creator, {});
@@ -152,17 +188,19 @@ export async function getCompletedContests(): Promise<gameRoom[]> {
         creatorBanner = cached?.banner;
         creatorPfp = cached?.pfp;
       }
-      
-      const questionCount = data.questions && Array.isArray(data.questions) 
-        ? data.questions.length.toString() 
-        : data.number_of_questions || data.questionCount?.toString() || "0";
-      contests.push({ 
-        id: docSnap.id, 
+
+      const questionCount =
+        data.questions && Array.isArray(data.questions)
+          ? data.questions.length.toString()
+          : data.number_of_questions || data.questionCount?.toString() || "0";
+      contests.push({
+        id: docSnap.id,
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
         creatorPfp: data.creatorPfp || creatorPfp,
-        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+        lastRatingUpdate:
+          data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
       } as gameRoom);
     }
@@ -180,7 +218,7 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      
+
       let creatorBanner: string | undefined;
       let creatorPfp: string | undefined;
       if (data.creator) {
@@ -192,21 +230,22 @@ export async function getContestById(id: string): Promise<gameRoom | null> {
           console.error("Error fetching creator banner:", e);
         }
       }
-      
-      const questionCount = data.questions && Array.isArray(data.questions) 
-        ? data.questions.length.toString() 
-        : data.number_of_questions || data.questionCount?.toString() || "0";
-      return { 
-        id: docSnap.id, 
+
+      const questionCount =
+        data.questions && Array.isArray(data.questions)
+          ? data.questions.length.toString()
+          : data.number_of_questions || data.questionCount?.toString() || "0";
+      return {
+        id: docSnap.id,
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
         creatorPfp: data.creatorPfp || creatorPfp,
-        lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
+        lastRatingUpdate:
+          data.lastRatingUpdate?.toDate?.()?.toISOString() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.toISOString() || null,
       } as gameRoom;
-    }
-    else {
+    } else {
       console.log("No such contest document!");
       return null;
     }

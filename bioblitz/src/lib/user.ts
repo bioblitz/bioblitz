@@ -31,6 +31,7 @@ export interface UserProfile {
   nameChangedAt: Timestamp | FieldValue;
   bannerURL?: string;
   channelName?: string;
+  subscriberCount?: number;
 }
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
@@ -42,7 +43,7 @@ export async function isUsernameUnique(username: string): Promise<boolean> {
 
 export async function updateUsername(
   uid: string,
-  username: string
+  username: string,
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
@@ -53,7 +54,7 @@ export async function updateUsername(
 
 export async function updateUserBanner(
   uid: string,
-  bannerURL: string
+  bannerURL: string,
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
@@ -63,7 +64,7 @@ export async function updateUserBanner(
 
 export async function updateChannelName(
   uid: string,
-  channelName: string
+  channelName: string,
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
@@ -71,7 +72,10 @@ export async function updateChannelName(
   });
 }
 
-export async function updateUserPhoto(uid: string, photoURL: string): Promise<void> {
+export async function updateUserPhoto(
+  uid: string,
+  photoURL: string,
+): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
     photoURL: photoURL,
@@ -107,6 +111,7 @@ export async function createUserProfile(user: any) {
     createdAt: serverTimestamp(),
     lastLogin: serverTimestamp(),
     nameChangedAt: serverTimestamp(),
+    subscriberCount: 0,
   };
 
   await setDoc(userRef, newUserProfile);
@@ -126,9 +131,11 @@ export async function getUserProfile(uid: string) {
   }
 }
 
-export async function getUserProfileByUsername(username: string): Promise<UserProfile | null> {
+export async function getUserProfileByUsername(
+  username: string,
+): Promise<UserProfile | null> {
   const usersRef = collection(firestore, "users");
-  
+
   // Try exact match first
   let q = query(usersRef, where("username", "==", username));
   let querySnapshot = await getDocs(q);
@@ -140,24 +147,30 @@ export async function getUserProfileByUsername(username: string): Promise<UserPr
     userProfile.uid = userDoc.id;
     return userProfile;
   }
-  
+
   // If no exact match, try case-insensitive search
-  console.log("Exact match not found, trying case-insensitive search for:", username);
+  console.log(
+    "Exact match not found, trying case-insensitive search for:",
+    username,
+  );
   const normalizedUsername = username.toLowerCase();
   const allUsersSnapshot = await getDocs(usersRef);
-  
-  const matchingDoc = allUsersSnapshot.docs.find(doc => {
+
+  const matchingDoc = allUsersSnapshot.docs.find((doc) => {
     const docUsername = doc.data().username;
     return docUsername && docUsername.toLowerCase() === normalizedUsername;
   });
 
   if (matchingDoc) {
-    console.log("User found with case-insensitive match:", matchingDoc.data().username);
+    console.log(
+      "User found with case-insensitive match:",
+      matchingDoc.data().username,
+    );
     const userProfile = matchingDoc.data() as UserProfile;
     userProfile.uid = matchingDoc.id;
     return userProfile;
   }
-  
+
   console.log("User not found with username:", username);
   return null;
 }
