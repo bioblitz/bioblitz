@@ -34,7 +34,6 @@ export const createNotification = async (
   senderName?: string
 ) => {
   try {
-    // 1. Create In-App Notification (Firestore)
     await addDoc(collection(db, "notifications"), {
       recipientUid,
       type,
@@ -47,8 +46,6 @@ export const createNotification = async (
       createdAt: serverTimestamp(),
     });
 
-    // 2. Send Email Notification (API)
-    // Added "friend_accept" here too, in case you want emails for accepted requests later
     if (type === "friend_request") {
       await fetch("/api/notifications", {
         method: "POST",
@@ -58,7 +55,7 @@ export const createNotification = async (
           type,
           data: {
             senderName: senderName || "A user",
-            senderPhotoURL: senderPhotoURL, // <--- THIS WAS MISSING
+            senderPhotoURL: senderPhotoURL,
             link: link,
           },
         }),

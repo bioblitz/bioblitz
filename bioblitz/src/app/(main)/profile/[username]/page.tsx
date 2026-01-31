@@ -851,13 +851,10 @@ export default function ProfilePage() {
   const uniqueRatedSets = Array.from(
     setsPlayed
       .reduce((map, set) => {
-        // Safety check: ensure we actually have an ID to group by
         if (!set.setId) return map;
 
         const existing = map.get(set.setId);
 
-        // Logic: If we haven't stored this game yet, OR this attempt is OLDER
-        // than the one we have, assume this is the "First Attempt"
         if (!existing || (set.playedAt && set.playedAt < existing.playedAt)) {
           map.set(set.setId, set);
         }
@@ -866,7 +863,6 @@ export default function ProfilePage() {
       .values()
   );
 
-  // B. Calculate stats using ONLY the unique sets (Rated ones)
   const topicStats = uniqueRatedSets.reduce((acc, set) => {
     const topic = set.topic || "General";
 
@@ -1489,13 +1485,11 @@ export default function ProfilePage() {
 
               <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
                 <div className="w-full max-w-[300px] shrink-0 relative z-10">
-                  {/* Calendar Header with Navigation */}
                   <div className="flex flex-row items-center justify-between gap-2 mb-4">
                     <h2 className="text-lg font-semibold text-white whitespace-nowrap items-center gap-1.5">
                       Daily Streak
                     </h2>
 
-                    {/* Navigation Controls */}
                     <div className="flex items-center gap-2 bg-zinc-900/50 rounded-lg p-1 border border-zinc-800">
                       <button
                         onClick={handlePrevMonth}
@@ -1520,7 +1514,6 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Day Names Header */}
                   <div className="grid grid-cols-7 gap-1 mb-1">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
                       <div
@@ -1532,24 +1525,19 @@ export default function ProfilePage() {
                     ))}
                   </div>
 
-                  {/* Calendar Grid */}
                   <div className="grid grid-cols-7 gap-1">
-                    {/* Empty slots for previous month */}
                     {Array.from({ length: firstDayOfViewMonth }).map((_, i) => (
                       <div key={`empty-${i}`} />
                     ))}
 
-                    {/* Actual Days */}
                     {Array.from({ length: daysInViewMonth }).map((_, i) => {
                       const dayNum = i + 1;
 
-                      // Construct the date for this specific grid cell
                       const cellDate = new Date(viewYear, viewMonth, dayNum);
                       const dateString = cellDate.toDateString();
 
                       const isActive = activeDates.has(dateString);
 
-                      // Check if this cell is literally "Today"
                       const isLiterallyToday =
                         cellDate.toDateString() === new Date().toDateString();
 
@@ -1675,7 +1663,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* ----------------- IMPROVED CHART SECTION ----------------- */}
               <div className="mt-6 pt-5 border-t border-zinc-800/50 w-full flex-1 min-h-[250px] flex flex-col">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -1704,7 +1691,6 @@ export default function ProfilePage() {
                         data={chartData}
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                       >
-                        {/* 1. Add the Background Grid */}
                         <CartesianGrid
                           strokeDasharray="3 3"
                           vertical={false}
@@ -1723,7 +1709,6 @@ export default function ProfilePage() {
                           dy={10}
                         />
 
-                        {/* 2. Show YAxis for context, but keep it subtle */}
                         <YAxis
                           axisLine={false}
                           tickLine={false}
@@ -1745,7 +1730,6 @@ export default function ProfilePage() {
                                       <span className="text-zinc-400 text-[10px]">
                                         Total Score
                                       </span>
-                                      {/* Added .toLocaleString() for commas (e.g. 1,466) */}
                                       <span className="text-violet-400 font-mono text-xs">
                                         {data.totalScore.toLocaleString()}
                                       </span>
@@ -1758,17 +1742,14 @@ export default function ProfilePage() {
                                         {data.sets}
                                       </span>
                                     </div>
-                                    {/* --- FIX IS HERE --- */}
                                     <div className="flex items-center justify-between gap-4">
                                       <span className="text-zinc-400 text-[10px]">
                                         Avg. Score
                                       </span>
                                       <span className="text-emerald-400 font-mono text-xs">
                                         {data.avg.toLocaleString()}{" "}
-                                        {/* Removed the % sign */}
                                       </span>
                                     </div>
-                                    {/* ------------------- */}
                                   </div>
                                 </div>
                               );
@@ -1779,11 +1760,10 @@ export default function ProfilePage() {
 
                         <Bar
                           dataKey="totalScore"
-                          radius={[6, 6, 0, 0]} // Smoother rounded corners
+                          radius={[6, 6, 0, 0]} 
                           barSize={32}
                           animationDuration={1500}
                         >
-                          {/* 3. Map over data to assign different colors per bar */}
                           {chartData.map((entry, index) => (
                             <Cell
                               key={`cell-${index}`}
@@ -2025,7 +2005,6 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       )}
-      {/* REPORT MODAL */}
       {reporting && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
@@ -2033,7 +2012,6 @@ export default function ProfilePage() {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative overflow-hidden"
           >
-            {/* Red Glow Effect */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/5 blur-[60px] pointer-events-none" />
 
             <button

@@ -1,0 +1,17 @@
+{
+  "name": "BioBlitz - Biology Quiz Platform",
+  "short_name": "BioBlitz",
+  "description": "Competitive biology quiz platform with contests, leaderboards, and daily challenges",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/favicon.ico",
+      "type": "image/png",
+      "purpose": "main logo"
+    }
+  ]
+}

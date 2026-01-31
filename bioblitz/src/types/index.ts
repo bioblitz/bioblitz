@@ -72,3 +72,20 @@ export interface IQuestionForDisplay {
   d?: string;
   e?: string;
 }
+
+export interface UserProfile {
+  uid: string;
+  displayName: string;
+  username: string | null;
+  email: string;
+  photoURL: string;
+  bElo: number;
+  bio: string;
+  createdAt: any;
+  location: string;
+  grade?: string;
+  school?: string;
+  streak?: number;
+  bannerURL?: string;
+  channelName?: string;
+}

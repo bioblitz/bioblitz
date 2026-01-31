@@ -3,9 +3,7 @@ import Link from "next/link";
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col font-inter bg-[#020204] text-slate-200 selection:bg-violet-500 selection:text-white overflow-x-hidden">
-      {/* --- BACKGROUND EFFECTS --- */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Subtle Grid - kept for design consistency but lowered opacity */}
         <div
           className="absolute inset-0 opacity-[0.1]"
           style={{
@@ -19,7 +17,6 @@ export default function AboutPage() {
       </div>
 
       <main className="relative z-10 flex-grow flex flex-col items-center w-full pt-20">
-        {/* --- HERO: THE HUMAN HOOK --- */}
         <section className="w-full max-w-3xl px-6 pt-16 pb-20 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-8 leading-tight">
             We are <br />
@@ -33,10 +30,8 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* --- THE STORY (Text-Heavy, Honest Narrative) --- */}
         <section className="w-full max-w-4xl px-6 py-12">
           <div className="bg-[#0F1422] border border-slate-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
-            {/* Soft decorative blob */}
             <div className="absolute -top-20 -right-20 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
             <div className="relative z-10 space-y-6 text-slate-300 leading-relaxed text-lg">
@@ -61,7 +56,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* --- THE TEAM (People Focused) --- */}
         <section className="w-full max-w-6xl px-6 py-20">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-white mb-4">
@@ -71,11 +65,9 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Person 1 */}
             <div className="bg-[#0F1422] border border-slate-800 rounded-xl p-6 flex flex-col hover:border-violet-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 overflow-hidden">
-                  {/* Placeholder for avatar */}
                   <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div>
@@ -91,7 +83,6 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Person 2 */}
             <div className="bg-[#0F1422] border border-slate-800 rounded-xl p-6 flex flex-col hover:border-violet-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 overflow-hidden">
@@ -105,7 +96,6 @@ export default function AboutPage() {
               <p className="text-slate-400 text-sm leading-relaxed mb-4"></p>
             </div>
 
-            {/* Person 3 */}
             <div className="bg-[#0F1422] border border-slate-800 rounded-xl p-6 flex flex-col hover:border-violet-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 overflow-hidden">
@@ -128,7 +118,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* --- ETHOS / TRANSPARENCY --- */}
         <section className="w-full max-w-4xl px-6 py-20 border-t border-slate-900/50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
@@ -158,7 +147,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* --- SIMPLE CONTACT CTA --- */}
         <section className="w-full py-20 px-6 text-center">
           <h2 className="text-2xl font-bold text-white mb-6">
             Want to talk biology?
@@ -180,7 +168,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* --- FOOTER --- */}
         <footer className="w-full text-center py-8 text-slate-600 text-sm border-t border-slate-900 bg-[#020204]">
           <div className="flex justify-center gap-6 mb-4">
             <Link
