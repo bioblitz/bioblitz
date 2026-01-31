@@ -27,7 +27,6 @@ export const gradeTest = onDocumentCreated("gameSubmissions/{submissionId}", asy
     }
     const { gameId, userId, userAnswers, timeTaken } = submissionData;
 
-    // Fetch Game Metadata
     const gameDocRef = db.collection("sets").doc(gameId);
     const gameDoc = await gameDocRef.get();
 

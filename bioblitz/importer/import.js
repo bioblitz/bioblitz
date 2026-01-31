@@ -2,10 +2,8 @@ const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
 
-// ---- CONFIG ----
 const JSON_PATH = path.join(__dirname, "august_set.json");
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, "serviceAccountKey.json");
-// ---------------
 
 const serviceAccount = require(SERVICE_ACCOUNT_PATH);
 
@@ -15,7 +13,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// Firestore batch limit is 500 writes per batch
 const BATCH_LIMIT = 450;
 
 function chunkArray(arr, size) {
@@ -34,12 +31,11 @@ async function run() {
   const setId = data.setDoc.setId;
   const setRef = db.collection("sets").doc(setId);
 
-  // ---- 1) Write the set doc ----
   const setPayload = {
     averageRating: data.setDoc.averageRating ?? 0,
     description: data.setDoc.description ?? "",
     hidden: data.setDoc.hidden ?? false,
-    lastRatingUpdate: null, // keep null unless you want admin.firestore.FieldValue.serverTimestamp()
+    lastRatingUpdate: null,
     questionCount: data.questions.length,
     ratingCount: data.setDoc.ratingCount ?? 0,
     ratingSum: data.setDoc.ratingSum ?? 0,
@@ -52,7 +48,6 @@ async function run() {
 
   await setRef.set(setPayload, { merge: true });
 
-  // ---- 2) Write questions in batches ----
   const chunks = chunkArray(data.questions, BATCH_LIMIT);
 
   for (let i = 0; i < chunks.length; i++) {
@@ -71,7 +66,7 @@ async function run() {
           c: q.c ?? "",
           d: q.d ?? "",
           e: q.e ?? "",
-          correct: (q.correct ?? "").toLowerCase(), // expects "a"-"e"
+          correct: (q.correct ?? "").toLowerCase(),
           content: q.content ?? "",
           imgURL: q.imgURL ?? "",
           solution: q.solution ?? "",
@@ -84,10 +79,10 @@ async function run() {
     console.log(`Committed batch ${i + 1}/${chunks.length}`);
   }
 
-  console.log(`✅ Import complete: sets/${setId} with ${data.questions.length} questions`);
+  console.log(`Import complete: sets/${setId} with ${data.questions.length} questions`);
 }
 
 run().catch((err) => {
-  console.error("❌ Import failed:", err);
+  console.error("Import failed:", err);
   process.exit(1);
 });

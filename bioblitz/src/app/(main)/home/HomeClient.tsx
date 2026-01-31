@@ -32,9 +32,6 @@ export default function HomeClient({
   const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
   const [typeFilter, setTypeFilter] = useState<"All" | "Official" | "Community">("All");
 
-  // FIX 1: Removed `const [games, setGames]...` 
-  // We use `initialGames` directly. This ensures that if Next.js revalidates 
-  // the page on the server, the client immediately sees the new data.
 
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -84,7 +81,6 @@ export default function HomeClient({
     }
   };
 
-  // FIX 2: Wrapped in useMemo to prevent expensive re-filtering on every minor render
   const filteredGames = useMemo(() => {
     return initialGames.filter((game) => {
       const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -159,7 +155,6 @@ export default function HomeClient({
     <div className="min-h-screen bg-zinc-950 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
-          {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
@@ -179,7 +174,7 @@ export default function HomeClient({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search titles..."
                   className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600"
-                  suppressHydrationWarning // Good use of suppression here
+                  suppressHydrationWarning
                 />
               </div>
 
@@ -210,7 +205,6 @@ export default function HomeClient({
             </div>
           </div>
 
-          {/* Filters Panel */}
           {showFilters && (
             <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">

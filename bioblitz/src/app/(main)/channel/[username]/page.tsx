@@ -122,7 +122,6 @@ export default function ChannelPage() {
         setChannelOwnerProfile(profile);
         setIsOwner(authUser?.uid === profile.uid);
         
-        // Fetch contests for this user
         const contests = await getContestsByCreator(profile.uid);
         setUserContests(contests);
 
@@ -155,7 +154,7 @@ export default function ChannelPage() {
         />
       )}
 
-      <div className="bg-black justify-center h-screen pt-16 text-white">
+      <div className="bg-black min-h-screen justify-center pt-20 py-10 text-white">
       <div className ="w-11/12 mx-auto">
 
       <input
@@ -280,7 +279,7 @@ export default function ChannelPage() {
         {userContests.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {userContests.map((game) => (
-              <ContestCard key={game.id} contest={game} />
+              <ContestCard key={game.id} contest={game} href={`/home/${game.id}`}/>
             ))}
           </div>
         ) : (

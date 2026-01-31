@@ -106,7 +106,6 @@ export default function GameDetailPage() {
     loadGameData();
   }, [gameId]);
 
-  // --- New Effect: Check for Active Session in LocalStorage ---
   useEffect(() => {
     if (!user || !gameId || !game) return;
 
@@ -123,17 +122,15 @@ export default function GameDetailPage() {
         if (remaining > 0) {
           setActiveSession({ timeLeft: remaining });
         } else {
-          setActiveSession(null); // Time expired
+          setActiveSession(null);
         }
       } else {
         setActiveSession(null);
       }
     };
 
-    // Check immediately
     checkSession();
 
-    // Check every second to update timer
     const interval = setInterval(checkSession, 1000);
     return () => clearInterval(interval);
   }, [user, gameId, game]);
@@ -228,7 +225,6 @@ export default function GameDetailPage() {
           (entry) => entry !== null
         ) as LeaderboardEntry[];
         
-        // Sort by score (desc), then by time (asc)
         filteredData.sort((a, b) => {
           if (b.score !== a.score) {
             return b.score - a.score;
@@ -402,7 +398,6 @@ export default function GameDetailPage() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {/* --- Resume Attempt Button --- */}
               {activeSession && (
                 <button
                   onClick={proceedToGame}
@@ -429,7 +424,6 @@ export default function GameDetailPage() {
                 </button>
               )}
 
-              {/* --- Standard Start Button --- */}
               <button
                 onClick={handleJoinGame}
                 disabled={loadingAttempts || !authResolved || activeSession !== null}
@@ -437,7 +431,7 @@ export default function GameDetailPage() {
                   loadingAttempts
                     ? "bg-zinc-800 cursor-wait opacity-70"
                     : activeSession !== null
-                    ? "bg-zinc-800 opacity-50 cursor-not-allowed" // Disable start if resume is active
+                    ? "bg-zinc-800 opacity-50 cursor-not-allowed"
                     : isFirstAttempt
                     ? "bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-900/20"
                     : "bg-white text-black hover:bg-zinc-200"
@@ -454,7 +448,6 @@ export default function GameDetailPage() {
                       <span className="text-lg font-bold">Sign in to Play</span>
                     </>
                   ) : activeSession ? (
-                     // Placeholder to keep layout height, though button is disabled
                      <span className="text-zinc-500 font-bold">Finish your current attempt first</span>
                   ) : isFirstAttempt ? (
                     <>
