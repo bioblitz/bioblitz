@@ -3,14 +3,17 @@ import Link from "next/link";
 import { gameRoom } from "@/types";
 import { Clock, Star, Users } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-import { GameRoomClient } from "@/types";
 interface ContestCardProps {
   contest: gameRoom;
   href?: string;
 }
 
 const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
-  const timeInMinutes = contest.timeLimit ? parseInt(contest.timeLimit) : 0;
+  const timeInMinutes = contest.timeLimit 
+    ? (typeof contest.timeLimit === 'string' && contest.timeLimit.includes('min') 
+        ? parseInt(contest.timeLimit) 
+        : Math.floor(parseInt(contest.timeLimit) / 60))
+    : 0;
   const questionCount = parseInt(contest.number_of_questions) || 0;
 
   const getTopicColor = (topic?: string) => {
