@@ -61,6 +61,12 @@ export async function createContest(
   const questions: any[] = questionsString ? JSON.parse(questionsString) : [];
   const status = (formData.get("status") as string) || "incomplete";
 
+  // hidden: true for drafts, false for published (unless caller overrides)
+  const hiddenParam = formData.get("hidden");
+  const hidden = status === "completed"
+    ? (hiddenParam === "true" ? true : false)
+    : true;
+
   const contest: Omit<gameRoom, "id"> = {
     title: formData.get("title") as string,
     source: formData.get("source") as string,
@@ -74,6 +80,7 @@ export async function createContest(
     creatorUsername: creatorUsername,
     rating: Number(formData.get("rating")) || 0,
     status: status,
+    hidden,
     bannerUrl: (formData.get("bannerUrl") as string) || "",
     creation: null,
   };

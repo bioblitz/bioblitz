@@ -3,6 +3,7 @@ import Link from "next/link";
 import { gameRoom } from "@/types";
 import { Clock, Star, Users } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
+import { getTopicShortLabel } from "@/lib/utils";
 interface ContestCardProps {
   contest: gameRoom;
   href?: string;
@@ -17,15 +18,17 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
   const questionCount = parseInt(contest.number_of_questions) || 0;
 
   const getTopicColor = (topic?: string) => {
-    if (!topic) return "bg-violet-600";
-    
-    const topicLower = topic.toLowerCase();
-    if (topicLower.includes("animal")) return "bg-rose-600";
-    if (topicLower.includes("multiple")) return "bg-yellow-600";
-    if (topicLower.includes("eco")) return "bg-emerald-600";
-    if (topicLower.includes("genetic")) return "bg-lime-600";
-    if (topicLower.includes("plant")) return "bg-green-600";
-    return "bg-violet-600";
+    switch (topic) {
+      case "Anatomy & Physiology": return "bg-blue-600";
+      case "Cell Biology": return "bg-cyan-600";
+      case "Plant Biology": return "bg-green-600";
+      case "Genetics & Evolution": return "bg-lime-600";
+      case "Biosystematics": return "bg-violet-600";
+      case "Ecology": return "bg-emerald-600";
+      case "Ethology": return "bg-orange-600";
+      case "Multiple": return "bg-yellow-600";
+      default: return "bg-zinc-600";
+    }
   };
 
   return (
@@ -71,7 +74,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10">
               <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}>
-                {contest.topic}
+                {getTopicShortLabel(contest.topic)}
               </span>
             </div>
           )}

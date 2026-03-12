@@ -4,12 +4,15 @@
 import { useState } from "react";
 
 const topics = [
-  { name: "All Topics", emoji: "🌍" },
-  { name: "Animal", emoji: "🐶" },
-  { name: "Cell Biology", emoji: "🔬"},
-  { name: "Genetics", emoji: "🧬" },
-  { name: "Biochem", emoji: "🧪" },
-  { name: "Plants", emoji: "🌱" },
+  { name: "All Topics", label: "All Topics", emoji: "🌍" },
+  { name: "Anatomy & Physiology", label: "Anat & Phys", emoji: "🫀" },
+  { name: "Cell Biology", label: "Cell Biology", emoji: "🔬" },
+  { name: "Plant Biology", label: "Plant Biology", emoji: "🌱" },
+  { name: "Genetics & Evolution", label: "Gen & Evo", emoji: "🧬" },
+  { name: "Biosystematics", label: "Biosystematics", emoji: "🌳" },
+  { name: "Ecology", label: "Ecology", emoji: "🌿" },
+  { name: "Ethology", label: "Ethology", emoji: "🐾" },
+  { name: "Multiple", label: "Multiple", emoji: "📚" },
 ];
 
 export default function TopicFilter({ setTopic }: { setTopic: (topic: string) => void }) {
@@ -33,7 +36,7 @@ export default function TopicFilter({ setTopic }: { setTopic: (topic: string) =>
           }`}
         >
           <span>{topic.emoji}</span>
-          <span>{topic.name}</span>
+          <span>{topic.label}</span>
         </button>
       ))}
     </div>

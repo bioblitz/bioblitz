@@ -332,19 +332,41 @@ export default function ChannelPage() {
 
           <div className="mt-8">
             <h2 className="text-xl font-bold mb-4">Blitzes</h2>
-            {userContests.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {userContests.map((game) => (
-                  <ContestCard
-                    key={game.id}
-                    contest={game}
-                    href={`/home/${game.id}`}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-zinc-400">No Blitzes created yet.</p>
-            )}
+            {(() => {
+              const displayed = isOwner
+                ? userContests
+                : userContests.filter((c) => c.status === 'completed' && !(c as any).hidden);
+              return displayed.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {displayed.map((game) => (
+                    <div key={game.id} className="relative group">
+                      <ContestCard
+                        contest={game}
+                        href={`/home/${game.id}`}
+                      />
+                      {isOwner && (
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {(game.status !== 'completed' || (game as any).hidden) && (
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
+                              {game.status !== 'completed' ? 'Draft' : 'Hidden'}
+                            </span>
+                          )}
+                          <button
+                            onClick={() => router.push(`/contests/create/${game.id}`)}
+                            className="p-1.5 bg-zinc-900/90 hover:bg-zinc-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
+                          >
+                            <PencilIcon className="w-3 h-3" />
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400">No Blitzes created yet.</p>
+              );
+            })()}
           </div>
         </div>
       </div>

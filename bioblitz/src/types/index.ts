@@ -21,6 +21,7 @@ export type gameRoom = {
   rating?: number;
   questions?: Question[];
   status?: string;
+  hidden?: boolean;
   bannerUrl?: string;
   totalPlays?: number;
   creation: number | null;

@@ -60,7 +60,7 @@ export default function PotdGameClient({
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const topics = ["All Topics", "General", "Animal", "Cell Bio", "Biochem", "Genetics", "Plants"];
+  const topics = ["All Topics", "Anatomy & Physiology", "Cell Biology", "Plant Biology", "Genetics & Evolution", "Biosystematics", "Ecology", "Ethology", "Multiple"];
 
   // ------------------------------------------------------------------
   // HELPER: Strict PST Date Check
@@ -193,12 +193,15 @@ export default function PotdGameClient({
 
   const getTopicColors = (topic: string | undefined) => {
     switch (topic) {
-      case "Animal": return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50" };
-      case "Cell Bio": return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50" };
-      case "Biochem": return { bg: "bg-teal-500/10 text-teal-400 border-teal-500/20", shadow: "hover:shadow-teal-500/10 hover:border-teal-500/50" };
-      case "Genetics": return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50" };
-      case "Plants": return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50" };
-      default: return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50" };
+      case "Anatomy & Physiology": return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50" };
+      case "Cell Biology": return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50" };
+      case "Plant Biology": return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50" };
+      case "Genetics & Evolution": return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50" };
+      case "Biosystematics": return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50" };
+      case "Ecology": return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50" };
+      case "Ethology": return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50" };
+      case "Multiple": return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50" };
+      default: return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50" };
     }
   };
 

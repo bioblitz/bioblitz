@@ -40,12 +40,15 @@ export default function HomeClient({
   const db = getFirestore(app);
 
   const topics = [
-    "All Topics",
-    "Animal",
-    "Cell Bio",
-    "Biochem",
-    "Genetics",
-    "Plants",
+    { value: "All Topics", label: "All Topics" },
+    { value: "Anatomy & Physiology", label: "Anatomy & Physiology" },
+    { value: "Cell Biology", label: "Cell Biology" },
+    { value: "Plant Biology", label: "Plant Biology" },
+    { value: "Genetics & Evolution", label: "Gen & Evo" },
+    { value: "Biosystematics", label: "Biosystematics" },
+    { value: "Ecology", label: "Ecology" },
+    { value: "Ethology", label: "Ethology" },
+    { value: "Multiple", label: "Multiple" },
   ];
 
   useEffect(() => {
@@ -107,42 +110,24 @@ export default function HomeClient({
 
   const getTopicColors = (topic: string | undefined) => {
     switch (topic) {
-      case "Animal":
-        return {
-          bg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-          shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50",
-          badge: "bg-blue-500 text-white",
-        };
-      case "Cell Bio":
-        return {
-          bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-          shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50",
-          badge: "bg-cyan-500 text-white",
-        };
-      case "Biochem":
-        return {
-          bg: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-          shadow: "hover:shadow-teal-500/10 hover:border-teal-500/50",
-          badge: "bg-teal-600 text-white",
-        };
-      case "Genetics":
-        return {
-          bg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
-          shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50",
-          badge: "bg-lime-600 text-white",
-        };
-      case "Plants":
-        return {
-          bg: "bg-green-500/10 text-green-400 border-green-500/20",
-          shadow: "hover:shadow-green-500/10 hover:border-green-500/50",
-          badge: "bg-green-600 text-white",
-        };
+      case "Anatomy & Physiology":
+        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50", badge: "bg-blue-500 text-white" };
+      case "Cell Biology":
+        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50", badge: "bg-cyan-500 text-white" };
+      case "Plant Biology":
+        return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50", badge: "bg-green-600 text-white" };
+      case "Genetics & Evolution":
+        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50", badge: "bg-lime-600 text-white" };
+      case "Biosystematics":
+        return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50", badge: "bg-violet-600 text-white" };
+      case "Ecology":
+        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50", badge: "bg-emerald-600 text-white" };
+      case "Ethology":
+        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50", badge: "bg-orange-600 text-white" };
+      case "Multiple":
+        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50", badge: "bg-yellow-600 text-white" };
       default:
-        return {
-          bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-          shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50",
-          badge: "bg-yellow-600 text-white",
-        };
+        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50", badge: "bg-zinc-600 text-white" };
     }
   };
 
@@ -262,18 +247,18 @@ export default function HomeClient({
                     <div className="flex flex-wrap gap-2">
                       {topics.map((t) => (
                         <button
-                          key={t}
-                          onClick={() => setTopic(t)}
+                          key={t.value}
+                          onClick={() => setTopic(t.value)}
                           className={`
                                   px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                                   ${
-                                    topic === t
+                                    topic === t.value
                                       ? "bg-violet-600/15 text-violet-300 border-violet-500/30"
                                       : "bg-transparent text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
                                   }
                                 `}
                         >
-                          {t}
+                          {t.label}
                         </button>
                       ))}
                     </div>

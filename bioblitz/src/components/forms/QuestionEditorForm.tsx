@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import dynamic from "next/dynamic";
 import { EditableQuestion, AnswerChoice } from "@/types";
 import { CheckCircle, Circle, Plus, Trash2, UploadCloud } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import "react-quill-new/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), {
+  ssr: false,
+  loading: () => <p>Loading Editor...</p>,
+});
 
 interface QuestionEditorFormProps {
   question: EditableQuestion;
@@ -19,12 +24,9 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleContentChange = (content: string) => {
-    onQuestionChange({ ...question, content: content });
+    if (content === question.content) return;
+    onQuestionChange({ ...question, content });
   };
-  const ReactQuill = useMemo(() => dynamic(() => import("react-quill-new"), { 
-    ssr: false,
-    loading: () => <p>Loading Editor...</p>
-  }), []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
