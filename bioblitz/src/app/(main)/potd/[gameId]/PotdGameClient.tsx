@@ -62,27 +62,31 @@ export default function PotdGameClient({
 
   const topics = ["All Topics", "General", "Animal", "Cell Bio", "Biochem", "Genetics", "Plants"];
 
-  // Helper: Date Check
+  // ------------------------------------------------------------------
+  // HELPER: Strict PST Date Check
+  // Ensures transitions happen exactly at 12:00 AM PST
+  // ------------------------------------------------------------------
   const isToday = (dateString: string) => {
-    const d = new Date(dateString);
+    // 1. Get current time in PST (America/Los_Angeles)
     const now = new Date();
-    
-    // Check Local
-    const matchLocal = d.getDate() === now.getDate() && 
-                       d.getMonth() === now.getMonth() && 
-                       d.getFullYear() === now.getFullYear();
-
-    // Check PST
-    const pstOptions: Intl.DateTimeFormatOptions = {
+    const options: Intl.DateTimeFormatOptions = {
         timeZone: "America/Los_Angeles",
-        year: "numeric", month: "numeric", day: "numeric"
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
     };
-    const matchPST = d.toLocaleDateString("en-US", pstOptions) === now.toLocaleDateString("en-US", pstOptions);
+    // Returns "MM/DD/YYYY" format
+    const pstDateString = now.toLocaleDateString("en-US", options);
+    
+    // 2. Convert to YYYY-MM-DD to match database format
+    const [month, day, year] = pstDateString.split('/');
+    const currentPST = `${year}-${month}-${day}`;
 
-    return matchLocal || matchPST;
+    // 3. Strict Comparison
+    return dateString === currentPST;
   };
 
-  // 1. Redirect if Today
+  // 1. Redirect if Today (Forces user to main POTD page if viewing today's puzzle in archive mode)
   useEffect(() => {
     if (isToday(puzzle.date)) {
         router.replace('/potd'); 
@@ -142,15 +146,18 @@ export default function PotdGameClient({
         const userRef = doc(db, "users", user.uid);
         
         // 1. Save detailed log
+        // Note: The Server-Side function triggers on this creation to update streaks
         const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
         await setDoc(setPlayedRef, {
             gameId: puzzle.id,
             timestamp: serverTimestamp(),
+            // Pass the puzzle date explicitly so the server knows which "PST Day" this counts for
+            puzzleDate: puzzle.date, 
             correct: correct,
             answers: sortedSelected
         });
 
-        // 2. Add to Completed Array (No streak increment here)
+        // 2. Add to Completed Array (Streak increment is handled server-side)
         await updateDoc(userRef, {
             completedPotdIds: arrayUnion(puzzle.id) 
         });
@@ -250,7 +257,7 @@ export default function PotdGameClient({
                                 </span>
                                 <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 px-2 py-1 rounded-md">
                                     {puzzle.multiSelect ? <ListChecks className="w-3 h-3" /> : <MousePointerClick className="w-3 h-3" />}
-                                    {puzzle.multiSelect ? "Multi-Select" : "Single Choice"}
+                                    {puzzle.multiSelect ? "Multi-Select" : "Single Select"}
                                 </span>
                                 
                                 {isCompleted && (

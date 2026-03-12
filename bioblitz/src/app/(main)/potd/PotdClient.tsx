@@ -23,8 +23,6 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
-  collection,
-  getDocs,
   doc,
   getDoc,
   updateDoc,
@@ -105,7 +103,8 @@ export default function PotdClient({
     }
   };
 
-  const handleSubmit = async (puzzle: DailyPuzzle) => {
+
+const handleSubmit = async (puzzle: DailyPuzzle) => {
     if (!user) {
       alert("Please sign in to submit answers.");
       return;
@@ -115,74 +114,37 @@ export default function PotdClient({
 
     const sortedSelected = [...selectedOptions].sort();
     const sortedCorrect = [...puzzle.correctAnswer].sort();
-    const correct =
-      JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+    const correct = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+    
+    // Optimistic UI updates (Make it feel instant)
     setIsCorrect(correct);
+    setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
+    // Optionally assume streak increased for UI purposes (will be corrected on refresh)
+    if (correct) { 
+        // Logic to visually increment streak if you want
+    }
 
     try {
-      const userRef = doc(db, "users", user.uid);
-
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
+      
+      // *** CRITICAL: You must include puzzleDate here ***
       await setDoc(setPlayedRef, {
         gameId: puzzle.id,
         timestamp: serverTimestamp(),
         correct: correct,
         answers: sortedSelected,
+        puzzleDate: puzzle.date // <--- REQUIRED for index.ts to trigger
       });
 
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-
-      const now = new Date();
-      const currentPstDate = new Date(
-        now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
-      );
-      currentPstDate.setHours(0, 0, 0, 0);
-
-      let lastStreakDate: Date | null = null;
-      if (userData?.lastStreakDate) {
-        lastStreakDate = userData.lastStreakDate.toDate();
-      }
-
-      let shouldIncrement = false;
-
-      if (!lastStreakDate) {
-        shouldIncrement = true;
-      } else {
-        const lastPstDate = new Date(
-          lastStreakDate.toLocaleString("en-US", {
-            timeZone: "America/Los_Angeles",
-          })
-        );
-        if (lastPstDate < currentPstDate) {
-          shouldIncrement = true;
-        }
-      }
-
-      const updateData: any = {
-        completedPotdIds: arrayUnion(puzzle.id),
-      };
-
-      if (shouldIncrement) {
-        const newStreak = (userData?.streak || 0) + 1;
-        updateData.streak = newStreak;
-        updateData.lastStreakDate = serverTimestamp();
-
-        setStreak(newStreak);
-        setStreakUpdated(true);
-      }
-
-      await updateDoc(userRef, updateData);
-
-      setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
       setIsSubmitted(true);
       setViewAnyway(true);
     } catch (error) {
       console.error("Error updating stats:", error);
+      alert("Error submitting. Check console.");
     } finally {
       setSubmitting(false);
     }
-  };
+};
 
   const handleOptionClick = (key: string, isMulti: boolean) => {
     if (isSubmitted) return;
@@ -241,22 +203,25 @@ export default function PotdClient({
     const d = new Date(dateString);
     const now = new Date();
 
-    const matchLocal =
-      d.getDate() === now.getDate() &&
-      d.getMonth() === now.getMonth() &&
-      d.getFullYear() === now.getFullYear();
-
-    const pstOptions: Intl.DateTimeFormatOptions = {
+    // 1. Get the current Calendar Date in Pacific Time
+    const currentPstString = now.toLocaleDateString("en-US", {
       timeZone: "America/Los_Angeles",
       year: "numeric",
       month: "numeric",
       day: "numeric",
-    };
-    const matchPST =
-      d.toLocaleDateString("en-US", pstOptions) ===
-      now.toLocaleDateString("en-US", pstOptions);
+    });
 
-    return matchLocal || matchPST;
+    // 2. Get the Puzzle's Calendar Date (using UTC to avoid timezone shifting)
+    // We assume the puzzle date (e.g. "2025-01-10") represents the target day.
+    const puzzleDateString = d.toLocaleDateString("en-US", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+
+    // 3. Compare: This ensures the puzzle for "Jan 10" shows up exactly when it is "Jan 10" in PST.
+    return currentPstString === puzzleDateString;
   };
 
   const todaysPuzzle = puzzles.find((p) => isToday(p.date));
@@ -489,11 +454,7 @@ export default function PotdClient({
                                   <h3 className="text-xl font-bold text-green-400">
                                     Correct! Great Job!
                                   </h3>
-                                  {streakUpdated && (
-                                    <p className="text-sm text-green-300 font-medium">
-                                      🔥 Streak Incremented!
-                                    </p>
-                                  )}
+                                 
                                 </>
                               ) : (
                                 <>

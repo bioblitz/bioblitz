@@ -1,67 +1,77 @@
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { app } from "@/lib/firebase";
+import "server-only";
+
 import PotdGameClient from "./PotdGameClient";
 import { notFound } from "next/navigation";
-import { getCachedPuzzles, DailyPuzzle } from "@/lib/potd"; // Import shared fetcher
+import { getCachedPuzzles, DailyPuzzle } from "@/lib/potd";
+import { adminFirestore } from "@/lib/firebase-admin";
 
-export const revalidate = 0; // Don't cache the individual lookup page itself (optional)
+export const revalidate = 0; // page itself not cached; archive is cached in getCachedPuzzles()
 
-export default async function PotdGamePage({ params }: { params: { gameId: string } }) {
-  const db = getFirestore(app);
+export default async function PotdGamePage({
+  params,
+}: {
+  params: { gameId: string };
+}) {
   const { gameId } = params;
 
-  // 1. Fetch the specific puzzle (Live fetch)
-  const docRef = doc(db, "potd", gameId);
-  const docSnap = await getDoc(docRef);
+  // 1) Fetch the specific puzzle (server/admin fetch)
+  const docSnap = await adminFirestore.collection("potd").doc(gameId).get();
 
-  if (!docSnap.exists()) {
+  if (!docSnap.exists) {
     return notFound();
   }
 
-  // 2. Format the single puzzle
-  const data = docSnap.data();
+  // 2) Format the single puzzle
+  const data = docSnap.data() ?? {};
+
+  // Firestore Admin Timestamp has .toDate()
   let dateString = new Date().toISOString();
-  if (data.date) {
-      if (typeof data.date.toDate === 'function') {
-        dateString = data.date.toDate().toISOString();
-      } else {
-        dateString = new Date(data.date).toISOString();
-      }
+  const rawDate = (data as any).date;
+  if (rawDate) {
+    if (typeof rawDate.toDate === "function") {
+      dateString = rawDate.toDate().toISOString();
+    } else {
+      dateString = new Date(rawDate).toISOString();
+    }
   }
 
   const rawOptions = [
-      { key: 'a', text: data.a },
-      { key: 'b', text: data.b },
-      { key: 'c', text: data.c },
-      { key: 'd', text: data.d },
-      { key: 'e', text: data.e },
+    { key: "a", text: (data as any).a },
+    { key: "b", text: (data as any).b },
+    { key: "c", text: (data as any).c },
+    { key: "d", text: (data as any).d },
+    { key: "e", text: (data as any).e },
   ];
-  
+
   let correctArr: string[] = [];
-  if (Array.isArray(data.correct)) {
-      correctArr = data.correct;
-  } else if (typeof data.correct === 'string') {
-      correctArr = [data.correct];
-  } else if (typeof data.correct === 'object') {
-      correctArr = Object.values(data.correct);
+  const rawCorrect = (data as any).correct;
+
+  if (Array.isArray(rawCorrect)) {
+    correctArr = rawCorrect;
+  } else if (typeof rawCorrect === "string") {
+    correctArr = [rawCorrect];
+  } else if (rawCorrect && typeof rawCorrect === "object") {
+    correctArr = Object.values(rawCorrect);
   }
 
   const currentPuzzle: DailyPuzzle = {
     id: docSnap.id,
-    title: data.title || "Daily Problem",
-    topic: data.topic || "General",
+    title: (data as any).title || "Daily Problem",
+    topic: (data as any).topic || "General",
     date: dateString,
-    multiSelect: data.multiSelect || false,
-    questionText: data.question || "",
-    difficulty: data.difficulty || "Medium",
-    options: rawOptions.filter(opt => opt.text),
+    multiSelect: (data as any).multiSelect || false,
+    questionText: (data as any).question || "",
+    difficulty: (data as any).difficulty || "Medium",
+    options: rawOptions.filter((opt) => opt.text),
     correctAnswer: correctArr,
-    explanation: data.explanation || "No explanation provided."
+    explanation: (data as any).explanation || "No explanation provided.",
   };
 
-  // 3. FETCH THE ARCHIVE (Cached)
+  // 3) Fetch the archive (cached)
   const archivePuzzles = await getCachedPuzzles();
 
-  // 4. Pass both to client
-  return <PotdGameClient puzzle={currentPuzzle} archivePuzzles={archivePuzzles} />;
+  // 4) Pass both to client
+  return (
+    <PotdGameClient puzzle={currentPuzzle} archivePuzzles={archivePuzzles} />
+  );
 }
