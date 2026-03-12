@@ -21,7 +21,7 @@ export default async function mainPage({
       title: "Animal Anatomy & Physiology",
       weight: "25%",
       color: "border-violet-500/50",
-      bg: "bg-violet-500/20", // Slightly stronger opacity for the glow
+      bg: "bg-violet-500/10",
       text: "text-violet-400",
       icon: <HeartPulse className="w-16 h-16" />,
       desc: "Animal body systems, organ functions, and physiological regulation.",
@@ -30,7 +30,7 @@ export default async function mainPage({
       title: "Cell & Molecular Biology",
       weight: "20%",
       color: "border-fuchsia-500/50",
-      bg: "bg-fuchsia-500/20",
+      bg: "bg-fuchsia-500/10",
       text: "text-fuchsia-400",
       icon: <Microscope className="w-16 h-16" />,
       desc: "Cellular structures, biomolecules, and molecular processes.",
@@ -39,7 +39,7 @@ export default async function mainPage({
       title: "Genetics & Evolution",
       weight: "20%",
       color: "border-blue-500/50",
-      bg: "bg-blue-500/20",
+      bg: "bg-blue-500/10",
       text: "text-blue-400",
       icon: <Dna className="w-16 h-16" />,
       desc: "Inheritance, genetic variation, and evolutionary mechanisms.",
@@ -66,41 +66,34 @@ export default async function mainPage({
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-[#020204] text-slate-200 selection:bg-violet-500 selection:text-white overflow-x-hidden">
-      {/* Dynamic Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Grid */}
         <div
-          className="absolute inset-0 opacity-[0.15]"
+          className="absolute inset-0 opacity-[0.07]"
           style={{
             backgroundImage:
-              "linear-gradient(to right, #2e1065 1px, transparent 1px), linear-gradient(to bottom, #2e1065 1px, transparent 1px)",
+              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
-        {/* Ambient Glow Spots */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-900/20 rounded-full blur-[128px] mix-blend-screen animate-pulse duration-1000"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[128px] mix-blend-screen"></div>
+        <div className="absolute top-0 left-1/3 w-[400px] h-[400px] bg-violet-950/40 rounded-full blur-[160px]"></div>
       </div>
 
       <main className="relative z-10 flex-grow flex flex-col items-center w-full pt-20">
         {/* --- HERO SECTION --- */}
         <section className="w-full max-w-6xl px-6 pt-15 pb-q text-center flex flex-col items-center">
-          <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tight mb-8 drop-shadow-2xl leading-[0.9]">
+          <h1 className="text-5xl md:text-8xl text-white tracking-tight mb-8 drop-shadow-2xl leading-[0.9]">
             Biology is now <br />
-            <span
-              className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-violet-300
-"
-            >
+            <span className="text-violet-300">
               beyond the books.
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 leading-relaxed">
-            Stop memorizing textbooks alone. Join the competitive platform for{" "}
+            The competitive practice platform for{" "}
             <span className="text-slate-200 font-medium">USABO</span> and{" "}
-            <span className="text-slate-200 font-medium">IBO</span> aspirants.
-            Grind challenging problems, boost your Elo, and climb up the
-            leaderboard.
+            <span className="text-slate-200 font-medium">IBO</span>. Work
+            through real exam problems, track your Elo, and see where you
+            actually stand.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mb-10">
@@ -263,11 +256,11 @@ export default async function mainPage({
           <div className="max-w-7xl mx-auto px-6">
             <div className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                Complete USABO Coverage
+                What you'll be tested on
               </h2>
               <p className="text-slate-400">
-                The Full USABO Framework; Play now to master the 7 official
-                syllabus areas.
+                All five topic areas from the official USABO syllabus, with
+                problem sets weighted to match the real exam.
               </p>
             </div>
 
@@ -304,8 +297,8 @@ export default async function mainPage({
                         </h3>
                       </div>
 
-                      <div className="absolute bottom-4 text-slate-600 text-[10px] uppercase tracking-wider font-mono">
-                        Hover to Reveal
+                      <div className="absolute bottom-4 text-slate-700 text-[10px] uppercase tracking-wider font-mono">
+                        {card.weight} of exam
                       </div>
                     </div>
 
@@ -361,17 +354,17 @@ export default async function mainPage({
           className="w-full py-12 px-6 border-t border-slate-900 bg-[#020204]"
         >
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-white">Hall of Fame</h2>
+            <div className="mb-12">
+              <h2 className="text-3xl font-bold text-white">From the community</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {/* Review 1 */}
               <div className="p-6 bg-[#0B0F19] border border-slate-800 rounded-xl relative">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"></div>
+                  <div className="w-10 h-10 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-400 text-sm font-bold">A</div>
                   <div>
                     <div className="text-white font-bold text-sm">
-                      Alex Chen
+                      Alex C.
                     </div>
                     <div className="text-slate-500 text-xs">
                       USABO Finalist '24
@@ -379,26 +372,27 @@ export default async function mainPage({
                   </div>
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  "BioBlitz gamification is actually insane. I went from
-                  struggling to memorize Campbell's to visualizing concepts
-                  because of the problem quality. Hit Gold Tier last week."
+                  "The problem quality is legitimately good. I stopped just
+                  re-reading Campbell's and started actually understanding the
+                  material. Hit Gold Tier last week."
                 </p>
               </div>
 
               {/* Review 2 */}
               <div className="p-6 bg-[#0B0F19] border border-slate-800 rounded-xl relative">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500"></div>
+                  <div className="w-10 h-10 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400 text-sm font-bold">S</div>
                   <div>
                     <div className="text-white font-bold text-sm">
-                      Sarah Jenkins
+                      Sarah J.
                     </div>
                     <div className="text-slate-500 text-xs">Pre-Med @ JHU</div>
                   </div>
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  "The MCAT biology section feels easy after grinding the hard
-                  mode problems here. It's like weight training for your brain."
+                  "Used this for MCAT prep and honestly the USABO-level
+                  questions made everything else feel manageable. The timed
+                  format forces you to actually know it, not just recognize it."
                 </p>
               </div>
             </div>
@@ -409,7 +403,7 @@ export default async function mainPage({
         <section className="w-full py-12 px-6 border-t border-slate-900 bg-[#050505]">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-8">
-              Frequently Asked Questions
+              FAQ
             </h2>
             <div className="space-y-4">
               {/* Q1: The Streak Mechanic (Mandatory per your request) */}
@@ -564,15 +558,15 @@ export default async function mainPage({
           <div className="absolute inset-0 z-0 bg-violet-900/5"></div>
           <div className="max-w-3xl mx-auto bg-[#0F1422] rounded-3xl p-6 border border-white/5 relative z-10 shadow-2xl">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Ready to start your streak?
+              See where you rank.
             </h2>
             <p className="text-slate-300 mb-6 text-lg">
-              Join the top students across the nation mastering biology today.
+              Your first Blitz is free. No account required to start.
             </p>
 
             <Link href="/home">
               <button className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-slate-200 transition-colors shadow-lg shadow-white/10">
-                Get Started
+                Start a Blitz
               </button>
             </Link>
           </div>

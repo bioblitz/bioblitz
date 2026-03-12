@@ -57,9 +57,8 @@ export async function createContest(
 
   const contestId = formData.get("contestId") as string | null;
   const questionsString = formData.get("questions") as string;
-  const questions: Question[] = questionsString
-    ? JSON.parse(questionsString)
-    : [];
+  // Questions are now in subcollection format: {id, content, a, b, c, d?, e?, correct, imgURL, solution}
+  const questions: any[] = questionsString ? JSON.parse(questionsString) : [];
   const status = (formData.get("status") as string) || "incomplete";
 
   const contest: Omit<gameRoom, "id"> = {
@@ -74,7 +73,6 @@ export async function createContest(
     creatorPfp: creatorPfp,
     creatorUsername: creatorUsername,
     rating: Number(formData.get("rating")) || 0,
-    questions: questions,
     status: status,
     bannerUrl: (formData.get("bannerUrl") as string) || "",
     creation: null,
@@ -88,12 +86,24 @@ export async function createContest(
         .doc(contestId)
         .set(contest, { merge: true });
       savedId = contestId;
-      console.log("Document updated with ID: ", contestId);
     } else {
       const ref = await adminFirestore.collection("sets").add(contest);
       savedId = ref.id;
-      console.log("Document written with ID: ", ref.id);
     }
+
+    // Write questions to subcollection, replacing any existing ones
+    if (savedId && questions.length > 0) {
+      const questionsColRef = adminFirestore.collection("sets").doc(savedId).collection("questions");
+      const existing = await questionsColRef.get();
+      await Promise.all(existing.docs.map((d) => d.ref.delete()));
+      await Promise.all(
+        questions.map((q) => {
+          const { id, ...qData } = q;
+          return questionsColRef.doc(id || questionsColRef.doc().id).set(qData);
+        })
+      );
+    }
+
     if (status === "completed") {
       await adminFirestore
         .collection("users")

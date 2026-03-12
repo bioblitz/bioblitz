@@ -2,22 +2,19 @@ import { NextResponse } from 'next/server';
 import { getContestById } from '@/lib/actions';
 import { adminAuth, adminFirestore } from '@/lib/firebase-admin';
 
-async function saveDraftToFirestore(contestId: string, data: any) {
-  try {
-    const docRef = adminFirestore.collection('sets').doc(contestId);
-    await docRef.set(data, { merge: true });
-    return true;
-  } catch (e) {
-    console.error('Error saving draft to Firestore:', e);
-    return false;
-  }
-}
-
 export async function GET(request: Request, { params }: { params: { contestId: string } }) {
   try {
     const contest = await getContestById(params.contestId);
     if (!contest) return NextResponse.json(null, { status: 404 });
-    return NextResponse.json(contest);
+
+    const questionsSnap = await adminFirestore
+      .collection('sets')
+      .doc(params.contestId)
+      .collection('questions')
+      .get();
+
+    const questions = questionsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return NextResponse.json({ ...contest, questions });
   } catch (err) {
     console.error('Error fetching contest:', err);
     return NextResponse.json({ error: 'Failed to fetch contest' }, { status: 500 });
@@ -40,25 +37,25 @@ export async function POST(request: Request, { params }: { params: { contestId: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const questionsArr: any[] = body.questions || [];
+
     const contestData: any = {
       title: body.title || '',
       description: body.description || '',
       timeLimit: body.timeLimit || '600',
       topic: body.topic || '',
-      questions: body.questions || [],
+      number_of_questions: questionsArr.length.toString(),
       status: body.status || 'incomplete',
       incomplete: body.incomplete === true,
       bannerUrl: body.bannerUrl || '',
       creator: uid,
     };
 
-    // add tags array and include 'incomplete' tag when appropriate
     contestData.tags = Array.isArray(body.tags) ? body.tags.slice() : [];
     if (contestData.incomplete && !contestData.tags.includes('incomplete')) {
       contestData.tags.push('incomplete');
     }
 
-    // try to get user profile info from users collection
     try {
       const userDoc = await adminFirestore.collection('users').doc(uid).get();
       if (userDoc.exists) {
@@ -70,8 +67,21 @@ export async function POST(request: Request, { params }: { params: { contestId: 
       // ignore
     }
 
-    const success = await saveDraftToFirestore(params.contestId, contestData);
-    if (!success) return NextResponse.json({ error: 'Failed to save' }, { status: 500 });
+    const docRef = adminFirestore.collection('sets').doc(params.contestId);
+    await docRef.set(contestData, { merge: true });
+
+    if (questionsArr.length > 0) {
+      const questionsColRef = docRef.collection('questions');
+      const existing = await questionsColRef.get();
+      await Promise.all(existing.docs.map((d) => d.ref.delete()));
+      await Promise.all(
+        questionsArr.map((q: any) => {
+          const { id, ...qData } = q;
+          return questionsColRef.doc(id || questionsColRef.doc().id).set(qData);
+        })
+      );
+    }
+
     return NextResponse.json({ message: 'Draft saved' });
   } catch (err) {
     console.error('Error in POST /api/contests/[contestId]:', err);

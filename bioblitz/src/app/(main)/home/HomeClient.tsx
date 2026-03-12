@@ -157,7 +157,7 @@ export default function HomeClient({
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold text-white">
                 Welcome back!
               </h1>
               <p className="text-zinc-400 mt-1">

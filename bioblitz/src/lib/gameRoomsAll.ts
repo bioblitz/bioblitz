@@ -1,6 +1,6 @@
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData, doc, getDoc } from "firebase/firestore";
 import { firestore } from "./firebase";
-import { gameRoom } from "@/types";
+import { gameRoom } from "@/types/index";
 
 export type Question = {
   id: string;
@@ -38,7 +38,10 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
     const gameRoomsCollection = collection(firestore, 'sets');
     const gameRoomSnapshot = await getDocs(gameRoomsCollection);
 
-    let visibleDocs = gameRoomSnapshot.docs.filter(doc => !doc.data().hidden);
+    let visibleDocs = gameRoomSnapshot.docs.filter(doc => {
+      const data = doc.data();
+      return !data.hidden && data.status !== "incomplete";
+    });
 
     if (topic && topic !== "All Topics") {
       visibleDocs = visibleDocs.filter(doc => doc.data().topic === topic);

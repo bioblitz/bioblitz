@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { allGames } from "@/lib/gameRoomsAll";
-import { gameRoom } from "@/types";
+import { gameRoom } from "@/types/index";
 import {
   Loader2,
   History,
@@ -14,10 +14,10 @@ import {
   Medal,
   Crown,
   Star,
-  AlertTriangle,
   ArrowUpRight,
   ChevronRight,
-  Timer, // Added Timer icon
+  Timer,
+  AlertTriangle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
@@ -45,12 +45,17 @@ interface GameSubmission {
   submittedAt: Timestamp;
   timeTaken: number;
   ranked?: boolean;
+  // New fields for optimization
+  username?: string;
+  handle?: string;
+  photoURL?: string;
 }
 
 interface LeaderboardEntry {
   userId: string;
   username: string;
   handle?: string;
+  photoURL?: string; // Added photoURL
   score: number;
   timeTaken: number;
 }
@@ -73,6 +78,7 @@ export default function GameDetailPage() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
+  const [showRatingDropdown, setShowRatingDropdown] = useState(false);
 
   // New State for Active Session
   const [activeSession, setActiveSession] = useState<{ timeLeft: number } | null>(null);
@@ -106,6 +112,7 @@ export default function GameDetailPage() {
     loadGameData();
   }, [gameId]);
 
+  // Check for Active Session in LocalStorage
   useEffect(() => {
     if (!user || !gameId || !game) return;
 
@@ -117,20 +124,22 @@ export default function GameDetailPage() {
         const startTime = parseInt(savedStart);
         const now = Date.now();
         const elapsedSeconds = Math.floor((now - startTime) / 1000);
-        const remaining = parseInt(game.timeLimit)*60 - elapsedSeconds;
+        const remaining = parseInt(game.timeLimit) * 60 - elapsedSeconds;
 
         if (remaining > 0) {
           setActiveSession({ timeLeft: remaining });
         } else {
-          setActiveSession(null);
+          setActiveSession(null); // Time expired
         }
       } else {
         setActiveSession(null);
       }
     };
 
+    // Check immediately
     checkSession();
 
+    // Check every second to update timer
     const interval = setInterval(checkSession, 1000);
     return () => clearInterval(interval);
   }, [user, gameId, game]);
@@ -181,7 +190,9 @@ export default function GameDetailPage() {
         const q = query(
           collection(firestore, "gameSubmissions"),
           where("gameId", "==", gameId),
-          where("status", "==", "graded")
+          where("status", "==", "graded"),
+          orderBy("submittedAt", "desc"),
+          limit(20)
         );
 
         const snapshot = await getDocs(q);
@@ -195,8 +206,22 @@ export default function GameDetailPage() {
 
         const leaderboardData = await Promise.all(
           uniqueSubmissions.map(async (submission) => {
+            // 1. Optimized Way: Use data directly from submission if available
+            if (submission.username) {
+              return {
+                userId: submission.userId,
+                username: submission.username,
+                handle: submission.handle,
+                photoURL: submission.photoURL,
+                score: submission.score,
+                timeTaken: submission.timeTaken,
+              };
+            }
+
+            // 2. Legacy Way: Fetch user profile (only if submission data missing)
             let displayName = "Unknown User";
             let handle = "";
+            let photoURL = "";
 
             try {
               const userDocRef = doc(firestore, "users", submission.userId);
@@ -207,6 +232,7 @@ export default function GameDetailPage() {
               const userData = userSnap.data();
               displayName = userData.displayName || "Unknown User";
               handle = userData.username || "";
+              photoURL = userData.photoURL || "";
             } catch (e) {
               console.error("Failed to fetch user profile", e);
             }
@@ -215,24 +241,17 @@ export default function GameDetailPage() {
               userId: submission.userId,
               username: displayName,
               handle: handle,
+              photoURL: photoURL,
               score: submission.score,
               timeTaken: submission.timeTaken,
             };
           })
         );
 
-        const filteredData = leaderboardData.filter(
-          (entry) => entry !== null
-        ) as LeaderboardEntry[];
-        
-        filteredData.sort((a, b) => {
-          if (b.score !== a.score) {
-            return b.score - a.score;
-          }
-          return a.timeTaken - b.timeTaken;
-        });
-        
-        setLeaderboard(filteredData.slice(0, 50));
+        setLeaderboard(
+          (leaderboardData.filter((entry) => entry !== null) as LeaderboardEntry[])
+            .sort((a, b) => b.score - a.score || a.timeTaken - b.timeTaken)
+        );
       } catch (err) {
         console.error("Error loading leaderboard:", err);
       } finally {
@@ -333,34 +352,25 @@ export default function GameDetailPage() {
             variants={slideUp}
             className="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 shadow-2xl backdrop-blur-sm"
           >
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
-                  {game.title}
-                </h1>
+            <div className="mb-6">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
+                {game.title}
+              </h1>
 
-                <div className="flex gap-3 mt-3">
-                  <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs font-bold uppercase tracking-wider">
-                    {game.topic || "General"}
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs font-bold uppercase tracking-wider">
-                    {game.difficulty}
-                  </span>
+              <div className="flex gap-3 mt-3">
+                <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs font-bold uppercase tracking-wider">
+                  {game.topic || "General"}
+                </span>
+                <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs font-bold uppercase tracking-wider">
+                  Difficulty: {game.difficulty}
+                </span>
 
-                  {game.rating && game.rating > 0 && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
-                      <Star className="w-3.5 h-3.5 fill-yellow-500" />
-                      <span>{game.rating}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-zinc-950/50 p-3 rounded-2xl border border-zinc-800">
-                <div className="text-xs text-zinc-500 uppercase font-bold mb-2">
-                  Rate this Blitz
-                </div>
-                <GameRating gameId={gameId} hasPlayed={hasPlayed} />
+                {game.rating && game.rating > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
+                    <Star className="w-3.5 h-3.5 fill-yellow-500" />
+                    <span>{game.rating}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -398,6 +408,7 @@ export default function GameDetailPage() {
             </div>
 
             <div className="flex flex-col gap-3">
+              {/* --- Resume Attempt Button --- */}
               {activeSession && (
                 <button
                   onClick={proceedToGame}
@@ -424,14 +435,17 @@ export default function GameDetailPage() {
                 </button>
               )}
 
+              {/* --- Standard Start Button --- */}
               <button
                 onClick={handleJoinGame}
-                disabled={loadingAttempts || !authResolved || activeSession !== null}
+                disabled={
+                  loadingAttempts || !authResolved || activeSession !== null
+                }
                 className={`w-full relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
                   loadingAttempts
                     ? "bg-zinc-800 cursor-wait opacity-70"
                     : activeSession !== null
-                    ? "bg-zinc-800 opacity-50 cursor-not-allowed"
+                    ? "bg-zinc-800 opacity-50 cursor-not-allowed" // Disable start if resume is active
                     : isFirstAttempt
                     ? "bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-900/20"
                     : "bg-white text-black hover:bg-zinc-200"
@@ -448,7 +462,10 @@ export default function GameDetailPage() {
                       <span className="text-lg font-bold">Sign in to Play</span>
                     </>
                   ) : activeSession ? (
-                     <span className="text-zinc-500 font-bold">Finish your current attempt first</span>
+                    // Placeholder to keep layout height, though button is disabled
+                    <span className="text-zinc-500 font-bold">
+                      Finish your current attempt first
+                    </span>
                   ) : isFirstAttempt ? (
                     <>
                       <Trophy className="w-6 h-6" />
@@ -536,7 +553,7 @@ export default function GameDetailPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-4 z-10">
                       <div className="text-right">
                         <div className="text-zinc-400 text-sm font-mono flex items-center gap-1 justify-end">
@@ -590,6 +607,20 @@ export default function GameDetailPage() {
                     <div className="w-5 flex justify-center">
                       {getRankIcon(index)}
                     </div>
+
+                    {/* IMAGE LOGIC */}
+                    {entry.photoURL ? (
+                      <img
+                        src={entry.photoURL}
+                        alt={entry.username}
+                        className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-xs font-bold text-violet-300">
+                        {entry.username[0]?.toUpperCase()}
+                      </div>
+                    )}
+
                     <div>
                       <div
                         className={`text-sm font-bold ${
@@ -679,6 +710,27 @@ export default function GameDetailPage() {
           </motion.div>
         </div>
       )}
+
+      {/* Floating Rate button */}
+      <div className="fixed right-6 bottom-8 z-40 flex flex-col items-end gap-2">
+        {showRatingDropdown && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-2xl mb-1">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-3">Rate this Blitz</p>
+            <GameRating gameId={gameId} hasPlayed={hasPlayed} />
+          </div>
+        )}
+        <button
+          onClick={() => setShowRatingDropdown((v) => !v)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm shadow-lg border transition-all ${
+            showRatingDropdown
+              ? "bg-yellow-500 text-black border-yellow-400"
+              : "bg-zinc-900 text-yellow-400 border-zinc-700 hover:border-yellow-500/50 hover:bg-zinc-800"
+          }`}
+        >
+          <Star className={`w-4 h-4 ${showRatingDropdown ? "fill-black" : "fill-yellow-400"}`} />
+          Rate
+        </button>
+      </div>
     </div>
   );
 }

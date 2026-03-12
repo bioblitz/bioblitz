@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
-import { EditableQuestion, IQuestionForDisplay, Question } from "@/types";
+import { EditableQuestion, IQuestionForDisplay } from "@/types";
 import { Plus, Trash2 } from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
@@ -58,6 +58,7 @@ const initialQuestion = (): EditableQuestion => ({
     { id: "2", text: "" },
   ],
   correctAnswerId: "",
+  solution: "",
 });
 
 const initialState = {
@@ -135,13 +136,22 @@ export default function EditContestPage() {
             setSelectedTopic(contest.topic || TOPICS[0]);
             setBannerUrl(contest.bannerUrl || null);
             if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
-              const editable = (contest.questions as Question[]).map((q) => ({
-                id: q.id || Date.now().toString(),
-                content: q.question || "",
-                imageUrl: (q as any).imgURL || "",
-                choices: q.answers.map((a, idx) => ({ id: String(idx + 1), text: a })),
-                correctAnswerId: String((q.answers.findIndex(a => a === q.correctAnswer) + 1) || ""),
-              } as EditableQuestion));
+              const choiceKeys = ['a', 'b', 'c', 'd', 'e'] as const;
+              const editable = (contest.questions as any[]).map((q) => {
+                // Subcollection format: {id, content, a, b, c, d?, e?, correct, imgURL, solution}
+                const choices = choiceKeys
+                  .filter((k) => q[k])
+                  .map((k, idx) => ({ id: String(idx + 1), text: q[k] as string }));
+                const correctIndex = choiceKeys.indexOf(q.correct as typeof choiceKeys[number]);
+                return {
+                  id: q.id || Date.now().toString(),
+                  content: q.content || '',
+                  imageUrl: q.imgURL || '',
+                  choices,
+                  correctAnswerId: correctIndex >= 0 ? String(correctIndex + 1) : '',
+                  solution: q.solution || '',
+                } as EditableQuestion;
+              });
               setQuestions(editable);
               setActiveQuestionId(editable[0]?.id || null);
             }
@@ -178,15 +188,23 @@ export default function EditContestPage() {
     setQuestions(newQuestions);
   };
   
-  const convertToQuestions = (editableQuestions: EditableQuestion[]): Question[] => {
+  // Converts EditableQuestion → subcollection doc format: {content, a, b, c, d?, e?, correct, imgURL, solution}
+  const convertToQuestions = (editableQuestions: EditableQuestion[]) => {
+    const choiceKeys = ['a', 'b', 'c', 'd', 'e'] as const;
     return editableQuestions.map((eq) => {
-      const correctAnswer = eq.choices.find((c) => c.id === eq.correctAnswerId)?.text || '';
-      return {
+      const correctIndex = eq.choices.findIndex((c) => c.id === eq.correctAnswerId);
+      const correctLetter = correctIndex >= 0 ? choiceKeys[correctIndex] : '';
+      const q: Record<string, string> = {
         id: eq.id,
-        question: eq.content,
-        answers: eq.choices.map((c) => c.text),
-        correctAnswer: correctAnswer,
-      } as Question;
+        content: eq.content,
+        correct: correctLetter,
+        imgURL: eq.imageUrl || '',
+        solution: eq.solution || '',
+      };
+      eq.choices.forEach((choice, idx) => {
+        if (idx < choiceKeys.length) q[choiceKeys[idx]] = choice.text;
+      });
+      return q;
     });
   };
 

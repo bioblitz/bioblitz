@@ -246,6 +246,19 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
         <Plus className="w-5 h-5" />
         Add Answer Choice
       </button>
+
+      <div>
+        <label className="block text-sm font-bold text-zinc-400 mb-2">
+          Solution / Explanation <span className="text-zinc-600 font-normal">(optional)</span>
+        </label>
+        <textarea
+          value={question.solution || ''}
+          onChange={(e) => onQuestionChange({ ...question, solution: e.target.value })}
+          placeholder="Explain why the correct answer is right..."
+          rows={3}
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all resize-none"
+        />
+      </div>
     </div>
   );
 };

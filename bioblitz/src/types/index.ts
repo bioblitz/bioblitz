@@ -61,6 +61,7 @@ export interface EditableQuestion {
   imageUrl?: string;
   choices: AnswerChoice[];
   correctAnswerId: string;
+  solution?: string;
 }
 
 export interface IQuestionForDisplay {
