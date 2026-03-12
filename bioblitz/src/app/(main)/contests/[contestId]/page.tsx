@@ -41,7 +41,7 @@ export default async function ContestPage({ params }: ContestPageParams) {
         </header>
 
         <main className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-zinc-300 mb-6">Contest Details</h2>
+          <h2 className="text-2xl font-bold text-zinc-300 mb-6">Blitz Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-zinc-400">Topic</p>

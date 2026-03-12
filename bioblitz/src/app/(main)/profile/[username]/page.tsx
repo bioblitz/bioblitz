@@ -1247,7 +1247,7 @@ export default function ProfilePage() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-full text-zinc-600 text-sm pb-8">
-                    Play more games to see history
+                    Play more Blitzes to see history
                   </div>
                 )}
               </div>

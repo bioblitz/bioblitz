@@ -16,7 +16,7 @@ export default async function ContestsPage() {
 
     return (
     <div className="min-h-screen font-inter bg-black text-white p-8">
-      <h1 className="text-4xl font-bold mb-8">Contests</h1>
+      <h1 className="text-4xl font-bold mb-8">Blitzes</h1>
       <div className="flex gap-8">
         <aside className="w-1/4 ml-4">
           <ContestFilters />
@@ -29,7 +29,7 @@ export default async function ContestsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-zinc-400">No completed contests available.</p>
+            <p className="text-zinc-400">No completed Blitzes available.</p>
           )}
         </main>
       </div>

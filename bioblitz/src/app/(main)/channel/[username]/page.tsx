@@ -324,14 +324,14 @@ export default function ChannelPage() {
                   className="px-4 py-2 bg-black-600 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
                 >
                   <PlusIcon className="w-5 h-5" />
-                  Create New Contest
+                  Create New Blitz
                 </button>
               )}
             </div>
           </div>
 
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">Contests</h2>
+            <h2 className="text-xl font-bold mb-4">Blitzes</h2>
             {userContests.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {userContests.map((game) => (
@@ -343,7 +343,7 @@ export default function ChannelPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-400">No contests created yet.</p>
+              <p className="text-zinc-400">No Blitzes created yet.</p>
             )}
           </div>
         </div>

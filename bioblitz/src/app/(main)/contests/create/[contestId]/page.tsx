@@ -74,7 +74,7 @@ function SubmitButton() {
       className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
       aria-disabled={pending}
     >
-      {pending ? 'Creating Contest...' : 'Create Contest'}
+      {pending ? 'Creating Blitz...' : 'Create Blitz'}
     </button>
   );
 }
@@ -95,7 +95,7 @@ export default function EditContestPage() {
   const [idToken, setIdToken] = useState<string | null>(null);
   const [selectedTopic, setSelectedTopic] = useState(TOPICS[0]);
   const [customTopic, setCustomTopic] = useState("");
-  const [title, setTitle] = useState("Untitled Contest");
+  const [title, setTitle] = useState("Untitled Blitz");
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState<number>(600);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
@@ -130,7 +130,7 @@ export default function EditContestPage() {
         if (res.ok) {
           const contest = await res.json();
           if (contest) {
-            setTitle(contest.title || "Untitled Contest");
+            setTitle(contest.title || "Untitled Blitz");
             setDescription(contest.description || "");
             setTimeLimit(Number(contest.timeLimit) || 600);
             setSelectedTopic(contest.topic || TOPICS[0]);
@@ -363,7 +363,7 @@ export default function EditContestPage() {
     if (isValid) {
       const token = await auth.currentUser?.getIdToken(true);
       if (!token) {
-        setErrors({ general: ["You must be logged in to submit the contest."] });
+        setErrors({ general: ["You must be logged in to submit the Blitz."] });
         return;
       }
       setIdToken(token);
@@ -408,7 +408,7 @@ export default function EditContestPage() {
       <div className="container mx-auto max-w-7xl px-4">
         <header className="mb-8 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            Contest Editor
+            Blitz Editor
           </h1>
           <p className="text-zinc-400 mt-2 text-lg">
             Use the form on the left to build your question and see a live
@@ -429,7 +429,7 @@ export default function EditContestPage() {
                 <textarea id="description" name="description" rows={3} placeholder="The first 10 questions of the 2013 USABO opens" className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300">Contest Banner</label>
+                <label className="block text-sm font-medium text-gray-300">Blitz Banner</label>
                 <div className="mt-1 flex items-center gap-4">
                   {bannerUrl ? (
                     <img src={bannerUrl} alt="Banner preview" className="h-24 w-auto rounded-md object-cover" />

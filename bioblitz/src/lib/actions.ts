@@ -23,7 +23,7 @@ export async function createContest(
   const idToken = (formData.get("idToken") as string) || null;
 
   if (!idToken) {
-    return { message: "You must be logged in to create a contest." };
+    return { message: "You must be logged in to create a Blitz." };
   }
 
   let uid: string;
@@ -52,7 +52,7 @@ export async function createContest(
     }
   } catch (e) {
     console.error("Invalid ID token:", e);
-    return { message: "You must be logged in to create a contest." };
+    return { message: "You must be logged in to create a Blitz." };
   }
 
   const contestId = formData.get("contestId") as string | null;
@@ -112,10 +112,10 @@ export async function createContest(
     }
 
     revalidatePath("/contests");
-    return { message: `Contest saved with ID: ${savedId}` };
+    return { message: `Blitz saved with ID: ${savedId}` };
   } catch (e) {
     console.error("Error saving document: ", e);
-    return { message: "Failed to save contest" };
+    return { message: "Failed to save Blitz" };
   }
 }
 

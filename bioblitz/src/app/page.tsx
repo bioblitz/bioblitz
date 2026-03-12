@@ -83,17 +83,16 @@ export default async function mainPage({
         <section className="w-full max-w-6xl px-6 pt-15 pb-q text-center flex flex-col items-center">
           <h1 className="text-5xl md:text-8xl text-white tracking-tight mb-8 drop-shadow-2xl leading-[0.9]">
             Biology is now <br />
-            <span className="text-violet-300">
+            <span className="text-violet-300 font-bold inline-block mt-2">
               beyond the books.
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-8 leading-relaxed">
             The competitive practice platform for{" "}
-            <span className="text-slate-200 font-medium">USABO</span> and{" "}
-            <span className="text-slate-200 font-medium">IBO</span>. Work
-            through real exam problems, track your Elo, and see where you
-            actually stand.
+            <span className="text-slate-200 font-medium">USABO</span>. Work
+            through biology problems, create your own, track your Elo, and see where you
+            stand in the biology world.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mb-10">

@@ -715,7 +715,7 @@ export default function GameRoomPage() {
             {submitted && activeTab === "leaderboard" && (
               <div className="bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-8">
                 <h2 className="text-2xl font-bold mb-6 text-center">
-                  Contest Leaderboard
+                  Blitz Leaderboard
                 </h2>
 
                 {loadingLeaderboard ? (

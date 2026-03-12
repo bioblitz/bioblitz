@@ -337,7 +337,7 @@ export default function GameDetailPage() {
     );
   }
 
-  if (!game) return <div className="text-white p-10">Game not found</div>;
+  if (!game) return <div className="text-white p-10">Blitz not found</div>;
 
   return (
     <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">

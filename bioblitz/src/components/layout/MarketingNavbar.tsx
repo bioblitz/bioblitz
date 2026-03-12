@@ -25,7 +25,7 @@ export default function MarketingNavbar() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all duration-200"
             >
               <Trophy className="w-4 h-4" />
-              Contests
+              Blitzes
             </Link>
 
             {!loading && (

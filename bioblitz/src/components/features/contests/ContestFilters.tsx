@@ -12,7 +12,7 @@ import {
 export function ContestFilters() {
   return (
     <div className="bg-gray-900 p-4 rounded-lg space-y-4">
-      <h3 className="text-lg font-semibold">Filter Contests</h3>
+      <h3 className="text-lg font-semibold">Filter Blitzes</h3>
       <div>
         <label htmlFor="search" className="block text-sm font-medium mb-1">
           Search
