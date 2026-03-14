@@ -30,6 +30,7 @@ import { useProfileData } from "@/hooks/profile/useProfileData";
 import { useFriendActions } from "@/hooks/profile/useFriendActions";
 import { useProfileReport } from "@/hooks/profile/useProfileReport";
 import { UserProfile } from "@/hooks/profile/types";
+import { useAuth } from "@/context/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -70,6 +71,7 @@ export default function ProfilePage() {
   const db = getFirestore(app);
   const storage = getStorage(app);
   const router = useRouter();
+  const { updateUsername } = useAuth();
 
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -186,6 +188,7 @@ export default function ProfilePage() {
 
       await updateDoc(userRef, payload);
       setUserProfile({ ...userProfile!, ...payload });
+      updateUsername(cleanedUsername);
 
       if (cleanedUsername && cleanedUsername !== usernameParamNormalized) {
         router.push(`/profile/${cleanedUsername}`);

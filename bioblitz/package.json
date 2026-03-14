@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "grant-admin": "node scripts/grant-admin.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

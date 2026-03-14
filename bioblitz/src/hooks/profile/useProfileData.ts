@@ -43,29 +43,35 @@ export function useProfileData({
         setLoading(true);
         setError(null);
 
-        const q = query(
-          collection(db, "users"),
-          where("username", "==", usernameParamRaw)
+        const rawNoAt = usernameParamRaw.startsWith("@")
+          ? usernameParamRaw.slice(1)
+          : usernameParamRaw;
+        const normalizedNoAt = usernameParamNormalized.startsWith("@")
+          ? usernameParamNormalized.slice(1)
+          : usernameParamNormalized;
+
+        const identifierCandidates = Array.from(
+          new Set(
+            [
+              usernameParamRaw,
+              usernameParamNormalized,
+              rawNoAt,
+              normalizedNoAt,
+            ]
+              .map((v) => v.trim())
+              .filter(Boolean)
+          )
         );
-        const snapshot = await getDocs(q);
 
-        if (!snapshot.empty) {
-          const userDoc = snapshot.docs[0];
-          const userData = userDoc.data() as UserProfile;
-          setProfileUid(userDoc.id);
-          setUserProfile({ ...userData, uid: userDoc.id });
-          setLoading(false);
-          return;
-        }
-
-        if (usernameParamNormalized !== usernameParamRaw) {
-          const qNorm = query(
+        for (const candidate of identifierCandidates) {
+          const q = query(
             collection(db, "users"),
-            where("username", "==", usernameParamNormalized)
+            where("username", "==", candidate)
           );
-          const snapNorm = await getDocs(qNorm);
-          if (!snapNorm.empty) {
-            const userDoc = snapNorm.docs[0];
+          const snapshot = await getDocs(q);
+
+          if (!snapshot.empty) {
+            const userDoc = snapshot.docs[0];
             const userData = userDoc.data() as UserProfile;
             setProfileUid(userDoc.id);
             setUserProfile({ ...userData, uid: userDoc.id });
@@ -74,13 +80,15 @@ export function useProfileData({
           }
         }
 
-        const uidSnap = await getDoc(doc(db, "users", usernameParamRaw));
-        if (uidSnap.exists()) {
-          const userData = uidSnap.data() as UserProfile;
-          setProfileUid(uidSnap.id);
-          setUserProfile({ ...userData, uid: uidSnap.id });
-          setLoading(false);
-          return;
+        for (const candidate of identifierCandidates) {
+          const uidSnap = await getDoc(doc(db, "users", candidate));
+          if (uidSnap.exists()) {
+            const userData = uidSnap.data() as UserProfile;
+            setProfileUid(uidSnap.id);
+            setUserProfile({ ...userData, uid: uidSnap.id });
+            setLoading(false);
+            return;
+          }
         }
 
         setError("User not found.");
