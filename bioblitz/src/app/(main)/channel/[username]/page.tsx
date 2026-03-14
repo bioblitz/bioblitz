@@ -149,7 +149,10 @@ export default function ChannelPage() {
         setChannelOwnerProfile(profile);
         setIsOwner(authUser?.uid === profile.uid);
 
-        const contests = await getContestsByCreator(profile.uid);
+        const contests = await getContestsByCreator(
+          profile.uid,
+          profile.username,
+        );
         setUserContests(contests);
       } else {
         console.error(
@@ -343,7 +346,12 @@ export default function ChannelPage() {
             {(() => {
               const displayed = isOwner
                 ? userContests
-                : userContests.filter((c) => c.status === 'completed' && !(c as any).hidden);
+                : userContests.filter((contest) => {
+                    const isHidden = (contest as any).hidden === true;
+                    const isCompleted = contest.status === "completed";
+                    const hasStatus = Boolean(contest.status);
+                    return !isHidden && (isCompleted || !hasStatus);
+                  });
               return displayed.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {displayed.map((game) => (
@@ -352,13 +360,13 @@ export default function ChannelPage() {
                         contest={game}
                         href={`/home/${game.id}`}
                       />
-                      {isOwner && (
-                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {(game.status !== 'completed' || (game as any).hidden) && (
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
-                              {game.status !== 'completed' ? 'Draft' : 'Hidden'}
-                            </span>
-                          )}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isOwner && (game.status !== 'completed' || (game as any).hidden) && (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
+                            {game.status !== 'completed' ? 'Draft' : 'Hidden'}
+                          </span>
+                        )}
+                        {isOwner && (
                           <button
                             onClick={() => router.push(`/contests/create/${game.id}`)}
                             className="p-1.5 bg-zinc-900/90 hover:bg-zinc-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
@@ -366,8 +374,8 @@ export default function ChannelPage() {
                             <PencilIcon className="w-3 h-3" />
                             Edit
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

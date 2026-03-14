@@ -128,14 +128,31 @@ export async function createContest(
 
 export async function getContestsByCreator(
   creatorUid: string,
+  creatorUsername?: string | null,
 ): Promise<gameRoom[]> {
   try {
-    const q = query(
+    const contests: gameRoom[] = [];
+    const docsById = new Map<string, DocumentData>();
+
+    const byCreator = query(
       collection(firestore, "sets"),
       where("creator", "==", creatorUid),
     );
-    const querySnapshot = await getDocs(q);
-    const contests: gameRoom[] = [];
+    const byCreatorSnapshot = await getDocs(byCreator);
+    byCreatorSnapshot.forEach((docSnap) => {
+      docsById.set(docSnap.id, docSnap.data());
+    });
+
+    if (creatorUsername) {
+      const byUsername = query(
+        collection(firestore, "sets"),
+        where("creatorUsername", "==", creatorUsername),
+      );
+      const byUsernameSnapshot = await getDocs(byUsername);
+      byUsernameSnapshot.forEach((docSnap) => {
+        docsById.set(docSnap.id, docSnap.data());
+      });
+    }
 
     let creatorBanner: string | undefined;
     let creatorPfp: string | undefined;
@@ -147,14 +164,13 @@ export async function getContestsByCreator(
       console.error("Error fetching creator banner:", e);
     }
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+    docsById.forEach((data, id) => {
       const questionCount =
         data.questions && Array.isArray(data.questions)
           ? data.questions.length.toString()
           : data.number_of_questions || data.questionCount?.toString() || "0";
       contests.push({
-        id: doc.id,
+        id,
         ...data,
         number_of_questions: questionCount,
         creatorBanner: data.creatorBanner || creatorBanner,
