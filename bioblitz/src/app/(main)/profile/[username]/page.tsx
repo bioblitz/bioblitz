@@ -32,6 +32,7 @@ import { useProfileReport } from "@/hooks/profile/useProfileReport";
 import { UserProfile } from "@/hooks/profile/types";
 import { useAuth } from "@/context/AuthContext";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
+import { applyTextPolicy } from "@/lib/textPolicy";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -165,7 +166,22 @@ export default function ProfilePage() {
     setEditError(null);
     if (!auth.currentUser) return;
 
-    const { value: cleanedUsername } = await applyUsernamePolicy(tempProfile.username);
+    const { value: cleanedUsername, censored } = await applyUsernamePolicy(
+      tempProfile.username
+    );
+    if (censored) {
+      setEditError("Inappropriate username, try again.");
+      return;
+    }
+
+    const { value: censoredBio } = await applyTextPolicy(tempProfile.bio || "");
+    const { value: censoredLocation } = await applyTextPolicy(
+      tempProfile.location || ""
+    );
+    const { value: censoredSchool } = await applyTextPolicy(tempProfile.school || "");
+    const { value: censoredDisplayName } = await applyTextPolicy(
+      tempProfile.displayName || ""
+    );
 
     if (cleanedUsername !== (userProfile?.username || "").trim().toLowerCase()) {
       if (cleanedUsername.length < 3) {
@@ -184,6 +200,10 @@ export default function ProfilePage() {
 
       const payload = {
         ...tempProfile,
+        bio: censoredBio,
+        location: censoredLocation,
+        school: censoredSchool,
+        displayName: censoredDisplayName,
         username: cleanedUsername,
       };
 

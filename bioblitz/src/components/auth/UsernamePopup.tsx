@@ -72,7 +72,11 @@ export function UsernamePopup() {
     if (!user) return;
     setError(null);
 
-    const { value: trimmed } = await applyUsernamePolicy(username);
+    const { value: trimmed, censored } = await applyUsernamePolicy(username);
+    if (censored) {
+      setError("Inappropriate username, try again.");
+      return;
+    }
     if (trimmed !== username.trim().toLowerCase().replace(/\s+/g, "_")) {
       setUsernameState(trimmed);
     }

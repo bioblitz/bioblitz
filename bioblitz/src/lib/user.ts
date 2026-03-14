@@ -47,7 +47,10 @@ export async function updateUsername(
   username: string,
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
-  const { value: sanitized } = await applyUsernamePolicy(username);
+  const { value: sanitized, censored } = await applyUsernamePolicy(username);
+  if (censored) {
+    throw new Error("Inappropriate username, try again.");
+  }
   await updateDoc(userRef, {
     username: sanitized.toLowerCase(),
     nameChangedAt: serverTimestamp(),

@@ -13,6 +13,7 @@ export interface UserProfile {
   grade?: string;
   school?: string;
   streak?: number;
+  roles?: string[];
 }
 
 export interface EloHistoryPoint {

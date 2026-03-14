@@ -1,4 +1,4 @@
-import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag } from "lucide-react";
+import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer } from "lucide-react";
 
 type FriendshipStatus = "none" | "sent" | "received" | "friends";
 
@@ -14,6 +14,7 @@ interface UserProfileLite {
   grade?: string;
   streak?: number;
   createdAt?: { seconds: number };
+  roles?: string[];
 }
 
 interface ProfileHeroCardProps {
@@ -153,6 +154,12 @@ export default function ProfileHeroCard({
             )}
           </div>
           <div className="flex items-center gap-2">
+            {userProfile?.roles?.includes("admin") && (
+              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-amber-500/40 text-amber-100">
+                <Hammer className="w-3 h-3 text-amber-200" />
+                Developer
+              </span>
+            )}
             {isOwnProfile ? (
               <button
                 onClick={onEditProfile}
@@ -176,11 +183,13 @@ export default function ProfileHeroCard({
           </div>
         </div>
 
-        <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
-          <p className="text-zinc-300 leading-relaxed italic">
-            {userProfile?.bio || "Add a biography!"}
-          </p>
-        </div>
+        {(isOwnProfile || userProfile?.bio) && (
+          <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
+            <p className="text-zinc-300 leading-relaxed italic">
+              {userProfile?.bio || "Add a biography!"}
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-wrap justify-center md:justify-start gap-3">
           {userProfile?.location && (

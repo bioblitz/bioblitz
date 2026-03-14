@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
+import { applyTextPolicy } from "@/lib/textPolicy";
 
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -122,9 +123,16 @@ export async function PUT(request: Request) {
 
   const body = await request.json();
   const uid = String(body?.uid || "").trim();
-  const displayName = String(body?.displayName || "").trim();
+  const displayNameRaw = String(body?.displayName || "").trim();
   const rawUsername = String(body?.username || "").trim();
-  const { value: censoredUsername } = await applyUsernamePolicy(rawUsername);
+    const { value: displayName } = await applyTextPolicy(displayNameRaw);
+  const { value: censoredUsername, censored } = await applyUsernamePolicy(rawUsername);
+  if (censored) {
+    return NextResponse.json(
+      { error: "Inappropriate username, try again." },
+      { status: 400 }
+    );
+  }
   const username = censoredUsername || "";
 
   if (!uid) {
