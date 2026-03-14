@@ -83,6 +83,7 @@ export default function MainNavbar() {
 
   const handleSignOut = async () => {
     try {
+      await fetch("/api/logout", { method: "POST" });
       const auth = getAuth(app);
       await signOut(auth);
       setIsAuthenticated(false);

@@ -27,14 +27,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const res = await fetch('/api/auth-status');
         if (res.ok) {
           const data = await res.json();
+          const auth = getAuth();
+          const currentAuthUser = auth.currentUser;
+
+          if (data.isAuthenticated && !currentAuthUser) {
+            await fetch("/api/logout", { method: "POST" });
+            setIsAuthenticated(false);
+            setUser(null);
+            return;
+          }
+
           setIsAuthenticated(data.isAuthenticated);
           if (data.isAuthenticated) {
             // prefer server-provided user profile, but if it lacks a photoURL
             // fall back to Firebase Auth's currentUser.photoURL so the navbar
             // can show the user's pfp immediately
             const serverUser = data.user;
-            const auth = getAuth();
-            const currentAuthUser = auth.currentUser;
 
             if (serverUser) {
               if (!serverUser.photoURL && currentAuthUser?.photoURL) {

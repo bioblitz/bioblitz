@@ -467,7 +467,7 @@ export default function EditContestPage() {
   const inputClass = "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white font-sans pt-24 pb-16">
+    <div className="min-h-screen bg-black text-white font-sans pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-6">
 
         <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
