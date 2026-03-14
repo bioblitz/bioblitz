@@ -92,7 +92,7 @@ export default function MountainHero() {
           backgroundSize: "cover",
         }}
       />
-      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-25 flex flex-col items-center">
+      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center">
         <h1
           className="text-white mb-0 tracking-tight leading-[0.95]"
           style={{
@@ -101,14 +101,26 @@ export default function MountainHero() {
             fontWeight: 400,
           }}
         >
-          Biology is now
-          <br />
-          <em style={{ color: "#e8f1ff", fontStyle: "italic" }}>
-            beyond the books.
-          </em>
+          <span
+            className="block hero-reveal"
+            style={{ animationDelay: "0.05s" }}
+          >
+            Biology is now
+          </span>
+          <span
+            className="block hero-reveal"
+            style={{ animationDelay: "0.2s" }}
+          >
+            <em style={{ color: "#e8f1ff", fontStyle: "italic" }}>
+              beyond the books.
+            </em>
+          </span>
         </h1>
 
-        <div className="flex items-center gap-4 my-3 w-full max-w-xs mx-auto">
+        <div
+          className="flex items-center gap-4 my-3 w-full max-w-xs mx-auto hero-reveal"
+          style={{ animationDelay: "0.35s" }}
+        >
           <div
             className="flex-1 h-px"
             style={{
@@ -135,10 +147,11 @@ export default function MountainHero() {
         </div>
 
         <p
-          className="text-white/85 max-w-xl mb-6 leading-relaxed"
+          className="text-white/85 max-w-xl mb-6 leading-relaxed hero-reveal"
           style={{
             fontSize: "clamp(15px, 2vw, 18px)",
             fontWeight: 300,
+            animationDelay: "0.5s",
           }}
         >
           The competitive practice platform for{" "}
@@ -147,10 +160,13 @@ export default function MountainHero() {
           where you stand in the biology world.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+        <div
+          className="flex flex-col sm:flex-row gap-3 items-center justify-center hero-reveal"
+          style={{ animationDelay: "0.65s" }}
+        >
           <Link href="/auth">
             <button
-              className="relative flex items-center gap-2 text-white font-medium text-[15px] rounded-xl cursor-pointer"
+              className="relative flex items-center gap-2 text-white font-medium text-[15px] rounded-xl cursor-pointer overflow-hidden"
               style={{
                 padding: "10px 16px",
                 background:
@@ -161,6 +177,7 @@ export default function MountainHero() {
               }}
             >
               <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />
+              <span className="button-shine absolute inset-y-0 -left-1/3 w-1/3" />
               <svg
                 width="16"
                 height="16"
@@ -209,6 +226,37 @@ export default function MountainHero() {
           border: 1px solid rgba(139, 92, 246, 0.7);
           box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);
           filter: blur(6px);
+        }
+        .hero-reveal {
+          opacity: 0;
+          transform: translateY(12px);
+          animation: hero-reveal 0.8s ease forwards;
+        }
+        .button-shine {
+          background: linear-gradient(
+            105deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.55) 50%,
+            transparent 100%
+          );
+          animation: shine-sweep 6s ease-in-out infinite;
+          opacity: 0.7;
+          pointer-events: none;
+        }
+        @keyframes hero-reveal {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes shine-sweep {
+          0%, 70% { transform: translateX(-120%); opacity: 0; }
+          75% { opacity: 0.6; }
+          100% { transform: translateX(320%); opacity: 0; }
         }
         @keyframes shimmer-sweep {
           0% { left: -30%; }

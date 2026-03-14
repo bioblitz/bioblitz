@@ -77,7 +77,7 @@ export default async function mainPage({
 
         <section id="demo" className="w-full pt-10 pb-20 px-6 relative -mt-[42vh] z-20">
           <div className="max-w-6xl mx-auto relative z-10">
-            <div className="relative rounded-2xl border border-zinc-800 bg-black shadow-2xl overflow-hidden"
+            <div className="relative rounded-2xl border border-zinc-800 bg-black shadow-2xl overflow-hidden demo-pop"
               style={{ boxShadow: "0 0 0 1px rgba(61,184,112,0.06), 0 32px 80px rgba(0,0,0,0.5)" }}>
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
@@ -203,6 +203,25 @@ export default async function mainPage({
             </div>
           </div>
         </section>
+
+        <style>{`
+          .demo-pop {
+            opacity: 0;
+            transform: translateY(24px) scale(0.98);
+            animation: demo-pop 0.8s ease forwards;
+            animation-delay: 0.9s;
+          }
+          @keyframes demo-pop {
+            from {
+              opacity: 0;
+              transform: translateY(24px) scale(0.98);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+        `}</style>
 
         {/* ── REVIEWS ─────────────────────────────── */}
         <section id="reviews" className="w-full py-16 px-6 border-t border-slate-900 bg-[#020204]">
