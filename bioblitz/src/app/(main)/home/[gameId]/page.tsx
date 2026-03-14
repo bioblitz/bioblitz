@@ -7,6 +7,7 @@ import { gameRoom } from "@/types/index";
 import {
   Loader2,
   History,
+  HelpCircle,
   Trophy,
   Calendar,
   Clock,
@@ -45,7 +46,6 @@ interface GameSubmission {
   submittedAt: Timestamp;
   timeTaken: number;
   ranked?: boolean;
-  // New fields for optimization
   username?: string;
   handle?: string;
   photoURL?: string;
@@ -55,7 +55,7 @@ interface LeaderboardEntry {
   userId: string;
   username: string;
   handle?: string;
-  photoURL?: string; // Added photoURL
+  photoURL?: string;
   score: number;
   timeTaken: number;
 }
@@ -80,7 +80,6 @@ export default function GameDetailPage() {
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
 
-  // New State for Active Session
   const [activeSession, setActiveSession] = useState<{ timeLeft: number } | null>(null);
 
   useEffect(() => {
@@ -112,7 +111,6 @@ export default function GameDetailPage() {
     loadGameData();
   }, [gameId]);
 
-  // Check for Active Session in LocalStorage
   useEffect(() => {
     if (!user || !gameId || !game) return;
 
@@ -129,17 +127,15 @@ export default function GameDetailPage() {
         if (remaining > 0) {
           setActiveSession({ timeLeft: remaining });
         } else {
-          setActiveSession(null); // Time expired
+          setActiveSession(null);
         }
       } else {
         setActiveSession(null);
       }
     };
 
-    // Check immediately
     checkSession();
 
-    // Check every second to update timer
     const interval = setInterval(checkSession, 1000);
     return () => clearInterval(interval);
   }, [user, gameId, game]);
@@ -339,94 +335,147 @@ export default function GameDetailPage() {
 
   if (!game) return <div className="text-white p-10">Blitz not found</div>;
 
+  const timeLimitMinutes = Math.max(
+    1,
+    Math.floor((parseInt(String(game.timeLimit || "0"), 10) || 0) / 60)
+  );
+
+  const registrantAvatars = leaderboard.slice(0, 3);
+  const registrantAvatarSkeletons = Array.from({ length: 3 });
+
   return (
-    <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">
-      <div className="flex flex-1 overflow-hidden pt-24 px-4 md:px-8 pb-4 gap-6 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col min-h-screen bg-black text-white font-sans">
+      <motion.div variants={slideUp} className="w-full pt-24 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <div className="relative h-48 md:h-56 rounded overflow-hidden border border-zinc-800">
+            {game.bannerUrl ? (
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${game.bannerUrl})` }}
+              />
+            ) : game.creatorPfp ? (
+              <>
+                <img
+                  src={game.creatorPfp}
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                  alt=""
+                  aria-hidden
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative h-full flex items-center justify-center">
+                  <img
+                    src={game.creatorPfp}
+                    alt="Creator"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+            )}
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="flex flex-1 px-4 md:px-8 pb-16 gap-6 max-w-7xl mx-auto w-full">
         <motion.main
-          className="flex-[1.4] flex flex-col overflow-y-auto custom-scrollbar pr-2"
+          className="flex-[1.4] flex flex-col pr-2"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.div
             variants={slideUp}
-            className="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 shadow-2xl backdrop-blur-sm"
+            className="rounded-3xl p-8"
           >
             <div className="mb-6">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
+              <h1 className="text-3xl mb-10 md:text-3xl font-extrabold text-white tracking-tight mb-2">
                 {game.title}
               </h1>
 
-              <div className="flex gap-3 mt-3">
+              <div className="flex flex-wrap items-center gap-6 mt-3 text-sm text-zinc-400">
+                <span>
+                  Created by{" "}
+                  {game.creatorUsername ? (
+                    <Link
+                      href={`/profile/${game.creatorUsername}`}
+                      className="text-zinc-200 hover:underline transition-colors"
+                    >
+                      {game.creatorUsername}
+                    </Link>
+                  ) : (
+                    <span className="text-zinc-200">Unknown</span>
+                  )}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 mt-4">
                 <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs font-bold uppercase tracking-wider">
                   {game.topic || "General"}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs font-bold uppercase tracking-wider">
-                  Difficulty: {game.difficulty}
-                </span>
 
                 {game.rating && game.rating > 0 && (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
-                    <Star className="w-3.5 h-3.5 fill-yellow-500" />
-                    <span>{game.rating}</span>
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
+                    <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                    <span>{game.rating.toFixed(1)}/5.0</span>
+                    <span className="text-yellow-200/80 normal-case font-semibold">
+                      {(typeof game.ratingCount === "number" ? game.ratingCount : 0)} review{(typeof game.ratingCount === "number" ? game.ratingCount : 0) === 1 ? "" : "s"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowRatingDropdown(true)}
+                      className="ml-1 text-yellow-100 hover:text-white underline underline-offset-4"
+                    >
+                      Leave a review
+                    </button>
                   </div>
                 )}
               </div>
             </div>
 
-            {game.description && (
-              <p className="text-zinc-400 text-lg leading-relaxed mb-8 max-w-3xl">
-                {game.description.replace(/^"(.*)"$/, "$1")}
-              </p>
-            )}
-
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
-                <div className="text-zinc-500 text-xs uppercase font-bold mb-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              <div>
+                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
                   Questions
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-xl font-bold text-white">
                   {game.number_of_questions}
                 </div>
               </div>
-              <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
-                <div className="text-zinc-500 text-xs uppercase font-bold mb-1">
+              <div>
+                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
                   Time Limit
                 </div>
-                <div className="text-2xl font-bold text-white">
-                  {game.timeLimit}
+                <div className="text-xl font-bold text-white">
+                  {timeLimitMinutes} min
                 </div>
               </div>
-              <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 text-center">
-                <div className="text-zinc-500 text-xs uppercase font-bold mb-1">
+              <div>
+                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
                   Attempts
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-xl font-bold text-white">
                   {loadingAttempts ? "-" : previousAttempts.length}
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col gap-3">
-              {/* --- Resume Attempt Button --- */}
               {activeSession && (
                 <button
                   onClick={proceedToGame}
                   className="w-full relative group overflow-hidden rounded-xl p-5 bg-amber-500/10 border border-amber-500/50 hover:bg-amber-500/20 transition-all duration-300 transform active:scale-[0.98] mb-1"
                 >
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-amber-500/20 p-2 rounded-lg">
-                        <Timer className="w-6 h-6 text-amber-500 animate-pulse" />
-                      </div>
-                      <div className="flex flex-col items-start">
+                    <div className="flex flex-col items-start">
                         <span className="text-lg font-bold text-amber-500 leading-none">
                           Attempt in Progress
                         </span>
                         <span className="text-xs font-medium text-amber-200/70 mt-1">
                           Click to Resume
                         </span>
-                      </div>
                     </div>
                     <div className="text-2xl font-mono font-bold text-amber-500 tabular-nums">
                       {formatCountdown(activeSession.timeLeft)}
@@ -435,7 +484,6 @@ export default function GameDetailPage() {
                 </button>
               )}
 
-              {/* --- Standard Start Button --- */}
               <button
                 onClick={handleJoinGame}
                 disabled={
@@ -445,7 +493,7 @@ export default function GameDetailPage() {
                   loadingAttempts
                     ? "bg-zinc-800 cursor-wait opacity-70"
                     : activeSession !== null
-                    ? "bg-zinc-800 opacity-50 cursor-not-allowed" // Disable start if resume is active
+                    ? "bg-zinc-800 opacity-50 cursor-not-allowed"
                     : isFirstAttempt
                     ? "bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-900/20"
                     : "bg-white text-black hover:bg-zinc-200"
@@ -457,43 +505,81 @@ export default function GameDetailPage() {
                       Checking sign-in...
                     </span>
                   ) : !user ? (
-                    <>
-                      <Play className="w-6 h-6" />
-                      <span className="text-lg font-bold">Sign in to Play</span>
-                    </>
+                    <span className="text-lg font-bold">Sign in to Play</span>
                   ) : activeSession ? (
-                    // Placeholder to keep layout height, though button is disabled
                     <span className="text-zinc-500 font-bold">
                       Finish your current attempt first
                     </span>
                   ) : isFirstAttempt ? (
-                    <>
-                      <Trophy className="w-6 h-6" />
-                      <div className="flex flex-col items-start">
-                        <span className="text-lg font-bold leading-none">
-                          Start Ranked Attempt
-                        </span>
-                        <span className="text-xs font-medium opacity-80">
-                          Counts towards Elo
-                        </span>
-                      </div>
-                    </>
+                    <div className="flex flex-col items-start">
+                      <span className="text-lg justify-center font-bold leading-none">
+                        Start Now
+                      </span>
+                      <span className="text-xs font-medium opacity-80">
+                        Counts towards Elo
+                      </span>
+                    </div>
                   ) : (
-                    <>
-                      <Play className="w-6 h-6 fill-current" />
-                      <div className="flex flex-col items-start">
-                        <span className="text-lg font-bold leading-none">
-                          Practice Mode
-                        </span>
-                        <span className="text-xs font-medium opacity-60">
-                          Replay for fun (No Elo)
-                        </span>
-                      </div>
-                    </>
+                    <div className="flex flex-col items-start">
+                      <span className="text-lg font-bold leading-none">
+                        Start Now
+                      </span>
+                      <span className="text-xs font-medium opacity-60">
+                        Replay for fun (No Elo)
+                      </span>
+                    </div>
                   )}
                 </div>
               </button>
+
+              <div className="mt-2 flex items-center gap-3">
+                <div className="text-sm text-indigo-300">
+                  {game.totalPlays || 0} registrant{game.totalPlays === 1 ? "" : "s"}
+                </div>
+                <div className="flex items-center -space-x-2">
+                  {loadingLeaderboard
+                    ? registrantAvatarSkeletons.map((_, index) => (
+                        <div
+                          key={`loading-${index}`}
+                          className="w-7 h-7 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+                        />
+                      ))
+                    : registrantAvatars.map((entry) => (
+                        <div
+                          key={entry.userId}
+                          className="w-7 h-7 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+                        >
+                          {entry.photoURL ? (
+                            <img
+                              src={entry.photoURL}
+                              alt={entry.username}
+                              className="w-full h-full rounded-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            entry.username?.[0]?.toUpperCase()
+                          )}
+                        </div>
+                      ))}
+                  {[0, 1].map((index) => (
+                    <div
+                      key={`unknown-${index}`}
+                      className="w-7 h-7 rounded-full border border-dashed border-zinc-700 bg-zinc-900/60 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+                    >
+                      ?
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+            <h1 className= "py-4 text-lg text-zinc-100">
+            Description: 
+            {game.description && (
+              <p className="text-lg text-zinc-100 leading-relaxed mt-2 max-w-3xl">
+                {game.description.replace(/^"(.*)"$/, "$1")}
+              </p>
+            )}
+            </h1>
           </motion.div>
 
           <motion.div variants={slideUp} className="mt-6 flex-1 mb-8">
@@ -572,7 +658,7 @@ export default function GameDetailPage() {
 
         <motion.aside
           variants={slideUp}
-          className="hidden lg:flex flex-[0.8] flex-col bg-zinc-900 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-fit max-h-full sticky top-0"
+          className="hidden lg:flex flex-[0.8] flex-col p-6 h-fit"
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -593,7 +679,7 @@ export default function GameDetailPage() {
               No ranked plays yet.
             </div>
           ) : (
-            <div className="overflow-y-auto custom-scrollbar pr-1 flex-1 space-y-2">
+            <div className="pr-1 flex-1 space-y-2">
               {leaderboard.map((entry, index) => (
                 <div
                   key={index}

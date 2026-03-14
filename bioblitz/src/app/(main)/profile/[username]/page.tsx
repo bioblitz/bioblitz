@@ -271,6 +271,12 @@ export default function ProfilePage() {
     return `/profile/${u.uid}`;
   };
 
+  const channelPathFor = (u: Pick<UserProfile, "uid" | "username">) => {
+    const uname = (u.username || "").trim();
+    if (uname) return `/channel/${uname.toLowerCase()}`;
+    return `/channel/${u.uid}`;
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
@@ -349,6 +355,64 @@ export default function ProfilePage() {
           onScrollLeft={() => scroll("left")}
           onScrollRight={() => scroll("right")}
         />
+
+        <Link
+          href={userProfile ? channelPathFor(userProfile) : "/channel"}
+          className="group block rounded-3xl border border-zinc-800 bg-zinc-950/70 overflow-hidden shadow-xl"
+        >
+          <div
+            className="relative h-40 sm:h-48 bg-zinc-900/60 flex items-center justify-center overflow-hidden"
+            style={
+              userProfile?.bannerURL
+                ? {
+                    backgroundImage: `url(${userProfile.bannerURL})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : undefined
+            }
+          >
+            {!userProfile?.bannerURL && userProfile?.photoURL && (
+              <>
+                <img
+                  src={userProfile.photoURL}
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                  alt=""
+                  aria-hidden
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative h-full flex items-center justify-center">
+                  <img
+                    src={userProfile.photoURL}
+                    alt="Channel owner"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </>
+            )}
+            {!userProfile?.bannerURL && !userProfile?.photoURL && (
+              <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+            )}
+          </div>
+          <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-zinc-500">
+                Channel
+              </p>
+              <h3 className="text-lg sm:text-xl font-semibold text-white">
+                {userProfile?.channelName || userProfile?.displayName || "Channel"}
+              </h3>
+              <p className="text-sm text-zinc-400">
+                @{userProfile?.username || "user"}
+              </p>
+            </div>
+            <span className="inline-flex items-center justify-center px-4 py-2 rounded-full border border-violet-500/30 text-violet-300 text-sm font-medium group-hover:bg-violet-500/10 transition">
+              Visit Channel
+            </span>
+          </div>
+        </Link>
 
         <div className="text-center pt-8 border-t border-zinc-900">
           <Link

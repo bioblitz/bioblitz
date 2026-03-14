@@ -97,6 +97,12 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
         creatorUsername,
         creatorBanner,
         rating: data.averageRating || data.rating,
+        ratingCount:
+          data.ratingCount ??
+          data.ratingsCount ??
+          data.totalRatings ??
+          data.reviewCount ??
+          null,
         totalPlays: data.totalPlays || 0,
         bannerUrl: data.bannerUrl,
         questions: [],

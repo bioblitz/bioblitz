@@ -19,6 +19,7 @@ export type gameRoom = {
   creatorUsername?: string;
   creatorBanner?: string;
   rating?: number;
+  ratingCount?: number;
   questions?: Question[];
   status?: string;
   hidden?: boolean;

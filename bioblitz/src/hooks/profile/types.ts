@@ -14,6 +14,9 @@ export interface UserProfile {
   school?: string;
   streak?: number;
   roles?: string[];
+  bannerURL?: string;
+  channelName?: string;
+  subscriberCount?: number;
 }
 
 export interface EloHistoryPoint {

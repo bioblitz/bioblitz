@@ -55,6 +55,7 @@ export default function ChannelPage() {
   };
 
   const handleEditNameClick = () => {
+    if (!isOwner) return;
     setNewChannelName(
       channelOwnerProfile?.channelName || channelOwnerProfile?.username || "",
     );
@@ -285,12 +286,19 @@ export default function ChannelPage() {
               ) : (
                 <>
                   <div className="flex flex-col">
-                    <h1 className="text-2xl font-bold">
+                    <Link
+                      href={
+                        channelOwnerProfile?.username
+                          ? `/profile/${channelOwnerProfile.username}`
+                          : `/profile/${channelOwnerProfile?.uid}`
+                      }
+                      className="text-2xl font-bold hover:underline transition-colors"
+                    >
                       {channelOwnerProfile?.channelName ||
                         channelOwnerProfile?.displayName ||
                         channelOwnerProfile?.username}
                       's Channel
-                    </h1>
+                    </Link>
                     <button
                       onClick={() => setShowSubscribersModal(true)}
                       className="text-zinc-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit"
@@ -314,7 +322,7 @@ export default function ChannelPage() {
             <div className="flex items-center gap-3">
               {!isOwner && channelOwnerProfile && (
                 <SubscribeButton
-                  topicId={channelOwnerProfile.uid} // 👈 Subscribing to the USER UID
+                  topicId={channelOwnerProfile.uid}
                   topicName={channelOwnerProfile.displayName || "this channel"}
                 />
               )}
@@ -330,7 +338,7 @@ export default function ChannelPage() {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 px-2">
             <h2 className="text-xl font-bold mb-4">Blitzes</h2>
             {(() => {
               const displayed = isOwner
