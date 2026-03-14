@@ -14,7 +14,7 @@ import {
 import { gameRoom, Question } from "@/types";
 import { revalidatePath } from "next/cache";
 import { getUserProfile } from "./user";
-import { FieldValue } from "firebase-admin/firestore";
+import { DocumentData, FieldValue } from "firebase-admin/firestore";
 
 export async function createContest(
   prevState: { message: string },
