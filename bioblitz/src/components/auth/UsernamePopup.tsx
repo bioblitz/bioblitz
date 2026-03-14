@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { isUsernameUnique, updateUsername as updateUsernameInDb } from "@/lib/user";
+import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { useAuth } from "@/context/AuthContext";
 import { ArrowRight, ArrowLeft, Check, Dna, Trophy, Zap, User } from "lucide-react";
 
@@ -71,7 +72,10 @@ export function UsernamePopup() {
     if (!user) return;
     setError(null);
 
-    const trimmed = username.trim().toLowerCase().replace(/\s+/g, "_");
+    const { value: trimmed } = await applyUsernamePolicy(username);
+    if (trimmed !== username.trim().toLowerCase().replace(/\s+/g, "_")) {
+      setUsernameState(trimmed);
+    }
 
     if (trimmed.length < 3) {
       setError("Username must be at least 3 characters.");

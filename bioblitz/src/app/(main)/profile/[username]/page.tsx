@@ -31,6 +31,7 @@ import { useFriendActions } from "@/hooks/profile/useFriendActions";
 import { useProfileReport } from "@/hooks/profile/useProfileReport";
 import { UserProfile } from "@/hooks/profile/types";
 import { useAuth } from "@/context/AuthContext";
+import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -164,7 +165,7 @@ export default function ProfilePage() {
     setEditError(null);
     if (!auth.currentUser) return;
 
-    const cleanedUsername = tempProfile.username.trim().toLowerCase();
+    const { value: cleanedUsername } = await applyUsernamePolicy(tempProfile.username);
 
     if (cleanedUsername !== (userProfile?.username || "").trim().toLowerCase()) {
       if (cleanedUsername.length < 3) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
+import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -123,7 +124,8 @@ export async function PUT(request: Request) {
   const uid = String(body?.uid || "").trim();
   const displayName = String(body?.displayName || "").trim();
   const rawUsername = String(body?.username || "").trim();
-  const username = rawUsername ? rawUsername.toLowerCase() : "";
+  const { value: censoredUsername } = await applyUsernamePolicy(rawUsername);
+  const username = censoredUsername || "";
 
   if (!uid) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });

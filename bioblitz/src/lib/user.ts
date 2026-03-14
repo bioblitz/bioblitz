@@ -1,4 +1,5 @@
 import { firestore } from "./firebase";
+import { applyUsernamePolicy } from "./usernamePolicy";
 import {
   doc,
   setDoc,
@@ -46,8 +47,9 @@ export async function updateUsername(
   username: string,
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
+  const { value: sanitized } = await applyUsernamePolicy(username);
   await updateDoc(userRef, {
-    username: username.toLowerCase(),
+    username: sanitized.toLowerCase(),
     nameChangedAt: serverTimestamp(),
   });
 }
