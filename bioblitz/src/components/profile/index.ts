@@ -7,3 +7,8 @@ export { default as RecentSets } from './RecentSets';
 export { default as FriendsSection } from './FriendsSection';
 export { default as EditProfileModal } from './EditProfileModal';
 export { default as ReportModal } from './ReportModal';
+export { default as ProfileHeroCard } from './ProfileHeroCard';
+export { default as ProfileFriendsPanel } from './ProfileFriendsPanel';
+export { default as DomainMasterySection } from './DomainMasterySection';
+export { default as RecentSetsCarousel } from './RecentSetsCarousel';
+export { default as RankedRatingCard } from './RankedRatingCard';

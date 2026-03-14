@@ -7,6 +7,7 @@ interface ReportModalProps {
   reportDescription: string;
   isSubmitting: boolean;
   success: boolean;
+  categories?: string[];
   onClose: () => void;
   onCategoryChange: (category: string) => void;
   onDescriptionChange: (description: string) => void;
@@ -27,12 +28,15 @@ export default function ReportModal({
   reportDescription,
   isSubmitting,
   success,
+  categories,
   onClose,
   onCategoryChange,
   onDescriptionChange,
   onSubmit,
 }: ReportModalProps) {
   if (!isOpen) return null;
+
+  const categoryOptions = categories && categories.length > 0 ? categories : REPORT_CATEGORIES;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -87,7 +91,7 @@ export default function ReportModal({
                     onChange={(e) => onCategoryChange(e.target.value)}
                     className="w-full appearance-none bg-zinc-900 text-white p-3 pr-10 rounded-xl border border-zinc-800 focus:border-red-500/50 focus:outline-none transition-colors"
                   >
-                    {REPORT_CATEGORIES.map((cat) => (
+                    {categoryOptions.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
                       </option>
