@@ -36,7 +36,7 @@ export interface UserProfile {
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
   const usersRef = collection(firestore, "users");
-  const q = query(usersRef, where("username", "==", username));
+  const q = query(usersRef, where("username", "==", username.toLowerCase()));
   const querySnapshot = await getDocs(q);
   return querySnapshot.empty;
 }
@@ -47,7 +47,7 @@ export async function updateUsername(
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
-    username: username,
+    username: username.toLowerCase(),
     nameChangedAt: serverTimestamp(),
   });
 }
@@ -135,42 +135,25 @@ export async function getUserProfileByUsername(
   username: string,
 ): Promise<UserProfile | null> {
   const usersRef = collection(firestore, "users");
+  const normalized = username.toLowerCase();
 
-  // Try exact match first
-  let q = query(usersRef, where("username", "==", username));
+  let q = query(usersRef, where("username", "==", normalized));
   let querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
-    console.log("User found with username:", username);
     const userDoc = querySnapshot.docs[0];
     const userProfile = userDoc.data() as UserProfile;
     userProfile.uid = userDoc.id;
     return userProfile;
   }
 
-  // If no exact match, try case-insensitive search
-  console.log(
-    "Exact match not found, trying case-insensitive search for:",
-    username,
-  );
-  const normalizedUsername = username.toLowerCase();
-  const allUsersSnapshot = await getDocs(usersRef);
-
-  const matchingDoc = allUsersSnapshot.docs.find((doc) => {
-    const docUsername = doc.data().username;
-    return docUsername && docUsername.toLowerCase() === normalizedUsername;
-  });
-
-  if (matchingDoc) {
-    console.log(
-      "User found with case-insensitive match:",
-      matchingDoc.data().username,
-    );
-    const userProfile = matchingDoc.data() as UserProfile;
-    userProfile.uid = matchingDoc.id;
+  const userRef = doc(firestore, "users", username);
+  const userSnap = await getDoc(userRef);
+  if (userSnap.exists()) {
+    const userProfile = userSnap.data() as UserProfile;
+    userProfile.uid = username;
     return userProfile;
   }
 
-  console.log("User not found with username:", username);
   return null;
 }

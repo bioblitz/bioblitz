@@ -34,20 +34,18 @@ export function useProfileData({
 
   useEffect(() => {
     const fetchUserByUsernameOrUid = async () => {
+      if (!usernameParamRaw || usernameParamRaw === "undefined") {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-        setUserProfile(null);
-        setProfileUid(null);
-
-        if (!usernameParamRaw) {
-          setError("User not found.");
-          return;
-        }
 
         const q = query(
           collection(db, "users"),
-          where("username", "==", usernameParamNormalized)
+          where("username", "==", usernameParamRaw)
         );
         const snapshot = await getDocs(q);
 
@@ -56,7 +54,24 @@ export function useProfileData({
           const userData = userDoc.data() as UserProfile;
           setProfileUid(userDoc.id);
           setUserProfile({ ...userData, uid: userDoc.id });
+          setLoading(false);
           return;
+        }
+
+        if (usernameParamNormalized !== usernameParamRaw) {
+          const qNorm = query(
+            collection(db, "users"),
+            where("username", "==", usernameParamNormalized)
+          );
+          const snapNorm = await getDocs(qNorm);
+          if (!snapNorm.empty) {
+            const userDoc = snapNorm.docs[0];
+            const userData = userDoc.data() as UserProfile;
+            setProfileUid(userDoc.id);
+            setUserProfile({ ...userData, uid: userDoc.id });
+            setLoading(false);
+            return;
+          }
         }
 
         const uidSnap = await getDoc(doc(db, "users", usernameParamRaw));
@@ -64,12 +79,13 @@ export function useProfileData({
           const userData = uidSnap.data() as UserProfile;
           setProfileUid(uidSnap.id);
           setUserProfile({ ...userData, uid: uidSnap.id });
+          setLoading(false);
           return;
         }
 
         setError("User not found.");
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching user:", err);
         setError("Unable to load profile.");
       } finally {
         setLoading(false);
