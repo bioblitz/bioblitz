@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 
@@ -8,6 +9,7 @@ export default async function mainPage({
   searchParams: { potato: string };
 }) {
   const user = await getCurrentUser();
+  if (user) redirect("/home");
 
   const size = 180;
   const strokeWidth = 15;
@@ -96,7 +98,7 @@ export default async function mainPage({
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mb-10">
-            <Link href="/home">
+            <Link href="/auth">
               <button className="w-full sm:w-auto bg-violet-500 text-white font-bold py-4 px-10 rounded-lg hover:bg-violet-500 hover:shadow-[0_0_40px_-10px_rgba(124,58,237,0.6)] transition-all duration-200">
                 Start Competing
               </button>

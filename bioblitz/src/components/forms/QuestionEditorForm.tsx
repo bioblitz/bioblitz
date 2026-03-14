@@ -99,7 +99,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   ];
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-6">
+    <div className="p-5 space-y-5">
       <style dangerouslySetInnerHTML={{ __html: `
         .ql-snow .ql-editor {
           background-color: #1a1a1a;

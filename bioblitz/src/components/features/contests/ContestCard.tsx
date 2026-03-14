@@ -1,15 +1,16 @@
 import React from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { Clock, Star, Users } from "lucide-react";
+import { Clock, Star, Users, CheckCircle2 } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { getTopicShortLabel } from "@/lib/utils";
 interface ContestCardProps {
   contest: gameRoom;
   href?: string;
+  isCompleted?: boolean;
 }
 
-const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
+const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted }) => {
   const timeInMinutes = contest.timeLimit 
     ? (typeof contest.timeLimit === 'string' && contest.timeLimit.includes('min') 
         ? parseInt(contest.timeLimit) 
@@ -76,6 +77,11 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href }) => {
               <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}>
                 {getTopicShortLabel(contest.topic)}
               </span>
+            </div>
+          )}
+          {isCompleted && (
+            <div className="absolute top-2 right-2 z-10">
+              <CheckCircle2 className="w-5 h-5 text-green-400 drop-shadow-md" />
             </div>
           )}
           <div className="absolute bottom-2 right-2 z-10">

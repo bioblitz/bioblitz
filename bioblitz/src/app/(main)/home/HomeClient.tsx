@@ -18,7 +18,7 @@ import {
   Search,
 } from "lucide-react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 
 export default function HomeClient({
@@ -66,19 +66,9 @@ export default function HomeClient({
 
   const fetchPlayedGames = async (uid: string) => {
     try {
-      const userGamesRef = collection(db, "users", uid, "setsPlayed");
-      const snapshot = await getDocs(userGamesRef);
-
-      const playedIds = new Set(
-        snapshot.docs
-          .map((doc) => {
-            const data = doc.data() as { gameId?: string };
-            return data.gameId || doc.id;
-          })
-          .filter(Boolean) as string[]
-      );
-
-      setPlayedGameIds(playedIds);
+      const userDoc = await getDoc(doc(db, "users", uid));
+      const ids: string[] = userDoc.data()?.playedGameIds ?? [];
+      setPlayedGameIds(new Set(ids));
     } catch (error) {
       console.error("Error fetching played games:", error);
     }
@@ -290,7 +280,7 @@ export default function HomeClient({
             </div>
           ) : (
             filteredGames.map((game) => (
-              <ContestCard key={game.id} contest={game} href={`/home/${game.id}`} />
+              <ContestCard key={game.id} contest={game} href={`/home/${game.id}`} isCompleted={playedGameIds.has(game.id)} />
             ))
           )}
         </div>

@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay } from "@/types";
-import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff, Check } from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
@@ -70,12 +70,12 @@ function SubmitButton({ isPublished }: { isPublished: boolean }) {
   return (
     <button
       type="submit"
-      className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-      aria-disabled={pending}
+      disabled={pending}
+      className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors"
     >
       {pending
-        ? isPublished ? 'Updating...' : 'Creating Blitz...'
-        : isPublished ? 'Update Blitz' : 'Create Blitz'}
+        ? (isPublished ? 'Updating...' : 'Publishing...')
+        : (isPublished ? 'Update Blitz' : 'Publish Blitz')}
     </button>
   );
 }
@@ -103,7 +103,9 @@ export default function EditContestPage() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
+  const [isAiGenerated, setIsAiGenerated] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
   const lastSavedSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -141,6 +143,7 @@ export default function EditContestPage() {
             setBannerUrl(contest.bannerUrl || null);
             setIsPublished(contest.status === 'completed');
             setIsHidden(contest.hidden === true);
+            setIsAiGenerated(contest.isAiGenerated === true);
             if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
               const choiceKeys = ['a', 'b', 'c', 'd', 'e'] as const;
               const editable = (contest.questions as any[]).map((q) => {
@@ -221,6 +224,11 @@ export default function EditContestPage() {
       setIsHidden(false);
     }
   }, [state.message]);
+
+  const flashSaved = useCallback(() => {
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2500);
+  }, []);
 
   const handleToggleVisibility = async () => {
     if (!contestId) return;
@@ -303,6 +311,7 @@ export default function EditContestPage() {
     // preserve published status when editing an already-published blitz
     formData.append("status", isPublished ? "completed" : "incomplete");
     formData.append("hidden", isPublished ? isHidden.toString() : "true");
+    formData.append("isAiGenerated", isAiGenerated.toString());
     if (bannerUrl) {
       formData.append("bannerUrl", bannerUrl);
     }
@@ -312,6 +321,7 @@ export default function EditContestPage() {
       startTransition(() => {
         formAction(formData);
       });
+      flashSaved();
       console.log("Contest draft saved automatically.");
     } catch (error) {
       console.error("Failed to autosave draft:", error);
@@ -429,6 +439,7 @@ export default function EditContestPage() {
       }
       formData.append("status", "completed");
       formData.append("hidden", "false");
+      formData.append("isAiGenerated", isAiGenerated.toString());
 
       // update snapshot so unload handler doesn't resend the same draft
       try {
@@ -447,175 +458,202 @@ export default function EditContestPage() {
       startTransition(() => {
         formAction(formData);
       });
+      flashSaved();
     }
   };
 
   const topicValue = selectedTopic === "Other" ? customTopic : selectedTopic;
 
+  const inputClass = "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
+
   return (
-    <div className="min-h-screen bg-black text-white font-sans pt-28 pb-12">
-      <div className="container mx-auto max-w-7xl px-4">
-        <header className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-                Blitz Editor
-              </h1>
-              <p className="text-zinc-400 mt-2 text-lg">
-                Use the form on the left to build your question and see a live preview on the right.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {isPublished && (
-                <button
-                  type="button"
-                  onClick={handleToggleVisibility}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isHidden
-                      ? 'bg-zinc-800 text-zinc-400 hover:text-white'
-                      : 'bg-zinc-800 text-green-400 hover:text-green-300'
-                  }`}
-                  title={isHidden ? 'Blitz is hidden — click to make public' : 'Blitz is public — click to hide'}
-                >
-                  {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  {isHidden ? 'Hidden' : 'Public'}
-                </button>
-              )}
+    <div className="min-h-screen bg-[#09090b] text-white font-sans pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-6">
+
+        <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Blitz Editor</h1>
+            <p className="text-zinc-500 text-sm mt-0.5">Build your question set and preview it live.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isPublished && (
               <button
                 type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                onClick={handleToggleVisibility}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                  isHidden
+                    ? 'border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
+                    : 'border-green-800/60 text-green-400 hover:bg-green-900/20'
+                }`}
               >
-                <Trash2 className="w-4 h-4" />
-                {deleting ? 'Deleting...' : 'Delete'}
+                {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {isHidden ? 'Hidden' : 'Public'}
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-zinc-700 text-red-400 hover:text-red-300 hover:border-red-800/60 hover:bg-red-900/10 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
           </div>
-        </header>
+        </div>
 
-        <form onSubmit={validateAndSubmit}> 
-          <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-zinc-300 mb-4">Editor</h2>
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-300">Title</label>
-                <input type="text" id="title" name="title" required className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" value={title} onChange={(e) => setTitle(e.target.value)} />
-              </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-300">Description</label>
-                <textarea id="description" name="description" rows={3} placeholder="The first 10 questions of the 2013 USABO opens" className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300">Blitz Banner</label>
-                <div className="mt-1 flex items-center gap-4">
-                  {bannerUrl ? (
-                    <img src={bannerUrl} alt="Banner preview" className="h-24 w-auto rounded-md object-cover" />
-                  ) : (
-                    <div className="h-24 w-40 bg-zinc-800 rounded-md flex items-center justify-center text-zinc-500">No banner</div>
+        <form onSubmit={validateAndSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+            {/* Left: Editor */}
+            <div className="space-y-8">
+
+              {/* Blitz Details */}
+              <section>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Blitz Details</h2>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Title</label>
+                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Description</label>
+                    <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. First 10 questions from the 2013 USABO Opens" className={`${inputClass} resize-none`} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Time Limit (seconds)</label>
+                      <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Topic</label>
+                      <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} className={inputClass}>
+                        {TOPICS.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {selectedTopic === 'Other' && (
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Custom Topic</label>
+                      <input type="text" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)} className={inputClass} />
+                    </div>
                   )}
                   <div>
-                    <label className="cursor-pointer inline-flex items-center px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-indigo-400 hover:text-indigo-300">
-                      <span>{uploadingBanner ? 'Uploading...' : 'Upload banner'}</span>
-                      <input type="file" accept="image/*" onChange={handleBannerUpload} className="sr-only" disabled={uploadingBanner} />
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label htmlFor="timeLimit" className="block text-sm font-medium text-gray-300">Time Limit (seconds)</label>
-                <input type="number" id="timeLimit" name="timeLimit" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" />
-              </div>
-              <div>
-                <label htmlFor="topic-select" className="block text-sm font-medium text-gray-300">Topic</label>
-                <select id="topic-select" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm">
-                  {TOPICS.map(topic => <option key={topic} value={topic}>{topic}</option>)}
-                </select>
-              </div>
-              {selectedTopic === 'Other' && (
-                <div>
-                  <label htmlFor="custom-topic" className="block text-sm font-medium text-gray-300">Custom Topic</label>
-                  <input type="text" id="custom-topic" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none sm:text-sm" />
-                </div>
-              )}
-
-
-              <button
-                type="button"
-                onClick={addQuestion}
-                className="w-full flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-violet-100"
-              >
-                <Plus className="w-5 h-5" />
-                Add Question
-              </button>
-              
-              {questions.map((question, index) => (
-                <div
-                  key={question.id}
-                  onClick={() => setActiveQuestionId(question.id)}
-                  className={`p-1 rounded-2xl transition-all ${
-                    "bg-zinc-900"
-                  }`}
-                >
-                  <div className="bg-zinc-900 rounded-xl">
-                    <div className="flex justify-between items-center p-4 pb-0">
-                      <h3 className="text-xl font-bold text-white">
-                        Question {index + 1}
-                      </h3>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Banner Image</label>
+                    <div className="flex items-center gap-3">
+                      {bannerUrl ? (
+                        <img src={bannerUrl} alt="Banner" className="h-14 w-28 rounded-lg object-cover border border-zinc-700" />
+                      ) : (
+                        <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">No banner</div>
+                      )}
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
+                        {uploadingBanner ? 'Uploading...' : 'Upload'}
+                        <input type="file" accept="image/*" onChange={handleBannerUpload} className="sr-only" disabled={uploadingBanner} />
+                      </label>
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeQuestion(question.id);
-                        }}
-                        className="p-2 text-red-500 transition-colors rounded-md hover:bg-red-500/10"
-                        aria-label="Remove question"
+                        onClick={() => setIsAiGenerated(v => !v)}
+                        className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                          isAiGenerated
+                            ? 'border-violet-600/60 bg-violet-900/20 text-violet-300'
+                            : 'border-zinc-700 bg-zinc-800 text-zinc-500'
+                        }`}
                       >
-                        <Trash2 className="w-5 h-5" />
+                        {isAiGenerated ? (
+                          <span>AI</span>
+                        ) : (
+                          <span className="relative">
+                            AI
+                            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="block w-full h-px bg-zinc-500 rotate-[-20deg]" />
+                            </span>
+                          </span>
+                        )}
                       </button>
-                    </div>
-                    {errors[question.id] && (
-                      <div className="p-4 pt-2">
-                        {errors[question.id].map((err, i) => (
-                          <p key={i} className="text-sm text-red-400">{err}</p>
-                        ))}
+                      <div className="relative group">
+                        <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">?</div>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
+                          Toggle if any part of your blitz is AI-generated
+                        </div>
                       </div>
-                    )}
-                    <QuestionEditorForm
-                      question={question}
-                      onQuestionChange={(updated) =>
-                        handleQuestionChange(question.id, updated)
-                      }
-                    />
+                    </div>
                   </div>
                 </div>
-              ))}
+              </section>
+
+              {/* Questions */}
+              <section>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Questions</h2>
+                <div className="space-y-4">
+                  {questions.map((question, index) => (
+                    <div key={question.id} className="rounded-xl border border-zinc-800 overflow-hidden">
+                      <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
+                        <span className="text-sm font-semibold text-zinc-300">Question {index + 1}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); removeQuestion(question.id); }}
+                          className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {errors[question.id] && (
+                        <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
+                          {errors[question.id].map((err, i) => (
+                            <p key={i} className="text-xs text-red-400">{err}</p>
+                          ))}
+                        </div>
+                      )}
+                      <QuestionEditorForm
+                        question={question}
+                        onQuestionChange={(updated) => handleQuestionChange(question.id, updated)}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-zinc-500 hover:text-zinc-300 border border-dashed border-zinc-800 hover:border-zinc-600 rounded-xl transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add question
+                  </button>
+                </div>
+              </section>
+
+              <div className="flex items-center justify-between pt-1">
+                {state.message && !state.message.startsWith('Blitz saved') && (
+                  <p className="text-sm text-red-400">{state.message}</p>
+                )}
+                <div className="ml-auto flex items-center gap-3">
+                  <span className={`flex items-center gap-1.5 text-xs text-green-400 transition-opacity duration-300 ${showSaved ? 'opacity-100' : 'opacity-0'}`}>
+                    <Check className="w-3.5 h-3.5" />
+                    Saved
+                  </span>
+                  <SubmitButton isPublished={isPublished} />
+                </div>
+              </div>
             </div>
 
+            {/* Right: Preview */}
             <div>
-              <h2 className="text-2xl font-bold text-zinc-300 mb-4">
-                Live Preview
-              </h2>
-              <div className="space-y-8">
+              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Live Preview</h2>
+              <div className="space-y-6">
                 {questions.map((q, index) => {
                   const [qPreview, qSelectedAnswerKey] = transformForPreview(q);
                   return (
-                    <div key={q.id}>
-                      <ContestQuestionView
-                        questionNumber={index + 1}
-                        question={qPreview}
-                        selectedAnswer={qSelectedAnswerKey}
-                      />
-                    </div>
+                    <ContestQuestionView
+                      key={q.id}
+                      questionNumber={index + 1}
+                      question={qPreview}
+                      selectedAnswer={qSelectedAnswerKey}
+                    />
                   );
                 })}
               </div>
             </div>
-          </main>
-          <div className="mt-8 flex justify-end">
-            <SubmitButton isPublished={isPublished} />
+
           </div>
-          {state.message && <p className="mt-4 text-sm text-red-500 text-center">{state.message}</p>}
         </form>
       </div>
     </div>
