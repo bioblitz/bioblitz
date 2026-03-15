@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { DailyPuzzle } from "@/lib/potd";
+import { createUserProfile } from "@/lib/user";
 import PotdArchivePanel from "@/components/features/potd/PotdArchivePanel";
 import PotdQuestionCard from "@/components/features/potd/PotdQuestionCard";
 
@@ -134,6 +135,7 @@ export default function PotdGameClient({
     setIsCorrect(correct);
 
     try {
+      await createUserProfile(user);
       const userRef = doc(db, "users", user.uid);
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
 
@@ -145,20 +147,28 @@ export default function PotdGameClient({
         answers: sortedSelected,
       });
 
-      await updateDoc(userRef, {
-        completedPotdIds: arrayUnion(puzzle.id),
-      });
-
-      const activityRef = doc(db, "potdActivity", puzzle.id);
       await setDoc(
-        activityRef,
+        userRef,
         {
-          attempts: increment(1),
-          correctCount: correct ? increment(1) : increment(0),
-          lastPlayedAt: serverTimestamp(),
+          completedPotdIds: arrayUnion(puzzle.id),
         },
         { merge: true }
       );
+
+      try {
+        const activityRef = doc(db, "potdActivity", puzzle.id);
+        await setDoc(
+          activityRef,
+          {
+            attempts: increment(1),
+            correctCount: correct ? increment(1) : increment(0),
+            lastPlayedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.warn("Failed to update POTD activity:", error);
+      }
 
       setIsSubmitted(true);
       setIsCompleted(true);

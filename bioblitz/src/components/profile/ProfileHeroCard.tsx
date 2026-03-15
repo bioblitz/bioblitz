@@ -70,6 +70,11 @@ export default function ProfileHeroCard({
               src={userProfile.photoURL}
               alt="Profile"
               className="w-full h-full object-cover group-hover:opacity-50 transition-all duration-300"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = "/images/logo.svg";
+              }}
             />
           ) : (
             <div className="w-full h-full bg-violet-900/30 flex items-center justify-center text-violet-400 text-4xl font-bold group-hover:bg-violet-900/50 transition-colors">

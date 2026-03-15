@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Calendar,
   Flame,
@@ -33,6 +33,7 @@ import {
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { DailyPuzzle } from "@/lib/potd";
+import { createUserProfile } from "@/lib/user";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -131,6 +132,8 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     }
 
     try {
+      await createUserProfile(user);
+      const userRef = doc(db, "users", user.uid);
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
       
       // *** CRITICAL: You must include puzzleDate here ***
@@ -142,16 +145,28 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         puzzleDate: puzzle.date // <--- REQUIRED for index.ts to trigger
       });
 
-      const activityRef = doc(db, "potdActivity", puzzle.id);
       await setDoc(
-        activityRef,
+        userRef,
         {
-          attempts: increment(1),
-          correctCount: correct ? increment(1) : increment(0),
-          lastPlayedAt: serverTimestamp(),
+          completedPotdIds: arrayUnion(puzzle.id),
         },
         { merge: true }
       );
+
+      try {
+        const activityRef = doc(db, "potdActivity", puzzle.id);
+        await setDoc(
+          activityRef,
+          {
+            attempts: increment(1),
+            correctCount: correct ? increment(1) : increment(0),
+            lastPlayedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.warn("Failed to update POTD activity:", error);
+      }
 
       setIsSubmitted(true);
       setViewAnyway(true);
@@ -237,8 +252,29 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   const todaysPuzzle = puzzles.find((p) => isToday(p.date));
   const archivePuzzles = puzzles.filter((p) => !isToday(p.date));
+  const fallbackPuzzle = useMemo(() => {
+    if (archivePuzzles.length === 0) return null;
+    const pstDate = new Date().toLocaleDateString("en-US", {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const seed = pstDate.replaceAll("/", "");
+    let hash = 0;
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    }
+    const index = hash % archivePuzzles.length;
+    return archivePuzzles[index] || null;
+  }, [archivePuzzles]);
+  const activePuzzle = todaysPuzzle || fallbackPuzzle;
+  const isFallback = !todaysPuzzle && !!fallbackPuzzle;
   const isTodayCompleted = todaysPuzzle
     ? playedGameIds.has(todaysPuzzle.id)
+    : false;
+  const isActiveCompleted = activePuzzle
+    ? playedGameIds.has(activePuzzle.id)
     : false;
   const activeFilterCount =
     (statusFilter !== "All" ? 1 : 0) + (topic !== "All Topics" ? 1 : 0);
@@ -296,8 +332,8 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         ) : (
           <div className="space-y-12">
             <section className="relative">
-              {todaysPuzzle ? (
-                isTodayCompleted && !viewAnyway ? (
+              {activePuzzle ? (
+                !isFallback && isTodayCompleted && !viewAnyway ? (
                   <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-xl p-12 text-center animate-in fade-in duration-500">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
 
@@ -336,21 +372,26 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                     <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
+                      {isFallback && (
+                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300">
+                          Sampled from archive
+                        </span>
+                      )}
                       <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                            getTopicColors(todaysPuzzle.topic).bg
+                            getTopicColors(activePuzzle.topic).bg
                           }`}
                         >
-                          {todaysPuzzle.topic}
+                          {activePuzzle.topic}
                         </span>
                         <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
-                          {todaysPuzzle.multiSelect ? (
+                          {activePuzzle.multiSelect ? (
                             <ListChecks className="w-3 h-3" />
                           ) : (
                             <MousePointerClick className="w-3 h-3" />
                           )}
-                          {todaysPuzzle.multiSelect
+                          {activePuzzle.multiSelect
                             ? "Multi-Select"
                             : "Single Choice"}
                         </span>
@@ -358,23 +399,24 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                       <div className="space-y-4 mb-8 max-w-4xl mx-auto">
                         <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
-                          {todaysPuzzle.title}
+                          {activePuzzle.title}
                         </h2>
                         <p className="text-zinc-300 text-lg leading-relaxed">
-                          {todaysPuzzle.questionText}
+                          {activePuzzle.questionText}
                         </p>
                       </div>
 
                       <div className="grid grid-cols-1 gap-3 w-full max-w-2xl mx-auto">
-                        {todaysPuzzle.options.map((option) => {
+                        {activePuzzle.options.map((option) => {
                           const isSelected = selectedOptions.includes(
                             option.key
                           );
                           const isCorrectKey =
-                            todaysPuzzle.correctAnswer.includes(option.key);
+                            activePuzzle.correctAnswer.includes(option.key);
 
                           const showResults =
-                            isSubmitted || (viewAnyway && isTodayCompleted);
+                            isSubmitted ||
+                            ((viewAnyway || isFallback) && isActiveCompleted);
 
                           let borderClass =
                             "border-zinc-800 hover:border-zinc-700";
@@ -402,10 +444,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               key={option.key}
                               disabled={showResults || submitting}
                               onClick={() =>
-                                handleOptionClick(
-                                  option.key,
-                                  todaysPuzzle.multiSelect
-                                )
+                                handleOptionClick(option.key, activePuzzle.multiSelect)
                               }
                               className={`
                                                         relative flex items-center justify-center w-full p-4 rounded-xl border transition-all duration-200
@@ -455,7 +494,8 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         })}
                       </div>
 
-                      {(isSubmitted || (viewAnyway && isTodayCompleted)) && (
+                      {(isSubmitted ||
+                        ((viewAnyway || isFallback) && isActiveCompleted)) && (
                         <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
                           {isSubmitted && (
                             <div
@@ -494,19 +534,20 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               Explanation
                             </div>
                             <p className="text-zinc-300 leading-relaxed">
-                              {todaysPuzzle.explanation}
+                              {activePuzzle.explanation}
                             </p>
                           </div>
                         </div>
                       )}
 
-                      {!isSubmitted && !(viewAnyway && isTodayCompleted) && (
+                      {!isSubmitted &&
+                        !((viewAnyway || isFallback) && isActiveCompleted) && (
                         <div className="mt-8 flex justify-center w-full border-t border-white/5 pt-6">
                           <button
                             disabled={
                               selectedOptions.length === 0 || submitting
                             }
-                            onClick={() => handleSubmit(todaysPuzzle)}
+                            onClick={() => handleSubmit(activePuzzle)}
                             className={`
                                                     px-12 py-3 rounded-xl font-bold text-base transition-all w-full md:w-auto flex items-center justify-center gap-2
                                                     ${

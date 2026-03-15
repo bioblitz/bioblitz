@@ -14,6 +14,7 @@ import {
   Timestamp,
   serverTimestamp,
 } from "firebase/firestore";
+import { uploadImage } from "./storage";
 
 export interface UserProfile {
   uid: string;
@@ -86,6 +87,30 @@ export async function updateUserPhoto(
   await updateDoc(userRef, {
     photoURL: photoURL,
   });
+}
+
+export async function cacheUserPhotoURL(
+  uid: string,
+  photoURL: string,
+): Promise<string | null> {
+  if (!photoURL || !photoURL.includes("googleusercontent.com")) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(photoURL);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    const extension = blob.type?.includes("png") ? "png" : "jpg";
+    const file = new File([blob], `avatar.${extension}`, { type: blob.type });
+    const path = `avatars/${uid}/${Date.now()}.${extension}`;
+    const cachedUrl = await uploadImage(file, path);
+    await updateUserPhoto(uid, cachedUrl);
+    return cachedUrl;
+  } catch (error) {
+    console.warn("Failed to cache user photo:", error);
+    return null;
+  }
 }
 
 export async function createUserProfile(user: any) {

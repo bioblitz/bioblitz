@@ -1,72 +1,66 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- Helper Functions ---
-    
-    // Check if user is logged in
     function isSignedIn() {
       return request.auth != null;
     }
-
-    // Check if the user accessing data is the owner of that data
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-
-    // Prevent users from modifying their own Elo ratings manually
-    // (Elo should only be changed by the server/cloud functions)
     function notUpdatingElo() {
       return !request.resource.data.diff(resource.data).affectedKeys()
         .hasAny(['bElo', 'mElo', 'buElo', 'muElo', 'score']);
     }
-
-    // --- Collection Rules ---
-
-    // 1. USERS COLLECTION
-    // Profiles are public (for leaderboards), but only the owner can edit.
     match /users/{userId} {
       allow read: if true; 
       allow create: if isSignedIn() && isOwner(userId);
-      // Allow update only if they own the profile AND are not trying to hack their Elo
       allow update: if isSignedIn() && isOwner(userId) && notUpdatingElo();
+
+      match /friends/{friendId} {
+        allow read: if true;
+        allow write: if isSignedIn() && (
+          isOwner(userId) || request.resource.data.uid == request.auth.uid
+        );
+      }
+
+      match /ratingHistory/{historyId} {
+        allow read: if true;
+        allow write: if false;
+      }
     }
 
-    // 2. SETS (The Games/Blitzes)
-    // Everyone can read games to play them. Only admins (via Console) can create/edit.
     match /sets/{setId} {
       allow read: if true;
-      allow write: if false; // Locked down. You create these manually or via Admin SDK.
+      allow write: if false;
 
-      // Questions Subcollection
-      // Note: If you want to prevent cheating, questions should arguably be 
-      // read-only or hidden behind a Cloud Function. 
-      // However, your 'allGames' function currently reads this, so we must allow read.
       match /questions/{questionId} {
         allow read: if true;
         allow write: if false;
       }
     }
 
-    // 3. GAME SUBMISSIONS
-    // Created when a user finishes a game.
     match /gameSubmissions/{submissionId} {
-      // Users can create a submission if the userId matches their auth token
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      
-      // Users can only read their own submissions (or you can make this public for leaderboards)
-      allow read: if true; 
-      
-      // No one should edit a submission after it's sent (prevents score tampering)
+      allow read: if true;
       allow update, delete: if false;
     }
     
-    // 4. SETS PLAYED (Subcollection in Users)
-    // Used in your ProfilePage to show history
     match /users/{userId}/setsPlayed/{setId} {
       allow read: if true;
       // Usually written by Cloud Functions, but if client writes it:
       allow write: if isSignedIn() && isOwner(userId);
+    }
+
+    match /potdActivity/{potdId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid == resource.data.recipientUid;
+      allow create: if false;
+      allow delete: if false;
     }
   }
 }

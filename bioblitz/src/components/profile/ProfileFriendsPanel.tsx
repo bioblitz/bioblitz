@@ -66,6 +66,11 @@ export default function ProfileFriendsPanel({
                     src={friend.photoURL}
                     alt={friend.displayName}
                     className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.onerror = null;
+                      target.src = "/images/logo.svg";
+                    }}
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
@@ -103,6 +108,11 @@ export default function ProfileFriendsPanel({
                         src={request.photoURL}
                         alt={request.displayName}
                         className="w-8 h-8 rounded-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.onerror = null;
+                          target.src = "/images/logo.svg";
+                        }}
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">

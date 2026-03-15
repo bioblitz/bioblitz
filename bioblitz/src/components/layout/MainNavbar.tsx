@@ -164,6 +164,11 @@ export default function MainNavbar() {
                   src={user.photoURL}
                   alt={user.displayName}
                   className="h-10 w-10 rounded-full object-cover border border-zinc-700"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = "/images/logo.svg";
+                  }}
                 />
               ) : (
                 <DefaultAvatar name={user.displayName} />

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { getAuth } from "firebase/auth";
 import { useRouter } from 'next/navigation';
-import { UserProfile } from '@/lib/user';
+import { UserProfile, cacheUserPhotoURL } from '@/lib/user';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const isCachingPhoto = useRef(false);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -51,6 +52,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
 
             setUser(serverUser);
+            if (
+              serverUser?.photoURL &&
+              !isCachingPhoto.current &&
+              serverUser.photoURL.includes("googleusercontent.com") &&
+              !serverUser.photoURL.includes("firebasestorage.googleapis.com")
+            ) {
+              isCachingPhoto.current = true;
+              cacheUserPhotoURL(serverUser.uid, serverUser.photoURL)
+                .then((cachedUrl) => {
+                  if (cachedUrl) {
+                    setUser((prev) => (prev ? { ...prev, photoURL: cachedUrl } : prev));
+                  }
+                })
+                .finally(() => {
+                  isCachingPhoto.current = false;
+                });
+            }
           }
         } else {
           setIsAuthenticated(false);
