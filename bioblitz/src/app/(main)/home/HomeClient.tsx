@@ -134,7 +134,7 @@ export default function HomeClient({
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -265,7 +265,7 @@ export default function HomeClient({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredGames.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
               <Filter className="w-12 h-12 text-zinc-700 mx-auto mb-3" />

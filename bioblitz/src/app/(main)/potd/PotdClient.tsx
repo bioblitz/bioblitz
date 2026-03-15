@@ -299,7 +299,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     >
       <div className="absolute top-0 left-0 w-full h-125 bg-violet-900/10 blur-[100px] pointer-events-none" />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
           <div className="flex flex-col items-start gap-2">
             <div className="flex items-center gap-3">

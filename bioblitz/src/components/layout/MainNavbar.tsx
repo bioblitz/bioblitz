@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-import { Zap, House, Trophy, Menu, Flame, Search, ChevronUp } from "lucide-react";
+import { Zap, House, Trophy, Flame, Search, Plus, Hammer, ShieldUser} from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -15,16 +15,20 @@ import NotificationBell from "@/components/NotificationBell";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  const [railOpen, setRailOpen] = useState(false);
+  const [suppressRailHover, setSuppressRailHover] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ type: string; title: string; subtitle: string; href: string }>>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeLong, setRouteLong] = useState(false);
 
   const [streak, setStreak] = useState(0);
   const [streakActive, setStreakActive] = useState(false);
@@ -123,6 +127,22 @@ export default function MainNavbar() {
     }
   }, [user]);
 
+  useEffect(() => {
+    setRouteLoading(true);
+    setRouteLong(false);
+    const longHandle = window.setTimeout(() => {
+      setRouteLong(true);
+    }, 600);
+    const handle = window.setTimeout(() => {
+      setRouteLoading(false);
+    }, 180);
+
+    return () => {
+      window.clearTimeout(handle);
+      window.clearTimeout(longHandle);
+    };
+  }, [pathname]);
+
   const handleSignOut = async () => {
     try {
       await fetch("/api/logout", { method: "POST" });
@@ -136,20 +156,13 @@ export default function MainNavbar() {
     setDropdownOpen(false);
   };
 
-  const navItems = [
-    { name: "Home", href: "/home", icon: House },
-    { name: "Daily Problem", href: "/potd", icon: Flame },
-  ];
 
-  const allPages = [
+  const createHref = user?.username ? `/channel/${user.username}` : "/channel";
+  const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
-    { name: "Contests", href: "/contests", icon: Trophy },
-    { name: "Categories", href: "/categories", icon: Trophy },
-    { name: "Channel", href: "/channel", icon: Trophy },
-    { name: "About", href: "/about", icon: Trophy },
-    { name: "Settings", href: "/settings", icon: Trophy },
+    { name: "Create", href: createHref, icon: Plus },
   ];
 
   useEffect(() => {
@@ -324,34 +337,29 @@ export default function MainNavbar() {
 
   return (
     <>
+      <div
+        className={`route-progress-bar ${routeLoading ? "is-active" : ""} ${
+          routeLong ? "is-long" : ""
+        }`}
+      />
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
-          scrolled || isSidebarOpen
+          scrolled
             ? "bg-black/80 backdrop-blur-md border-white/10"
             : "bg-transparent border-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsSidebarOpen((open) => !open)}
-                className="p-2 text-zinc-400 hover:text-white focus:outline-none"
-                aria-label="Open navigation"
-              >
-                <Menu size={22} />
-              </button>
-
-              <Link href="/home" className="flex items-center space-x-2 group">
-                <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                  <Zap className="w-6 h-6 text-yellow-400" />
-                </div>
-                <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                  BioBlitz
-                </span>
-              </Link>
-            </div>
-
+            <Link href="/home" className="flex items-center space-x-2 group">
+              <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
+                <Zap className="w-6 h-6 text-yellow-400" />
+              </div>
+              <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+                BioBlitz
+              </span>
+            </Link>
+            {/**
             <div className="hidden md:flex items-center space-x-2">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -374,7 +382,7 @@ export default function MainNavbar() {
                   activeClass = "text-zinc-400 hover:text-white hover:bg-white/5";
                   iconClass = "";
                 }
-
+              
                 return (
                   <Link
                     key={item.name}
@@ -387,8 +395,9 @@ export default function MainNavbar() {
                 );
               })}
             </div>
+            */}
 
-            <div className="hidden md:block relative" ref={searchRef}>
+            <div className="hidden md:block relative ml-100" ref={searchRef}>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
@@ -450,69 +459,101 @@ export default function MainNavbar() {
         </div>
       </nav>
 
-      {isSidebarOpen && (
-        <div
-          className="fixed left-0 right-0 bottom-0 top-16 z-40 bg-black/40 backdrop-blur-[2px]"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
       <aside
-        className={`fixed top-16 left-0 h-[calc(100%-4rem)] w-60 bg-zinc-950 border-r border-zinc-800 z-50 transform transition-transform duration-300 ease-out ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 ${
+          railOpen ? "bg-black/90" : "bg-transparent"
         }`}
-        aria-hidden={!isSidebarOpen}
+        onMouseLeave={() => {
+          setRailOpen(false);
+          setSuppressRailHover(false);
+        }}
       >
-        <div className="flex items-center justify-between px-4 h-16 border-b border-zinc-800">
-          <span className="text-sm uppercase tracking-[0.3em] text-zinc-400">
-            Pages
-          </span>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-2 text-zinc-400 hover:text-white"
-            aria-label="Close navigation"
-          >
-            <ChevronUp size={20} />
-          </button>
-        </div>
-
-        <div className="px-3 py-4 space-y-1">
-          {allPages.map((item) => {
+        <div
+          className="w-16 flex flex-col items-center justify-center py-6 gap-3 ml-2"
+          onMouseEnter={() => {
+            if (!suppressRailHover) setRailOpen(true);
+          }}
+        >
+          {sideItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+            <Link
+              key={item.name}
+              href={item.href}
+              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+              title={item.name}
+              aria-label={item.name}
+              onClick={() => {
+                setRailOpen(false);
+                setSuppressRailHover(true);
+              }}
+            >
+              <span
+                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
+                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                }`}
+              />
+              <item.icon size={26} className={isActive ? "text-white fill-white" : ""} />
+              <span
+                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
                 }`}
               >
-                <item.icon size={18} />
-                <span>{item.name}</span>
-              </Link>
+                {item.name}
+              </span>
+            </Link>
             );
           })}
           {isStaff && (
             <Link
               href="/staff"
-              onClick={() => setIsSidebarOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+              title="Staff"
+              aria-label="Staff"
+              onClick={() => {
+                setRailOpen(false);
+                setSuppressRailHover(true);
+              }}
             >
-              <Trophy size={18} />
-              <span>Staff</span>
+              <span
+                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
+                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                }`}
+              />
+              <ShieldUser size={26} />
+              <span
+                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
+                }`}
+              >
+                Staff
+              </span>
             </Link>
           )}
           {isAdmin && (
             <Link
               href="/admin"
-              onClick={() => setIsSidebarOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+              title="Admin"
+              aria-label="Admin"
+              onClick={() => {
+                setRailOpen(false);
+                setSuppressRailHover(true);
+              }}
             >
-              <Trophy size={18} />
-              <span>Admin</span>
+              <span
+                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
+                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                }`}
+              />
+              <Hammer size={26} />
+              <span
+                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
+                }`}
+              >
+                Admin
+              </span>
             </Link>
           )}
         </div>

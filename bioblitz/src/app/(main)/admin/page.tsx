@@ -284,7 +284,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-20">
+      <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>

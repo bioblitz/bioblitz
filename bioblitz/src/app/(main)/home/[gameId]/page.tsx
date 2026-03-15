@@ -348,7 +348,7 @@ export default function GameDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white font-sans">
-      <motion.div variants={slideUp} className="w-full pt-24 px-4 md:px-8 max-w-7xl mx-auto">
+      <motion.div variants={slideUp} className="w-full pt-24 pr-4 pl-2 md:pr-8 md:pl-4 max-w-7xl mx-auto">
         <div className="mb-6">
           <div className="relative h-48 md:h-56 rounded overflow-hidden border border-zinc-800">
             {game.bannerUrl ? (
@@ -382,7 +382,7 @@ export default function GameDetailPage() {
         </div>
       </motion.div>
 
-      <div className="flex flex-1 px-4 md:px-8 pb-16 gap-6 max-w-7xl mx-auto w-full">
+      <div className="flex flex-1 pr-4 pl-2 md:pr-8 md:pl-4 pb-16 gap-6 max-w-7xl mx-auto w-full">
         <motion.main
           className="flex-[1.4] flex flex-col pr-2"
           variants={containerVariants}
