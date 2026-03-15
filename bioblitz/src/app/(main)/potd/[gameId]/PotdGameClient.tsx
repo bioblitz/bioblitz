@@ -12,6 +12,7 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  increment,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -33,6 +34,7 @@ export default function PotdGameClient({
   const [loadingUser, setLoadingUser] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
+  const [isStaffUser, setIsStaffUser] = useState(false);
 
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -104,9 +106,13 @@ export default function PotdGameClient({
       if (userSnap.exists()) {
         const data = userSnap.data();
         const completedArr = data.completedPotdIds || [];
+        const roles = Array.isArray(data.roles)
+          ? data.roles.map((role: unknown) => String(role).toLowerCase())
+          : [];
 
         setPlayedGameIds(new Set(completedArr));
         setIsCompleted(completedArr.includes(puzzle.id));
+        setIsStaffUser(roles.includes("admin") || roles.includes("staff"));
       }
     } catch (error) {
       console.error("Error checking status:", error);
@@ -142,6 +148,17 @@ export default function PotdGameClient({
       await updateDoc(userRef, {
         completedPotdIds: arrayUnion(puzzle.id),
       });
+
+      const activityRef = doc(db, "potdActivity", puzzle.id);
+      await setDoc(
+        activityRef,
+        {
+          attempts: increment(1),
+          correctCount: correct ? increment(1) : increment(0),
+          lastPlayedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
       setIsSubmitted(true);
       setIsCompleted(true);
@@ -189,7 +206,7 @@ export default function PotdGameClient({
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        <div className="flex items-center mb-8">
+        <div className="flex items-center justify-between gap-4 mb-8">
           <Link
             href="/potd"
             className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-medium"
@@ -197,6 +214,14 @@ export default function PotdGameClient({
             <ArrowLeft className="w-4 h-4" />
             Back to Archive
           </Link>
+          {isStaffUser && (
+            <Link
+              href="/potd/staff"
+              className="text-sm font-semibold text-orange-300 border border-orange-500/40 hover:border-orange-500 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+            >
+              Manage Queue
+            </Link>
+          )}
         </div>
 
         {loadingUser ? (

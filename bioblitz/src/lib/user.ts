@@ -21,6 +21,7 @@ export interface UserProfile {
   displayName: string;
   email: string;
   photoURL: string;
+  roles?: string[];
   bElo: number;
   buElo: number;
   muElo: number;

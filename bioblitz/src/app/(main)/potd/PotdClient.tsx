@@ -29,6 +29,7 @@ import {
   setDoc,
   serverTimestamp,
   arrayUnion,
+  increment,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { DailyPuzzle } from "@/lib/potd";
@@ -58,6 +59,7 @@ export default function PotdClient({
 
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
+  const [isStaffUser, setIsStaffUser] = useState(false);
 
   const [streak, setStreak] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -97,6 +99,10 @@ export default function PotdClient({
         setStreak(data.streak || 0);
         const completedArr = data.completedPotdIds || [];
         setPlayedGameIds(new Set(completedArr));
+        const roles = Array.isArray(data.roles)
+          ? data.roles.map((role: unknown) => String(role).toLowerCase())
+          : [];
+        setIsStaffUser(roles.includes("admin") || roles.includes("staff"));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -135,6 +141,17 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         answers: sortedSelected,
         puzzleDate: puzzle.date // <--- REQUIRED for index.ts to trigger
       });
+
+      const activityRef = doc(db, "potdActivity", puzzle.id);
+      await setDoc(
+        activityRef,
+        {
+          attempts: increment(1),
+          correctCount: correct ? increment(1) : increment(0),
+          lastPlayedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
       setIsSubmitted(true);
       setViewAnyway(true);
@@ -259,6 +276,14 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
             </div>
             <p className="text-zinc-500 ml-1">Keep your streak alive!</p>
           </div>
+          {isStaffUser && (
+            <Link
+              href="/potd/staff"
+              className="text-sm font-semibold text-orange-300 border border-orange-500/40 hover:border-orange-500 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+            >
+              Manage Queue
+            </Link>
+          )}
         </div>
 
         {userDataLoading ? (
