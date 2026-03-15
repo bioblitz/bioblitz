@@ -2,6 +2,8 @@
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { tryResolveChallenge } from "@/lib/challenges";
+
 import Link from "next/link";
 import {
   addDoc,
@@ -76,7 +78,7 @@ export default function GameRoomPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
-    {}
+    {},
   );
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -148,7 +150,7 @@ export default function GameRoomPage() {
 
             if (savedStart) {
               const elapsed = Math.floor(
-                (Date.now() - parseInt(savedStart)) / 1000
+                (Date.now() - parseInt(savedStart)) / 1000,
               );
               const remaining = Math.max(0, data.timeLimit - elapsed);
 
@@ -174,7 +176,7 @@ export default function GameRoomPage() {
         const functions = getFunctions();
         const getPublicQuestions = httpsCallable(
           functions,
-          "getPublicQuestions"
+          "getPublicQuestions",
         );
         const result = await getPublicQuestions({ gameId: gameId });
         const loadedQuestions = (result.data as { questions: Question[] })
@@ -292,8 +294,15 @@ export default function GameRoomPage() {
               correctAnswers: data.correctAnswers,
             });
           }
+          // Resolve any open challenge with the real graded score
+          tryResolveChallenge({
+            blitzId: gameId as string,
+            userId: user?.uid ?? "",
+            score: data.score,
+            timeTaken: timeTotal - (timeLeft ?? 0),
+          }).catch(() => {});
         }
-      }
+      },
     );
 
     return () => unsub();
@@ -332,7 +341,7 @@ export default function GameRoomPage() {
           orderBy("score", "desc"),
           orderBy("timeTaken", "asc"),
           orderBy("submittedAt", "asc"),
-          limit(50)
+          limit(50),
         );
 
         const snapshot = await getDocs(q);
@@ -375,7 +384,7 @@ export default function GameRoomPage() {
         const uniqueUserIds = Array.from(new Set(missingProfileIds));
 
         const userPromises = uniqueUserIds.map((uid) =>
-          getDoc(doc(firestore, "users", uid))
+          getDoc(doc(firestore, "users", uid)),
         );
 
         const userSnapshots = await Promise.all(userPromises);
@@ -422,11 +431,13 @@ export default function GameRoomPage() {
 
   return (
     //! please don't cheat :(
-<div
+    <div
       className={`min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24 ${
         submitted ? "select-text" : "select-none"
       }`}
-    >      {showTimeUpAlert && (
+    >
+      {" "}
+      {showTimeUpAlert && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-violet-900/90 border border-violet-500/50 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
             <AlertCircle className="text-violet-300 w-6 h-6" />
@@ -442,7 +453,6 @@ export default function GameRoomPage() {
           </button>
         </div>
       )}
-
       <div className="flex-1 flex justify-center py-8 px-4">
         <div className="w-full max-w-4xl relative">
           <div className="mb-8 text-center md:text-left">
@@ -518,12 +528,12 @@ export default function GameRoomPage() {
                         </span>
                       </div>
 
-<div 
+                      <div
                         className="mb-6 text-xl leading-relaxed text-zinc-100 font-medium"
                         dangerouslySetInnerHTML={{ __html: question.content }}
                       />
 
-                          {question.imgURL && (
+                      {question.imgURL && (
                         <div className="mb-6 rounded-xl overflow-hidden border border-zinc-700 bg-black">
                           <img
                             src={question.imgURL}
@@ -555,7 +565,7 @@ export default function GameRoomPage() {
                               >
                                 {key}
                               </span>
-                              <span 
+                              <span
                                 className="text-lg"
                                 dangerouslySetInnerHTML={{ __html: text }}
                               />
@@ -649,9 +659,11 @@ export default function GameRoomPage() {
                             </span>
                           </div>
 
-                          <div 
+                          <div
                             className="mb-6 text-xl text-zinc-100"
-                            dangerouslySetInnerHTML={{ __html: question.content }}
+                            dangerouslySetInnerHTML={{
+                              __html: question.content,
+                            }}
                           />
 
                           {question.imgURL && (
@@ -686,7 +698,7 @@ export default function GameRoomPage() {
                                   <span className="font-bold mr-4 uppercase w-6">
                                     {key}
                                   </span>
-                                  <span 
+                                  <span
                                     className="font-medium"
                                     dangerouslySetInnerHTML={{ __html: text }}
                                   />
@@ -842,7 +854,6 @@ export default function GameRoomPage() {
           </div>
         )}
       </div>
-
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center transform scale-100 transition-all">

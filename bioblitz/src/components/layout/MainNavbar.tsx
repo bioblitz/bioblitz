@@ -6,7 +6,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-import { Zap, House, Trophy, Flame, Search, Plus, Hammer, ShieldUser} from "lucide-react";
+import {
+  Zap,
+  House,
+  Trophy,
+  Flame,
+  Search,
+  Plus,
+  Hammer,
+  ShieldUser,
+  Swords,
+} from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -24,7 +34,9 @@ export default function MainNavbar() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Array<{ type: string; title: string; subtitle: string; href: string }>>([]);
+  const [searchResults, setSearchResults] = useState<
+    Array<{ type: string; title: string; subtitle: string; href: string }>
+  >([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -67,7 +79,9 @@ export default function MainNavbar() {
     setSearchLoading(true);
     const handle = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(query)}`,
+        );
         if (!response.ok) {
           throw new Error("Search failed");
         }
@@ -109,7 +123,7 @@ export default function MainNavbar() {
 
             const lastDatePst = lastDate.toLocaleDateString(
               "en-US",
-              pstOptions
+              pstOptions,
             );
             const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
 
@@ -156,12 +170,13 @@ export default function MainNavbar() {
     setDropdownOpen(false);
   };
 
-
   const createHref = user?.username ? `/channel/${user.username}` : "/channel";
   const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
+    { name: "Compete", href: "/challenges", icon: Swords },
+
     { name: "Create", href: createHref, icon: Plus },
   ];
 
@@ -425,7 +440,9 @@ export default function MainNavbar() {
               {searchOpen && (
                 <div className="absolute left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
                   {searchResults.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-zinc-500">No results found.</div>
+                    <div className="px-4 py-3 text-sm text-zinc-500">
+                      No results found.
+                    </div>
                   ) : (
                     <div className="max-h-96 overflow-y-auto">
                       {searchResults.map((result, index) => (
@@ -439,9 +456,13 @@ export default function MainNavbar() {
                             {result.type}
                           </span>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-zinc-100 truncate">{result.title}</span>
+                            <span className="font-semibold text-zinc-100 truncate">
+                              {result.title}
+                            </span>
                             {result.subtitle && (
-                              <span className="text-xs text-zinc-500 truncate">{result.subtitle}</span>
+                              <span className="text-xs text-zinc-500 truncate">
+                                {result.subtitle}
+                              </span>
                             )}
                           </div>
                         </Link>
@@ -452,9 +473,7 @@ export default function MainNavbar() {
               )}
             </div>
 
-            <div className="flex items-center space-x-4">
-              {renderUserNav()}
-            </div>
+            <div className="flex items-center space-x-4">{renderUserNav()}</div>
           </div>
         </div>
       </nav>
@@ -477,31 +496,38 @@ export default function MainNavbar() {
           {sideItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-              title={item.name}
-              aria-label={item.name}
-              onClick={() => {
-                setRailOpen(false);
-                setSuppressRailHover(true);
-              }}
-            >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
-                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <item.icon size={26} className={isActive ? "text-white fill-white" : ""} />
-              <span
-                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
-                }`}
+              <Link
+                key={item.name}
+                href={item.href}
+                className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+                title={item.name}
+                aria-label={item.name}
+                onClick={() => {
+                  setRailOpen(false);
+                  setSuppressRailHover(true);
+                }}
               >
-                {item.name}
-              </span>
-            </Link>
+                <span
+                  className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
+                    suppressRailHover
+                      ? ""
+                      : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                  }`}
+                />
+                <item.icon
+                  size={26}
+                  className={isActive ? "text-white fill-white" : ""}
+                />
+                <span
+                  className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    railOpen
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 translate-x-1"
+                  }`}
+                >
+                  {item.name}
+                </span>
+              </Link>
             );
           })}
           {isStaff && (
@@ -517,13 +543,17 @@ export default function MainNavbar() {
             >
               <span
                 className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                  suppressRailHover
+                    ? ""
+                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
                 }`}
               />
               <ShieldUser size={26} />
               <span
                 className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
+                  railOpen
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 translate-x-1"
                 }`}
               >
                 Staff
@@ -543,13 +573,17 @@ export default function MainNavbar() {
             >
               <span
                 className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover ? "" : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                  suppressRailHover
+                    ? ""
+                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
                 }`}
               />
               <Hammer size={26} />
               <span
                 className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1"
+                  railOpen
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 translate-x-1"
                 }`}
               >
                 Admin
