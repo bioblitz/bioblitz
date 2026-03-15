@@ -20,15 +20,30 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
 
   const getTopicColor = (topic?: string) => {
     switch (topic) {
-      case "Anatomy & Physiology": return "bg-blue-600";
-      case "Cell Biology": return "bg-cyan-600";
-      case "Plant Biology": return "bg-green-600";
-      case "Genetics & Evolution": return "bg-lime-600";
-      case "Biosystematics": return "bg-violet-600";
-      case "Ecology": return "bg-emerald-600";
-      case "Ethology": return "bg-orange-600";
-      case "Multiple": return "bg-yellow-600";
-      default: return "bg-zinc-600";
+      case "Anatomy & Physiology":
+      case "Anat & Phys":
+        return "bg-blue-600";
+      case "Cell Biology":
+      case "Cell Bio":
+        return "bg-cyan-600";
+      case "Plant Biology":
+      case "Plant Bio":
+        return "bg-green-600";
+      case "Genetics & Evolution":
+      case "Gen & Evo":
+      case "Genetics":
+        return "bg-lime-600";
+      case "Biosystematics":
+      case "Biosys":
+        return "bg-violet-600";
+      case "Ecology":
+        return "bg-emerald-600";
+      case "Ethology":
+        return "bg-orange-600";
+      case "Multiple":
+        return "bg-yellow-600";
+      default:
+        return "bg-zinc-600";
     }
   };
 

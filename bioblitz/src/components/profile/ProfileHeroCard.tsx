@@ -1,4 +1,4 @@
-import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer } from "lucide-react";
+import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer, ShieldUser } from "lucide-react";
 
 type FriendshipStatus = "none" | "sent" | "received" | "friends";
 
@@ -154,6 +154,12 @@ export default function ProfileHeroCard({
             )}
           </div>
           <div className="flex items-center gap-2">
+            {userProfile?.roles?.includes("staff") &&  (
+              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-emerald-500/40 text-emerald-100">
+                <ShieldUser className="w-4 h-4 text-emerald-200"/>
+                Staff
+              </span>
+            )}
             {userProfile?.roles?.includes("admin") && (
               <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-amber-500/40 text-amber-100">
                 <Hammer className="w-3 h-3 text-amber-200" />
