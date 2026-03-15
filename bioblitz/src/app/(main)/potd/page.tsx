@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCachedPuzzles } from "@/lib/potd";
 import PotdClient from "./PotdClient";
 

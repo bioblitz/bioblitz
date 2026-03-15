@@ -121,12 +121,21 @@ export default function SubscribersModal({
                   {/* Avatar */}
                   <div className="relative shrink-0">
                     {sub.photoURL ? (
-                      <img
-                        src={sub.photoURL}
-                        alt={sub.username || "User"}
-                        className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-violet-500/30 transition-colors"
-                        referrerPolicy="no-referrer"
-                      />
+                      <div className="relative w-10 h-10">
+                        <img
+                          src={sub.photoURL}
+                          alt={sub.username || "User"}
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-violet-500/30 transition-colors"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                          }}
+                        />
+                        <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-violet-900/20 flex items-center justify-center text-violet-300 font-bold border border-violet-500/20">
+                          {sub.displayName?.[0]?.toUpperCase() || "?"}
+                        </div>
+                      </div>
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-violet-900/20 flex items-center justify-center text-violet-300 font-bold border border-violet-500/20">
                         {sub.displayName?.[0]?.toUpperCase() || "?"}

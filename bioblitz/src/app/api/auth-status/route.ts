@@ -18,8 +18,11 @@ export async function GET() {
           photoURL: decodedIdToken.picture || '',
         });
       } else {
-        // If the server profile exists but lacks a photoURL, persist the auth picture
-        if ((!userProfile.photoURL || userProfile.photoURL === '') && decodedIdToken.picture) {
+        // Refresh photoURL if missing or still a Google URL (which can go stale when the
+        // user changes their Google profile picture). Firebase Storage URLs won't match
+        // this condition, so custom-uploaded photos are never overwritten.
+        const storedIsGoogleUrl = userProfile.photoURL?.includes('googleusercontent.com');
+        if (decodedIdToken.picture && (!userProfile.photoURL || storedIsGoogleUrl)) {
           try {
             await updateUserPhoto(decodedIdToken.uid, decodedIdToken.picture);
             userProfile.photoURL = decodedIdToken.picture;

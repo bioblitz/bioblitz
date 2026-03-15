@@ -73,12 +73,21 @@ export default function FriendsSection({
                   className="flex items-center gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-colors group"
                 >
                   {friend.photoURL ? (
-                    <img
-                      src={friend.photoURL}
-                      alt={friend.displayName}
-                      className="w-10 h-10 rounded-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="relative w-10 h-10">
+                      <img
+                        src={friend.photoURL}
+                        alt={friend.displayName}
+                        className="w-10 h-10 rounded-full object-cover"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                      <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                        {friend.displayName?.[0]?.toUpperCase() || "?"}
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold">
                       {friend.displayName?.[0]?.toUpperCase() || "?"}
