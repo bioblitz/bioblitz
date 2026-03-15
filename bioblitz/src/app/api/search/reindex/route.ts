@@ -5,6 +5,15 @@ function normalize(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+function ngrams(token: string, size: number): string[] {
+  if (token.length < size) return [];
+  const grams: string[] = [];
+  for (let i = 0; i <= token.length - size; i += 1) {
+    grams.push(token.slice(i, i + size));
+  }
+  return grams;
+}
+
 function tokenize(inputs: Array<string | undefined | null>): string[] {
   const tokens = new Set<string>();
   inputs.forEach((value) => {
@@ -12,7 +21,10 @@ function tokenize(inputs: Array<string | undefined | null>): string[] {
     normalize(String(value))
       .split(" ")
       .filter((token) => token.length > 1)
-      .forEach((token) => tokens.add(token));
+      .forEach((token) => {
+        tokens.add(token);
+        ngrams(token, 3).forEach((gram) => tokens.add(gram));
+      });
   });
   return Array.from(tokens);
 }
@@ -147,6 +159,31 @@ export async function POST(request: Request) {
       subtitle,
       href: `/potd/${docSnap.id}`,
       keywords: tokenize([title, subtitle, date]),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+
+  const pages = [
+    { title: "Home", href: "/home", subtitle: "Main dashboard" },
+    { title: "Daily Problem", href: "/potd", subtitle: "Puzzle of the day" },
+    { title: "Leaderboard", href: "/leaderboard", subtitle: "Top players" },
+    { title: "Contests", href: "/contests", subtitle: "Blitz sets" },
+    { title: "Categories", href: "/categories", subtitle: "Topics" },
+    { title: "Channel", href: "/channel", subtitle: "Community" },
+    { title: "About", href: "/about", subtitle: "About BioBlitz" },
+    { title: "Settings", href: "/settings", subtitle: "Account" },
+    { title: "Privacy Policy", href: "/privacy-policy", subtitle: "Privacy" },
+    { title: "Terms and Conditions", href: "/terms-and-conditions", subtitle: "Terms" },
+  ];
+
+  for (const page of pages) {
+    await writeDoc(`page_${page.href.replace(/\W+/g, "_")}`, {
+      type: "page",
+      refId: page.href,
+      title: page.title,
+      subtitle: page.subtitle,
+      href: page.href,
+      keywords: tokenize([page.title, page.subtitle, page.href]),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
   }

@@ -12,12 +12,26 @@ function normalize(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+function ngrams(token: string, size: number): string[] {
+  if (token.length < size) return [];
+  const grams: string[] = [];
+  for (let i = 0; i <= token.length - size; i += 1) {
+    grams.push(token.slice(i, i + size));
+  }
+  return grams;
+}
+
 function tokenize(input: string): string[] {
   if (!input) return [];
   const normalized = normalize(input);
   if (!normalized) return [];
   const tokens = normalized.split(" ").filter((token) => token.length > 1);
-  return Array.from(new Set(tokens));
+  const expanded = new Set<string>();
+  tokens.forEach((token) => {
+    expanded.add(token);
+    ngrams(token, 3).forEach((gram) => expanded.add(gram));
+  });
+  return Array.from(expanded);
 }
 
 function scoreResult(query: string, item: any): number {

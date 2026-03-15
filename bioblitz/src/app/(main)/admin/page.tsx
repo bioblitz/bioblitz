@@ -48,6 +48,7 @@ export default function AdminPage() {
   const [sortColumn, setSortColumn] = useState<SortColumn>("role");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [status, setStatus] = useState<string | null>(null);
+  const [reindexing, setReindexing] = useState(false);
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -194,6 +195,30 @@ export default function AdminPage() {
     }
   };
 
+  const handleReindexSearch = async () => {
+    if (!user || reindexing) return;
+    try {
+      setStatus(null);
+      setReindexing(true);
+      const idToken = await user.getIdToken();
+      const response = await fetch("/api/search/reindex", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to reindex search.");
+      }
+      setStatus(data?.message || "Search reindexed.");
+    } catch (error: any) {
+      setStatus(error?.message || "Failed to reindex search.");
+    } finally {
+      setReindexing(false);
+    }
+  };
+
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -269,9 +294,18 @@ export default function AdminPage() {
               Contests taken: <span className="text-zinc-100 font-semibold">{submissionsCount}</span>
             </div>
           </div>
-          <Link href="/home" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-            Return to home
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleReindexSearch}
+              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+              disabled={reindexing}
+            >
+              {reindexing ? "Reindexing..." : "Reindex Search"}
+            </button>
+            <Link href="/home" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
+              Return to home
+            </Link>
+          </div>
         </div>
 
         {status && <p className="text-sm text-zinc-400 mb-4">{status}</p>}
