@@ -15,6 +15,8 @@ import {
   Medal,
   Crown,
   Star,
+  Users,
+  CheckCircle2,
   ArrowUpRight,
   ChevronRight,
   Timer,
@@ -37,6 +39,7 @@ import {
 } from "firebase/firestore";
 
 import GameRating from "@/components/features/reviews/GameRating";
+import { getTopicColors, getTopicShortLabel } from "@/lib/utils";
 
 interface GameSubmission {
   id: string;
@@ -412,13 +415,15 @@ export default function GameDetailPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3 mt-4">
-                <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs font-bold uppercase tracking-wider">
-                  {game.topic || "General"}
+                <span
+                  className={`${getTopicColors(game.topic).badge} text-white text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full`}
+                >
+                  {getTopicShortLabel(game.topic || "General")}
                 </span>
 
                 {game.rating && game.rating > 0 && (
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
-                    <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                    <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
                     <span>{game.rating.toFixed(1)}/5.0</span>
                     <span className="text-yellow-200/80 normal-case font-semibold">
                       {(typeof game.ratingCount === "number" ? game.ratingCount : 0)} review{(typeof game.ratingCount === "number" ? game.ratingCount : 0) === 1 ? "" : "s"}
@@ -448,7 +453,7 @@ export default function GameDetailPage() {
                 <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
                   Time Limit
                 </div>
-                <div className="text-xl font-bold text-white">
+                <div className="text-xl font-bold text-white flex items-center gap-2">
                   {timeLimitMinutes} min
                 </div>
               </div>
@@ -456,7 +461,7 @@ export default function GameDetailPage() {
                 <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
                   Attempts
                 </div>
-                <div className="text-xl font-bold text-white">
+                <div className="text-xl font-bold text-white flex items-center gap-2">
                   {loadingAttempts ? "-" : previousAttempts.length}
                 </div>
               </div>
@@ -533,7 +538,8 @@ export default function GameDetailPage() {
               </button>
 
               <div className="mt-2 flex items-center gap-3">
-                <div className="text-sm text-indigo-300">
+                <div className="text-sm text-indigo-300 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
                   {game.totalPlays || 0} registrant{game.totalPlays === 1 ? "" : "s"}
                 </div>
                 <div className="flex items-center -space-x-2">
