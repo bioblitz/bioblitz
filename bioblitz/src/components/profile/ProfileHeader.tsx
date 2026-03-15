@@ -1,6 +1,7 @@
 import { UserProfile } from "@/types";
 import { Pencil, MapPin, School, GraduationCap, Calendar, Flag } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 interface ProfileHeaderProps {
   userProfile: UserProfile;
@@ -19,6 +20,7 @@ export default function ProfileHeader({
   onImageClick,
   onReportClick,
 }: ProfileHeaderProps) {
+  const [imgError, setImgError] = useState(false);
   const memberSince = userProfile.createdAt
     ? new Date(userProfile.createdAt.toMillis()).toLocaleDateString("en-US", {
         month: "long",
@@ -36,12 +38,13 @@ export default function ProfileHeader({
                 pfpLoading ? "opacity-50" : ""
               }`}
             >
-              {userProfile.photoURL ? (
+              {userProfile.photoURL && !imgError ? (
                 <img
                   src={userProfile.photoURL}
                   alt={userProfile.displayName}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={() => setImgError(true)}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-600 to-purple-600 text-white text-4xl font-bold">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { allGames } from "@/lib/gameRoomsAll";
+import { getGamesPage } from "@/lib/gameRoomsAll";
 import { useEffect, useState, useMemo } from "react";
 import ContestCard from "@/components/features/contests/ContestCard";
 import {
@@ -16,22 +16,25 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 
-export default function HomeClient({
-  initialGames,
-}: {
-  initialGames: gameRoom[];
-}) {
+export default function HomeClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
   const [typeFilter, setTypeFilter] = useState<"All" | "Official" | "Community">("All");
 
+  const [pages, setPages] = useState<gameRoom[][]>([]);
+  const [cursors, setCursors] = useState<(QueryDocumentSnapshot<DocumentData> | null)[]>([null]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -74,8 +77,27 @@ export default function HomeClient({
     }
   };
 
+  const loadPage = async (pageIndex: number) => {
+    if (pages[pageIndex]) {
+      setCurrentPage(pageIndex);
+      return;
+    }
+    setLoadingPage(true);
+    const cursor = cursors[pageIndex] ?? null;
+    const { games, lastSnap } = await getGamesPage(cursor);
+    setPages(prev => { const next = [...prev]; next[pageIndex] = games; return next; });
+    setCursors(prev => { const next = [...prev]; next[pageIndex + 1] = lastSnap; return next; });
+    setHasMore(games.length === 20);
+    setCurrentPage(pageIndex);
+    setLoadingPage(false);
+  };
+
+  useEffect(() => { loadPage(0); }, []);
+
+  const currentGames = pages[currentPage] ?? [];
+
   const filteredGames = useMemo(() => {
-    return initialGames.filter((game) => {
+    return currentGames.filter((game: gameRoom) => {
       const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTopic = topic === "All Topics" || game.topic === topic;
       const isPlayed = playedGameIds.has(game.id);
@@ -96,7 +118,7 @@ export default function HomeClient({
 
       return matchesSearch && matchesTopic && matchesStatus && matchesType;
     });
-  }, [initialGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
+  }, [currentGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
 
   const getTopicColors = (topic: string | undefined) => {
     switch (topic) {
@@ -285,11 +307,37 @@ export default function HomeClient({
               </button>
             </div>
           ) : (
-            filteredGames.map((game) => (
+            filteredGames.map((game: gameRoom) => (
               <ContestCard key={game.id} contest={game} href={`/home/${game.id}`} isCompleted={playedGameIds.has(game.id)} />
             ))
           )}
         </div>
+
+        {loadingPage ? (
+          <div className="flex justify-center mt-10">
+            <div className="w-5 h-5 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-4 mt-10">
+            <button
+              onClick={() => loadPage(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Prev
+            </button>
+            <span className="text-xs text-zinc-600 tabular-nums">Page {currentPage + 1}</span>
+            <button
+              onClick={() => loadPage(currentPage + 1)}
+              disabled={!hasMore}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

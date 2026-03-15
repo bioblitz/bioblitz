@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 
-export default function CreateContestRedirect() {
+function RedirectLogic() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -16,4 +16,12 @@ export default function CreateContestRedirect() {
   }, [router, searchParams]);
 
   return null;
+}
+
+export default function CreateContestRedirect() {
+  return (
+    <Suspense fallback={null}>
+      <RedirectLogic />
+    </Suspense>
+  );
 }

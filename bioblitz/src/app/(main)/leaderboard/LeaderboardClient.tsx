@@ -130,7 +130,21 @@ export default function LeaderboardClient({
 
                     <div className="flex-shrink-0 mr-4 ml-2">
                         {user.photoURL ? (
-                        <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-zinc-800" referrerPolicy="no-referrer" />
+                        <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                          <img
+                            src={user.photoURL}
+                            alt={user.displayName}
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-zinc-800"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
+                            <span className="text-lg font-bold text-zinc-500">{user.displayName ? user.displayName[0].toUpperCase() : "?"}</span>
+                          </div>
+                        </div>
                         ) : (
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
                             <span className="text-lg font-bold text-zinc-500">{user.displayName ? user.displayName[0].toUpperCase() : "?"}</span>

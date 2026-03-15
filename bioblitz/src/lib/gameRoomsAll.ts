@@ -1,4 +1,4 @@
-import { collection, getDocs, QueryDocumentSnapshot, DocumentData, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData, doc, getDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
 import { firestore } from "./firebase";
 import { gameRoom } from "@/types/index";
 
@@ -31,6 +31,88 @@ const formatTime = (totalSeconds: number): string => {
   }
   
   return `${seconds} sec`;
+};
+
+const PAGE_SIZE = 20;
+
+const transformDoc = async (
+  docSnap: QueryDocumentSnapshot<DocumentData>,
+  creatorCache: Map<string, { username?: string; banner?: string; pfp?: string }>
+): Promise<gameRoom> => {
+  const data = docSnap.data();
+  let creatorUsername = data.creatorUsername;
+  let creatorBanner = data.creatorBanner;
+  let creatorPfp = data.creatorPfp;
+
+  if (data.creator) {
+    if (!creatorCache.has(data.creator)) {
+      try {
+        const userDoc = await getDoc(doc(firestore, "users", data.creator));
+        if (userDoc.exists()) {
+          const u = userDoc.data();
+          creatorCache.set(data.creator, { username: u.username, banner: u.bannerURL, pfp: u.photoURL });
+        } else {
+          creatorCache.set(data.creator, {});
+        }
+      } catch {
+        creatorCache.set(data.creator, {});
+      }
+    }
+    const cached = creatorCache.get(data.creator)!;
+    creatorUsername = creatorUsername || cached.username;
+    creatorBanner = creatorBanner || cached.banner;
+    creatorPfp = creatorPfp || cached.pfp;
+  }
+
+  return {
+    id: docSnap.id,
+    title: data.title || '',
+    source: data.source || '',
+    number_of_questions: (data.questions && Array.isArray(data.questions)
+      ? data.questions.length
+      : (data.number_of_questions ? parseInt(data.number_of_questions) : (data.questionCount || 0))).toString(),
+    topic: data.topic,
+    difficulty: data.difficulty || 'Easy',
+    timeLimit: formatTime(parseInt(data.timeLimit || '0', 10)),
+    description: data.description,
+    creator: data.creator,
+    creatorPfp,
+    creatorUsername,
+    creatorBanner,
+    rating: data.averageRating || data.rating,
+    totalPlays: data.totalPlays || 0,
+    bannerUrl: data.bannerUrl,
+    questions: [],
+    creation: data.creation?.toDate?.()?.getTime() || null,
+    lastPlayedAt: data.lastPlayedAt?.toDate?.()?.getTime() || null,
+    lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.getTime() || null,
+  };
+};
+
+export const getGamesPage = async (
+  cursor: QueryDocumentSnapshot<DocumentData> | null = null
+): Promise<{ games: gameRoom[]; lastSnap: QueryDocumentSnapshot<DocumentData> | null }> => {
+  try {
+    const col = collection(firestore, 'sets');
+    const q = cursor
+      ? query(col, orderBy('trendingScore', 'desc'), startAfter(cursor), limit(PAGE_SIZE))
+      : query(col, orderBy('trendingScore', 'desc'), limit(PAGE_SIZE));
+
+    const snapshot = await getDocs(q);
+    const visibleDocs = snapshot.docs.filter(d => {
+      const data = d.data();
+      return !data.hidden && data.status !== 'incomplete';
+    });
+
+    const creatorCache = new Map<string, { username?: string; banner?: string; pfp?: string }>();
+    const games = await Promise.all(visibleDocs.map(d => transformDoc(d, creatorCache)));
+    const lastSnap = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
+
+    return { games, lastSnap };
+  } catch (error) {
+    console.error("Error fetching games page:", error);
+    return { games: [], lastSnap: null };
+  }
 };
 
 export const allGames = async (topic?: string): Promise<gameRoom[]> => {
