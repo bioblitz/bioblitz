@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { gameRoom } from "@/types";
 import { getGamesPage } from "@/lib/gameRoomsAll";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import ContestCard from "@/components/features/contests/ContestCard";
 import {
   Clock,
@@ -94,10 +94,9 @@ export default function HomeClient() {
 
   useEffect(() => { loadPage(0); }, []);
 
-  const currentGames = pages[currentPage] ?? [];
-
+  const allGames = pages.flat();
   const filteredGames = useMemo(() => {
-    return currentGames.filter((game: gameRoom) => {
+    return allGames.filter((game: gameRoom) => {
       const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTopic = topic === "All Topics" || game.topic === topic;
       const isPlayed = playedGameIds.has(game.id);
@@ -118,7 +117,24 @@ export default function HomeClient() {
 
       return matchesSearch && matchesTopic && matchesStatus && matchesType;
     });
-  }, [currentGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
+  }, [allGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
+
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(loadingPage);
+  loadingRef.current = loadingPage;
+
+  const handleScroll = useCallback(() => {
+    if (!loaderRef.current || loadingRef.current || !hasMore) return;
+    const rect = loaderRef.current.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 200) {
+      loadPage(pages.length);
+    }
+  }, [hasMore, loadPage, pages.length]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
   const getTopicColors = (topic: string | undefined) => {
     switch (topic) {
@@ -312,30 +328,10 @@ export default function HomeClient() {
             ))
           )}
         </div>
-
-        {loadingPage ? (
+        <div ref={loaderRef} />
+        {loadingPage && (
           <div className="flex justify-center mt-10">
             <div className="w-5 h-5 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <button
-              onClick={() => loadPage(currentPage - 1)}
-              disabled={currentPage === 0}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Prev
-            </button>
-            <span className="text-xs text-zinc-600 tabular-nums">Page {currentPage + 1}</span>
-            <button
-              onClick={() => loadPage(currentPage + 1)}
-              disabled={!hasMore}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         )}
       </main>
