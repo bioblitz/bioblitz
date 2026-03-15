@@ -21,6 +21,7 @@ export async function createContest(
   formData: FormData,
 ) {
   const idToken = (formData.get("idToken") as string) || null;
+  const postAsUsernameRaw = String(formData.get("postAsUsername") || "").trim();
 
   if (!idToken) {
     return { message: "You must be logged in to create a Blitz." };
@@ -29,11 +30,24 @@ export async function createContest(
   let uid: string;
   let creatorPfp = "/images/logo.svg";
   let creatorUsername = "";
-  try {
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    uid = decoded.uid;
+  const normalizeRoles = (raw: unknown): string[] => {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((role) => String(role).toLowerCase().trim())
+      .filter(Boolean);
+  };
+  const isStaffOrAdminFromClaims = (claims: any): boolean => {
+    const roles = normalizeRoles(claims?.roles);
+    return (
+      claims?.admin === true ||
+      claims?.role === "admin" ||
+      roles.includes("admin") ||
+      roles.includes("staff")
+    );
+  };
+  const loadCreatorProfile = async (userId: string) => {
     try {
-      const userRecord = await adminAuth.getUser(uid);
+      const userRecord = await adminAuth.getUser(userId);
       if (userRecord.photoURL) creatorPfp = userRecord.photoURL;
       if (userRecord.displayName) creatorUsername = userRecord.displayName;
     } catch (e) {
@@ -41,7 +55,7 @@ export async function createContest(
     }
 
     try {
-      const userDoc = await adminFirestore.collection("users").doc(uid).get();
+      const userDoc = await adminFirestore.collection("users").doc(userId).get();
       if (userDoc.exists) {
         const data = userDoc.data() as any;
         if (data.photoURL) creatorPfp = data.photoURL;
@@ -50,6 +64,50 @@ export async function createContest(
     } catch (e) {
       // ignore
     }
+  };
+  try {
+    const decoded = await adminAuth.verifyIdToken(idToken);
+    uid = decoded.uid;
+    await loadCreatorProfile(uid);
+
+    if (postAsUsernameRaw) {
+      let allowed = isStaffOrAdminFromClaims(decoded);
+      if (!allowed) {
+        const actorDoc = await adminFirestore.collection("users").doc(uid).get();
+        const actorRoles = normalizeRoles(actorDoc.data()?.roles);
+        allowed = actorRoles.includes("admin") || actorRoles.includes("staff");
+      }
+      if (!allowed) {
+        return { message: "You do not have permission to post as another user." };
+      }
+
+      const normalizedUsername = postAsUsernameRaw.toLowerCase();
+      let targetUid = "";
+
+      const userDoc = await adminFirestore
+        .collection("users")
+        .where("username", "==", normalizedUsername)
+        .limit(1)
+        .get();
+
+      if (!userDoc.empty) {
+        targetUid = userDoc.docs[0].id;
+      } else {
+        const byId = await adminFirestore.collection("users").doc(normalizedUsername).get();
+        if (byId.exists) {
+          targetUid = byId.id;
+        }
+      }
+
+      if (!targetUid) {
+        return { message: "Target user not found." };
+      }
+
+      uid = targetUid;
+      creatorPfp = "/images/logo.svg";
+      creatorUsername = "";
+      await loadCreatorProfile(uid);
+    }
   } catch (e) {
     console.error("Invalid ID token:", e);
     return { message: "You must be logged in to create a Blitz." };
@@ -57,11 +115,9 @@ export async function createContest(
 
   const contestId = formData.get("contestId") as string | null;
   const questionsString = formData.get("questions") as string;
-  // Questions are now in subcollection format: {id, content, a, b, c, d?, e?, correct, imgURL, solution}
   const questions: any[] = questionsString ? JSON.parse(questionsString) : [];
   const status = (formData.get("status") as string) || "incomplete";
 
-  // hidden: true for drafts, false for published (unless caller overrides)
   const hiddenParam = formData.get("hidden");
   const hidden = status === "completed"
     ? (hiddenParam === "true" ? true : false)

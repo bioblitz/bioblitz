@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-import { Zap, House, Trophy, Menu, X, Flame } from "lucide-react";
+import { Zap, House, Trophy, Menu, Flame, Search, ChevronUp } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -15,30 +15,72 @@ import NotificationBell from "@/components/NotificationBell";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ type: string; title: string; subtitle: string; href: string }>>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const [streak, setStreak] = useState(0);
   const [streakActive, setStreakActive] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const roles = Array.isArray(user?.roles)
+    ? user.roles.map((role: unknown) => String(role).toLowerCase())
+    : [];
+  const isAdmin = roles.includes("admin");
+  const isStaff = isAdmin || roles.includes("staff");
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(target)) {
+        setSearchOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    const handle = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+          throw new Error("Search failed");
+        }
+        const data = await response.json();
+        const results = Array.isArray(data.results) ? data.results : [];
+        setSearchResults(results);
+        setSearchOpen(true);
+      } catch (error) {
+        setSearchResults([]);
+        setSearchOpen(true);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+
+    return () => window.clearTimeout(handle);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (user?.uid) {
@@ -97,7 +139,17 @@ export default function MainNavbar() {
   const navItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
+  ];
+
+  const allPages = [
+    { name: "Home", href: "/home", icon: House },
+    { name: "Daily Problem", href: "/potd", icon: Flame },
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
+    { name: "Contests", href: "/contests", icon: Trophy },
+    { name: "Categories", href: "/categories", icon: Trophy },
+    { name: "Channel", href: "/channel", icon: Trophy },
+    { name: "About", href: "/about", icon: Trophy },
+    { name: "Settings", href: "/settings", icon: Trophy },
   ];
 
   useEffect(() => {
@@ -235,11 +287,26 @@ export default function MainNavbar() {
                   Settings
                 </span>
               </Link>
-              <Link href="/admin">
-                <span className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors" onClick={() => setDropdownOpen(false)}>
-                  Admin
-                </span>
-              </Link>
+              {isStaff && (
+                <Link href="/staff">
+                  <span
+                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Staff
+                  </span>
+                </Link>
+              )}
+              {isAdmin && (
+                <Link href="/admin">
+                  <span
+                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Admin
+                  </span>
+                </Link>
+              )}
               <div className="border-t border-zinc-800 mt-1">
                 <span
                   className="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"
@@ -256,111 +323,200 @@ export default function MainNavbar() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
-        scrolled || isMobileMenuOpen
-          ? "bg-black/80 backdrop-blur-md border-white/10"
-          : "bg-transparent border-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/home" className="flex items-center space-x-2 group">
-            <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-              <Zap className="w-6 h-6 text-yellow-400" />
-            </div>
-            <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-              BioBlitz
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center space-x-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const isDaily = item.href === "/daily";
-
-              let activeClass = "";
-              let iconClass = "";
-
-              if (isActive) {
-                if (isDaily) {
-                  activeClass =
-                    "bg-orange-600/20 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)] border border-orange-500/20";
-                  iconClass = "text-orange-400";
-                } else {
-                  activeClass =
-                    "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10";
-                  iconClass = "text-violet-400";
-                }
-              } else {
-                activeClass = "text-zinc-400 hover:text-white hover:bg-white/5";
-                iconClass = "";
-              }
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${activeClass}`}
-                >
-                  <item.icon size={18} className={iconClass} />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {renderUserNav()}
-
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-zinc-400 hover:text-white focus:outline-none"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className={`md:hidden absolute w-full bg-zinc-950 border-b border-white/10 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
-          isMobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+    <>
+      <nav
+        className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+          scrolled || isSidebarOpen
+            ? "bg-black/80 backdrop-blur-md border-white/10"
+            : "bg-transparent border-transparent"
         }`}
       >
-        <div className="px-4 pt-2 pb-6 space-y-2">
-          {navItems.map((item) => {
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsSidebarOpen((open) => !open)}
+                className="p-2 text-zinc-400 hover:text-white focus:outline-none"
+                aria-label="Open navigation"
+              >
+                <Menu size={22} />
+              </button>
+
+              <Link href="/home" className="flex items-center space-x-2 group">
+                <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
+                  <Zap className="w-6 h-6 text-yellow-400" />
+                </div>
+                <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+                  BioBlitz
+                </span>
+              </Link>
+            </div>
+
+            <div className="hidden md:flex items-center space-x-2">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                const isDaily = item.href === "/daily";
+
+                let activeClass = "";
+                let iconClass = "";
+
+                if (isActive) {
+                  if (isDaily) {
+                    activeClass =
+                      "bg-orange-600/20 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)] border border-orange-500/20";
+                    iconClass = "text-orange-400";
+                  } else {
+                    activeClass =
+                      "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10";
+                    iconClass = "text-violet-400";
+                  }
+                } else {
+                  activeClass = "text-zinc-400 hover:text-white hover:bg-white/5";
+                  iconClass = "";
+                }
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${activeClass}`}
+                  >
+                    <item.icon size={18} className={iconClass} />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="hidden md:block relative" ref={searchRef}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchResults.length > 0) setSearchOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && searchResults[0]) {
+                      router.push(searchResults[0].href);
+                      setSearchOpen(false);
+                    }
+                  }}
+                  placeholder="Search"
+                  className="w-80 bg-zinc-900/70 border border-zinc-800 rounded-full pl-9 pr-9 py-2 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700"
+                />
+                {searchLoading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
+                    ...
+                  </span>
+                )}
+              </div>
+
+              {searchOpen && (
+                <div className="absolute left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
+                  {searchResults.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-zinc-500">No results found.</div>
+                  ) : (
+                    <div className="max-h-96 overflow-y-auto">
+                      {searchResults.map((result, index) => (
+                        <Link
+                          key={`${result.type}-${index}`}
+                          href={result.href}
+                          onClick={() => setSearchOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                        >
+                          <span className="text-[10px] uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2 py-0.5">
+                            {result.type}
+                          </span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-zinc-100 truncate">{result.title}</span>
+                            {result.subtitle && (
+                              <span className="text-xs text-zinc-500 truncate">{result.subtitle}</span>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {renderUserNav()}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed left-0 right-0 bottom-0 top-16 z-40 bg-black/40 backdrop-blur-[2px]"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed top-16 left-0 h-[calc(100%-4rem)] w-60 bg-zinc-950 border-r border-zinc-800 z-50 transform transition-transform duration-300 ease-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        aria-hidden={!isSidebarOpen}
+      >
+        <div className="flex items-center justify-between px-4 h-16 border-b border-zinc-800">
+          <span className="text-sm uppercase tracking-[0.3em] text-zinc-400">
+            Pages
+          </span>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 text-zinc-400 hover:text-white"
+            aria-label="Close navigation"
+          >
+            <ChevronUp size={20} />
+          </button>
+        </div>
+
+        <div className="px-3 py-4 space-y-1">
+          {allPages.map((item) => {
             const isActive = pathname === item.href;
-            const isDaily = item.href === "/daily";
-
-            let activeClass = "";
-
-            if (isActive) {
-              if (isDaily) {
-                activeClass =
-                  "bg-orange-600/20 text-orange-300 border border-orange-500/20";
-              } else {
-                activeClass =
-                  "bg-violet-600/20 text-violet-300 border border-violet-500/20";
-              }
-            } else {
-              activeClass = "text-zinc-400 hover:bg-white/5 hover:text-white";
-            }
-
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${activeClass}`}
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
               >
-                <item.icon size={20} />
-                <span className="font-medium">{item.name}</span>
+                <item.icon size={18} />
+                <span>{item.name}</span>
               </Link>
             );
           })}
+          {isStaff && (
+            <Link
+              href="/staff"
+              onClick={() => setIsSidebarOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <Trophy size={18} />
+              <span>Staff</span>
+            </Link>
+          )}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={() => setIsSidebarOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <Trophy size={18} />
+              <span>Admin</span>
+            </Link>
+          )}
         </div>
-      </div>
-    </nav>
+      </aside>
+    </>
   );
 }

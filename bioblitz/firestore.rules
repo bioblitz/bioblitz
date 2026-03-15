@@ -68,5 +68,10 @@ service cloud.firestore {
       allow create: if false;
       allow delete: if false;
     }
+
+    match /search_index/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
   }
 }

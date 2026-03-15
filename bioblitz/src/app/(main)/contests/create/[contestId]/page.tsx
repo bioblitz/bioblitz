@@ -2,7 +2,7 @@
 
 import React, { useState, useActionState, useMemo, useEffect, useCallback, startTransition, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay } from "@/types";
@@ -85,7 +85,9 @@ const TOPICS = ["Anatomy & Physiology", "Cell Biology", "Plant Biology", "Geneti
 export default function EditContestPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const routeContestId = (params as any)?.contestId as string | undefined;
+  const postAsUsername = searchParams?.get("postAs")?.trim() || "";
 
   const [state, formAction] = useActionState(createContest, initialState);
   const [questions, setQuestions] = useState<EditableQuestion[]>([initialQuestion()]);
@@ -239,7 +241,11 @@ export default function EditContestPage() {
       await fetch(`/api/contests/${contestId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: token, hidden: newHidden }),
+        body: JSON.stringify({
+          idToken: token,
+          hidden: newHidden,
+          postAsUsername: postAsUsername || undefined,
+        }),
       });
     } catch (e) {
       setIsHidden(!newHidden); // revert on error
@@ -255,7 +261,10 @@ export default function EditContestPage() {
       const res = await fetch(`/api/contests/${contestId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: token }),
+        body: JSON.stringify({
+          idToken: token,
+          postAsUsername: postAsUsername || undefined,
+        }),
       });
       if (res.ok) router.push('/contests');
     } catch (e) {
@@ -303,6 +312,9 @@ export default function EditContestPage() {
     const formData = new FormData();
     formData.append("contestId", contestId);
     formData.append("idToken", token);
+    if (postAsUsername) {
+      formData.append("postAsUsername", postAsUsername);
+    }
     formData.append("questions", JSON.stringify(convertToQuestions(questions)));
     formData.append("title", title);
     formData.append("description", description);
@@ -327,7 +339,7 @@ export default function EditContestPage() {
       console.error("Failed to autosave draft:", error);
       lastSavedSnapshotRef.current = null;
     }
-  }, [contestId, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
+  }, [contestId, postAsUsername, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
 
   useEffect(() => {
     if (!contestId) return;
@@ -336,6 +348,7 @@ export default function EditContestPage() {
       try {
         const payload = {
           idToken: idToken,
+          postAsUsername: postAsUsername || undefined,
           questions: convertToQuestions(questions),
           title,
           description,
@@ -368,7 +381,7 @@ export default function EditContestPage() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [contestId, idToken, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl, isPublished, isHidden]);
+  }, [contestId, idToken, postAsUsername, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl, isPublished, isHidden]);
 
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -429,6 +442,9 @@ export default function EditContestPage() {
       const formData = new FormData();
       formData.append("contestId", contestId || "");
       formData.append("idToken", token);
+      if (postAsUsername) {
+        formData.append("postAsUsername", postAsUsername);
+      }
       formData.append("questions", JSON.stringify(convertToQuestions(questions)));
       formData.append("title", title);
       formData.append("description", description);
@@ -474,6 +490,11 @@ export default function EditContestPage() {
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Blitz Editor</h1>
             <p className="text-zinc-500 text-sm mt-0.5">Build your question set and preview it live.</p>
+            {postAsUsername && (
+              <p className="text-xs text-violet-300 mt-1">
+                Posting as <span className="font-semibold">{postAsUsername}</span>
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {isPublished && (

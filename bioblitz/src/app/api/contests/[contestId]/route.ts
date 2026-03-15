@@ -2,6 +2,40 @@ import { NextResponse } from 'next/server';
 import { getContestById } from '@/lib/actions';
 import { adminAuth, adminFirestore } from '@/lib/firebase-admin';
 
+function normalizeRoles(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((role) => String(role).toLowerCase().trim())
+    .filter(Boolean);
+}
+
+function isStaffOrAdminFromClaims(claims: any): boolean {
+  const roles = normalizeRoles(claims?.roles);
+  return (
+    claims?.admin === true ||
+    claims?.role === 'admin' ||
+    roles.includes('admin') ||
+    roles.includes('staff')
+  );
+}
+
+async function resolveUserByUsername(usernameRaw: string): Promise<string> {
+  const username = usernameRaw.trim().toLowerCase();
+  if (!username) return '';
+
+  const byUsername = await adminFirestore
+    .collection('users')
+    .where('username', '==', username)
+    .limit(1)
+    .get();
+  if (!byUsername.empty) return byUsername.docs[0].id;
+
+  const byId = await adminFirestore.collection('users').doc(username).get();
+  if (byId.exists) return byId.id;
+
+  return '';
+}
+
 export async function GET(request: Request, { params }: { params: Promise<{ contestId: string }> }) {
   try {
     const { contestId } = await params;
@@ -32,16 +66,37 @@ export async function POST(request: Request, { params }: { params: Promise<{ con
     const { contestId } = await params;
     const body = await request.json();
     const { idToken } = body;
+    const postAsUsername = String(body?.postAsUsername || '').trim();
 
     if (!idToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     let uid: string;
+    let decodedClaims: any = null;
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
+      decodedClaims = decoded;
       uid = decoded.uid;
     } catch (e) {
       console.error('Invalid ID token:', e);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (postAsUsername) {
+      let allowed = isStaffOrAdminFromClaims(decodedClaims);
+      if (!allowed) {
+        const actorDoc = await adminFirestore.collection('users').doc(uid).get();
+        const actorRoles = normalizeRoles(actorDoc.data()?.roles);
+        allowed = actorRoles.includes('admin') || actorRoles.includes('staff');
+      }
+      if (!allowed) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+
+      const targetUid = await resolveUserByUsername(postAsUsername);
+      if (!targetUid) {
+        return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+      }
+      uid = targetUid;
     }
 
     const questionsArr: any[] = body.questions || [];
@@ -99,20 +154,40 @@ export async function POST(request: Request, { params }: { params: Promise<{ con
 export async function PATCH(request: Request, { params }: { params: Promise<{ contestId: string }> }) {
   try {
     const { contestId } = await params;
-    const { idToken, hidden } = await request.json();
+    const { idToken, hidden, postAsUsername } = await request.json();
     if (!idToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     let uid: string;
+    let decodedClaims: any = null;
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
+      decodedClaims = decoded;
       uid = decoded.uid;
     } catch (e) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    let targetUid = uid;
+    if (postAsUsername) {
+      let allowed = isStaffOrAdminFromClaims(decodedClaims);
+      if (!allowed) {
+        const actorDoc = await adminFirestore.collection('users').doc(uid).get();
+        const actorRoles = normalizeRoles(actorDoc.data()?.roles);
+        allowed = actorRoles.includes('admin') || actorRoles.includes('staff');
+      }
+      if (!allowed) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      const resolved = await resolveUserByUsername(String(postAsUsername));
+      if (!resolved) {
+        return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+      }
+      targetUid = resolved;
+    }
+
     const docRef = adminFirestore.collection('sets').doc(contestId);
     const snap = await docRef.get();
-    if (!snap.exists || snap.data()?.creator !== uid) {
+    if (!snap.exists || snap.data()?.creator !== targetUid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -126,20 +201,40 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ co
 export async function DELETE(request: Request, { params }: { params: Promise<{ contestId: string }> }) {
   try {
     const { contestId } = await params;
-    const { idToken } = await request.json();
+    const { idToken, postAsUsername } = await request.json();
     if (!idToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     let uid: string;
+    let decodedClaims: any = null;
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
+      decodedClaims = decoded;
       uid = decoded.uid;
     } catch (e) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    let targetUid = uid;
+    if (postAsUsername) {
+      let allowed = isStaffOrAdminFromClaims(decodedClaims);
+      if (!allowed) {
+        const actorDoc = await adminFirestore.collection('users').doc(uid).get();
+        const actorRoles = normalizeRoles(actorDoc.data()?.roles);
+        allowed = actorRoles.includes('admin') || actorRoles.includes('staff');
+      }
+      if (!allowed) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      const resolved = await resolveUserByUsername(String(postAsUsername));
+      if (!resolved) {
+        return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+      }
+      targetUid = resolved;
+    }
+
     const docRef = adminFirestore.collection('sets').doc(contestId);
     const snap = await docRef.get();
-    if (!snap.exists || snap.data()?.creator !== uid) {
+    if (!snap.exists || snap.data()?.creator !== targetUid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -159,7 +159,7 @@ export default function ProfileHeroCard({
             )}
           </div>
           <div className="flex items-center gap-2">
-            {userProfile?.roles?.includes("staff") &&  (
+            {(userProfile?.roles?.includes("staff") || userProfile?.roles?.includes("admin")) && (
               <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-emerald-500/40 text-emerald-100">
                 <ShieldUser className="w-4 h-4 text-emerald-200"/>
                 Staff
