@@ -76,8 +76,15 @@ export async function GET(request: Request) {
       createdAt: formatCreatedAt(data.createdAt),
     };
   });
+  let submissionsCount = 0;
+  try {
+    const submissionsSnap = await adminFirestore.collection("gameSubmissions").get();
+    submissionsCount = submissionsSnap.size;
+  } catch (err) {
+    submissionsCount = 0;
+  }
 
-  return NextResponse.json({ users });
+  return NextResponse.json({ users, submissionsCount });
 }
 
 export async function DELETE(request: Request) {

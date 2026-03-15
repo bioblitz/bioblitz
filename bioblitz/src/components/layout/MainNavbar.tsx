@@ -235,6 +235,11 @@ export default function MainNavbar() {
                   Settings
                 </span>
               </Link>
+              <Link href="/admin">
+                <span className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors" onClick={() => setDropdownOpen(false)}>
+                  Admin
+                </span>
+              </Link>
               <div className="border-t border-zinc-800 mt-1">
                 <span
                   className="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"

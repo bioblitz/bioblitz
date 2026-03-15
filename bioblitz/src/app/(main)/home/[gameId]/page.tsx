@@ -494,13 +494,13 @@ export default function GameDetailPage() {
                 disabled={
                   loadingAttempts || !authResolved || activeSession !== null
                 }
-                className={`w-full relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
+                className={`w-full py-2.5 blurred-border relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
                   loadingAttempts
-                    ? "bg-zinc-800 cursor-wait opacity-70"
+                    ? "bg-zinc-500 cursor-wait opacity-70"
                     : activeSession !== null
-                    ? "bg-zinc-800 opacity-50 cursor-not-allowed"
+                    ? "bg-zinc-500 opacity-50 cursor-not-allowed"
                     : isFirstAttempt
-                    ? "bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-900/20"
+                    ? "bg-violet-500 hover:bg-violet-600"
                     : "bg-white text-black hover:bg-zinc-200"
                 }`}
               >
@@ -520,7 +520,7 @@ export default function GameDetailPage() {
                       <span className="text-lg justify-center font-bold leading-none">
                         Start Now
                       </span>
-                      <span className="text-xs font-medium opacity-80">
+                      <span className="text-xs justify-center font-medium opacity-80">
                         Counts towards Elo
                       </span>
                     </div>
@@ -529,7 +529,7 @@ export default function GameDetailPage() {
                       <span className="text-lg font-bold leading-none">
                         Start Now
                       </span>
-                      <span className="text-xs font-medium opacity-60">
+                      <span className="text-xs justify-center font-medium opacity-60">
                         Replay for fun (No Elo)
                       </span>
                     </div>

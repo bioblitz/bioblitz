@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [submissionsCount, setSubmissionsCount] = useState(0);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>("role");
@@ -93,6 +94,11 @@ export default function AdminPage() {
 
       const data = await response.json();
       setUsers(Array.isArray(data.users) ? data.users : []);
+      setSubmissionsCount(
+        Number.isFinite(Number(data.submissionsCount))
+          ? Number(data.submissionsCount)
+          : 0
+      );
     } catch (error: any) {
       setStatus(error?.message || "Failed to fetch users.");
     }
@@ -255,7 +261,14 @@ export default function AdminPage() {
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-20">
         <div className="flex items-center justify-between gap-4 mb-4">
-          <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
+            <div className="text-sm text-zinc-400 mt-1">
+              Total users: <span className="text-zinc-100 font-semibold">{users.length}</span>
+              <span className="mx-2 text-zinc-600">|</span>
+              Contests taken: <span className="text-zinc-100 font-semibold">{submissionsCount}</span>
+            </div>
+          </div>
           <Link href="/home" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
             Return to home
           </Link>

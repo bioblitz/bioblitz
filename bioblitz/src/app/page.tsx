@@ -171,7 +171,6 @@ export default async function mainPage({
               {cards.map((card, i) => (
                 <div key={i} className="group h-[320px] w-full [perspective:1000px]">
                   <div className="relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    {/* Front */}
                     <div className="absolute inset-0 h-full w-full rounded-2xl bg-[#0F1422] border border-slate-800 p-6 flex flex-col items-center justify-center [backface-visibility:hidden]">
                       <div className={`absolute top-0 right-0 w-32 h-32 ${card.bg} blur-[60px] rounded-full opacity-50`} />
                       <div className={`mb-6 ${card.text} transition-transform duration-300 group-hover:scale-110`}>{card.icon}</div>
@@ -181,7 +180,6 @@ export default async function mainPage({
                       </div>
                       <div className="absolute bottom-4 text-slate-700 text-[10px] uppercase tracking-wider font-mono">{card.weight} of exam</div>
                     </div>
-                    {/* Back */}
                     <div className={`absolute inset-0 h-full w-full rounded-2xl bg-[#0F1422] border ${card.color} p-6 flex flex-col justify-between [transform:rotateY(180deg)] [backface-visibility:hidden]`}>
                       <div className={`absolute -bottom-10 -left-10 w-40 h-40 ${card.bg} blur-[50px] rounded-full opacity-40`} />
                       <div className="relative z-10">
@@ -223,7 +221,6 @@ export default async function mainPage({
           }
         `}</style>
 
-        {/* ── REVIEWS ─────────────────────────────── */}
         <section id="reviews" className="w-full py-16 px-6 border-t border-slate-900 bg-[#020204]">
           <div className="max-w-4xl mx-auto">
             <div className="mb-12">
@@ -303,7 +300,6 @@ export default async function mainPage({
           </div>
         </section>
 
-        {/* ── CTA FOOTER ──────────────────────────── */}
         <section className="w-full py-16 px-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 z-0 bg-violet-900/5" />
           <div className="max-w-3xl mx-auto bg-[#0F1422] rounded-3xl p-10 border border-white/5 relative z-10 shadow-2xl">
@@ -321,7 +317,6 @@ export default async function mainPage({
           </div>
         </section>
 
-        {/* ── FOOTER ──────────────────────────────── */}
         <footer className="w-full text-center py-8 text-slate-600 text-sm border-t border-slate-900 bg-[#020204]">
           <div className="flex justify-center gap-6 mb-4">
             <Link href="/privacy-policy" className="hover:text-violet-400 transition-colors">Privacy</Link>

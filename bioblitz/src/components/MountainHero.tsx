@@ -166,18 +166,13 @@ export default function MountainHero() {
         >
           <Link href="/auth">
             <button
-              className="relative flex items-center gap-2 text-white font-medium text-[15px] rounded-xl cursor-pointer overflow-hidden"
-              style={{
-                padding: "10px 16px",
-                background:
-                  "linear-gradient(135deg, rgba(237,233,254,0.95) 0%, rgba(196,181,253,0.85) 100%)",
-                letterSpacing: "-0.01em",
-                border: "1px solid rgba(196,181,253,0.8)",
-                color: "#312e81",
-              }}
+              className="purple-gradient-button rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden"
             >
-              <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />
-              <span className="button-shine absolute inset-y-0 -left-1/3 w-1/3" />
+              <span className="absolute top-0 left-0 z-20 h-full w-full blur-[1px]" aria-hidden="true">
+                <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />
+              </span>
+              <span className="button-shimmer absolute -top-4 -left-12 h-[153px] w-[54px] opacity-40" aria-hidden="true" />
+              <span className="button-shine absolute inset-y-0 -left-1/3 w-1/3" aria-hidden="true" />
               <svg
                 width="16"
                 height="16"
@@ -239,8 +234,23 @@ export default function MountainHero() {
             rgba(255, 255, 255, 0.55) 50%,
             transparent 100%
           );
-          animation: shine-sweep 6s ease-in-out infinite;
+          animation: shimmer-sweep 10s ease-in-out infinite;
           opacity: 0.7;
+          pointer-events: none;
+        }
+        .purple-gradient-button {
+          background: linear-gradient(135deg, rgba(109, 40, 217, 0.95) 0%, rgba(139, 92, 246, 0.9) 100%);
+          border: 1px solid rgba(167, 139, 250, 0.6);
+          box-shadow: 0 10px 26px rgba(76, 29, 149, 0.35);
+        }
+        .button-shimmer {
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.35) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          animation: shimmer-sweep s ease-in-out infinite;
           pointer-events: none;
         }
         @keyframes hero-reveal {
@@ -259,8 +269,10 @@ export default function MountainHero() {
           100% { transform: translateX(320%); opacity: 0; }
         }
         @keyframes shimmer-sweep {
-          0% { left: -30%; }
-          60%, 100% { left: 120%; }
+          0% { left: -30%; opacity: 0; }
+          4% { opacity: 0.5; }
+          10% { left: 120%; opacity: 0; }
+          100% { left: 120%; opacity: 0; }
         }
         @keyframes float-cue {
           0%, 100% { transform: translateX(-50%) translateY(0); }
