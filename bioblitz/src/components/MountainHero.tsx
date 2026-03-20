@@ -6,7 +6,6 @@ import Link from "next/link";
 export default function MountainHero() {
   const starsRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Stars
   useEffect(() => {
     const canvas = starsRef.current;
     if (!canvas) return;
@@ -111,7 +110,7 @@ export default function MountainHero() {
             className="block hero-reveal"
             style={{ animationDelay: "0.2s" }}
           >
-            <em style={{ color: "#e8f1ff", fontStyle: "italic" }}>
+            <em style={{ color: "#f1f7ff", fontStyle: "italic" }}>
               beyond the books.
             </em>
           </span>
@@ -164,25 +163,28 @@ export default function MountainHero() {
           className="flex flex-col sm:flex-row gap-3 items-center justify-center hero-reveal"
           style={{ animationDelay: "0.65s" }}
         >
-          <Link href="/auth">
-            <button
-              className="purple-gradient-button rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden"
+          <Link
+            href="/auth"
+            className="purple-gradient-button hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
+          >
+            <span className="pointer-events-none absolute inset-0 z-30 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
+
+            <span className="pointer-events-none absolute top-0 left-0 z-20 h-full w-full blur-[1px]" aria-hidden="true">
+              <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />
+            </span>
+            <span className="pointer-events-none button-shimmer absolute -top-4 -left-12 h-[153px] w-[54px] opacity-40" aria-hidden="true" />
+            <span className="pointer-events-none button-shine absolute inset-y-0 -left-1/3 w-1/3" aria-hidden="true" />
+
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="relative z-10"
             >
-              <span className="absolute top-0 left-0 z-20 h-full w-full blur-[1px]" aria-hidden="true">
-                <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />
-              </span>
-              <span className="button-shimmer absolute -top-4 -left-12 h-[153px] w-[54px] opacity-40" aria-hidden="true" />
-              <span className="button-shine absolute inset-y-0 -left-1/3 w-1/3" aria-hidden="true" />
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M11 2L4 11h7l-2 7 9-10h-7l2-6z" />
-              </svg>
-              Start Competing
-            </button>
+          <path d="M11 2L4 11h7l-2 7 9-10h-7l2-6z" />
+          </svg>
+          <span className="relative z-10">Start Competing</span>
           </Link>
         </div>
       </div>

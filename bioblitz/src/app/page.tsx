@@ -75,8 +75,8 @@ export default async function mainPage({
       <main className="relative z-10 flex-grow flex flex-col w-full">
         <MountainHero />
 
-        <section id="demo" className="w-full pt-10 pb-20 px-6 relative -mt-[42vh] z-20">
-          <div className="max-w-6xl mx-auto relative z-10">
+        <section id="demo" className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20">
+          <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
             <div className="relative rounded-2xl border border-zinc-800 bg-black shadow-2xl overflow-hidden demo-pop"
               style={{ boxShadow: "0 0 0 1px rgba(61,184,112,0.06), 0 32px 80px rgba(0,0,0,0.5)" }}>
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
@@ -255,7 +255,6 @@ export default async function mainPage({
           </div>
         </section>
 
-        {/* ── FAQ ─────────────────────────────────── */}
         <section className="w-full py-16 px-6 border-t border-slate-900 bg-[#050505]">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-8">FAQ</h2>
