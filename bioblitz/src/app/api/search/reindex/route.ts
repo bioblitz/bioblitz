@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       refId: docSnap.id,
       title,
       subtitle,
-      href: `/contests/${docSnap.id}`,
+      href: `/home/${docSnap.id}`,
       keywords: tokenize([title, subtitle, creatorUsername]),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });

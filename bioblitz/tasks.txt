@@ -1,0 +1,14 @@
+implement the rest of the marketing page
+when admin is on pages let them do stuff like delete contests
+fix rating graphs
+move over any changes on lite to main branch
+when user clicks on get started, route to sign in page
+make rating system more robust so that new users that take 1 contest and do well don't get +1253 rating, marginal increase based on performance on each one.
+contest leaderboard should show incorrect/ correct questions for each user, total qs right, time taken
+add sitemap
+analytics
+implement user progress summary and feature updates in weekly emails
+fix review contest display <p>What&nbsp;macromolecule&nbsp;is&nbsp;the&nbsp;most&nbsp;efficent&nbsp;at&nbsp;storing&nbsp;energy&nbsp;long-term?</p>
+fix minutes on contests always showing at 1 minute
+rework challenge ui to not look vibecoded
+

@@ -1,17 +1,14 @@
-"use client";
-
-import { getAuth } from "firebase/auth";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import { getAuth } from "firebase/auth"
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import {
   Zap,
   House,
   Trophy,
   Flame,
-  Search,
   Plus,
   Hammer,
   ShieldUser,
@@ -22,6 +19,7 @@ import { app } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
+import SearchBar from "./SearchBar";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -33,12 +31,6 @@ export default function MainNavbar() {
   const [suppressRailHover, setSuppressRailHover] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<
-    Array<{ type: string; title: string; subtitle: string; href: string }>
-  >([]);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeLong, setRouteLong] = useState(false);
 
@@ -46,7 +38,6 @@ export default function MainNavbar() {
   const [streakActive, setStreakActive] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
 
   const roles = Array.isArray(user?.roles)
     ? user.roles.map((role: unknown) => String(role).toLowerCase())
@@ -60,45 +51,10 @@ export default function MainNavbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setDropdownOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(target)) {
-        setSearchOpen(false);
-      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
-
-  useEffect(() => {
-    const query = searchQuery.trim();
-    if (query.length < 2) {
-      setSearchResults([]);
-      setSearchOpen(false);
-      return;
-    }
-
-    setSearchLoading(true);
-    const handle = window.setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `/api/search?q=${encodeURIComponent(query)}`,
-        );
-        if (!response.ok) {
-          throw new Error("Search failed");
-        }
-        const data = await response.json();
-        const results = Array.isArray(data.results) ? data.results : [];
-        setSearchResults(results);
-        setSearchOpen(true);
-      } catch (error) {
-        setSearchResults([]);
-        setSearchOpen(true);
-      } finally {
-        setSearchLoading(false);
-      }
-    }, 250);
-
-    return () => window.clearTimeout(handle);
-  }, [searchQuery]);
 
   useEffect(() => {
     if (user?.uid) {
@@ -374,104 +330,8 @@ export default function MainNavbar() {
                 BioBlitz
               </span>
             </Link>
-            {/**
-            <div className="hidden md:flex items-center space-x-2">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                const isDaily = item.href === "/daily";
-
-                let activeClass = "";
-                let iconClass = "";
-
-                if (isActive) {
-                  if (isDaily) {
-                    activeClass =
-                      "bg-orange-600/20 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)] border border-orange-500/20";
-                    iconClass = "text-orange-400";
-                  } else {
-                    activeClass =
-                      "bg-violet-600/15 text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-violet-500/10";
-                    iconClass = "text-violet-400";
-                  }
-                } else {
-                  activeClass = "text-zinc-400 hover:text-white hover:bg-white/5";
-                  iconClass = "";
-                }
-              
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`flex items-center space-x-2 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${activeClass}`}
-                  >
-                    <item.icon size={18} className={iconClass} />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-            */}
-
-            <div className="hidden md:block relative ml-100" ref={searchRef}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => {
-                    if (searchResults.length > 0) setSearchOpen(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && searchResults[0]) {
-                      router.push(searchResults[0].href);
-                      setSearchOpen(false);
-                    }
-                  }}
-                  placeholder="Search"
-                  className="w-80 bg-zinc-900/70 border border-zinc-800 rounded-full pl-9 pr-9 py-2 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700"
-                />
-                {searchLoading && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
-                    ...
-                  </span>
-                )}
-              </div>
-
-              {searchOpen && (
-                <div className="absolute left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
-                  {searchResults.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-zinc-500">
-                      No results found.
-                    </div>
-                  ) : (
-                    <div className="max-h-96 overflow-y-auto">
-                      {searchResults.map((result, index) => (
-                        <Link
-                          key={`${result.type}-${index}`}
-                          href={result.href}
-                          onClick={() => setSearchOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                        >
-                          <span className="text-[10px] uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2 py-0.5">
-                            {result.type}
-                          </span>
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-zinc-100 truncate">
-                              {result.title}
-                            </span>
-                            {result.subtitle && (
-                              <span className="text-xs text-zinc-500 truncate">
-                                {result.subtitle}
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            
+            <SearchBar />
 
             <div className="flex items-center space-x-4">{renderUserNav()}</div>
           </div>

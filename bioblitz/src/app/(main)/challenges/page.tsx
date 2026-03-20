@@ -1,5 +1,4 @@
 "use client";
-// src/app/(main)/challenges/page.tsx
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -43,7 +42,6 @@ interface FriendElo {
   streak: number;
 }
 
-// Vivid per-person colors for the leaderboard
 const RANK_COLORS = [
   {
     bar: "#f59e0b",
@@ -103,7 +101,6 @@ const RANK_COLORS = [
   }, // red
 ];
 
-// ─── Friend ranking sidebar ───────────────────────────────────────────────────
 function FriendRanking({
   friends,
   currentUid,
@@ -117,7 +114,6 @@ function FriendRanking({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* My rank callout */}
       {myRank >= 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -172,14 +168,12 @@ function FriendRanking({
                         : "border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700"
                     }`}
                   >
-                    {/* Colored progress bar behind */}
                     <div
                       className="absolute left-0 top-0 bottom-0 opacity-10 transition-all duration-500"
                       style={{ width: `${barWidth}%`, backgroundColor: c.bar }}
                     />
 
                     <div className="relative flex items-center gap-2.5 px-3 py-2.5">
-                      {/* Rank */}
                       <div className="w-5 flex justify-center flex-shrink-0">
                         {i === 0 ? (
                           <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
@@ -194,7 +188,6 @@ function FriendRanking({
                         )}
                       </div>
 
-                      {/* Avatar with colored ring */}
                       <div className="relative flex-shrink-0">
                         {friend.photoURL ? (
                           <img
@@ -218,7 +211,6 @@ function FriendRanking({
                         )}
                       </div>
 
-                      {/* Name + streak */}
                       <div className="flex-1 min-w-0">
                         <p
                           className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? c.text : "text-zinc-200"}`}
@@ -233,7 +225,6 @@ function FriendRanking({
                         )}
                       </div>
 
-                      {/* Elo with colored dot */}
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <div
                           className="w-1.5 h-1.5 rounded-full"
@@ -257,7 +248,6 @@ function FriendRanking({
   );
 }
 
-// ─── Challenge card ───────────────────────────────────────────────────────────
 function ChallengeCard({
   challenge,
   currentUid,
@@ -316,7 +306,6 @@ function ChallengeCard({
                 : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
           }`}
         >
-          {/* Urgent shimmer effect */}
           {urgent && needsMyPlay && (
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -327,7 +316,6 @@ function ChallengeCard({
             />
           )}
 
-          {/* Left accent */}
           <div
             className={`absolute left-0 top-0 bottom-0 w-1 ${
               urgent && needsMyPlay
@@ -341,7 +329,6 @@ function ChallengeCard({
           />
 
           <div className="flex items-center gap-4 p-4 pl-5">
-            {/* Avatar */}
             <div className="relative flex-shrink-0">
               {opponent.photo ? (
                 <img
@@ -365,7 +352,6 @@ function ChallengeCard({
                   {opponent.name[0]?.toUpperCase()}
                 </div>
               )}
-              {/* Live dot */}
               {needsMyPlay && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
@@ -374,7 +360,6 @@ function ChallengeCard({
               )}
             </div>
 
-            {/* Content */}
             <div className="flex-1 min-w-0">
               <p
                 className={`text-sm font-bold truncate leading-tight transition-colors ${
@@ -425,7 +410,6 @@ function ChallengeCard({
               </div>
             </div>
 
-            {/* Score or arrow */}
             {isCompleted && myScore !== null && theirScore !== null ? (
               <div className="flex-shrink-0 text-right">
                 <div
@@ -450,7 +434,6 @@ function ChallengeCard({
             ) : null}
           </div>
 
-          {/* Urgent bottom glow line */}
           {urgent && needsMyPlay && (
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
           )}
@@ -460,7 +443,6 @@ function ChallengeCard({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
 export default function ChallengesPage() {
   const router = useRouter();
   const [uid, setUid] = useState<string | null>(null);
@@ -573,7 +555,6 @@ export default function ChallengesPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Dot grid */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.025]"
         style={{
@@ -583,7 +564,6 @@ export default function ChallengesPage() {
       />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-        {/* Centered header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -786,7 +766,6 @@ export default function ChallengesPage() {
             </AnimatePresence>
           </div>
 
-          {/* RIGHT: Friend ranking */}
           <motion.div
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
