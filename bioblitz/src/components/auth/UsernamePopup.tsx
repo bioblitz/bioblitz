@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { isUsernameUnique, updateUsername as updateUsernameInDb } from "@/lib/user";
+import { isUsernameUnique, updateUsername as updateUsernameInDb, updateMarketingPreference } from "@/lib/user";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowRight, ArrowLeft, Check, Dna, Trophy, Zap, User } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Dna, Trophy, Zap, User, Mail, Star } from "lucide-react";
 
 const INTRO_STEPS = [
   {
-    icon: <Dna className="w-10 h-10 text-violet-400" />,
     title: "Welcome to BioBlitz!",
     subtitle: "The competitive biology platform.",
     content: (
@@ -20,7 +19,6 @@ const INTRO_STEPS = [
     ),
   },
   {
-    icon: <Zap className="w-10 h-10 text-yellow-400" />,
     title: "How Blitzes Work",
     subtitle: "Race the clock, answer correctly.",
     content: (
@@ -33,27 +31,26 @@ const INTRO_STEPS = [
     ),
   },
   {
-    icon: <Trophy className="w-10 h-10 text-yellow-500" />,
     title: "Earn Your Ranking",
     subtitle: "Elo-based competitive ladder.",
     content: (
       <p className="text-zinc-400 text-sm leading-relaxed">
         Every ranked attempt adjusts your{" "}
         <span className="text-white font-medium">Elo</span> score based on
-        performance. Every day that you don't play a Blitz, your Elo <span className="text-white font-medium">drops by 10</span>. Track your progress on the Global Leaderboard and see how
+        performance. Track your progress on the Global Leaderboard and see how
         you stack up against other competitors.
       </p>
     ),
   },
 ];
-// ─────────────────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = INTRO_STEPS.length + 1; // +1 for username step
+const TOTAL_STEPS = INTRO_STEPS.length + 1;
 
 export function UsernamePopup() {
   const { user, updateUsername } = useAuth();
   const [step, setStep] = useState(0);
   const [username, setUsernameState] = useState("");
+  const [wantsMarketing, setWantsMarketing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -98,7 +95,12 @@ export function UsernamePopup() {
         setLoading(false);
         return;
       }
-      await updateUsernameInDb(user.uid, trimmed);
+      
+      await Promise.all([
+        updateUsernameInDb(user.uid, trimmed),
+        updateMarketingPreference(user.uid, wantsMarketing)
+      ]);
+      
       updateUsername(trimmed);
       setDone(true);
     } catch {
@@ -117,7 +119,6 @@ export function UsernamePopup() {
       <div className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
            style={{ maxHeight: "88vh" }}>
 
-        {/* Top accent bar */}
         <div className="h-1 w-full bg-zinc-800">
           <div
             className="h-full bg-violet-500 transition-all duration-500 ease-out"
@@ -125,14 +126,10 @@ export function UsernamePopup() {
           />
         </div>
 
-        {/* Scrollable body */}
         <div className="overflow-y-auto flex-1 px-8 py-10">
           {!isUsernameStep ? (
-            // ── Intro steps ────────────────────────────────────────────────
             <div className="flex flex-col items-center text-center gap-5">
-              <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800">
-                {introStep.icon}
-              </div>
+
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1">
                   {introStep.title}
@@ -144,11 +141,7 @@ export function UsernamePopup() {
               </div>
             </div>
           ) : (
-            // ── Username step ───────────────────────────────────────────────
             <div className="flex flex-col items-center text-center gap-5">
-              <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800">
-                <User className="w-10 h-10 text-violet-400" />
-              </div>
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1">
                   Pick your username
@@ -175,16 +168,42 @@ export function UsernamePopup() {
                   <p className="text-red-400 text-xs font-medium">{error}</p>
                 )}
                 <p className="text-zinc-600 text-xs">
-                  3–24 characters · letters, numbers, underscores only
+                  3-24 characters · letters, numbers, underscores only
                 </p>
+
+                <div 
+                  onClick={() => setWantsMarketing(!wantsMarketing)}
+                  className={`mt-4 p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                    wantsMarketing 
+                    ? "bg-violet-500/10 border-violet-500/50" 
+                    : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                  }`}
+                >
+                  <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                    wantsMarketing 
+                    ? "bg-violet-600 border-violet-500" 
+                    : "bg-zinc-800 border-zinc-700"
+                  }`}>
+                    {wantsMarketing && <Check className="w-4 h-4 text-white" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-zinc-400"}`}>
+                          Stay in the loop!
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 leading-relaxed">
+                        Can we send you occassional emails about new competitions, features, or updates?
+                        No spam and you may unsubcribe anytime.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-8 pb-8 pt-4 flex items-center justify-between gap-4 border-t border-zinc-800/50">
-          {/* Step dots */}
           <div className="flex items-center gap-1.5">
             {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
               <div
@@ -200,7 +219,6 @@ export function UsernamePopup() {
             ))}
           </div>
 
-          {/* Navigation buttons */}
           <div className="flex items-center gap-2">
             {step > 0 && (
               <button

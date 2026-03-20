@@ -145,7 +145,7 @@ export default function TermsOfServicePage() {
             Privacy
           </Link>
           <Link
-            href="/terms-of-service"
+            href="/terms-and-conditions"
             className="hover:text-violet-400 transition-colors"
           >
             Terms and Conditions

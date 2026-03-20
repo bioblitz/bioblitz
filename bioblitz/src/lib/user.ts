@@ -35,6 +35,8 @@ export interface UserProfile {
   bannerURL?: string;
   channelName?: string;
   subscriberCount?: number;
+  marketingConsent?: boolean,
+  marketingConsentAskedAt?: Timestamp | FieldValue;
 }
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
@@ -56,6 +58,17 @@ export async function updateUsername(
   await updateDoc(userRef, {
     username: sanitized.toLowerCase(),
     nameChangedAt: serverTimestamp(),
+  });
+}
+
+export async function updateMarketingPreference(
+  uid: string,
+  consent: boolean,
+): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await updateDoc(userRef, {
+    marketingConsent: consent,
+    marketingConsentAskedAt: serverTimestamp(),
   });
 }
 

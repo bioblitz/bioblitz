@@ -7,7 +7,7 @@ import { app } from "@/lib/firebase";
 import { createUserProfile } from "@/lib/user";
 import GoogleButton from "@/components/ui/GoogleButton";
 import { useAuth } from "@/context/AuthContext";
-import { Zap, Loader2, Trophy, Timer, BookOpen } from "lucide-react"; // Updated icons
+import { Zap, Loader2, Trophy, Timer, BookOpen } from "lucide-react";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false);
@@ -168,7 +168,7 @@ export default function AuthenticationPage() {
                 <p className="text-xs text-slate-500 leading-relaxed px-4">
                   By continuing, you agree to our{" "}
                   <a
-                    href="/terms-of-service"
+                    href="/terms-and-conditions"
                     className="underline hover:text-indigo-400 transition-colors"
                   >
                     Terms of Service

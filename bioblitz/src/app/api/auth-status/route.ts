@@ -16,11 +16,10 @@ export async function GET() {
           displayName: decodedIdToken.name || decodedIdToken.email?.split('@')[0] || 'User',
           email: decodedIdToken.email || '',
           photoURL: decodedIdToken.picture || '',
+          marketingConsent: false,
+          marketingConsentAskedAt: null
         });
       } else {
-        // Refresh photoURL if missing or still a Google URL (which can go stale when the
-        // user changes their Google profile picture). Firebase Storage URLs won't match
-        // this condition, so custom-uploaded photos are never overwritten.
         const storedIsGoogleUrl = userProfile.photoURL?.includes('googleusercontent.com');
         if (decodedIdToken.picture && (!userProfile.photoURL || storedIsGoogleUrl)) {
           try {

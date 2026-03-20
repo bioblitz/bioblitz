@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn });
 
     const response = NextResponse.json({ success: true }, { status: 200 });
