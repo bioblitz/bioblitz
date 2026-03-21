@@ -15,7 +15,7 @@ export default function MarketingEmails({ onAccept , onDecline}: { onAccept: () 
             <div className="flex flex-col gap-3">
                 <button
                     onClick={onAccept}
-                    className="purple-gradient-button w-full rounded-xl py-3 text-white font-semibold text-sm"
+                    className="w-full rounded-xl py-3 text-white font-semibold text-sm"
                 >
                     Yes, keep me updated
                 </button>
