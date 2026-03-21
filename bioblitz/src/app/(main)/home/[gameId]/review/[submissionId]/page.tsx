@@ -7,6 +7,19 @@ import { firestore } from "@/lib/firebase";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { DM_Sans, JetBrains_Mono } from "next/font/google";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const mono = jetbrainsMono.className;
 
 // --- Types ---
 interface SubmissionData {
@@ -40,8 +53,11 @@ export default function ReviewPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch the specific submission
-        const subRef = doc(firestore, "gameSubmissions", submissionId as string);
+        const subRef = doc(
+          firestore,
+          "gameSubmissions",
+          submissionId as string,
+        );
         const subSnap = await getDoc(subRef);
 
         if (!subSnap.exists()) {
@@ -52,11 +68,10 @@ export default function ReviewPage() {
         const subData = subSnap.data() as SubmissionData;
         setSubmission(subData);
 
-        // 2. Fetch the questions (text content) via Cloud Function
         const functions = getFunctions();
         const getPublicQuestions = httpsCallable(
           functions,
-          "getPublicQuestions"
+          "getPublicQuestions",
         );
         const result = await getPublicQuestions({ gameId: gameId });
         setQuestions((result.data as { questions: Question[] }).questions);
@@ -72,7 +87,6 @@ export default function ReviewPage() {
     }
   }, [gameId, submissionId, router]);
 
-  // Helper to match the GameRoom format exactly
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -83,7 +97,9 @@ export default function ReviewPage() {
 
   if (loading || !submission) {
     return (
-      <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
+      <div
+        className={`${dmSans.className} flex items-center justify-center h-screen bg-black text-white`}
+      >
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
           <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
@@ -94,58 +110,90 @@ export default function ReviewPage() {
     );
   }
 
+  const accuracyPct =
+    submission.totalQuestions > 0
+      ? Math.round((submission.correctCount / submission.totalQuestions) * 100)
+      : 0;
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans pt-24 pb-20 select-text">
-      <div className="flex-1 flex justify-center py-8 px-4">
+    <div
+      className={`${dmSans.className} min-h-screen bg-black text-white flex flex-col pt-24 pb-20 select-text`}
+    >
+      {/* Dot grid */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
+      <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
-          
           {/* Header */}
           <div className="mb-8">
             <Link
               href={`/home/${gameId}`}
-              className="inline-flex items-center text-zinc-400 hover:text-white mb-4 transition-colors font-medium"
+              className="inline-flex items-center text-zinc-500 hover:text-white mb-4 transition-colors font-medium text-[13px]"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blitz Info
             </Link>
             <div className="flex items-center gap-4">
-              <h1 className="text-4xl font-bold text-white tracking-tight">
+              <h1
+                className="text-[32px] font-[900] text-white"
+                style={{ letterSpacing: "-0.02em" }}
+              >
                 Attempt Review
               </h1>
             </div>
-            <div className="h-1 w-20 bg-violet-600 rounded-full mt-4"></div>
+            <div className="h-[3px] w-20 bg-violet-600 rounded-full mt-4"></div>
           </div>
 
-          {/* Score Summary - Matches "Result" tab exactly */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-              <h2 className="text-zinc-400 font-medium mb-1">Accuracy</h2>
-              <p className="text-3xl font-bold text-white">
-                <span className="text-violet-500">
+          {/* Score Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+            <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
+              <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                Accuracy
+              </h2>
+              <p className="text-[28px] font-[900] text-white">
+                <span className="text-violet-400">
                   {submission.correctCount}
                 </span>
-                <span className="text-zinc-600 text-xl">
+                <span className={`${mono} text-zinc-600 text-[18px]`}>
                   {" "}
                   / {submission.totalQuestions}
                 </span>
               </p>
+              <p
+                className={`${mono} text-[11px] mt-1 ${accuracyPct >= 65 ? "text-emerald-400" : accuracyPct >= 40 ? "text-amber-400" : "text-red-400"}`}
+              >
+                {accuracyPct}%
+              </p>
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-              <h2 className="text-zinc-400 font-medium mb-1">Time Played</h2>
-              <p className="text-3xl font-bold text-white">
+            <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
+              <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                Time Played
+              </h2>
+              <p className={`${mono} text-[24px] font-[800] text-white`}>
                 {formatTime(submission.timeTaken)}
               </p>
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl text-center">
-              <h2 className="text-zinc-400 font-medium mb-1">Score</h2>
-              <p className="text-3xl font-bold text-violet-500">
+            <div className="relative bg-[rgba(9,9,11,0.8)] border border-violet-500/30 p-6 rounded-2xl text-center overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-violet-600/[0.08] to-transparent pointer-events-none" />
+              <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">
+                Score
+              </h2>
+              <p
+                className={`${mono} relative text-[32px] font-[800] text-violet-400`}
+              >
                 {submission.score}
               </p>
             </div>
           </div>
 
-          {/* Question List - Matches "Result" tab exactly */}
-          <div className="space-y-8">
+          {/* Question List */}
+          <div className="space-y-6">
             {questions.map((question, idx) => {
               const choices = ["a", "b", "c", "d", "e"]
                 .filter((key) => question[key as keyof Question])
@@ -153,9 +201,8 @@ export default function ReviewPage() {
                   key,
                   text: question[key as keyof Question] as string,
                 }));
-              
+
               const userAnswer = submission.userAnswers[idx];
-              // Use safe navigation in case correctAnswers is missing for legacy data
               const correctAnswer = submission.correctAnswers
                 ? submission.correctAnswers[idx]
                 : "";
@@ -163,15 +210,18 @@ export default function ReviewPage() {
               return (
                 <div
                   key={idx}
-                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-md"
+                  className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="bg-zinc-800 text-zinc-400 text-sm font-bold px-3 py-1 rounded-full">
+                    <span
+                      className={`${mono} bg-zinc-800 text-zinc-400 text-[11px] font-[800] px-3 py-1 rounded-lg`}
+                      style={{ letterSpacing: "0.06em" }}
+                    >
                       Question {idx + 1}
                     </span>
                   </div>
 
-                  <p className="mb-6 text-xl text-zinc-100">
+                  <p className="mb-6 text-[18px] text-zinc-100 leading-relaxed">
                     {question.content}
                   </p>
 
@@ -179,42 +229,52 @@ export default function ReviewPage() {
                     <img
                       src={question.imgURL}
                       alt={`Question ${idx + 1}`}
-                      className="mb-6 rounded-lg max-h-[300px] w-auto border border-zinc-700"
+                      className="mb-6 rounded-xl max-h-[300px] w-auto border border-zinc-800"
                     />
                   )}
 
-                  <div className="flex flex-col space-y-3">
+                  <div className="flex flex-col space-y-2.5">
                     {choices.map(({ key, text }) => {
                       const isUserAnswer = userAnswer === key;
                       const isCorrect = correctAnswer === key;
 
                       let bgClass =
-                        "bg-zinc-800/50 border-zinc-700 text-zinc-400";
+                        "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
 
                       if (isCorrect) {
                         bgClass =
-                          "bg-emerald-500/10 border-emerald-500 text-emerald-400";
+                          "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
                       } else if (isUserAnswer) {
                         bgClass =
-                          "bg-red-500/10 border-red-500 text-red-400";
+                          "bg-red-500/10 border-red-500/50 text-red-300";
                       }
 
                       return (
                         <div
                           key={key}
-                          className={`flex items-center px-5 py-4 rounded-xl border-2 ${bgClass}`}
+                          className={`flex items-center px-5 py-4 rounded-xl border transition-all ${bgClass}`}
                         >
-                          <span className="font-bold mr-4 uppercase w-6">
+                          <span
+                            className={`${mono} font-[800] mr-4 uppercase w-6 text-[12px]`}
+                          >
                             {key}
                           </span>
-                          <span className="font-medium">{text}</span>
+                          <span className="font-medium text-[15px]">
+                            {text}
+                          </span>
                           {isCorrect && (
-                            <span className="ml-auto text-emerald-500 font-bold text-sm">
+                            <span
+                              className={`${mono} ml-auto text-emerald-400 font-[800] text-[11px] uppercase`}
+                              style={{ letterSpacing: "0.06em" }}
+                            >
                               CORRECT
                             </span>
                           )}
                           {isUserAnswer && !isCorrect && (
-                            <span className="ml-auto text-red-500 font-bold text-sm">
+                            <span
+                              className={`${mono} ml-auto text-red-400 font-[800] text-[11px] uppercase`}
+                              style={{ letterSpacing: "0.06em" }}
+                            >
                               YOUR ANSWER
                             </span>
                           )}
