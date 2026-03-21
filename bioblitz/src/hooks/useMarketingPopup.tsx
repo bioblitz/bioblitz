@@ -5,16 +5,16 @@ import { UserProfile } from "@/lib/user";
 
 
 interface useMarketingPopup{
-    user: UserProfile;
+    user: UserProfile | null;
 }
 export function useMarketingPopup({user} : useMarketingPopup) {
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
     
     useEffect(() => {
-        if(!user) return;
+        if(!user?.uid) return;
         async function check(){
-            const ref = doc(db, "users", user.uid)
+            const ref = doc(db, "users", user?.uid)
             const snap = await getDoc(ref);
             const data = snap.data();
 
@@ -41,7 +41,7 @@ export function useMarketingPopup({user} : useMarketingPopup) {
     }
     const handleDecline = async () => {
         await setDoc(doc(db, "users", user.uid), {
-            marektingConsent: false,
+            marketingConsent: false,
             marketingConsentAskedAt: serverTimestamp()
         }, {merge: true}
         );

@@ -165,7 +165,7 @@ export default function MountainHero() {
         >
           <Link
             href="/auth"
-            className="purple-gradient-button hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
+            className="bg-white hover:shadow-[0 0 30px rgba(245, 224, 36, 0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
           >
             <span className="pointer-events-none absolute inset-0 z-30 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
 
@@ -179,12 +179,12 @@ export default function MountainHero() {
               width="16"
               height="16"
               viewBox="0 0 20 20"
-              fill="currentColor"
+              fill="black"
               className="relative z-10"
             >
           <path d="M11 2L4 11h7l-2 7 9-10h-7l2-6z" />
           </svg>
-          <span className="relative z-10">Start Competing</span>
+          <span className="relative text-black z-10">Start Competing</span>
           </Link>
         </div>
       </div>
@@ -239,11 +239,6 @@ export default function MountainHero() {
           animation: shimmer-sweep 10s ease-in-out infinite;
           opacity: 0.7;
           pointer-events: none;
-        }
-        .purple-gradient-button {
-          background: linear-gradient(135deg, rgba(109, 40, 217, 0.95) 0%, rgba(139, 92, 246, 0.9) 100%);
-          border: 1px solid rgba(167, 139, 250, 0.6);
-          box-shadow: 0 10px 26px rgba(76, 29, 149, 0.35);
         }
         .button-shimmer {
           background: linear-gradient(

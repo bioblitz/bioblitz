@@ -52,10 +52,10 @@ const RANK_COLORS = [
   }, // gold
   {
     bar: "#a855f7",
-    text: "text-purple-400",
-    glow: "shadow-purple-500/40",
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/30",
+    text: "text-black-400",
+    glow: "shadow-black-500/40",
+    bg: "bg-black-500/10",
+    border: "border-black-500/30",
   }, // purple
   {
     bar: "#ec4899",
@@ -319,7 +319,7 @@ function ChallengeCard({
           <div
             className={`absolute left-0 top-0 bottom-0 w-1 ${
               urgent && needsMyPlay
-                ? "bg-gradient-to-b from-violet-400 to-purple-600"
+                ? "bg-black"
                 : iWon
                   ? "bg-emerald-500"
                   : iLost
