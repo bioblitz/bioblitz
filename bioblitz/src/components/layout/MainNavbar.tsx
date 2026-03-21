@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import { getAuth } from "firebase/auth"
+import { getAuth } from "firebase/auth";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import {
   Zap,
@@ -20,6 +20,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
+import { BarChart2 } from "lucide-react";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -130,9 +131,17 @@ export default function MainNavbar() {
   const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
-    { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
+    {
+      name: "Leaderboard",
+      href: "/leaderboard",
+      icon: Trophy,
+    },
     { name: "Compete", href: "/challenges", icon: Swords },
-
+    {
+      name: "Progress",
+      href: "/progress",
+      icon: BarChart2,
+    },
     { name: "Create", href: createHref, icon: Plus },
   ];
 
@@ -330,7 +339,7 @@ export default function MainNavbar() {
                 BioBlitz
               </span>
             </Link>
-            
+
             <SearchBar />
 
             <div className="flex items-center space-x-4">{renderUserNav()}</div>

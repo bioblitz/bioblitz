@@ -1,10 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { isUsernameUnique, updateUsername as updateUsernameInDb, updateMarketingPreference } from "@/lib/user";
+import {
+  isUsernameUnique,
+  updateUsername as updateUsernameInDb,
+  updateMarketingPreference,
+} from "@/lib/user";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowRight, ArrowLeft, Check, Dna, Trophy, Zap, User, Mail, Star } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Dna,
+  Trophy,
+  Zap,
+  User,
+  Mail,
+  Star,
+} from "lucide-react";
 
 const INTRO_STEPS = [
   {
@@ -95,12 +109,12 @@ export function UsernamePopup() {
         setLoading(false);
         return;
       }
-      
+
       await Promise.all([
         updateUsernameInDb(user.uid, trimmed),
-        updateMarketingPreference(user.uid, wantsMarketing)
+        updateMarketingPreference(user.uid, wantsMarketing),
       ]);
-      
+
       updateUsername(trimmed);
       setDone(true);
     } catch {
@@ -116,9 +130,10 @@ export function UsernamePopup() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4">
-      <div className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
-           style={{ maxHeight: "88vh" }}>
-
+      <div
+        className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        style={{ maxHeight: "88vh" }}
+      >
         <div className="h-1 w-full bg-zinc-800">
           <div
             className="h-full bg-violet-500 transition-all duration-500 ease-out"
@@ -129,7 +144,6 @@ export function UsernamePopup() {
         <div className="overflow-y-auto flex-1 px-8 py-10">
           {!isUsernameStep ? (
             <div className="flex flex-col items-center text-center gap-5">
-
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1">
                   {introStep.title}
@@ -171,30 +185,35 @@ export function UsernamePopup() {
                   3-24 characters · letters, numbers, underscores only
                 </p>
 
-                <div 
+                <div
                   onClick={() => setWantsMarketing(!wantsMarketing)}
                   className={`mt-4 p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
-                    wantsMarketing 
-                    ? "bg-violet-500/10 border-violet-500/50" 
-                    : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                    wantsMarketing
+                      ? "bg-violet-500/10 border-violet-500/50"
+                      : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
-                  <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
-                    wantsMarketing 
-                    ? "bg-violet-600 border-violet-500" 
-                    : "bg-zinc-800 border-zinc-700"
-                  }`}>
+                  <div
+                    className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                      wantsMarketing
+                        ? "bg-violet-600 border-violet-500"
+                        : "bg-zinc-800 border-zinc-700"
+                    }`}
+                  >
                     {wantsMarketing && <Check className="w-4 h-4 text-white" />}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-zinc-400"}`}>
-                          Stay in the loop!
+                      <span
+                        className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-zinc-400"}`}
+                      >
+                        Stay in the loop!
                       </span>
                     </div>
                     <p className="text-xs text-zinc-500 leading-relaxed">
-                        Can we send you occassional emails about new competitions, features, or updates?
-                        No spam and you may unsubcribe anytime.
+                      Can we send you occassional emails about new competitions,
+                      features, or updates? No spam and you may unsubcribe
+                      anytime.
                     </p>
                   </div>
                 </div>
@@ -212,8 +231,8 @@ export function UsernamePopup() {
                   i === step
                     ? "w-4 h-2 bg-violet-500"
                     : i < step
-                    ? "w-2 h-2 bg-zinc-600"
-                    : "w-2 h-2 bg-zinc-800"
+                      ? "w-2 h-2 bg-zinc-600"
+                      : "w-2 h-2 bg-zinc-800"
                 }`}
               />
             ))}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -31,6 +32,18 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const mono = jetbrainsMono.className;
+
 const db = getFirestore(app);
 
 interface FriendElo {
@@ -46,59 +59,51 @@ const RANK_COLORS = [
   {
     bar: "#f59e0b",
     text: "text-amber-400",
-    glow: "shadow-amber-500/40",
     bg: "bg-amber-500/10",
     border: "border-amber-500/30",
-  }, // gold
+  },
   {
     bar: "#a855f7",
     text: "text-purple-400",
-    glow: "shadow-purple-500/40",
     bg: "bg-purple-500/10",
     border: "border-purple-500/30",
-  }, // purple
+  },
   {
     bar: "#ec4899",
     text: "text-pink-400",
-    glow: "shadow-pink-500/40",
     bg: "bg-pink-500/10",
     border: "border-pink-500/30",
-  }, // pink
+  },
   {
     bar: "#22c55e",
     text: "text-green-400",
-    glow: "shadow-green-500/40",
     bg: "bg-green-500/10",
     border: "border-green-500/30",
-  }, // green
+  },
   {
     bar: "#3b82f6",
     text: "text-blue-400",
-    glow: "shadow-blue-500/40",
     bg: "bg-blue-500/10",
     border: "border-blue-500/30",
-  }, // blue
+  },
   {
     bar: "#f97316",
     text: "text-orange-400",
-    glow: "shadow-orange-500/40",
     bg: "bg-orange-500/10",
     border: "border-orange-500/30",
-  }, // orange
+  },
   {
     bar: "#06b6d4",
     text: "text-cyan-400",
-    glow: "shadow-cyan-500/40",
     bg: "bg-cyan-500/10",
     border: "border-cyan-500/30",
-  }, // cyan
+  },
   {
     bar: "#ef4444",
     text: "text-red-400",
-    glow: "shadow-red-500/40",
     bg: "bg-red-500/10",
     border: "border-red-500/30",
-  }, // red
+  },
 ];
 
 function FriendRanking({
@@ -113,38 +118,45 @@ function FriendRanking({
   const myRank = sorted.findIndex((f) => f.uid === currentUid);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {myRank >= 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-xl border border-violet-500/30 bg-violet-500/5 px-4 py-3 flex items-center justify-between"
+          className="rounded-xl border border-violet-500/30 bg-violet-500/[0.05] px-4 py-3 flex items-center justify-between mx-3 mt-3"
         >
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400/70 mb-0.5">
+            <p
+              className={`${mono} text-[10px] font-[800] uppercase text-violet-400/60`}
+              style={{ letterSpacing: "0.12em" }}
+            >
               Your rank
             </p>
-            <p className="text-3xl font-black text-white tabular-nums leading-none">
+            <p
+              className={`${mono} text-[32px] font-[800] text-white tabular-nums leading-none`}
+            >
               #{myRank + 1}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xl font-black font-extrabold text-violet-400 tabular-nums">
+            <p
+              className={`${mono} text-[20px] font-[800] text-violet-400 tabular-nums`}
+            >
               {sorted[myRank]?.bElo}
             </p>
-            <p className="text-[10px] text-zinc-600">Elo</p>
+            <p className={`${mono} text-[10px] text-zinc-600`}>Elo</p>
           </div>
         </motion.div>
       )}
 
       {sorted.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center">
+        <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center mx-3 mb-3">
           <p className="text-zinc-600 text-xs leading-relaxed">
             Add friends from your profile to see rankings.
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="px-3 pb-3 pt-1 space-y-1">
           {sorted.map((friend, i) => {
             const isMe = friend.uid === currentUid;
             const c = RANK_COLORS[i % RANK_COLORS.length];
@@ -162,14 +174,12 @@ function FriendRanking({
               >
                 <Link href={`/profile/${friend.username}`}>
                   <div
-                    className={`relative group rounded-xl border transition-all overflow-hidden cursor-pointer ${
-                      isMe
-                        ? `${c.border} ${c.bg}`
-                        : "border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700"
+                    className={`relative group rounded-xl overflow-hidden cursor-pointer transition-all ${
+                      isMe ? "bg-violet-500/[0.04]" : "hover:bg-zinc-900/60"
                     }`}
                   >
                     <div
-                      className="absolute left-0 top-0 bottom-0 opacity-10 transition-all duration-500"
+                      className="absolute left-0 top-0 bottom-0 opacity-[0.07] transition-all duration-500 rounded-xl"
                       style={{ width: `${barWidth}%`, backgroundColor: c.bar }}
                     />
 
@@ -182,7 +192,9 @@ function FriendRanking({
                         ) : i === 2 ? (
                           <Medal className="w-3.5 h-3.5 text-orange-500" />
                         ) : (
-                          <span className="text-zinc-600 font-mono text-[11px] font-bold">
+                          <span
+                            className={`${mono} text-zinc-600 text-[11px] font-bold`}
+                          >
                             {i + 1}
                           </span>
                         )}
@@ -199,7 +211,7 @@ function FriendRanking({
                           />
                         ) : (
                           <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
+                            className={`${mono} w-8 h-8 rounded-full flex items-center justify-center text-xs font-[800]`}
                             style={{
                               backgroundColor: `${c.bar}20`,
                               color: c.bar,
@@ -213,7 +225,7 @@ function FriendRanking({
 
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? c.text : "text-zinc-200"}`}
+                          className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? "text-violet-400" : "text-zinc-200"}`}
                         >
                           {isMe ? "You" : friend.displayName}
                         </p>
@@ -227,11 +239,12 @@ function FriendRanking({
 
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <div
-                          className="w-1.5 h-1.5 rounded-full"
+                          className="w-[6px] h-[6px] rounded-full"
                           style={{ backgroundColor: c.bar }}
                         />
                         <span
-                          className={`text-sm font-black tabular-nums ${c.text}`}
+                          className={`${mono} text-[13px] font-[800] tabular-nums`}
+                          style={{ color: c.bar }}
                         >
                           {friend.bElo}
                         </span>
@@ -300,15 +313,16 @@ function ChallengeCard({
         <div
           className={`group relative rounded-2xl border transition-all cursor-pointer overflow-hidden ${
             urgent && needsMyPlay
-              ? "border-violet-400/60 bg-gradient-to-r from-violet-950/60 to-zinc-900 hover:border-violet-400"
+              ? "border-violet-500/50 bg-gradient-to-r from-violet-950/40 to-[rgba(9,9,11,0.8)] hover:border-violet-400/70"
               : isCompleted && iWon
-                ? "border-emerald-500/25 bg-zinc-900/60 hover:border-emerald-500/40"
-                : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
+                ? "border-emerald-500/25 bg-[rgba(9,9,11,0.7)] hover:border-emerald-500/40"
+                : "border-zinc-800 bg-[rgba(9,9,11,0.6)] hover:border-zinc-700"
           }`}
         >
+          {/* Urgent glow */}
           {urgent && needsMyPlay && (
             <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
               style={{
                 background:
                   "linear-gradient(105deg, transparent 40%, rgba(139,92,246,0.08) 50%, transparent 60%)",
@@ -316,19 +330,19 @@ function ChallengeCard({
             />
           )}
 
+          {/* Side strip */}
           <div
-            className={`absolute left-0 top-0 bottom-0 w-1 ${
+            className={`absolute left-0 top-0 bottom-0 w-[3px] ${
               urgent && needsMyPlay
                 ? "bg-gradient-to-b from-violet-400 to-purple-600"
                 : iWon
                   ? "bg-emerald-500"
-                  : iLost
-                    ? "bg-zinc-700"
-                    : "bg-zinc-700"
+                  : "bg-zinc-700"
             }`}
           />
 
-          <div className="flex items-center gap-4 p-4 pl-5">
+          <div className="flex items-center gap-3.5 p-4 pl-5">
+            {/* Avatar */}
             <div className="relative flex-shrink-0">
               {opponent.photo ? (
                 <img
@@ -336,17 +350,17 @@ function ChallengeCard({
                   alt={opponent.name}
                   className={`w-11 h-11 rounded-full object-cover transition-all ${
                     urgent && needsMyPlay
-                      ? "ring-2 ring-violet-500/60 ring-offset-1 ring-offset-zinc-900"
+                      ? "ring-2 ring-violet-500/50 ring-offset-1 ring-offset-[#09090b] shadow-[0_0_12px_rgba(139,92,246,0.2)]"
                       : "border border-zinc-700"
                   }`}
                   referrerPolicy="no-referrer"
                 />
               ) : (
                 <div
-                  className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-black transition-all ${
+                  className={`${mono} w-11 h-11 rounded-full flex items-center justify-center text-sm font-[800] transition-all ${
                     urgent && needsMyPlay
-                      ? "bg-violet-900/50 text-violet-300 ring-2 ring-violet-500/60 ring-offset-1 ring-offset-zinc-900"
-                      : "bg-zinc-800 text-zinc-300"
+                      ? "bg-violet-900/40 text-violet-300 ring-2 ring-violet-500/50 ring-offset-1 ring-offset-[#09090b]"
+                      : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                   }`}
                 >
                   {opponent.name[0]?.toUpperCase()}
@@ -355,22 +369,23 @@ function ChallengeCard({
               {needsMyPlay && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-violet-500 border-2 border-zinc-900" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-violet-500 border-2 border-[#09090b]" />
                 </span>
               )}
             </div>
 
+            {/* Info */}
             <div className="flex-1 min-w-0">
               <p
-                className={`text-sm font-bold truncate leading-tight transition-colors ${
-                  urgent && needsMyPlay ? "text-white" : "text-zinc-100"
+                className={`text-[14px] font-bold truncate leading-tight transition-colors ${
+                  urgent && needsMyPlay ? "text-white" : "text-zinc-200"
                 }`}
               >
                 {challenge.blitzTitle}
               </p>
-              <p className="text-zinc-500 text-xs mt-0.5">
+              <p className="text-zinc-500 text-[12px] mt-0.5">
                 vs{" "}
-                <span className="text-zinc-400 font-medium">
+                <span className="text-zinc-400 font-semibold">
                   @{opponent.name}
                 </span>
               </p>
@@ -378,11 +393,12 @@ function ChallengeCard({
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 {needsMyPlay && (
                   <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-[800] uppercase px-2 py-1 rounded-lg ${
                       isExpiringSoon
-                        ? "text-red-300 bg-red-500/15 border border-red-500/30"
+                        ? "text-red-300 bg-red-500/12 border border-red-500/30"
                         : "text-violet-200 bg-violet-500/15 border border-violet-500/30"
                     }`}
+                    style={{ letterSpacing: "0.06em" }}
                   >
                     <Zap className="w-2.5 h-2.5" />
                     {!isChallenger && theirScore !== null
@@ -393,31 +409,43 @@ function ChallengeCard({
                   </span>
                 )}
                 {isPending && myScore !== null && theirScore === null && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500 bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 rounded-lg">
+                  <span
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-zinc-500 bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 rounded-lg`}
+                    style={{ letterSpacing: "0.06em" }}
+                  >
                     <Clock className="w-2.5 h-2.5" /> {hoursLeft}h left
                   </span>
                 )}
                 {iWon && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-lg">
+                  <span
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-[800] uppercase text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-lg`}
+                    style={{ letterSpacing: "0.06em" }}
+                  >
                     <CheckCircle2 className="w-2.5 h-2.5" /> Won
                   </span>
                 )}
                 {iLost && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-zinc-600 bg-zinc-800/80 border border-zinc-700/50 px-2 py-0.5 rounded-lg">
+                  <span
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-zinc-600 bg-zinc-800/80 border border-zinc-700/50 px-2 py-0.5 rounded-lg`}
+                    style={{ letterSpacing: "0.06em" }}
+                  >
                     <XCircle className="w-2.5 h-2.5" /> Lost
                   </span>
                 )}
               </div>
             </div>
 
+            {/* Score or arrow */}
             {isCompleted && myScore !== null && theirScore !== null ? (
               <div className="flex-shrink-0 text-right">
                 <div
-                  className={`text-2xl font-black tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-zinc-600"}`}
+                  className={`${mono} text-[24px] font-[800] tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-zinc-600"}`}
                 >
                   {myScore}
                 </div>
-                <div className="text-[11px] text-zinc-600 tabular-nums mt-0.5">
+                <div
+                  className={`${mono} text-[11px] text-zinc-600 tabular-nums mt-0.5`}
+                >
                   vs {theirScore}
                 </div>
               </div>
@@ -425,7 +453,7 @@ function ChallengeCard({
               <div
                 className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                   urgent
-                    ? "bg-violet-600 group-hover:bg-violet-500 shadow-lg shadow-violet-900/50"
+                    ? "bg-violet-600 group-hover:bg-violet-500 shadow-lg shadow-violet-900/40"
                     : "bg-zinc-800 group-hover:bg-zinc-700"
                 }`}
               >
@@ -434,8 +462,9 @@ function ChallengeCard({
             ) : null}
           </div>
 
+          {/* Bottom glow line for urgent */}
           {urgent && needsMyPlay && (
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
           )}
         </div>
       </Link>
@@ -547,43 +576,53 @@ export default function ChallengesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div
+        className={`${dmSans.className} min-h-screen bg-black flex items-center justify-center`}
+      >
         <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={`${dmSans.className} min-h-screen bg-black text-white`}>
+      {/* Dot grid */}
       <div
-        className="fixed inset-0 pointer-events-none opacity-[0.025]"
+        className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
           backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 relative z-10">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-violet-600/15 border border-violet-500/25 mb-4">
-            <Swords className="w-14 h-14 text-violet-400" />
+          <div className="relative inline-flex items-center justify-center w-[72px] h-[72px] rounded-2xl bg-violet-500/12 border border-violet-500/25 mb-4">
+            <Swords className="w-10 h-10 text-violet-400" />
+            <div className="absolute inset-[-20px] bg-[radial-gradient(circle,rgba(139,92,246,0.12)_0%,transparent_70%)] rounded-full pointer-events-none" />
           </div>
-          <h1 className="text-4xl font-black font-bold text-white ">Compete</h1>
+          <h1
+            className="text-[36px] font-[900] text-white"
+            style={{ letterSpacing: "-0.02em" }}
+          >
+            Compete
+          </h1>
 
           {needsMyPlay.length > 0 && (
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-violet-600/15 border border-violet-500/30 text-violet-300 text-sm font-bold"
+              className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-violet-500/12 border border-violet-500/30 text-violet-300 text-[13px] font-bold"
             >
-              <span className="flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-violet-400 opacity-75" />
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
               </span>
               {needsMyPlay.length} challenge
@@ -592,12 +631,14 @@ export default function ChallengesPage() {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-7 items-start">
+          {/* Left column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-1 p-1 bg-zinc-900/80 border border-zinc-800 rounded-xl w-fit">
+            {/* Tab bar */}
+            <div className="inline-flex items-center gap-0.5 p-[3px] bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-xl">
               <button
                 onClick={() => setActiveTab("active")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === "active"
                     ? needsMyPlay.length > 0
                       ? "bg-violet-600 text-white shadow-lg shadow-violet-900/40"
@@ -608,14 +649,16 @@ export default function ChallengesPage() {
                 <Swords className="w-3.5 h-3.5" />
                 Active
                 {needsMyPlay.length > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-white text-violet-700 text-[10px] font-black flex items-center justify-center leading-none">
+                  <span
+                    className={`${mono} w-5 h-5 rounded-full bg-white text-violet-700 text-[10px] font-[800] flex items-center justify-center leading-none`}
+                  >
                     {needsMyPlay.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab("history")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === "history"
                     ? "bg-zinc-800 text-white"
                     : "text-zinc-500 hover:text-zinc-300"
@@ -624,7 +667,9 @@ export default function ChallengesPage() {
                 <History className="w-3.5 h-3.5" />
                 History
                 {history.length > 0 && (
-                  <span className="text-zinc-600 text-xs font-medium">
+                  <span
+                    className={`${mono} text-zinc-600 text-[11px] font-medium`}
+                  >
                     {wins}W {losses}L
                   </span>
                 )}
@@ -642,13 +687,16 @@ export default function ChallengesPage() {
                   className="space-y-5"
                 >
                   {needsMyPlay.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-violet-400 opacity-75" />
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
                         </span>
-                        <p className="text-xs font-black text-violet-400 uppercase tracking-widest">
+                        <p
+                          className={`${mono} text-[10px] font-[800] text-violet-400 uppercase`}
+                          style={{ letterSpacing: "0.12em" }}
+                        >
                           Your turn
                         </p>
                       </div>
@@ -668,10 +716,13 @@ export default function ChallengesPage() {
                   )}
 
                   {waiting.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-zinc-700" />
-                        <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">
+                        <p
+                          className={`${mono} text-[10px] font-bold text-zinc-600 uppercase`}
+                          style={{ letterSpacing: "0.12em" }}
+                        >
                           Waiting on them
                         </p>
                       </div>
@@ -711,7 +762,7 @@ export default function ChallengesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-2"
+                  className="space-y-2.5"
                 >
                   {history.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-zinc-800 p-14 text-center">
@@ -723,26 +774,36 @@ export default function ChallengesPage() {
                   ) : (
                     <>
                       {wins + losses > 0 && (
-                        <div className="flex items-center gap-5 px-5 py-3.5 rounded-xl border border-zinc-800 bg-zinc-900/40 mb-4">
+                        <div className="flex items-center gap-5 px-5 py-3.5 rounded-xl border border-zinc-800 bg-[rgba(9,9,11,0.6)] mb-4">
                           <div>
-                            <span className="text-2xl font-black text-emerald-400 tabular-nums">
+                            <span
+                              className={`${mono} text-[24px] font-[800] text-emerald-400 tabular-nums`}
+                            >
                               {wins}
                             </span>
-                            <span className="text-xs text-zinc-600 uppercase tracking-wider ml-1.5">
+                            <span
+                              className={`${mono} text-[11px] text-zinc-600 uppercase ml-1.5`}
+                              style={{ letterSpacing: "0.08em" }}
+                            >
                               W
                             </span>
                           </div>
                           <div className="w-px h-6 bg-zinc-800" />
                           <div>
-                            <span className="text-2xl font-black text-zinc-500 tabular-nums">
+                            <span
+                              className={`${mono} text-[24px] font-[800] text-zinc-500 tabular-nums`}
+                            >
                               {losses}
                             </span>
-                            <span className="text-xs text-zinc-600 uppercase tracking-wider ml-1.5">
+                            <span
+                              className={`${mono} text-[11px] text-zinc-600 uppercase ml-1.5`}
+                              style={{ letterSpacing: "0.08em" }}
+                            >
                               L
                             </span>
                           </div>
                           <div className="w-px h-6 bg-zinc-800" />
-                          <span className="text-sm font-bold text-zinc-400">
+                          <span className="text-[13px] font-bold text-zinc-400">
                             {Math.round((wins / (wins + losses)) * 100)}% win
                             rate
                           </span>
@@ -766,22 +827,21 @@ export default function ChallengesPage() {
             </AnimatePresence>
           </div>
 
+          {/* Right column: Friends */}
           <motion.div
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15, duration: 0.3 }}
             className="lg:sticky lg:top-24 space-y-3"
           >
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-10 h-10 text-amber-500" />
-                <p className="text-xl font-black text-white font-bold">
-                  Friends Ranking
-                </p>
-              </div>
+            <div className="flex items-center gap-2.5 px-1">
+              <Trophy className="w-7 h-7 text-amber-500" />
+              <p className="text-[18px] font-[800] text-white">
+                Friends Ranking
+              </p>
             </div>
 
-            <div className="rounded-2xl border-3 border-zinc-900 bg-zinc-900/50 p-4">
+            <div className="rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] overflow-hidden">
               {uid && <FriendRanking friends={friends} currentUid={uid} />}
             </div>
           </motion.div>
