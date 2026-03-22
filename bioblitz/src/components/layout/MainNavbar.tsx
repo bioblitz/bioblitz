@@ -137,11 +137,13 @@ export default function MainNavbar() {
       icon: Trophy,
     },
     { name: "Compete", href: "/challenges", icon: Swords },
+    /** 
     {
       name: "Progress",
       href: "/progress",
       icon: BarChart2,
     },
+    */
     { name: "Create", href: createHref, icon: Plus },
   ];
 
