@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { tryResolveChallenge } from "@/lib/challenges";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import BookmarkButton from "@/components/ui/BookmarkButton";
 
 import Link from "next/link";
 import {
@@ -450,7 +451,6 @@ export default function GameRoomPage() {
         submitted ? "select-text" : "select-none"
       }`}
     >
-      {/* Dot grid */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
@@ -478,7 +478,6 @@ export default function GameRoomPage() {
 
       <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
-          {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
               <h1
@@ -507,7 +506,6 @@ export default function GameRoomPage() {
             <div className="h-[3px] w-20 bg-violet-600 rounded-full mx-auto md:mx-0"></div>
           </div>
 
-          {/* Tabs */}
           {submitted && (
             <div className="mb-8 flex flex-wrap gap-2 justify-center md:justify-start">
               <button
@@ -540,7 +538,6 @@ export default function GameRoomPage() {
           )}
 
           <div className="space-y-6 pb-20">
-            {/* ═══ QUESTIONS (not submitted) ═══ */}
             {!submitted && (
               <>
                 {questions.map((question, idx) => {
@@ -631,7 +628,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {/* ═══ RESULTS ═══ */}
             {submitted && activeTab === "result" && (
               <>
                 {!finalResult ? (
@@ -643,7 +639,6 @@ export default function GameRoomPage() {
                   </div>
                 ) : (
                   <>
-                    {/* Score summary cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
                       <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
                         <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
@@ -682,7 +677,6 @@ export default function GameRoomPage() {
                       </div>
                     </div>
 
-                    {/* Question review */}
                     {questions.map((question, idx) => {
                       const choices = ["a", "b", "c", "d", "e"]
                         .filter((key) => question[key as keyof Question])
@@ -705,6 +699,13 @@ export default function GameRoomPage() {
                             >
                               Question {idx + 1}
                             </span>
+                            <BookmarkButton
+                              gameId={gameId as string}
+                              questionIndex={idx}
+                              gameTitle={gameTitle}
+                              correctAnswer={correctAnswer}
+                              userAnswer={userAnswer}
+                            />
                           </div>
 
                           <div
@@ -780,7 +781,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {/* ═══ LEADERBOARD ═══ */}
             {submitted && activeTab === "leaderboard" && (
               <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-8">
                 <h2
@@ -871,7 +871,6 @@ export default function GameRoomPage() {
           </div>
         </div>
 
-        {/* ═══ CIRCULAR TIMER ═══ */}
         {timeLeft !== null && timeLeft > 0 && !submitted && (
           <div className="hidden xl:block fixed right-10 top-1/2 transform -translate-y-1/2 z-40">
             <div className="relative flex flex-col items-center">
@@ -925,7 +924,6 @@ export default function GameRoomPage() {
         )}
       </div>
 
-      {/* ═══ QUIT MODAL ═══ */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-[rgba(9,9,11,0.95)] border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">

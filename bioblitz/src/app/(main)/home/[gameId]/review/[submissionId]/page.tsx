@@ -8,6 +8,7 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import BookmarkButton from "@/components/ui/BookmarkButton";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function ReviewPage() {
   const [submission, setSubmission] = useState<SubmissionData | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gameTitle, setGameTitle] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +69,11 @@ export default function ReviewPage() {
         }
         const subData = subSnap.data() as SubmissionData;
         setSubmission(subData);
+        const gameDocRef = doc(firestore, "sets", gameId as string);
+        const gameSnap = await getDoc(gameDocRef);
+        if (gameSnap.exists()) {
+          setGameTitle(gameSnap.data().title || "");
+        }
 
         const functions = getFunctions();
         const getPublicQuestions = httpsCallable(
@@ -119,7 +126,6 @@ export default function ReviewPage() {
     <div
       className={`${dmSans.className} min-h-screen bg-black text-white flex flex-col pt-24 pb-20 select-text`}
     >
-      {/* Dot grid */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
@@ -130,7 +136,6 @@ export default function ReviewPage() {
 
       <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
-          {/* Header */}
           <div className="mb-8">
             <Link
               href={`/home/${gameId}`}
@@ -150,17 +155,16 @@ export default function ReviewPage() {
             <div className="h-[3px] w-20 bg-violet-600 rounded-full mt-4"></div>
           </div>
 
-          {/* Score Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
               <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
                 Accuracy
               </h2>
-              <p className="text-[28px] font-[900] text-white">
+              <p className="text-[24px] font-[900] text-white">
                 <span className="text-violet-400">
                   {submission.correctCount}
                 </span>
-                <span className={`${mono} text-zinc-600 text-[18px]`}>
+                <span className={`${mono} text-zinc-600 text-[24px]`}>
                   {" "}
                   / {submission.totalQuestions}
                 </span>
@@ -192,7 +196,6 @@ export default function ReviewPage() {
             </div>
           </div>
 
-          {/* Question List */}
           <div className="space-y-6">
             {questions.map((question, idx) => {
               const choices = ["a", "b", "c", "d", "e"]
@@ -219,6 +222,13 @@ export default function ReviewPage() {
                     >
                       Question {idx + 1}
                     </span>
+                    <BookmarkButton
+                      gameId={gameId as string}
+                      questionIndex={idx}
+                      gameTitle={gameTitle}
+                      correctAnswer={correctAnswer}
+                      userAnswer={userAnswer}
+                    />
                   </div>
 
                   <p className="mb-6 text-[18px] text-zinc-100 leading-relaxed">

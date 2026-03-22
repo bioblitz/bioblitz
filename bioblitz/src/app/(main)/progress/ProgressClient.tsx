@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import BookmarkButton from "@/components/ui/BookmarkButton";
 import Link from "next/link";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
@@ -42,6 +43,7 @@ import {
   FileText,
   XCircle,
   Calendar,
+  Bookmark,
 } from "lucide-react";
 import {
   XAxis,
@@ -604,9 +606,9 @@ function ActivitySection({
         <div className="flex gap-[3px] overflow-x-auto pb-1">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-[3px]">
-              {week.map((day) => (
+              {week.map((day, di) => (
                 <div
-                  key={day.key}
+                  key={`${day.key}-${di}`}
                   className={`w-[12px] h-[12px] rounded-[3px] transition-all hover:scale-[1.3] cursor-default ${getColor(day.count)}`}
                   title={`${day.key}: ${day.count} questions, ${day.blitzCount} blitz${day.blitzCount !== 1 ? "es" : ""}`}
                 />
@@ -866,6 +868,18 @@ function WeeklySnapshotSection({
           <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
         </Link>
       </div>
+      <Link
+        href="/bookmarks"
+        className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all group mt-2"
+      >
+        <div className="flex items-center gap-2.5">
+          <Bookmark className="w-4 h-4 text-amber-400" />
+          <span className="text-[13px] font-bold text-zinc-300 group-hover:text-white transition-colors">
+            View your bookmarked questions
+          </span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+      </Link>
     </motion.section>
   );
 }
@@ -900,6 +914,7 @@ function ReviewSection({
             <div className="bg-amber-500/15 border border-amber-500/30 p-2 rounded-lg flex-shrink-0">
               <XCircle className="w-4 h-4 text-amber-400" />
             </div>
+
             <div className="flex-1">
               <p className="text-[13px] font-bold text-amber-200">
                 {wrongThisWeekCount} question
