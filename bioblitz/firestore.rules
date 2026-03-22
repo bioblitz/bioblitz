@@ -9,7 +9,7 @@ service cloud.firestore {
     }
     function notUpdatingElo() {
       return !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['bElo', 'mElo', 'buElo', 'muElo', 'score']);
+        .hasAny(['bElo', 'mElo', 'buElo', 'muElo', 'score', 'contestsPlayed', 'lastContestAt']);
     }
     match /users/{userId} {
       allow read: if true; 
@@ -54,6 +54,11 @@ service cloud.firestore {
       allow read: if true;
       // Usually written by Cloud Functions, but if client writes it:
       allow write: if isSignedIn() && isOwner(userId);
+    }
+
+    match /potd/{potdId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     match /potdActivity/{potdId} {

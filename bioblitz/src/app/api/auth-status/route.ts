@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
-import { getUserProfile, createUserProfile, updateUserPhoto, UserProfile } from '@/lib/user';
+import { getCurrentUser, app } from '@/lib/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getUserProfile, createUserProfile, UserProfile } from '@/lib/user';
 
 export async function GET() {
   try {
@@ -23,7 +24,7 @@ export async function GET() {
         const storedIsGoogleUrl = userProfile.photoURL?.includes('googleusercontent.com');
         if (decodedIdToken.picture && (!userProfile.photoURL || storedIsGoogleUrl)) {
           try {
-            await updateUserPhoto(decodedIdToken.uid, decodedIdToken.picture);
+            await getFirestore(app).collection('users').doc(decodedIdToken.uid).update({ photoURL: decodedIdToken.picture });
             userProfile.photoURL = decodedIdToken.picture;
           } catch (err) {
             console.error('Failed to update user photoURL in Firestore:', err);

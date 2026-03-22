@@ -25,13 +25,14 @@ const mono = jetbrainsMono.className;
 
 // --- Types ---
 interface SubmissionData {
-  score: number;
   correctCount: number;
   totalQuestions: number;
   timeTaken: number;
   userAnswers: { [key: string]: string };
   correctAnswers: { [key: string]: string };
   gameId: string;
+  ratingDelta?: number;
+  newElo?: number;
 }
 
 interface Question {
@@ -187,13 +188,24 @@ export default function ReviewPage() {
             <div className="relative bg-[rgba(9,9,11,0.8)] border border-violet-500/30 p-6 rounded-2xl text-center overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-violet-600/[0.08] to-transparent pointer-events-none" />
               <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">
-                Score
+                Rating
               </h2>
-              <p
-                className={`${mono} relative text-[32px] font-[800] text-violet-400`}
-              >
-                {submission.score}
-              </p>
+              {submission.ratingDelta != null ? (
+                <>
+                  <p className={`${mono} relative text-[32px] font-[800] ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {submission.ratingDelta >= 0 ? "+" : ""}{submission.ratingDelta}
+                  </p>
+                  {submission.newElo != null && (
+                    <p className={`${mono} text-[11px] mt-1 text-zinc-500`}>
+                      → {submission.newElo}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className={`${mono} relative text-[18px] font-[700] text-zinc-500`}>
+                  Pending
+                </p>
+              )}
             </div>
           </div>
 

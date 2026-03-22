@@ -146,7 +146,7 @@ export async function createUserProfile(user: any) {
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || null,
-    bElo: 0,
+    bElo: 500,
     mElo: 0,
     buElo: 0,
     muElo: 0,

@@ -23,6 +23,7 @@ import {
   Timer,
   AlertTriangle,
   X,
+  ShieldAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
@@ -47,6 +48,7 @@ interface GameSubmission {
   id: string;
   userId: string;
   score: number;
+  correctCount: number;
   totalQuestions: number;
   submittedAt: Timestamp;
   timeTaken: number;
@@ -57,12 +59,16 @@ interface GameSubmission {
 }
 
 interface LeaderboardEntry {
+  submissionId: string;
   userId: string;
   username: string;
   handle?: string;
   photoURL?: string;
-  score: number;
+  correctCount: number;
+  totalQuestions: number;
   timeTaken: number;
+  tabSwitchCount?: number;
+  timeOffTab?: number;
 }
 
 export default function GameDetailPage() {
@@ -71,6 +77,8 @@ export default function GameDetailPage() {
   const gameId = params?.gameId as string;
 
   const [user, setUser] = useState<User | null>(null);
+  const [inspectEntry, setInspectEntry] = useState<LeaderboardEntry | null>(null);
+  const [erasing, setErasing] = useState(false);
   const [game, setGame] = useState<gameRoom | undefined>(undefined);
 
   const [loadingGame, setLoadingGame] = useState(true);
@@ -92,7 +100,7 @@ export default function GameDetailPage() {
   } | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setAuthResolved(true);
 
@@ -107,7 +115,6 @@ export default function GameDetailPage() {
       } else {
         setLoadingAttempts(false);
         setPreviousAttempts([]);
-        setIsAdmin(false);
       }
     });
 
@@ -211,8 +218,8 @@ export default function GameDetailPage() {
 
         const snapshot = await getDocs(q);
         const rawSubmissions = snapshot.docs
-          .map((doc) => doc.data() as GameSubmission)
-          .filter((submission) => submission.ranked);
+          .filter((doc) => doc.data().ranked)
+          .map((doc) => ({ ...(doc.data() as GameSubmission), id: doc.id }));
 
         const uniqueSubmissions = Array.from(
           new Map(rawSubmissions.map((s) => [s.userId, s])).values(),
@@ -223,12 +230,16 @@ export default function GameDetailPage() {
             // 1. Optimized Way: Use data directly from submission if available
             if (submission.username) {
               return {
+                submissionId: submission.id,
                 userId: submission.userId,
                 username: submission.username,
                 handle: submission.handle,
                 photoURL: submission.photoURL,
-                score: submission.score,
+                correctCount: submission.correctCount ?? 0,
+                totalQuestions: submission.totalQuestions ?? 0,
                 timeTaken: submission.timeTaken,
+                tabSwitchCount: (submission as any).tabSwitchCount,
+                timeOffTab: (submission as any).timeOffTab,
               };
             }
 
@@ -252,22 +263,23 @@ export default function GameDetailPage() {
             }
 
             return {
+              submissionId: submission.id,
               userId: submission.userId,
               username: displayName,
               handle: handle,
               photoURL: photoURL,
-              score: submission.score,
+              correctCount: submission.correctCount ?? 0,
+              totalQuestions: submission.totalQuestions ?? 0,
               timeTaken: submission.timeTaken,
+              tabSwitchCount: (submission as any).tabSwitchCount,
+              timeOffTab: (submission as any).timeOffTab,
             };
           }),
         );
 
         setLeaderboard(
-          (
-            leaderboardData.filter(
-              (entry) => entry !== null,
-            ) as LeaderboardEntry[]
-          ).sort((a, b) => b.score - a.score || a.timeTaken - b.timeTaken),
+          (leaderboardData.filter((entry) => entry !== null) as LeaderboardEntry[])
+            .sort((a, b) => (b.correctCount - a.correctCount) || (a.timeTaken - b.timeTaken)),
         );
       } catch (err) {
         console.error("Error loading leaderboard:", err);
@@ -345,6 +357,31 @@ export default function GameDetailPage() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const handleEraseSubmission = async (entry: LeaderboardEntry) => {
+    if (!user) return;
+    if (!confirm(`Erase ${entry.username}'s attempt and deduct 100 ELO? This cannot be undone.`)) return;
+    setErasing(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/submission/erase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ submissionId: entry.submissionId, userId: entry.userId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data?.error || "Failed to erase submission.");
+        return;
+      }
+      setLeaderboard((prev) => prev.filter((e) => e.submissionId !== entry.submissionId));
+      setInspectEntry(null);
+    } catch {
+      alert("Failed to erase submission.");
+    } finally {
+      setErasing(false);
+    }
   };
 
   const getRankIcon = (index: number) => {
@@ -829,13 +866,75 @@ export default function GameDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="font-bold text-white">{entry.score}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      <div className="font-bold text-white text-sm">
+                        {entry.correctCount}/{entry.totalQuestions}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 font-mono">
+                        {formatTimePlayed(entry.timeTaken)}
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setInspectEntry(entry)}
+                        className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        title="Inspect attempt"
+                      >
+                        <ShieldAlert className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </motion.aside>
       </div>
+
+      {inspectEntry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center gap-2 mb-4">
+              <ShieldAlert className="w-5 h-5 text-red-400" />
+              <h2 className="text-lg font-bold text-white">Inspect Attempt</h2>
+            </div>
+            <p className="text-sm text-zinc-400 mb-4">
+              <span className="text-zinc-200 font-semibold">{inspectEntry.username}</span>
+              {" "}— {inspectEntry.correctCount}/{inspectEntry.totalQuestions} in {formatTimePlayed(inspectEntry.timeTaken)}
+            </p>
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-3">
+                <span className="text-sm text-zinc-400">Tab switches</span>
+                <span className={`font-mono font-bold text-sm ${(inspectEntry.tabSwitchCount ?? 0) > 2 ? "text-red-400" : "text-zinc-200"}`}>
+                  {inspectEntry.tabSwitchCount ?? 0}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-3">
+                <span className="text-sm text-zinc-400">Time off tab</span>
+                <span className={`font-mono font-bold text-sm ${(inspectEntry.timeOffTab ?? 0) > 10 ? "text-red-400" : "text-zinc-200"}`}>
+                  {inspectEntry.timeOffTab ?? 0}s
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setInspectEntry(null)}
+                className="flex-1 py-2.5 rounded-xl text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-600 transition-colors text-sm font-semibold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => handleEraseSubmission(inspectEntry)}
+                disabled={erasing}
+                className="flex-1 py-2.5 rounded-xl bg-red-700 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+              >
+                {erasing ? "Erasing..." : "Erase + −100 ELO"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showStartConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">

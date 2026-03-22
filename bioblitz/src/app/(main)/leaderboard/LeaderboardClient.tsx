@@ -50,11 +50,13 @@ export default function LeaderboardClient({
     }
   };
 
+  // Tier thresholds per the Bioblitz rating spec (Section 11)
   const getEloColor = (elo: number) => {
-    if (elo >= 1700) return "bg-violet-500/20 text-violet-400 border-violet-500/50";
-    if (elo >= 1400) return "bg-blue-500/20 text-blue-400 border-blue-500/50";
-    if (elo >= 1100) return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
-    return "bg-zinc-800 text-zinc-400 border-zinc-700";
+    if (elo >= 2250) return "bg-cyan-400/20 text-cyan-300 border-cyan-400/50";     // Diamond
+    if (elo >= 1750) return "bg-violet-500/20 text-violet-400 border-violet-500/50"; // Platinum
+    if (elo >= 1250) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50"; // Gold
+    if (elo >= 750)  return "bg-zinc-300/20 text-zinc-300 border-zinc-400/50";       // Silver
+    return "bg-orange-700/20 text-orange-500 border-orange-700/50";                  // Bronze
   };
 
   return (

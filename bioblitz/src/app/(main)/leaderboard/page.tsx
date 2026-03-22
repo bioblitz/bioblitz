@@ -17,7 +17,8 @@ export interface LeaderboardUser {
   displayName: string;
   photoURL: string;
   bElo: number;
-  streak: number; // Added streak field
+  streak: number;
+  contestsPlayed: number;
   school?: string;
   username: string;
 }
@@ -35,12 +36,13 @@ const getEloLeaderboard = unstable_cache(
         uid: doc.id,
         displayName: data.displayName || "Anonymous",
         photoURL: data.photoURL || "",
-        bElo: data.bElo || 0,
+        bElo: data.bElo || 500,
         streak: data.streak || 0,
+        contestsPlayed: data.contestsPlayed || 0,
         school: data.school,
         username: data.username || "user",
       } as LeaderboardUser;
-    }).filter(u => u.bElo > 0); // Optional filter
+    }).filter(u => u.contestsPlayed >= 1);
   },
   ['leaderboard-elo'], 
   { revalidate: 1800 }

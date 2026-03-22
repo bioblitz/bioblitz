@@ -8,7 +8,7 @@ if (!identifier) {
   process.exit(1);
 }
 
-const serviceAccountPath = path.resolve(process.cwd(), "firebase-service-account.json");
+const serviceAccountPath = path.resolve(process.cwd(), "../firebase-service-account.json");
 
 if (!admin.apps.length) {
   admin.initializeApp({
