@@ -74,7 +74,7 @@ export default function AuthenticationPage() {
   }) => (
     <div className="flex items-start space-x-4">
       <div className="bg-[#0F1422] p-2 rounded-lg shrink-0">
-        <Icon className="w-5 h-5 text-indigo-400" />
+        <Icon className="w-5 h-5 text-yellow-400" />
       </div>
       <div>
         <h3 className="text-white font-medium text-sm">{title}</h3>
@@ -87,26 +87,17 @@ export default function AuthenticationPage() {
     return null;
   }
   return (
-    <div className="min-h-screen w-full bg-black text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="min-h-screen w-full bg-neutral-900 text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none  bg-[size:24px_24px]"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-black blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-4xl">
-        <div className="bg-indigo-500/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-500/10 overflow-hidden">
+        <div className="bg-black backdrop-blur-xl rounded-3xl border border-neutral-800 overflow-hidden">
           {" "}
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="p-5 md:p-8 flex flex-col justify-center md:border-r border-indigo-900/30 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-indigo-600/5 pointer-events-none z-0"></div>
+            <div className="p-5 md:p-8 flex flex-col justify-center md:border-r border-neutral-500 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full bg-neutral-600/5 pointer-events-none z-0"></div>
               <div className="relative z-10">
-                <div className="inline-flex items-center mb-6">
-                  <div className="bg-yellow-400/10 p-1.5 rounded-full transition-all duration-300 ease-out hover:bg-yellow-400/20 hover:scale-110 hover:shadow-[0_0_18px_rgba(250,204,21,0.45)]">
-                    <Zap className="w-6 h-6 text-yellow-400 transition-transform duration-300 ease-out hover:scale-105" />
-                  </div>
-                  <span className="ml-3 text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-200">
-                    BioBlitz
-                  </span>
-                </div>
-
                 <h2 className="text-3xl font-bold tracking-tight mb-4 text-white">
                   Master Biology, <br />
                   <div className="text-3x1 font-bold tracking-tight mb-4 text-white">
@@ -169,14 +160,14 @@ export default function AuthenticationPage() {
                   By continuing, you agree to our{" "}
                   <a
                     href="/terms-and-conditions"
-                    className="underline hover:text-indigo-400 transition-colors"
+                    className="underline hover:text-yellow-400 transition-colors"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
                     href="/privacy-policy"
-                    className="underline hover:text-indigo-400 transition-colors"
+                    className="underline hover:text-yellow-400 transition-colors"
                   >
                     Privacy Policy
                   </a>
@@ -190,8 +181,8 @@ export default function AuthenticationPage() {
 
       {loading && (
         <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
-          <div className="bg-indigo-950/80 p-6 rounded-2xl flex flex-col items-center border border-indigo-500/30">
-            <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
+          <div className="bg-neutral-900/80 p-6 rounded-2xl flex flex-col items-center border border-yellow-400/30">
+            <Loader2 className="w-10 h-10 text-yellow-300 animate-spin mb-4" />
             <p className="text-white font-medium animate-pulse tracking-wider">
               Authenticating...
             </p>
