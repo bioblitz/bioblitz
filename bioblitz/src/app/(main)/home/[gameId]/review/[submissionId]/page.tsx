@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import BookmarkButton from "@/components/ui/BookmarkButton";
+import ReportButton from "@/components/ui/ReportQuestionButton";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -228,6 +229,11 @@ export default function ReviewPage() {
                       gameTitle={gameTitle}
                       correctAnswer={correctAnswer}
                       userAnswer={userAnswer}
+                    />
+                    <ReportButton
+                      gameId={gameId as string}
+                      questionIndex={idx}
+                      gameTitle={gameTitle}
                     />
                   </div>
 

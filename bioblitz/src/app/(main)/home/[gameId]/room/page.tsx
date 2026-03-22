@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { tryResolveChallenge } from "@/lib/challenges";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import BookmarkButton from "@/components/ui/BookmarkButton";
+import ReportButton from "@/components/ui/ReportQuestionButton";
 
 import Link from "next/link";
 import {
@@ -560,6 +561,11 @@ export default function GameRoomPage() {
                         >
                           Question {idx + 1}
                         </span>
+                        <ReportButton
+                          gameId={gameId as string}
+                          questionIndex={idx}
+                          gameTitle={gameTitle}
+                        />
                       </div>
 
                       <div
@@ -705,6 +711,11 @@ export default function GameRoomPage() {
                               gameTitle={gameTitle}
                               correctAnswer={correctAnswer}
                               userAnswer={userAnswer}
+                            />
+                            <ReportButton
+                              gameId={gameId as string}
+                              questionIndex={idx}
+                              gameTitle={gameTitle}
                             />
                           </div>
 
