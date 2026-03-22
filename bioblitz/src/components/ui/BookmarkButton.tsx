@@ -37,32 +37,35 @@ export default function BookmarkButton({
   const bookmarkId = `${gameId}_q${questionIndex}`;
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const checkBookmark = async () => {
-      try {
-        const ref = doc(
-          db,
-          "users",
-          user.uid,
-          "bookmarkedQuestions",
-          bookmarkId,
-        );
-        const snap = await getDoc(ref);
-        setBookmarked(snap.exists());
-      } catch (err) {
-        console.error("Error checking bookmark:", err);
-      } finally {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
         setLoading(false);
+        return;
       }
-    };
 
-    checkBookmark();
-  }, [auth.currentUser, bookmarkId]);
+      const checkBookmark = async () => {
+        try {
+          const ref = doc(
+            db,
+            "users",
+            user.uid,
+            "bookmarkedQuestions",
+            bookmarkId,
+          );
+          const snap = await getDoc(ref);
+          setBookmarked(snap.exists());
+        } catch (err) {
+          console.error("Error checking bookmark:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      checkBookmark();
+    });
+
+    return () => unsubscribe();
+  }, [bookmarkId]);
 
   const toggleBookmark = async () => {
     const user = auth.currentUser;

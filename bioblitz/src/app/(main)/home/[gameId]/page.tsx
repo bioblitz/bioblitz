@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Timer,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
@@ -83,6 +84,8 @@ export default function GameDetailPage() {
   const [authResolved, setAuthResolved] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [activeSession, setActiveSession] = useState<{
     timeLeft: number;
@@ -93,9 +96,18 @@ export default function GameDetailPage() {
       setUser(currentUser);
       setAuthResolved(true);
 
-      if (!currentUser) {
+      if (currentUser) {
+        currentUser.getIdTokenResult(true).then((result) => {
+          const claims: any = result.claims || {};
+          const roles = Array.isArray(claims.roles)
+            ? claims.roles.map((r: any) => String(r).toLowerCase())
+            : [];
+          setIsAdmin(claims.admin === true || roles.includes("admin"));
+        });
+      } else {
         setLoadingAttempts(false);
         setPreviousAttempts([]);
+        setIsAdmin(false);
       }
     });
 
@@ -285,6 +297,35 @@ export default function GameDetailPage() {
     router.push(`/home/${gameId}/room?ranked=${isFirstAttempt}`);
   };
 
+  const handleDeleteContest = async () => {
+    if (!game || !user) return;
+    if (
+      !confirm(
+        `Delete "${game.title}"? This will permanently remove the contest, all submissions, bookmarks, and reports. This cannot be undone.`,
+      )
+    )
+      return;
+
+    setDeleting(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/admin/contests", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ gameId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      router.push("/home");
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete contest.");
+      setDeleting(false);
+    }
+  };
+
   const formatTimePlayed = (seconds: number) => {
     if (!seconds) return "--";
     const m = Math.floor(seconds / 60);
@@ -400,9 +441,25 @@ export default function GameDetailPage() {
         >
           <motion.div variants={slideUp} className="rounded-3xl p-8">
             <div className="mb-6">
-              <h1 className="text-3xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                {game.title}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                  {game.title}
+                </h1>
+                {isAdmin && (
+                  <button
+                    onClick={handleDeleteContest}
+                    disabled={deleting}
+                    className="p-2 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-all"
+                    title="Delete contest"
+                  >
+                    {deleting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <X className="w-5 h-5" />
+                    )}
+                  </button>
+                )}
+              </div>
 
               <div className="flex flex-wrap items-center gap-6 mt-3 text-sm text-zinc-400">
                 <span>

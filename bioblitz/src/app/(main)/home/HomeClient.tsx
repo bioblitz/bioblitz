@@ -5,6 +5,7 @@ import { gameRoom } from "@/types";
 import { getGamesPage } from "@/lib/gameRoomsAll";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import ContestCard from "@/components/features/contests/ContestCard";
+import { X, Loader2 } from "lucide-react";
 import {
   Clock,
   HelpCircle,
@@ -20,18 +21,30 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { app } from "@/lib/firebase";
 
 export default function HomeClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
   const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
-  const [typeFilter, setTypeFilter] = useState<"All" | "Official" | "Community">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">(
+    "All",
+  );
+  const [typeFilter, setTypeFilter] = useState<
+    "All" | "Official" | "Community"
+  >("All");
 
   const [pages, setPages] = useState<gameRoom[][]>([]);
-  const [cursors, setCursors] = useState<(QueryDocumentSnapshot<DocumentData> | null)[]>([null]);
+  const [cursors, setCursors] = useState<
+    (QueryDocumentSnapshot<DocumentData> | null)[]
+  >([null]);
   const [currentPage, setCurrentPage] = useState(0);
   const [loadingPage, setLoadingPage] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -41,6 +54,8 @@ export default function HomeClient() {
 
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const topics = [
     { value: "All Topics", label: "All Topics" },
@@ -59,8 +74,16 @@ export default function HomeClient() {
       setUser(currentUser);
       if (currentUser) {
         fetchPlayedGames(currentUser.uid);
+        currentUser.getIdTokenResult(true).then((result) => {
+          const claims: any = result.claims || {};
+          const roles = Array.isArray(claims.roles)
+            ? claims.roles.map((r: any) => String(r).toLowerCase())
+            : [];
+          setIsAdmin(claims.admin === true || roles.includes("admin"));
+        });
       } else {
         setPlayedGameIds(new Set());
+        setIsAdmin(false);
       }
     });
 
@@ -77,6 +100,37 @@ export default function HomeClient() {
     }
   };
 
+  const handleDeleteContest = async (gameId: string, title: string) => {
+    if (
+      !confirm(
+        `Delete "${title}"? This will permanently remove the contest, all submissions, bookmarks, and reports. This cannot be undone.`,
+      )
+    )
+      return;
+    if (!user) return;
+
+    setDeletingId(gameId);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/admin/contests", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ gameId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setPages((prev) =>
+        prev.map((page) => page.filter((g) => g.id !== gameId)),
+      );
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete contest.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
   const loadPage = async (pageIndex: number) => {
     if (pages[pageIndex]) {
       setCurrentPage(pageIndex);
@@ -85,19 +139,31 @@ export default function HomeClient() {
     setLoadingPage(true);
     const cursor = cursors[pageIndex] ?? null;
     const { games, lastSnap } = await getGamesPage(cursor);
-    setPages(prev => { const next = [...prev]; next[pageIndex] = games; return next; });
-    setCursors(prev => { const next = [...prev]; next[pageIndex + 1] = lastSnap; return next; });
+    setPages((prev) => {
+      const next = [...prev];
+      next[pageIndex] = games;
+      return next;
+    });
+    setCursors((prev) => {
+      const next = [...prev];
+      next[pageIndex + 1] = lastSnap;
+      return next;
+    });
     setHasMore(games.length === 20);
     setCurrentPage(pageIndex);
     setLoadingPage(false);
   };
 
-  useEffect(() => { loadPage(0); }, []);
+  useEffect(() => {
+    loadPage(0);
+  }, []);
 
   const allGames = pages.flat();
   const filteredGames = useMemo(() => {
     return allGames.filter((game: gameRoom) => {
-      const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = game.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       const matchesTopic = topic === "All Topics" || game.topic === topic;
       const isPlayed = playedGameIds.has(game.id);
 
@@ -140,28 +206,64 @@ export default function HomeClient() {
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50", badge: "bg-blue-500 text-white" };
+        return {
+          bg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+          shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50",
+          badge: "bg-blue-500 text-white",
+        };
       case "Cell Biology":
       case "Cell Bio":
-        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50", badge: "bg-cyan-500 text-white" };
+        return {
+          bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+          shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50",
+          badge: "bg-cyan-500 text-white",
+        };
       case "Plant Biology":
       case "Plant Bio":
-        return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50", badge: "bg-green-600 text-white" };
+        return {
+          bg: "bg-green-500/10 text-green-400 border-green-500/20",
+          shadow: "hover:shadow-green-500/10 hover:border-green-500/50",
+          badge: "bg-green-600 text-white",
+        };
       case "Genetics & Evolution":
       case "Gen & Evo":
       case "Genetics":
-        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50", badge: "bg-lime-600 text-white" };
+        return {
+          bg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
+          shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50",
+          badge: "bg-lime-600 text-white",
+        };
       case "Biosystematics":
       case "Biosys":
-        return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50", badge: "bg-violet-600 text-white" };
+        return {
+          bg: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+          shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50",
+          badge: "bg-violet-600 text-white",
+        };
       case "Ecology":
-        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50", badge: "bg-emerald-600 text-white" };
+        return {
+          bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+          shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50",
+          badge: "bg-emerald-600 text-white",
+        };
       case "Ethology":
-        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50", badge: "bg-orange-600 text-white" };
+        return {
+          bg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+          shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50",
+          badge: "bg-orange-600 text-white",
+        };
       case "Multiple":
-        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50", badge: "bg-yellow-600 text-white" };
+        return {
+          bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+          shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50",
+          badge: "bg-yellow-600 text-white",
+        };
       default:
-        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50", badge: "bg-zinc-600 text-white" };
+        return {
+          bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+          shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50",
+          badge: "bg-zinc-600 text-white",
+        };
     }
   };
 
@@ -176,9 +278,7 @@ export default function HomeClient() {
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-white">
-                Welcome back!
-              </h1>
+              <h1 className="text-4xl font-bold text-white">Welcome back!</h1>
               <p className="text-zinc-400 mt-1">
                 Select a Blitz to start competing
               </p>
@@ -267,7 +367,7 @@ export default function HomeClient() {
                           >
                             {opt}
                           </button>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -324,7 +424,31 @@ export default function HomeClient() {
             </div>
           ) : (
             filteredGames.map((game: gameRoom) => (
-              <ContestCard key={game.id} contest={game} href={`/home/${game.id}`} isCompleted={playedGameIds.has(game.id)} />
+              <div key={game.id} className="relative group">
+                <ContestCard
+                  contest={game}
+                  href={`/home/${game.id}`}
+                  isCompleted={playedGameIds.has(game.id)}
+                />
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteContest(game.id, game.title);
+                    }}
+                    disabled={deletingId === game.id}
+                    className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-black/80 border border-zinc-700 text-zinc-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    title="Delete contest"
+                  >
+                    {deletingId === game.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
+              </div>
             ))
           )}
         </div>
