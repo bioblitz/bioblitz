@@ -1,6 +1,14 @@
 "use client";
 
-import React, { useState, useActionState, useMemo, useEffect, useCallback, startTransition, useRef } from "react";
+import React, {
+  useState,
+  useActionState,
+  useMemo,
+  useEffect,
+  useCallback,
+  startTransition,
+  useRef,
+} from "react";
 import { useFormStatus } from "react-dom";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
@@ -10,9 +18,8 @@ import { Plus, Trash2, Eye, EyeOff, Check } from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
-import { v4 as uuidv4 } from 'uuid';
-import { debounce } from '@/lib/utils';
-
+import { v4 as uuidv4 } from "uuid";
+import { debounce } from "@/lib/utils";
 
 const generateChoiceKey = (index: number): string => {
   const charCodeA = "a".charCodeAt(0);
@@ -20,7 +27,7 @@ const generateChoiceKey = (index: number): string => {
 };
 
 const transformForPreview = (
-  editable: EditableQuestion | undefined
+  editable: EditableQuestion | undefined,
 ): [IQuestionForDisplay, string | undefined] => {
   if (!editable) {
     return [
@@ -74,13 +81,27 @@ function SubmitButton({ isPublished }: { isPublished: boolean }) {
       className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors"
     >
       {pending
-        ? (isPublished ? 'Updating...' : 'Publishing...')
-        : (isPublished ? 'Update Blitz' : 'Publish Blitz')}
+        ? isPublished
+          ? "Updating..."
+          : "Publishing..."
+        : isPublished
+          ? "Update Blitz"
+          : "Publish Blitz"}
     </button>
   );
 }
 
-const TOPICS = ["Anatomy & Physiology", "Cell Biology", "Plant Biology", "Genetics & Evolution", "Biosystematics", "Ecology", "Ethology", "Multiple", "Other"];
+const TOPICS = [
+  "Anatomy & Physiology",
+  "Cell Biology",
+  "Plant Biology",
+  "Genetics & Evolution",
+  "Biosystematics",
+  "Ecology",
+  "Ethology",
+  "Multiple",
+  "Other",
+];
 
 export default function EditContestPage() {
   const params = useParams();
@@ -90,9 +111,15 @@ export default function EditContestPage() {
   const postAsUsername = searchParams?.get("postAs")?.trim() || "";
 
   const [state, formAction] = useActionState(createContest, initialState);
-  const [questions, setQuestions] = useState<EditableQuestion[]>([initialQuestion()]);
-  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(questions[0]?.id || null);
-  const [contestId, setContestId] = useState<string | null>(routeContestId || null);
+  const [questions, setQuestions] = useState<EditableQuestion[]>([
+    initialQuestion(),
+  ]);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(
+    questions[0]?.id || null,
+  );
+  const [contestId, setContestId] = useState<string | null>(
+    routeContestId || null,
+  );
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -111,9 +138,9 @@ export default function EditContestPage() {
   const lastSavedSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        user.getIdToken().then(token => {
+        user.getIdToken().then((token) => {
           setIdToken(token);
         });
       } else {
@@ -143,24 +170,34 @@ export default function EditContestPage() {
             setTimeLimit(Number(contest.timeLimit) || 600);
             setSelectedTopic(contest.topic || TOPICS[0]);
             setBannerUrl(contest.bannerUrl || null);
-            setIsPublished(contest.status === 'completed');
+            setIsPublished(contest.status === "completed");
             setIsHidden(contest.hidden === true);
             setIsAiGenerated(contest.isAiGenerated === true);
-            if (contest.questions && Array.isArray(contest.questions) && contest.questions.length > 0) {
-              const choiceKeys = ['a', 'b', 'c', 'd', 'e'] as const;
+            if (
+              contest.questions &&
+              Array.isArray(contest.questions) &&
+              contest.questions.length > 0
+            ) {
+              const choiceKeys = ["a", "b", "c", "d", "e"] as const;
               const editable = (contest.questions as any[]).map((q) => {
                 // Subcollection format: {id, content, a, b, c, d?, e?, correct, imgURL, solution}
                 const choices = choiceKeys
                   .filter((k) => q[k])
-                  .map((k, idx) => ({ id: String(idx + 1), text: q[k] as string }));
-                const correctIndex = choiceKeys.indexOf(q.correct as typeof choiceKeys[number]);
+                  .map((k, idx) => ({
+                    id: String(idx + 1),
+                    text: q[k] as string,
+                  }));
+                const correctIndex = choiceKeys.indexOf(
+                  q.correct as (typeof choiceKeys)[number],
+                );
                 return {
                   id: q.id || Date.now().toString(),
-                  content: q.content || '',
-                  imageUrl: q.imgURL || '',
+                  content: q.content || "",
+                  imageUrl: q.imgURL || "",
                   choices,
-                  correctAnswerId: correctIndex >= 0 ? String(correctIndex + 1) : '',
-                  solution: q.solution || '',
+                  correctAnswerId:
+                    correctIndex >= 0 ? String(correctIndex + 1) : "",
+                  solution: q.solution || "",
                 } as EditableQuestion;
               });
               setQuestions(editable);
@@ -169,7 +206,7 @@ export default function EditContestPage() {
           }
         }
       } catch (err) {
-        console.error('Failed to fetch contest:', err);
+        console.error("Failed to fetch contest:", err);
       }
     }
     fetchContest();
@@ -191,26 +228,28 @@ export default function EditContestPage() {
 
   const handleQuestionChange = (
     id: string,
-    updatedQuestion: EditableQuestion
+    updatedQuestion: EditableQuestion,
   ) => {
     const newQuestions = questions.map((q) =>
-      q.id === id ? updatedQuestion : q
+      q.id === id ? updatedQuestion : q,
     );
     setQuestions(newQuestions);
   };
-  
+
   // Converts EditableQuestion → subcollection doc format: {content, a, b, c, d?, e?, correct, imgURL, solution}
   const convertToQuestions = (editableQuestions: EditableQuestion[]) => {
-    const choiceKeys = ['a', 'b', 'c', 'd', 'e'] as const;
+    const choiceKeys = ["a", "b", "c", "d", "e"] as const;
     return editableQuestions.map((eq) => {
-      const correctIndex = eq.choices.findIndex((c) => c.id === eq.correctAnswerId);
-      const correctLetter = correctIndex >= 0 ? choiceKeys[correctIndex] : '';
+      const correctIndex = eq.choices.findIndex(
+        (c) => c.id === eq.correctAnswerId,
+      );
+      const correctLetter = correctIndex >= 0 ? choiceKeys[correctIndex] : "";
       const q: Record<string, string> = {
         id: eq.id,
         content: eq.content,
         correct: correctLetter,
-        imgURL: eq.imageUrl || '',
-        solution: eq.solution || '',
+        imgURL: eq.imageUrl || "",
+        solution: eq.solution || "",
       };
       eq.choices.forEach((choice, idx) => {
         if (idx < choiceKeys.length) q[choiceKeys[idx]] = choice.text;
@@ -221,9 +260,33 @@ export default function EditContestPage() {
 
   // Detect successful publish via state message
   useEffect(() => {
-    if (state.message?.startsWith('Blitz saved with ID:')) {
+    if (state.message?.startsWith("Blitz saved with ID:")) {
+      const wasAlreadyPublished = isPublished;
       setIsPublished(true);
       setIsHidden(false);
+
+      // Notify subscribers only on first publish, not updates
+      if (!wasAlreadyPublished && contestId) {
+        (async () => {
+          try {
+            const token = await auth.currentUser?.getIdToken();
+            if (!token) return;
+            await fetch("/api/notifications/contest-published", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                gameId: contestId,
+                gameTitle: title,
+              }),
+            });
+          } catch (err) {
+            console.error("Failed to notify subscribers:", err);
+          }
+        })();
+      }
     }
   }, [state.message]);
 
@@ -239,8 +302,8 @@ export default function EditContestPage() {
     try {
       const token = await auth.currentUser?.getIdToken(true);
       await fetch(`/api/contests/${contestId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idToken: token,
           hidden: newHidden,
@@ -254,32 +317,42 @@ export default function EditContestPage() {
 
   const handleDelete = async () => {
     if (!contestId) return;
-    if (!confirm('Are you sure you want to delete this Blitz? This cannot be undone.')) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this Blitz? This cannot be undone.",
+      )
+    )
+      return;
     setDeleting(true);
     try {
       const token = await auth.currentUser?.getIdToken(true);
       const res = await fetch(`/api/contests/${contestId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idToken: token,
           postAsUsername: postAsUsername || undefined,
         }),
       });
-      if (res.ok) router.push('/contests');
+      if (res.ok) router.push("/contests");
     } catch (e) {
-      console.error('Failed to delete blitz:', e);
+      console.error("Failed to delete blitz:", e);
     } finally {
       setDeleting(false);
     }
   };
 
-  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (event.target.files && event.target.files[0] && contestId) {
       const file = event.target.files[0];
       setUploadingBanner(true);
       try {
-        const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
+        const downloadURL = await uploadImage(
+          file,
+          `contests/${contestId}/banner`,
+        );
         setBannerUrl(downloadURL);
       } catch (error) {
         console.error("Error uploading banner image:", error);
@@ -319,7 +392,10 @@ export default function EditContestPage() {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("timeLimit", timeLimit.toString());
-    formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
+    formData.append(
+      "topic",
+      selectedTopic === "Other" ? customTopic : selectedTopic,
+    );
     // preserve published status when editing an already-published blitz
     formData.append("status", isPublished ? "completed" : "incomplete");
     formData.append("hidden", isPublished ? isHidden.toString() : "true");
@@ -339,7 +415,17 @@ export default function EditContestPage() {
       console.error("Failed to autosave draft:", error);
       lastSavedSnapshotRef.current = null;
     }
-  }, [contestId, postAsUsername, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl]);
+  }, [
+    contestId,
+    postAsUsername,
+    questions,
+    title,
+    description,
+    timeLimit,
+    selectedTopic,
+    customTopic,
+    bannerUrl,
+  ]);
 
   useEffect(() => {
     if (!contestId) return;
@@ -365,7 +451,9 @@ export default function EditContestPage() {
         const url = `/api/contests/${contestId}`;
 
         if (navigator.sendBeacon) {
-          const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+          const blob = new Blob([JSON.stringify(payload)], {
+            type: "application/json",
+          });
           navigator.sendBeacon(url, blob);
         } else {
           fetch(url, {
@@ -375,46 +463,61 @@ export default function EditContestPage() {
             keepalive: true,
           }).catch(() => {});
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [contestId, idToken, postAsUsername, questions, title, description, timeLimit, selectedTopic, customTopic, bannerUrl, isPublished, isHidden]);
-
+  }, [
+    contestId,
+    idToken,
+    postAsUsername,
+    questions,
+    title,
+    description,
+    timeLimit,
+    selectedTopic,
+    customTopic,
+    bannerUrl,
+    isPublished,
+    isHidden,
+  ]);
 
   const validateAndSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); 
+    event.preventDefault();
 
     const newErrors: Record<string, string[]> = {};
     let isValid = true;
 
     if (!title.trim()) {
-        newErrors.title = ["Title cannot be empty."];
-        isValid = false;
+      newErrors.title = ["Title cannot be empty."];
+      isValid = false;
     }
     if (timeLimit <= 0) {
-        newErrors.timeLimit = ["Time limit must be a positive number."];
-        isValid = false;
+      newErrors.timeLimit = ["Time limit must be a positive number."];
+      isValid = false;
     }
-    if (!selectedTopic.trim() || (selectedTopic === "Other" && !customTopic.trim())) {
-        newErrors.topic = ["Topic cannot be empty."];
-        isValid = false;
+    if (
+      !selectedTopic.trim() ||
+      (selectedTopic === "Other" && !customTopic.trim())
+    ) {
+      newErrors.topic = ["Topic cannot be empty."];
+      isValid = false;
     }
 
-
-    questions.forEach(q => {
+    questions.forEach((q) => {
       const questionErrors: string[] = [];
       if (!q.content.trim()) {
         questionErrors.push("Question content cannot be empty.");
         isValid = false;
       }
       if (q.choices.length === 0) {
-        questionErrors.push("Each question must have at least one answer choice.");
+        questionErrors.push(
+          "Each question must have at least one answer choice.",
+        );
         isValid = false;
       }
-      q.choices.forEach(c => {
+      q.choices.forEach((c) => {
         if (!c.text.trim()) {
           questionErrors.push("Answer choice text cannot be empty.");
           isValid = false;
@@ -445,11 +548,17 @@ export default function EditContestPage() {
       if (postAsUsername) {
         formData.append("postAsUsername", postAsUsername);
       }
-      formData.append("questions", JSON.stringify(convertToQuestions(questions)));
+      formData.append(
+        "questions",
+        JSON.stringify(convertToQuestions(questions)),
+      );
       formData.append("title", title);
       formData.append("description", description);
       formData.append("timeLimit", timeLimit.toString());
-      formData.append("topic", selectedTopic === "Other" ? customTopic : selectedTopic);
+      formData.append(
+        "topic",
+        selectedTopic === "Other" ? customTopic : selectedTopic,
+      );
       if (bannerUrl) {
         formData.append("bannerUrl", bannerUrl);
       }
@@ -480,19 +589,24 @@ export default function EditContestPage() {
 
   const topicValue = selectedTopic === "Other" ? customTopic : selectedTopic;
 
-  const inputClass = "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
+  const inputClass =
+    "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
 
   return (
     <div className="min-h-screen bg-black text-white font-sans pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-6">
-
         <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Blitz Editor</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">Build your question set and preview it live.</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              Blitz Editor
+            </h1>
+            <p className="text-zinc-500 text-sm mt-0.5">
+              Build your question set and preview it live.
+            </p>
             {postAsUsername && (
               <p className="text-xs text-violet-300 mt-1">
-                Posting as <span className="font-semibold">{postAsUsername}</span>
+                Posting as{" "}
+                <span className="font-semibold">{postAsUsername}</span>
               </p>
             )}
           </div>
@@ -503,12 +617,16 @@ export default function EditContestPage() {
                 onClick={handleToggleVisibility}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
                   isHidden
-                    ? 'border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
-                    : 'border-green-800/60 text-green-400 hover:bg-green-900/20'
+                    ? "border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600"
+                    : "border-green-800/60 text-green-400 hover:bg-green-900/20"
                 }`}
               >
-                {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                {isHidden ? 'Hidden' : 'Public'}
+                {isHidden ? (
+                  <EyeOff className="w-3.5 h-3.5" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5" />
+                )}
+                {isHidden ? "Hidden" : "Public"}
               </button>
             )}
             <button
@@ -518,66 +636,119 @@ export default function EditContestPage() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-zinc-700 text-red-400 hover:text-red-300 hover:border-red-800/60 hover:bg-red-900/10 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? "Deleting..." : "Delete"}
             </button>
           </div>
         </div>
 
         <form onSubmit={validateAndSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-
             {/* Left: Editor */}
             <div className="space-y-8">
-
               {/* Blitz Details */}
               <section>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Blitz Details</h2>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+                  Blitz Details
+                </h2>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Title</label>
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className={inputClass}
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Description</label>
-                    <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. First 10 questions from the 2013 USABO Opens" className={`${inputClass} resize-none`} />
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                      Description
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="e.g. First 10 questions from the 2013 USABO Opens"
+                      className={`${inputClass} resize-none`}
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Time Limit (seconds)</label>
-                      <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} className={inputClass} />
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        Time Limit (seconds)
+                      </label>
+                      <input
+                        type="number"
+                        value={timeLimit}
+                        onChange={(e) => setTimeLimit(Number(e.target.value))}
+                        className={inputClass}
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Topic</label>
-                      <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} className={inputClass}>
-                        {TOPICS.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        Topic
+                      </label>
+                      <select
+                        value={selectedTopic}
+                        onChange={(e) => setSelectedTopic(e.target.value)}
+                        className={inputClass}
+                      >
+                        {TOPICS.map((topic) => (
+                          <option key={topic} value={topic}>
+                            {topic}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
-                  {selectedTopic === 'Other' && (
+                  {selectedTopic === "Other" && (
                     <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">Custom Topic</label>
-                      <input type="text" value={customTopic} onChange={(e) => setCustomTopic(e.target.value)} className={inputClass} />
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        Custom Topic
+                      </label>
+                      <input
+                        type="text"
+                        value={customTopic}
+                        onChange={(e) => setCustomTopic(e.target.value)}
+                        className={inputClass}
+                      />
                     </div>
                   )}
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Banner Image</label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                      Banner Image
+                    </label>
                     <div className="flex items-center gap-3">
                       {bannerUrl ? (
-                        <img src={bannerUrl} alt="Banner" className="h-14 w-28 rounded-lg object-cover border border-zinc-700" />
+                        <img
+                          src={bannerUrl}
+                          alt="Banner"
+                          className="h-14 w-28 rounded-lg object-cover border border-zinc-700"
+                        />
                       ) : (
-                        <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">No banner</div>
+                        <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">
+                          No banner
+                        </div>
                       )}
                       <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
-                        {uploadingBanner ? 'Uploading...' : 'Upload'}
-                        <input type="file" accept="image/*" onChange={handleBannerUpload} className="sr-only" disabled={uploadingBanner} />
+                        {uploadingBanner ? "Uploading..." : "Upload"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleBannerUpload}
+                          className="sr-only"
+                          disabled={uploadingBanner}
+                        />
                       </label>
                       <button
                         type="button"
-                        onClick={() => setIsAiGenerated(v => !v)}
+                        onClick={() => setIsAiGenerated((v) => !v)}
                         className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                           isAiGenerated
-                            ? 'border-violet-600/60 bg-violet-900/20 text-violet-300'
-                            : 'border-zinc-700 bg-zinc-800 text-zinc-500'
+                            ? "border-violet-600/60 bg-violet-900/20 text-violet-300"
+                            : "border-zinc-700 bg-zinc-800 text-zinc-500"
                         }`}
                       >
                         {isAiGenerated ? (
@@ -592,7 +763,9 @@ export default function EditContestPage() {
                         )}
                       </button>
                       <div className="relative group">
-                        <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">?</div>
+                        <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">
+                          ?
+                        </div>
                         <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
                           Toggle if any part of your blitz is AI-generated
                         </div>
@@ -604,15 +777,25 @@ export default function EditContestPage() {
 
               {/* Questions */}
               <section>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Questions</h2>
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+                  Questions
+                </h2>
                 <div className="space-y-4">
                   {questions.map((question, index) => (
-                    <div key={question.id} className="rounded-xl border border-zinc-800 overflow-hidden">
+                    <div
+                      key={question.id}
+                      className="rounded-xl border border-zinc-800 overflow-hidden"
+                    >
                       <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
-                        <span className="text-sm font-semibold text-zinc-300">Question {index + 1}</span>
+                        <span className="text-sm font-semibold text-zinc-300">
+                          Question {index + 1}
+                        </span>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); removeQuestion(question.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeQuestion(question.id);
+                          }}
                           className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -621,13 +804,17 @@ export default function EditContestPage() {
                       {errors[question.id] && (
                         <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
                           {errors[question.id].map((err, i) => (
-                            <p key={i} className="text-xs text-red-400">{err}</p>
+                            <p key={i} className="text-xs text-red-400">
+                              {err}
+                            </p>
                           ))}
                         </div>
                       )}
                       <QuestionEditorForm
                         question={question}
-                        onQuestionChange={(updated) => handleQuestionChange(question.id, updated)}
+                        onQuestionChange={(updated) =>
+                          handleQuestionChange(question.id, updated)
+                        }
                       />
                     </div>
                   ))}
@@ -643,11 +830,13 @@ export default function EditContestPage() {
               </section>
 
               <div className="flex items-center justify-between pt-1">
-                {state.message && !state.message.startsWith('Blitz saved') && (
+                {state.message && !state.message.startsWith("Blitz saved") && (
                   <p className="text-sm text-red-400">{state.message}</p>
                 )}
                 <div className="ml-auto flex items-center gap-3">
-                  <span className={`flex items-center gap-1.5 text-xs text-green-400 transition-opacity duration-300 ${showSaved ? 'opacity-100' : 'opacity-0'}`}>
+                  <span
+                    className={`flex items-center gap-1.5 text-xs text-green-400 transition-opacity duration-300 ${showSaved ? "opacity-100" : "opacity-0"}`}
+                  >
                     <Check className="w-3.5 h-3.5" />
                     Saved
                   </span>
@@ -658,7 +847,9 @@ export default function EditContestPage() {
 
             {/* Right: Preview */}
             <div>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Live Preview</h2>
+              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+                Live Preview
+              </h2>
               <div className="space-y-6">
                 {questions.map((q, index) => {
                   const [qPreview, qSelectedAnswerKey] = transformForPreview(q);
@@ -673,7 +864,6 @@ export default function EditContestPage() {
                 })}
               </div>
             </div>
-
           </div>
         </form>
       </div>

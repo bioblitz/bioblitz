@@ -103,7 +103,7 @@ export default function HomeClient() {
   const handleDeleteContest = async (gameId: string, title: string) => {
     if (
       !confirm(
-        `Delete "${title}"? This will permanently remove the contest, all submissions, bookmarks, and reports. This cannot be undone.`,
+        `Are you sure you want to delete "${title}"? This cannot be undone.`,
       )
     )
       return;
@@ -438,7 +438,7 @@ export default function HomeClient() {
                       handleDeleteContest(game.id, game.title);
                     }}
                     disabled={deletingId === game.id}
-                    className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-black/80 border border-zinc-700 text-zinc-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-black/80 border border-zinc-700 text-zinc-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                     title="Delete contest"
                   >
                     {deletingId === game.id ? (

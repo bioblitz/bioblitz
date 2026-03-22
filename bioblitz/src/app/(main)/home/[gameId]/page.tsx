@@ -313,7 +313,7 @@ export default function GameDetailPage() {
     if (!game || !user) return;
     if (
       !confirm(
-        `Delete "${game.title}"? This will permanently remove the contest, all submissions, bookmarks, and reports. This cannot be undone.`,
+        `Are you sure you want to delete "${game.title}"? This cannot be undone.`,
       )
     )
       return;

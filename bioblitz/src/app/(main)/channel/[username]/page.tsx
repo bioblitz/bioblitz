@@ -139,31 +139,29 @@ export default function ChannelPage() {
 
   useEffect(() => {
     async function fetchChannelOwnerAndContests() {
-      if (!username) {
-        router.push("/404");
-        return;
-      }
-      setLoading(true);
-      const profile = await getUserProfileByUsername(username as string);
-      if (profile) {
-        setChannelOwnerProfile(profile);
-        setIsOwner(authUser?.uid === profile.uid);
+      if (!username) return;
 
-        const contests = await getContestsByCreator(
-          profile.uid,
-          profile.username,
-        );
-        setUserContests(contests);
-      } else {
-        console.error(
-          "Channel owner profile not found for username:",
-          username,
-        );
-        setChannelOwnerProfile(null);
-        setIsOwner(false);
-        router.push("/404");
+      setLoading(true);
+      try {
+        const profile = await getUserProfileByUsername(username as string);
+        if (profile) {
+          setChannelOwnerProfile(profile);
+          setIsOwner(authUser?.uid === profile.uid);
+
+          const contests = await getContestsByCreator(
+            profile.uid,
+            profile.username,
+          );
+          setUserContests(contests);
+        } else {
+          setChannelOwnerProfile(null);
+          setIsOwner(false);
+        }
+      } catch (err) {
+        console.error("Error fetching channel:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchChannelOwnerAndContests();
   }, [username, authUser?.uid, router]);
@@ -259,6 +257,23 @@ export default function ChannelPage() {
             </div>
           )}
 
+          {!loading && !channelOwnerProfile && (
+            <div className="bg-black min-h-screen flex items-center justify-center text-white">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Channel not found</h1>
+                <p className="text-zinc-400 mb-4">
+                  No user with this username exists.
+                </p>
+                <Link
+                  href="/home"
+                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  Back to home
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="p-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               {isEditingName ? (
@@ -304,7 +319,7 @@ export default function ChannelPage() {
                     </Link>
                     <button
                       onClick={() => setShowSubscribersModal(true)}
-                      className="text-zinc-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit"
+                      className="text-zinc-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit cursor-pointer"
                     >
                       {channelOwnerProfile?.subscriberCount || 0} Subscribers
                     </button>
@@ -356,19 +371,20 @@ export default function ChannelPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {displayed.map((game) => (
                     <div key={game.id} className="relative group">
-                      <ContestCard
-                        contest={game}
-                        href={`/home/${game.id}`}
-                      />
+                      <ContestCard contest={game} href={`/home/${game.id}`} />
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isOwner && (game.status !== 'completed' || (game as any).hidden) && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
-                            {game.status !== 'completed' ? 'Draft' : 'Hidden'}
-                          </span>
-                        )}
+                        {isOwner &&
+                          (game.status !== "completed" ||
+                            (game as any).hidden) && (
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
+                              {game.status !== "completed" ? "Draft" : "Hidden"}
+                            </span>
+                          )}
                         {isOwner && (
                           <button
-                            onClick={() => router.push(`/contests/create/${game.id}`)}
+                            onClick={() =>
+                              router.push(`/contests/create/${game.id}`)
+                            }
                             className="p-1.5 bg-zinc-900/90 hover:bg-zinc-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
                           >
                             <PencilIcon className="w-3 h-3" />
