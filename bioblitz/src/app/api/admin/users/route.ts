@@ -64,6 +64,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err?.message || "Unauthorized" }, { status });
   }
 
+  const { searchParams } = new URL(request.url);
+  const statsOnly = searchParams.get("statsOnly") === "true";
+
+  let submissionsCount = 0;
+  let totalUsers = 0;
+
+  try {
+    const submissionsSnap = await adminFirestore.collection("gameSubmissions").count().get();
+    submissionsCount = submissionsSnap.data().count;
+  } catch (err) {
+    submissionsCount = 0;
+  }
+
+  try {
+    const usersCountSnap = await adminFirestore.collection("users").count().get();
+    totalUsers = usersCountSnap.data().count;
+  } catch (err) {
+    totalUsers = 0;
+  }
+
+  if (statsOnly) {
+    return NextResponse.json({ submissionsCount, totalUsers });
+  }
+
   const usersSnap = await adminFirestore.collection("users").get();
   const users = usersSnap.docs.map((docSnap) => {
     const data = docSnap.data() as any;
@@ -76,15 +100,8 @@ export async function GET(request: Request) {
       createdAt: formatCreatedAt(data.createdAt),
     };
   });
-  let submissionsCount = 0;
-  try {
-    const submissionsSnap = await adminFirestore.collection("gameSubmissions").get();
-    submissionsCount = submissionsSnap.size;
-  } catch (err) {
-    submissionsCount = 0;
-  }
 
-  return NextResponse.json({ users, submissionsCount });
+  return NextResponse.json({ users, submissionsCount, totalUsers });
 }
 
 export async function DELETE(request: Request) {

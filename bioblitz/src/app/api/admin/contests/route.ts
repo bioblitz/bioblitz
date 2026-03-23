@@ -96,46 +96,47 @@ export async function DELETE(request: Request) {
     await deleteCollection(reportsRef);
 
     // 5. Delete all bookmarkedQuestions across all users for this game
-    // Bookmarks have IDs like {gameId}_q{index}, so we can query by prefix
-    const usersSnap = await adminFirestore.collection("users").get();
-    let bookmarksDeleted = 0;
-
-    // Process in batches of 10 users at a time
-    const userDocs = usersSnap.docs;
-    for (let i = 0; i < userDocs.length; i += 10) {
-      const chunk = userDocs.slice(i, i + 10);
-      await Promise.all(
-        chunk.map(async (userDoc) => {
-          const bookmarksRef = userDoc.ref
-            .collection("bookmarkedQuestions")
-            .where("gameId", "==", gameId);
-          const bookmarksSnap = await bookmarksRef.get();
-          if (!bookmarksSnap.empty) {
-            const batch = adminFirestore.batch();
-            bookmarksSnap.docs.forEach((doc) => batch.delete(doc.ref));
-            await batch.commit();
-            bookmarksDeleted += bookmarksSnap.size;
-          }
-        }),
-      );
+    const bookmarksSnap = await adminFirestore
+      .collectionGroup("bookmarkedQuestions")
+      .where("gameId", "==", gameId)
+      .get();
+    
+    if (!bookmarksSnap.empty) {
+      const chunks = [];
+      for (let i = 0; i < bookmarksSnap.docs.length; i += 500) {
+        chunks.push(bookmarksSnap.docs.slice(i, i + 500));
+      }
+      for (const chunk of chunks) {
+        const batch = adminFirestore.batch();
+        chunk.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+      }
     }
 
     // 6. Remove gameId from users' playedGameIds arrays
-    for (let i = 0; i < userDocs.length; i += 10) {
-      const chunk = userDocs.slice(i, i + 10);
-      await Promise.all(
-        chunk.map(async (userDoc) => {
+    const usersWithGameSnap = await adminFirestore
+      .collection("users")
+      .where("playedGameIds", "array-contains", gameId)
+      .get();
+
+    if (!usersWithGameSnap.empty) {
+      const chunks = [];
+      for (let i = 0; i < usersWithGameSnap.docs.length; i += 500) {
+        chunks.push(usersWithGameSnap.docs.slice(i, i + 500));
+      }
+      for (const chunk of chunks) {
+        const batch = adminFirestore.batch();
+        chunk.forEach((userDoc) => {
           const data = userDoc.data();
           const playedIds = Array.isArray(data.playedGameIds)
             ? data.playedGameIds
             : [];
-          if (playedIds.includes(gameId)) {
-            await userDoc.ref.update({
-              playedGameIds: playedIds.filter((id: string) => id !== gameId),
-            });
-          }
-        }),
-      );
+          batch.update(userDoc.ref, {
+            playedGameIds: playedIds.filter((id: string) => id !== gameId),
+          });
+        });
+        await batch.commit();
+      }
     }
 
     return NextResponse.json({

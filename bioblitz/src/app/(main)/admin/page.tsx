@@ -43,7 +43,9 @@ export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [fetchingUsers, setFetchingUsers] = useState(false);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [submissionsCount, setSubmissionsCount] = useState(0);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(null);
@@ -52,6 +54,7 @@ export default function AdminPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [reindexing, setReindexing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDb, setShowDb] = useState(false);
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -70,7 +73,7 @@ export default function AdminPage() {
 
           setIsAdmin(admin);
           if (admin) {
-            fetchUsers(nextUser);
+            fetchStats(nextUser);
           }
           setLoading(false);
         });
@@ -82,8 +85,26 @@ export default function AdminPage() {
     return () => unsubscribe();
   }, [router]);
 
+  const fetchStats = async (currentUser: any) => {
+    try {
+      const idToken = await currentUser.getIdToken();
+      const response = await fetch("/api/admin/users?statsOnly=true", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch stats.");
+      const data = await response.json();
+      setSubmissionsCount(data.submissionsCount || 0);
+      setTotalUsers(data.totalUsers || 0);
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
+
   const fetchUsers = async (currentUser: any) => {
     try {
+      setFetchingUsers(true);
       setStatus(null);
       const idToken = await currentUser.getIdToken();
       const response = await fetch("/api/admin/users", {
@@ -98,14 +119,19 @@ export default function AdminPage() {
 
       const data = await response.json();
       setUsers(Array.isArray(data.users) ? data.users : []);
-      setSubmissionsCount(
-        Number.isFinite(Number(data.submissionsCount))
-          ? Number(data.submissionsCount)
-          : 0
-      );
+      setSubmissionsCount(data.submissionsCount || 0);
+      setTotalUsers(data.totalUsers || 0);
+      setShowDb(true);
     } catch (error: any) {
       setStatus(error?.message || "Failed to fetch users.");
+    } finally {
+      setFetchingUsers(false);
     }
+  };
+
+  const handleLoadDb = () => {
+    if (!user) return;
+    fetchUsers(user);
   };
 
   const handleSetUserRole = async (uid: string, newRole: string) => {
@@ -305,7 +331,7 @@ export default function AdminPage() {
           <div>
             <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
             <div className="text-sm text-zinc-400 mt-1">
-              Total users: <span className="text-zinc-100 font-semibold">{users.length}</span>
+              Total users: <span className="text-zinc-100 font-semibold">{totalUsers}</span>
               <span className="mx-2 text-zinc-600">|</span>
               Contests taken: <span className="text-zinc-100 font-semibold">{submissionsCount}</span>
             </div>
@@ -326,128 +352,145 @@ export default function AdminPage() {
 
         {status && <p className="text-sm text-zinc-400 mb-4">{status}</p>}
 
-        <div className="mb-6">
-          <Input
-            placeholder="Search users by name, username, email, or UID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 max-w-md"
-          />
-        </div>
+        {!showDb ? (
+          <div className="py-20 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">
+            <p className="text-zinc-400 mb-6 text-center max-w-md">
+              The user database is not loaded by default to save on read operations.
+            </p>
+            <button
+              onClick={handleLoadDb}
+              disabled={fetchingUsers}
+              className="px-6 py-3 bg-neutral-600 hover:bg-neutral-500 text-white rounded-xl font-semibold transition-all"
+            >
+              {fetchingUsers ? "Fetching Database..." : "Access User Database"}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <Input
+                placeholder="Search users by name, username, email, or UID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 max-w-md"
+              />
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm">
-            <thead>
-              <tr className="text-left text-zinc-300">
-                <th className="py-2 px-4 border-b border-zinc-800">Display Name</th>
-                <th
-                  className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
-                  onClick={() => handleSort("username")}
-                >
-                  Username {sortColumn === "username" && (sortDirection === "asc" ? "▲" : "▼")}
-                </th>
-                <th className="py-2 px-4 border-b border-zinc-800">Email</th>
-                <th
-                  className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
-                  onClick={() => handleSort("role")}
-                >
-                  Role {sortColumn === "role" && (sortDirection === "asc" ? "▲" : "▼")}
-                </th>
-                <th className="py-2 px-4 border-b border-zinc-800">UID</th>
-                <th className="py-2 px-4 border-b border-zinc-800 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedUsers.map((u) => (
-                <tr key={u.uid} className="hover:bg-zinc-900/60">
-                  <td
-                    className="py-2 px-4 border-b border-zinc-800 text-zinc-100 cursor-pointer"
-                    onClick={() => {
-                      setEditingUser({ ...u });
-                      setEditingOriginal({ ...u });
-                    }}
-                  >
-                    {editingUser?.uid === u.uid ? (
-                      <input
-                        value={editingUser.displayName}
-                        onChange={(e) =>
-                          setEditingUser((prev) => {
-                            if (!prev) return prev;
-                            return { ...prev, displayName: e.target.value };
-                          })
-                        }
-                        onBlur={() => {
-                          if (!editingUser) return;
-                          handleUpdateUser({ ...editingUser });
-                          setEditingUser(null);
-                          setEditingOriginal(null);
-                        }}
-                        className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
-                      />
-                    ) : (
-                      u.displayName || "Unnamed"
-                    )}
-                  </td>
-                  <td
-                    className="py-2 px-4 border-b border-zinc-800 text-zinc-300 cursor-pointer"
-                    onClick={() => {
-                      setEditingUser({ ...u });
-                      setEditingOriginal({ ...u });
-                    }}
-                  >
-                    {editingUser?.uid === u.uid ? (
-                      <input
-                        value={editingUser.username}
-                        onChange={(e) =>
-                          setEditingUser((prev) => {
-                            if (!prev) return prev;
-                            return { ...prev, username: e.target.value };
-                          })
-                        }
-                        onBlur={() => {
-                          if (!editingUser) return;
-                          handleUpdateUser({ ...editingUser });
-                          setEditingUser(null);
-                          setEditingOriginal(null);
-                        }}
-                        className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
-                      />
-                    ) : (
-                      `@${u.username || "no-username"}`
-                    )}
-                  </td>
-                  <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
-                    {u.email || "-"}
-                  </td>
-                  <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
-                    <select
-                      value={primaryRole(u.roles || [])}
-                      onChange={(e) => handleSetUserRole(u.uid, e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-md px-2 py-1"
+            <div className="overflow-x-auto">
+              <table className="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm">
+                <thead>
+                  <tr className="text-left text-zinc-300">
+                    <th className="py-2 px-4 border-b border-zinc-800">Display Name</th>
+                    <th
+                      className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
+                      onClick={() => handleSort("username")}
                     >
-                      <option value="user">User</option>
-                      <option value="staff">Staff</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </td>
-                  <td className="py-2 px-4 border-b border-zinc-800 text-zinc-400 font-mono text-xs break-all">
-                    {u.uid}
-                  </td>
-                  <td className="py-2 px-4 border-b border-zinc-800">
-                    <div className="flex items-center justify-center space-x-2 whitespace-nowrap">
-                      <button
-                        onClick={() => handleDeleteUser(u.uid)}
-                        className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white"
+                      Username {sortColumn === "username" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th className="py-2 px-4 border-b border-zinc-800">Email</th>
+                    <th
+                      className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
+                      onClick={() => handleSort("role")}
+                    >
+                      Role {sortColumn === "role" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th className="py-2 px-4 border-b border-zinc-800">UID</th>
+                    <th className="py-2 px-4 border-b border-zinc-800 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedUsers.map((u) => (
+                    <tr key={u.uid} className="hover:bg-zinc-900/60">
+                      <td
+                        className="py-2 px-4 border-b border-zinc-800 text-zinc-100 cursor-pointer"
+                        onClick={() => {
+                          setEditingUser({ ...u });
+                          setEditingOriginal({ ...u });
+                        }}
                       >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        {editingUser?.uid === u.uid ? (
+                          <input
+                            value={editingUser.displayName}
+                            onChange={(e) =>
+                              setEditingUser((prev) => {
+                                if (!prev) return prev;
+                                return { ...prev, displayName: e.target.value };
+                              })
+                            }
+                            onBlur={() => {
+                              if (!editingUser) return;
+                              handleUpdateUser({ ...editingUser });
+                              setEditingUser(null);
+                              setEditingOriginal(null);
+                            }}
+                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
+                          />
+                        ) : (
+                          u.displayName || "Unnamed"
+                        )}
+                      </td>
+                      <td
+                        className="py-2 px-4 border-b border-zinc-800 text-zinc-300 cursor-pointer"
+                        onClick={() => {
+                          setEditingUser({ ...u });
+                          setEditingOriginal({ ...u });
+                        }}
+                      >
+                        {editingUser?.uid === u.uid ? (
+                          <input
+                            value={editingUser.username}
+                            onChange={(e) =>
+                              setEditingUser((prev) => {
+                                if (!prev) return prev;
+                                return { ...prev, username: e.target.value };
+                              })
+                            }
+                            onBlur={() => {
+                              if (!editingUser) return;
+                              handleUpdateUser({ ...editingUser });
+                              setEditingUser(null);
+                              setEditingOriginal(null);
+                            }}
+                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
+                          />
+                        ) : (
+                          `@${u.username || "no-username"}`
+                        )}
+                      </td>
+                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
+                        {u.email || "-"}
+                      </td>
+                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
+                        <select
+                          value={primaryRole(u.roles || [])}
+                          onChange={(e) => handleSetUserRole(u.uid, e.target.value)}
+                          className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-md px-2 py-1"
+                        >
+                          <option value="user">User</option>
+                          <option value="staff">Staff</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-400 font-mono text-xs break-all">
+                        {u.uid}
+                      </td>
+                      <td className="py-2 px-4 border-b border-zinc-800">
+                        <div className="flex items-center justify-center space-x-2 whitespace-nowrap">
+                          <button
+                            onClick={() => handleDeleteUser(u.uid)}
+                            className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
