@@ -9,7 +9,6 @@ export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-violet-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        {/* Header */}
         <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
             BioBlitz Terms & Conditions
@@ -20,7 +19,6 @@ export default function TermsOfServicePage() {
           </p>
         </div>
 
-        {/* Content */}
         <div className="space-y-8 leading-relaxed text-lg">
           <section>
             <p>

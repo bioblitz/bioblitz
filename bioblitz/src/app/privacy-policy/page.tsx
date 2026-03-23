@@ -9,7 +9,6 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-violet-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        {/* Header */}
         <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
             BioBlitz Privacy Policy
@@ -20,7 +19,6 @@ export default function PrivacyPolicyPage() {
           </p>
         </div>
 
-        {/* Content */}
         <div className="space-y-8 leading-relaxed text-lg">
           <section>
             <p>
@@ -61,14 +59,14 @@ export default function PrivacyPolicyPage() {
               collected directly from you.
             </p>
             <div className="bg-zinc-900/50 border-l-4 border-violet-400 p-6 rounded-r-lg">
-              <h3 className="text-white font-bold mb-2">Children’s Privacy</h3>
+              <h3 className="text-white font-bold mb-2">Children's Privacy</h3>
               <p>
                 Protecting younger users is important to us. Our services are
                 not intended for children under 13, and we do not knowingly
                 collect personal information from children in this age group. If
                 we discover that we have received personal information from a
                 child under 13, we will promptly remove it from our records in
-                accordance with the Children’s Online Privacy Protection Act
+                accordance with the Children's Online Privacy Protection Act
                 (COPPA).
               </p>
             </div>
@@ -85,7 +83,7 @@ export default function PrivacyPolicyPage() {
               Your data may be used to improve our services, ensure compliance
               with legal requirements, and protect the security and integrity of
               our community. Marketing emails or newsletters are only sent if
-              you’ve given consent, and you can opt out at any time.
+              you've given consent, and you can opt out at any time.
             </p>
           </section>
 
@@ -218,7 +216,6 @@ export default function PrivacyPolicyPage() {
           </section>
         </div>
 
-        {/* Footer */}
       </div>
 
       <footer className="w-full text-center py-8 text-slate-600 text-sm border-t border-slate-900 bg-[#020204]">

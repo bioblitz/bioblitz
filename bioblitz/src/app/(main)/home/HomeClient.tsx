@@ -236,9 +236,9 @@ export default function HomeClient() {
       case "Biosystematics":
       case "Biosys":
         return {
-          bg: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-          shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50",
-          badge: "bg-violet-600 text-white",
+          bg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+          shadow: "hover:shadow-indigo-500/10 hover:border-indigo-500/50",
+          badge: "bg-indigo-600 text-white",
         };
       case "Ecology":
         return {
@@ -260,9 +260,9 @@ export default function HomeClient() {
         };
       default:
         return {
-          bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-          shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50",
-          badge: "bg-zinc-600 text-white",
+          bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20",
+          shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50",
+          badge: "bg-neutral-600 text-white",
         };
     }
   };
@@ -273,26 +273,26 @@ export default function HomeClient() {
     (topic !== "All Topics" ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-neutral-950 text-white">
       <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl font-bold text-white">Welcome back!</h1>
-              <p className="text-zinc-400 mt-1">
+              <p className="text-neutral-400 mt-1">
                 Select a Blitz to start competing
               </p>
             </div>
 
             <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative group flex-grow sm:flex-grow-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-neutral-500 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 group-focus-within:text-neutral-500 transition-colors" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search titles..."
-                  className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-all placeholder:text-zinc-600"
+                  className="w-full sm:w-64 bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-all placeholder:text-neutral-600"
                   suppressHydrationWarning
                 />
               </div>
@@ -303,8 +303,8 @@ export default function HomeClient() {
                     flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all
                     ${
                       showFilters || activeFilterCount > 0
-                        ? "bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700"
-                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
+                        ? "bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:bg-neutral-800 hover:text-white"
                     }
                   `}
               >
@@ -325,11 +325,11 @@ export default function HomeClient() {
           </div>
 
           {showFilters && (
-            <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="p-6 bg-neutral-900/50 border border-neutral-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                 <div className="md:col-span-5 space-y-6">
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
                       <CheckCircle2 className="w-3 h-3" /> Status
                     </span>
                     <div className="flex flex-wrap gap-2">
@@ -339,8 +339,8 @@ export default function HomeClient() {
                           onClick={() => setStatusFilter(opt)}
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                             statusFilter === opt
-                              ? "bg-zinc-800 text-white border-zinc-600"
-                              : "bg-transparent text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700"
+                              ? "bg-neutral-800 text-white border-neutral-600"
+                              : "bg-transparent text-neutral-500 border-neutral-800 hover:text-neutral-300 hover:border-neutral-700"
                           }`}
                         >
                           {opt}
@@ -350,7 +350,7 @@ export default function HomeClient() {
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
                       <User className="w-3 h-3" /> Type
                     </span>
                     <div className="flex flex-wrap gap-2">
@@ -361,8 +361,8 @@ export default function HomeClient() {
                             onClick={() => setTypeFilter(opt)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                               typeFilter === opt
-                                ? "bg-zinc-800 text-white border-zinc-600"
-                                : "bg-transparent text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700"
+                                ? "bg-neutral-800 text-white border-neutral-600"
+                                : "bg-transparent text-neutral-500 border-neutral-800 hover:text-neutral-300 hover:border-neutral-700"
                             }`}
                           >
                             {opt}
@@ -373,9 +373,9 @@ export default function HomeClient() {
                   </div>
                 </div>
 
-                <div className="md:col-span-7 border-t md:border-t-0 md:border-l border-zinc-800 pt-6 md:pt-0 md:pl-8">
+                <div className="md:col-span-7 border-t md:border-t-0 md:border-l border-neutral-800 pt-6 md:pt-0 md:pl-8">
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
                       <Filter className="w-3 h-3" /> Topics
                     </span>
                     <div className="flex flex-wrap gap-2">
@@ -388,7 +388,7 @@ export default function HomeClient() {
                                   ${
                                     topic === t.value
                                       ? "bg-neutral-600/15 text-neutral-300 border-neutral-500/30"
-                                      : "bg-transparent text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
+                                      : "bg-transparent text-neutral-400 border-neutral-800 hover:bg-neutral-800 hover:text-white"
                                   }
                                 `}
                         >
@@ -405,9 +405,9 @@ export default function HomeClient() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredGames.length === 0 ? (
-            <div className="col-span-full py-20 text-center bg-zinc-900/50 rounded-2xl border border-white/5">
-              <Filter className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-              <p className="text-zinc-400 text-lg">
+            <div className="col-span-full py-20 text-center bg-neutral-900/50 rounded-2xl border border-white/5">
+              <Filter className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+              <p className="text-neutral-400 text-lg">
                 No Blitzes found matching these filters.
               </p>
               <button
@@ -438,7 +438,7 @@ export default function HomeClient() {
                       handleDeleteContest(game.id, game.title);
                     }}
                     disabled={deletingId === game.id}
-                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-black/80 border border-zinc-700 text-zinc-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-black/80 border border-neutral-700 text-neutral-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                     title="Delete contest"
                   >
                     {deletingId === game.id ? (
@@ -455,7 +455,7 @@ export default function HomeClient() {
         <div ref={loaderRef} />
         {loadingPage && (
           <div className="flex justify-center mt-10">
-            <div className="w-5 h-5 border-2 border-zinc-700 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-neutral-700 rounded-full animate-spin" />
           </div>
         )}
       </main>

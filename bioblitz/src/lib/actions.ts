@@ -234,6 +234,7 @@ export async function getContestsByCreator(
         creation: data.creation?.toDate?.()?.getTime() || null,
         lastRatingUpdate: data.lastRatingUpdate?.toDate?.()?.getTime() || null,
         lastPlayedAt: data.lastPlayedAt?.toDate?.()?.getTime() || null,
+        activatedAt: data.activatedAt?.toDate?.()?.getTime() || null,
       } as unknown as gameRoom);
     });
     return contests;

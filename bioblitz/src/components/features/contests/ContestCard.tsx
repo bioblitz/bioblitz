@@ -35,7 +35,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
         return "bg-lime-600";
       case "Biosystematics":
       case "Biosys":
-        return "bg-violet-600";
+        return "bg-indigo-600";
       case "Ecology":
         return "bg-emerald-600";
       case "Ethology":
@@ -43,7 +43,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
       case "Multiple":
         return "bg-yellow-600";
       default:
-        return "bg-zinc-600";
+        return "bg-neutral-600";
     }
   };
 
@@ -53,7 +53,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
       href={href || `/contests/${contest.id}`}
       className="block group w-full"
     >
-      <div className="relative h-full flex flex-col bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-zinc-700">
+      <div className="relative h-full flex flex-col bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
         <div className="relative w-full h-28 bg-black">
           {contest?.bannerUrl ? (
             <div
@@ -74,13 +74,13 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
                 <img
                   src={contest.creatorPfp}
                   alt="Channel owner"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
                   referrerPolicy="no-referrer"
                 />
               </div>
             </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+            <div className="absolute inset-0 bg-neutral-900" />
           )}
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <p className="text-white text-sm font-semibold text-center px-4">
@@ -89,14 +89,14 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
           </div>
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10">
-              <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full shadow-sm`}>
+              <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}>
                 {getTopicShortLabel(contest.topic)}
               </span>
             </div>
           )}
           {isCompleted && (
             <div className="absolute top-2 right-2 z-10">
-              <CheckCircle2 className="w-5 h-5 text-green-400 drop-shadow-md" />
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
             </div>
           )}
           <div className="absolute bottom-2 right-2 z-10">
@@ -113,7 +113,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               <img
                 src={contest.creatorPfp}
                 alt={contest.creatorUsername || "Creator"}
-                className="w-12 h-12 rounded-full object-cover border-2 border-zinc-700 flex-shrink-0"
+                className="w-12 h-12 rounded-full object-cover border-2 border-neutral-700 flex-shrink-0"
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -127,7 +127,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               </h2>
               {contest.creatorUsername && (
                 <span
-                  className="text-xs text-zinc-400 hover:underline block truncate mb-1 cursor-pointer"
+                  className="text-xs text-neutral-400 hover:underline block truncate mb-1 cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -144,7 +144,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
                     <span className="font-medium">{contest.rating.toFixed(1)}/5</span>
                   </div>
                 )}
-                <div className="flex items-center gap-1 text-zinc-400">
+                <div className="flex items-center gap-1 text-neutral-400">
                   <Users className="w-3 h-3" />
                   <span className="font-medium">{contest.totalPlays || 0} plays</span>
                 </div>
