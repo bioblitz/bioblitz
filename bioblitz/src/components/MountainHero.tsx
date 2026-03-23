@@ -77,11 +77,12 @@ export default function MountainHero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <canvas
         ref={starsRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40"
+        className="absolute inset-0 w-full h-full pointer-events-none z-0 bg-neutral-800 opacity-40"
       />
+      {/** 
       <div
         className="absolute inset-0 w-full h-full pointer-events-none z-[5]"
         style={{
@@ -91,6 +92,7 @@ export default function MountainHero() {
           backgroundSize: "cover",
         }}
       />
+      */}
       <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center">
         <h1
           className="text-white mb-0 tracking-tight leading-[0.95]"

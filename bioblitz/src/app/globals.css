@@ -43,7 +43,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(9.693% 0.00001 271.152);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
@@ -172,7 +172,7 @@ body {
 }
 .loader {
   border: 3px solid transparent;
-  border-top-color: #4285f4; /* Google blue */
+  border-top-color: #4285f4;
   border-radius: 50%;
   width: 24px;
   height: 24px;

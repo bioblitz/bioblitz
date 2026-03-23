@@ -29,8 +29,7 @@ export default async function mainPage({
 
         <section id="demo" className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20">
           <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
-            <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop"
-              style={{ boxShadow: "0 0 0 1px rgba(61,184,112,0.06), 0 32px 80px rgba(0,0,0,0.5)" }}>
+            <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />

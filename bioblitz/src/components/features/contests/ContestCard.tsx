@@ -22,7 +22,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return "bg-blue-600";
+        return "bg-blue-400";
       case "Cell Biology":
       case "Cell Bio":
         return "bg-cyan-600";
