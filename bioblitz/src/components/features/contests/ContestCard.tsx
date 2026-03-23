@@ -60,26 +60,19 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${contest.bannerUrl})` }}
             />
-          ) : contest.creatorPfp ? (
-            <>
-              <img
-                src={contest.creatorPfp}
-                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
-                alt=""
-                aria-hidden
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-neutral-900/60" />
-              <div className="relative h-full flex items-center justify-center">
-                <img
-                  src={contest.creatorPfp}
-                  alt="Channel owner"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </>
-          ) : (
+            ) : contest.creatorPfp ? (
+              <>
+                <div className="absolute inset-0 bg-neutral-900" />
+                <div className="relative h-full flex items-center justify-center">
+                  <img
+                    src={contest.creatorPfp}
+                    alt="Channel owner"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </>         
+               ) : (
             <div className="absolute inset-0 bg-neutral-900" />
           )}
           <div className="absolute inset-0 bg-neutral-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

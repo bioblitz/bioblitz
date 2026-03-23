@@ -21,6 +21,7 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { BarChart2 } from "lucide-react";
+/**hi */
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -326,14 +327,16 @@ export default function MainNavbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/home" className="flex items-center space-x-2 group">
+            <Link href="/" className="flex items-center space-x-2 group">
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                <Zap className="w-6 h-6 text-yellow-400" />
+                <img src="/icons/favicon.ico" className="w-6 h-6" alt="BioBlitz" />
               </div>
-              <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+              <span style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }} className="text-white text-xl">
                 BioBlitz
-              </span>
+              </span>          
             </Link>
+
+
 
             <SearchBar />
 
