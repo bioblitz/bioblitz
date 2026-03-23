@@ -274,7 +274,7 @@ export default function PotdStaffPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-zinc-100">
         <div className="max-w-6xl mx-auto px-4 py-20">Loading...</div>
       </div>
     );
@@ -282,7 +282,7 @@ export default function PotdStaffPage() {
 
   if (!hasAccess) {
     return (
-      <div className="min-h-screen bg-black text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-zinc-100">
         <div className="max-w-6xl mx-auto px-4 py-20">
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
           <p className="text-zinc-400">You do not have permission to view this page.</p>
@@ -292,7 +292,7 @@ export default function PotdStaffPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100">
+    <div className="min-h-screen bg-neutral-900 text-zinc-100">
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
@@ -336,7 +336,7 @@ export default function PotdStaffPage() {
                   <input
                     value={newItem.title}
                     onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                    className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -345,7 +345,7 @@ export default function PotdStaffPage() {
                     value={newItem.question}
                     onChange={(e) => setNewItem({ ...newItem, question: e.target.value })}
                     rows={4}
-                    className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -354,7 +354,7 @@ export default function PotdStaffPage() {
                     value={newItem.explanation}
                     onChange={(e) => setNewItem({ ...newItem, explanation: e.target.value })}
                     rows={3}
-                    className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -363,7 +363,7 @@ export default function PotdStaffPage() {
                     <select
                       value={newItem.topic}
                       onChange={(e) => setNewItem({ ...newItem, topic: e.target.value })}
-                      className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                     >
                       {topics.map((topic) => (
                         <option key={topic} value={topic}>
@@ -377,7 +377,7 @@ export default function PotdStaffPage() {
                     <select
                       value={newItem.status}
                       onChange={(e) => setNewItem({ ...newItem, status: e.target.value })}
-                      className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                     >
                       <option value="queued">Queued</option>
                       <option value="scheduled">Scheduled</option>
@@ -392,7 +392,7 @@ export default function PotdStaffPage() {
                       type="date"
                       value={newItem.date}
                       onChange={(e) => setNewItem({ ...newItem, date: e.target.value })}
-                      className="mt-1 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                     />
                   </div>
                   <div className="flex items-center gap-2 mt-6">
@@ -426,7 +426,7 @@ export default function PotdStaffPage() {
                     value={newItem.imageAlt}
                     onChange={(e) => setNewItem({ ...newItem, imageAlt: e.target.value })}
                     placeholder="Image alt text"
-                    className="mt-3 w-full rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                    className="mt-3 w-full rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                   />
                 </div>
 
@@ -448,7 +448,7 @@ export default function PotdStaffPage() {
                             options: { ...newItem.options, [key]: e.target.value },
                           })
                         }
-                        className="flex-1 rounded-lg bg-black border border-zinc-800 px-3 py-2 text-sm"
+                        className="flex-1 rounded-lg bg-neutral-900 border border-zinc-800 px-3 py-2 text-sm"
                       />
                     </div>
                   ))}

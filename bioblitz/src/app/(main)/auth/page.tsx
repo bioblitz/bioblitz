@@ -89,10 +89,10 @@ export default function AuthenticationPage() {
   return (
     <div className="min-h-screen w-full bg-neutral-900 text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none  bg-[size:24px_24px]"></div>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-black blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-neutral-900 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-4xl">
-        <div className="bg-black backdrop-blur-xl rounded-3xl border border-neutral-800 overflow-hidden">
+        <div className="bg-neutral-900 backdrop-blur-xl rounded-3xl border border-neutral-800 overflow-hidden">
           {" "}
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="p-5 md:p-8 flex flex-col justify-center md:border-r border-neutral-500 relative overflow-hidden">
@@ -180,7 +180,7 @@ export default function AuthenticationPage() {
       </div>
 
       {loading && (
-        <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
+        <div className="absolute inset-0 z-50 bg-neutral-900/70 backdrop-blur-sm flex flex-col items-center justify-center">
           <div className="bg-neutral-900/80 p-6 rounded-2xl flex flex-col items-center border border-yellow-400/30">
             <Loader2 className="w-10 h-10 text-yellow-300 animate-spin mb-4" />
             <p className="text-white font-medium animate-pulse tracking-wider">

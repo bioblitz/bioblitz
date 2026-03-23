@@ -320,7 +320,7 @@ export default function MainNavbar() {
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
           scrolled
-            ? "bg-black/80 backdrop-blur-md border-white/10"
+            ? "bg-neutral-900/80 backdrop-blur-md border-white/10"
             : "bg-transparent border-transparent"
         }`}
       >
@@ -344,7 +344,7 @@ export default function MainNavbar() {
 
       <aside
         className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 ${
-          railOpen ? "bg-black/90" : "bg-transparent"
+          railOpen ? "bg-neutral-900/90" : "bg-transparent"
         }`}
         onMouseLeave={() => {
           setRailOpen(false);

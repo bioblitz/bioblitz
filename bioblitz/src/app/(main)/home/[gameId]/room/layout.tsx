@@ -4,5 +4,5 @@ export default function GameRoomLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="bg-black text-white min-h-screen">{children}</div>;
+  return <div className="bg-neutral-900 text-white min-h-screen">{children}</div>;
 }

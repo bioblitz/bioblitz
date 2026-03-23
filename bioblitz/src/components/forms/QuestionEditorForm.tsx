@@ -188,7 +188,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
             />
             <button
               onClick={removeImage}
-              className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-zinc-500/10 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 p-2 bg-neutral-900/50 rounded-full hover:bg-zinc-500/10 text-white opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -196,7 +196,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
         ) : (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full flex flex-col items-center justify-center gap-2 p-8 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-zinc-400 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-violet-100"
+            className="w-full flex flex-col items-center justify-center gap-2 p-8 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-zinc-400 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-neutral-100"
           >
             <span>Upload an Image</span>
           </button>
@@ -243,7 +243,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
 
       <button
         onClick={addChoice}
-        className="w-full flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-violet-100"
+        className="w-full flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-neutral-100"
       >
         <Plus className="w-5 h-5" />
         Add Answer Choice
@@ -258,7 +258,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
           onChange={(e) => onQuestionChange({ ...question, solution: e.target.value })}
           placeholder="Explain why the correct answer is right..."
           rows={3}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all resize-none"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition-all resize-none"
         />
       </div>
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// 👇 Changed imports: Added 'Check', removed 'BellOff'
 import { Bell, Check, Loader2 } from "lucide-react";
 import { getAuth } from "firebase/auth";
 import {
@@ -90,13 +89,12 @@ export default function SubscribeButton({
     <button
       onClick={toggleSubscription}
       disabled={loading}
-      // 👇 Added 'group' class to handle hover effects on child elements if needed
       className={`
         group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border
         ${
           isSubscribed
             ? "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
-            : "bg-violet-600 border-transparent text-white hover:bg-violet-500 shadow-lg shadow-violet-500/20"
+            : "border-yellow-300 text-white hover:bg-neutral-800"
         }
       `}
     >
@@ -104,9 +102,7 @@ export default function SubscribeButton({
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : isSubscribed ? (
         <>
-          {/* 👇 Using Check icon for a positive status */}
           <Check className="w-4 h-4 group-hover:hidden" />
-          {/* 👇 Optional: Show an X on hover so they know clicking will remove it */}
           <span className="hidden group-hover:inline-block w-4 h-4 text-center leading-none font-bold">
             ✕
           </span>

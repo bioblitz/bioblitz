@@ -43,13 +43,13 @@ export default function DigestPreviewPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
         Loading preview...
       </div>
     );
   if (error)
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-red-400">
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-red-400">
         {error}
       </div>
     );

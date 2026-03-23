@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function NotFound() {
   return (
     <div
-      className={`${inter.className} min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden px-4`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-white flex items-center justify-center relative overflow-hidden px-4`}
     >
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />

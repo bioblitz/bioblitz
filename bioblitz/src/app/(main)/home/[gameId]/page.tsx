@@ -227,7 +227,6 @@ export default function GameDetailPage() {
 
         const leaderboardData = await Promise.all(
           uniqueSubmissions.map(async (submission) => {
-            // 1. Optimized Way: Use data directly from submission if available
             if (submission.username) {
               return {
                 submissionId: submission.id,
@@ -243,7 +242,6 @@ export default function GameDetailPage() {
               };
             }
 
-            // 2. Legacy Way: Fetch user profile (only if submission data missing)
             let displayName = "Unknown User";
             let handle = "";
             let photoURL = "";
@@ -414,7 +412,7 @@ export default function GameDetailPage() {
 
   if (loadingGame) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
+      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
         <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
       </div>
     );
@@ -431,13 +429,13 @@ export default function GameDetailPage() {
   const registrantAvatarSkeletons = Array.from({ length: 3 });
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white font-sans pl-14">
+    <div className="flex flex-col min-h-screen bg-neutral-900 text-white font-sans pl-14">
       <motion.div
         variants={slideUp}
         className="w-full pt-24 pr-4 pl-2 md:pr-8 md:pl-4 max-w-7xl mx-auto"
       >
         <div className="mb-6">
-          <div className="relative h-48 md:h-56 rounded overflow-hidden border border-zinc-800">
+          <div className="relative h-48 md:h-56 rounded overflow-hidden">
             {game.bannerUrl ? (
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -452,7 +450,7 @@ export default function GameDetailPage() {
                   aria-hidden
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/60" />
+                <div className="absolute inset-0 bg-neutral-900/60" />
                 <div className="relative h-full flex items-center justify-center">
                   <img
                     src={game.creatorPfp}
@@ -608,7 +606,7 @@ export default function GameDetailPage() {
                       : activeSession !== null
                         ? "bg-zinc-500 opacity-50 cursor-not-allowed"
                         : isFirstAttempt
-                          ? "bg-violet-500 hover:bg-violet-600"
+                          ? "border-neutral-100 border hover:bg-neutral-800"
                           : "bg-white text-black hover:bg-zinc-200"
                   }`}
                 >
@@ -661,7 +659,7 @@ export default function GameDetailPage() {
                 )}
               </div>
               <div className="mt-2 flex items-center gap-3">
-                <div className="text-sm text-indigo-300 flex items-center gap-2">
+                <div className="text-sm text-neutral-300 flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   {game.totalPlays || 0} registrant
                   {game.totalPlays === 1 ? "" : "s"}
@@ -702,10 +700,10 @@ export default function GameDetailPage() {
                 </div>
               </div>
             </div>
-            <h1 className="py-4 text-lg text-zinc-100">
+            <h1 className="py-4 text-lg text-neutral-300">
               Description:
               {game.description && (
-                <p className="text-lg text-zinc-100 leading-relaxed mt-2 max-w-3xl">
+                <p className="text-lg text-neutral-300 leading-relaxed mt-2 max-w-3xl">
                   {game.description.replace(/^"(.*)"$/, "$1")}
                 </p>
               )}
@@ -714,7 +712,6 @@ export default function GameDetailPage() {
 
           <motion.div variants={slideUp} className="mt-6 flex-1 mb-8 pl-6">
             <div className="flex items-center gap-2 mb-4 px-2">
-              <History className="text-violet-500 w-5 h-5" />
               <h3 className="text-xl font-bold text-white">Your History</h3>
             </div>
 
@@ -723,7 +720,7 @@ export default function GameDetailPage() {
                 <Loader2 className="w-8 h-8 text-zinc-700 animate-spin" />
               </div>
             ) : previousAttempts.length === 0 ? (
-              <div className="bg-zinc-900/50 border border-zinc-800 border-dashed rounded-2xl p-8 text-center">
+              <div className="p-8 text-center">
                 <p className="text-zinc-500">
                   You haven't played this Blitz yet.
                 </p>
@@ -736,7 +733,7 @@ export default function GameDetailPage() {
                     key={attempt.id}
                     className={`group flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
                       attempt.ranked
-                        ? "bg-zinc-900 border-violet-500/20 hover:border-violet-500/50 hover:bg-zinc-900/80"
+                        ? "bg-zinc-900 border-neutral-500/20 hover:border-neutral-500/50 hover:bg-zinc-900/80"
                         : "bg-zinc-900 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
                     }`}
                   >
@@ -744,7 +741,7 @@ export default function GameDetailPage() {
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
                           attempt.ranked
-                            ? "bg-violet-900/30 text-violet-400"
+                            ? "bg-neutral-900/30 text-neutral-400"
                             : "bg-zinc-800 text-zinc-400"
                         }`}
                       >
@@ -756,7 +753,7 @@ export default function GameDetailPage() {
                             {attempt.score} pts
                           </span>
                           {attempt.ranked && (
-                            <span className="text-[10px] bg-violet-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">
+                            <span className="text-[10px] bg-neutral-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">
                               Ranked
                             </span>
                           )}
@@ -792,12 +789,8 @@ export default function GameDetailPage() {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Trophy className="text-yellow-500 w-5 h-5" />
-              Top Performers
+              Leaderboard
             </h2>
-            <span className="text-xs text-zinc-500 font-bold bg-zinc-800 px-2 py-1 rounded">
-              Ranked
-            </span>
           </div>
 
           {loadingLeaderboard ? (
@@ -815,7 +808,7 @@ export default function GameDetailPage() {
                   key={index}
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                     authResolved && user && entry.userId === user.uid
-                      ? "bg-violet-500/10 border-violet-500/30 ring-1 ring-violet-500/20"
+                      ? "bg-neutral-500/10 border-neutral-500/30"
                       : "bg-zinc-950/50 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
@@ -831,7 +824,7 @@ export default function GameDetailPage() {
                         className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-xs font-bold text-violet-300">
+                      <div className="w-8 h-8 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
                         {entry.username[0]?.toUpperCase()}
                       </div>
                     )}
@@ -840,7 +833,7 @@ export default function GameDetailPage() {
                       <div
                         className={`text-sm font-bold ${
                           authResolved && user && entry.userId === user.uid
-                            ? "text-violet-300"
+                            ? "text-neutral-300"
                             : "text-zinc-200"
                         }`}
                       >
@@ -893,7 +886,7 @@ export default function GameDetailPage() {
       </div>
 
       {inspectEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/80 backdrop-blur-sm">
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
             <div className="flex items-center gap-2 mb-4">
               <ShieldAlert className="w-5 h-5 text-red-400" />
@@ -937,13 +930,13 @@ export default function GameDetailPage() {
       )}
 
       {showStartConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/80 backdrop-blur-sm transition-all">
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[80px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-500/10 blur-[80px] pointer-events-none" />
 
             <div className="flex flex-col items-center text-center relative z-10">
               <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-yellow-500/20">
@@ -978,7 +971,7 @@ export default function GameDetailPage() {
 
                 <button
                   onClick={proceedToGame}
-                  className="flex-1 py-3.5 rounded-xl font-bold bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
+                  className="flex-1 py-3.5 rounded-xl font-bold bg-neutral-600 text-white hover:bg-neutral-500 shadow-lg shadow-neutral-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
                 >
                   Begin Blitz <ArrowUpRight className="w-4 h-4" />
                 </button>

@@ -438,7 +438,7 @@ export default function HomeClient() {
                       handleDeleteContest(game.id, game.title);
                     }}
                     disabled={deletingId === game.id}
-                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-black/80 border border-neutral-700 text-neutral-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-neutral-900/80 border border-neutral-700 text-neutral-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                     title="Delete contest"
                   >
                     {deletingId === game.id ? (

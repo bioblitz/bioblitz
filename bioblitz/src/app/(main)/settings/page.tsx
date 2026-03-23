@@ -296,7 +296,7 @@ export default function SettingsPage() {
 
   if (checkingAuth) {
     return (
-      <main className="min-h-screen bg-black flex items-center justify-center text-white">
+      <main className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
       </main>
     );
@@ -315,7 +315,7 @@ export default function SettingsPage() {
         />
       )}
       <main
-      className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-white p-8 overflow-y-auto pt-24`}
     >
       {toastMessage && (
         <motion.div
@@ -361,7 +361,7 @@ export default function SettingsPage() {
                   />
                   <button
                     onClick={handlePfpUploadClick}
-                    className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    className="absolute inset-0 rounded-full bg-neutral-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                     title="Change profile picture"
                   >
                     <Camera className="w-5 h-5 text-white" />

@@ -15,7 +15,7 @@ export default function ProfileStats({
 }: ProfileStatsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div className="bg-gradient-to-br from-violet-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-violet-500/30 transition-colors">
+      <div className="bg-gradient-to-br from-neutral-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-neutral-500/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
           <p className="text-zinc-500 text-sm font-medium">Rating</p>
           {isTrendingUp ? (

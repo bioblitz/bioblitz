@@ -213,7 +213,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50" };
       case "Biosystematics":
       case "Biosys":
-        return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50" };
+        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20", shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50" };
       case "Ecology":
         return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50" };
       case "Ethology":
@@ -295,9 +295,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   return (
     <div
-      className={`${inter.className} min-h-screen bg-black text-zinc-100 relative overflow-hidden`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 relative overflow-hidden`}
     >
-      <div className="absolute top-0 left-0 w-full h-125 bg-violet-900/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900/10 blur-[100px] pointer-events-none" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
@@ -324,7 +324,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
         {userDataLoading ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
-            <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
+            <Loader2 className="w-10 h-10 text-neutral-500 animate-spin" />
             <p className="text-zinc-500 text-sm font-medium animate-pulse">
               Loading Your Progress...
             </p>
@@ -352,7 +352,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       <div className="flex flex-col sm:flex-row gap-4">
                         <button
                           onClick={() => setShowArchive(true)}
-                          className="bg-violet-500/10 border border-violet-500/50 text-violet-200 hover:bg-violet-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                          className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                         >
                           <History className="w-5 h-5" />
                           Practice Past Problems
@@ -369,7 +369,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                   </div>
                 ) : (
                   <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-2xl group text-center">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-neutral-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
                       {isFallback && (
@@ -434,9 +434,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               textClass = "text-red-100";
                             }
                           } else if (isSelected) {
-                            borderClass = "border-violet-500/50";
-                            bgClass = "bg-violet-500/10";
-                            textClass = "text-violet-100";
+                            borderClass = "border-neutral-500/50";
+                            bgClass = "bg-neutral-500/10";
+                            textClass = "text-neutral-100";
                           }
 
                           return (
@@ -480,7 +480,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                               <div className="absolute right-4 animate-in zoom-in duration-200">
                                 {!showResults && isSelected && (
-                                  <CheckCircle2 className="w-5 h-5 text-violet-500" />
+                                  <CheckCircle2 className="w-5 h-5 text-neutral-500" />
                                 )}
                                 {showResults && isCorrectKey && (
                                   <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -553,7 +553,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                     ${
                                                       selectedOptions.length >
                                                         0 && !submitting
-                                                        ? "bg-violet-600 text-white hover:bg-violet-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-violet-900/20"
+                                                        ? "bg-neutral-600 text-white hover:bg-neutral-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-neutral-900/20"
                                                         : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                                     }
                                                 `}
@@ -625,7 +625,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search past questions..."
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-zinc-600"
                       />
                     </div>
                     <button

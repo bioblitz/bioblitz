@@ -112,7 +112,7 @@ export default function NotificationBell() {
           <div className="p-3 border-b border-zinc-800 flex justify-between items-center">
             <h3 className="font-semibold text-sm text-white">Notifications</h3>
             {unreadCount > 0 && (
-              <span className="text-xs text-violet-400 font-medium">
+              <span className="text-xs text-neutral-400 font-medium">
                 {unreadCount} new
               </span>
             )}
@@ -133,7 +133,7 @@ export default function NotificationBell() {
                     ${
                       notification.read
                         ? "bg-transparent hover:bg-zinc-900/50"
-                        : "bg-violet-500/5 hover:bg-violet-500/10"
+                        : "bg-neutral-500/5 hover:bg-neutral-500/10"
                     }
                   `}
                 >
@@ -187,7 +187,7 @@ export default function NotificationBell() {
 
                   {!notification.read && (
                     <div className="shrink-0 self-center">
-                      <div className="w-2 h-2 rounded-full bg-violet-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-neutral-500"></div>
                     </div>
                   )}
                 </div>

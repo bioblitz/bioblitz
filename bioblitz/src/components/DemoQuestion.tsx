@@ -59,7 +59,7 @@ export default function DemoQuestion() {
       {/* Question Card */}
       <div className="flex-1 w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xl relative z-10">
         <div className="flex items-center gap-3 mb-4">
-          <span className="bg-violet-500/10 text-violet-400 text-sm font-bold px-3 py-1 rounded-full border border-violet-500/20">
+          <span className="bg-neutral-500/10 text-neutral-400 text-sm font-bold px-3 py-1 rounded-full border border-neutral-500/20">
             Question 4
           </span>
         </div>
@@ -80,13 +80,13 @@ export default function DemoQuestion() {
                 className={`flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-150 cursor-pointer
                   ${
                     isSelected
-                      ? "bg-violet-600 text-white border-violet-600 shadow-lg shadow-violet-900/50 scale-[1.01]"
+                      ? "bg-neutral-600 text-white border-neutral-600 shadow-lg shadow-neutral-900/50 scale-[1.01]"
                       : "bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800"
                   }`}
               >
                 <span
                   className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm transition-colors
-                    ${isSelected ? "bg-white/20 text-white" : "bg-black/20 text-zinc-400"}`}
+                    ${isSelected ? "bg-white/20 text-white" : "bg-neutral-900/20 text-zinc-400"}`}
                 >
                   {key}
                 </span>

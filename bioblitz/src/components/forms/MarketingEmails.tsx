@@ -2,7 +2,7 @@
 
 export default function MarketingEmails({ onAccept , onDecline}: { onAccept: () => void , onDecline: () => void}){
     return (
-        <div className= "fixed justify-center z-50 items-center bg-black/60 backdrop-blur-sm">
+        <div className= "fixed justify-center z-50 items-center bg-neutral-900/60 backdrop-blur-sm">
             <div className ="bg-zinc-900 rounded border border-zinc-800 max-w-md shadow-2xl mx-4">
                 <h1 className="text-xl text-white font-bold mb-2">
                     Stay in the loop!

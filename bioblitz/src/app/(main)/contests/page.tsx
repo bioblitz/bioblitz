@@ -15,7 +15,7 @@ export default async function ContestsPage() {
   const completedContests = await getCompletedContests();
 
     return (
-    <div className="min-h-screen font-inter bg-black text-white p-8">
+    <div className="min-h-screen font-inter bg-neutral-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-8">Blitzes</h1>
       <div className="flex gap-8">
         <aside className="w-1/4 ml-4">

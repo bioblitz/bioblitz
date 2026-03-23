@@ -192,7 +192,7 @@ export default function ChannelPage() {
         />
       )}
 
-      <div className="bg-black min-h-screen justify-center pt-20 py-10 text-white">
+      <div className="bg-neutral-900 min-h-screen justify-center pt-20 py-10 text-white">
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8">
           <input
             type="file"
@@ -223,7 +223,7 @@ export default function ChannelPage() {
                     aria-hidden
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-black/60" />
+                  <div className="absolute inset-0 bg-neutral-900/60" />
 
                   <div className="relative h-full flex items-center justify-center">
                     <img
@@ -240,7 +240,7 @@ export default function ChannelPage() {
               {isOwner && (
                 <button
                   onClick={handleBannerUploadClick}
-                  className="absolute bottom-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                  className="absolute bottom-4 right-4 p-2 bg-neutral-900/50 rounded-full hover:bg-neutral-900/70 transition-colors"
                   aria-label="Edit banner"
                   disabled={bannerLoading}
                 >
@@ -258,7 +258,7 @@ export default function ChannelPage() {
           )}
 
           {!loading && !channelOwnerProfile && (
-            <div className="bg-black min-h-screen flex items-center justify-center text-white">
+            <div className="bg-neutral-900 min-h-screen flex items-center justify-center text-white">
               <div className="text-center">
                 <h1 className="text-2xl font-bold mb-2">Channel not found</h1>
                 <p className="text-zinc-400 mb-4">
@@ -347,7 +347,7 @@ export default function ChannelPage() {
               {isOwner && (
                 <button
                   onClick={handleCreateNewContest}
-                  className="px-4 py-2 bg-black-600 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
+                  className="px-4 py-2 bg-neutral-900-600 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
                 >
                   <PlusIcon className="w-5 h-5" />
                   Create New Blitz

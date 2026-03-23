@@ -22,7 +22,7 @@ export default function CurtainReveal({ trigger = false }) {
     <div className="fixed inset-0 z-50 flex pointer-events-none">
       <div
         className={clsx(
-          "relative w-1/2 h-full bg-black transition-transform duration-[2000ms] origin-left will-change-transform [transition-timing-function:cubic-bezier(0.65, 0, 0.35, 1)]",
+          "relative w-1/2 h-full bg-neutral-900 transition-transform duration-[2000ms] origin-left will-change-transform [transition-timing-function:cubic-bezier(0.65, 0, 0.35, 1)]",
           animate ? "-translate-x-full" : "translate-x-0"
         )}
       >
@@ -38,7 +38,7 @@ export default function CurtainReveal({ trigger = false }) {
 
       <div
         className={clsx(
-          "relative w-1/2 h-full bg-black transition-transform duration-[2000ms] origin-right will-change-transform [transition-timing-function:cubic-bezier(0.65, 0, 0.35, 1)]",
+          "relative w-1/2 h-full bg-neutral-900 transition-transform duration-[2000ms] origin-right will-change-transform [transition-timing-function:cubic-bezier(0.65, 0, 0.35, 1)]",
           animate ? "translate-x-full" : "translate-x-0"
         )}
       >

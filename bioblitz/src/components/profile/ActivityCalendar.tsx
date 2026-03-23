@@ -70,7 +70,7 @@ export default function ActivityCalendar({
               key={day}
               className={`aspect-square rounded-lg flex items-center justify-center text-xs transition-all ${
                 isActive
-                  ? "bg-violet-600 text-white font-bold shadow-lg"
+                  ? "bg-neutral-600 text-white font-bold shadow-lg"
                   : isFuture
                   ? "bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
                   : "bg-zinc-900 text-zinc-500 hover:bg-zinc-800"

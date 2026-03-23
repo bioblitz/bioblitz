@@ -20,7 +20,7 @@ export default function RankedRatingCard({
 }: RankedRatingCardProps) {
   return (
     <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl flex flex-col shadow-xl relative overflow-hidden h-full min-h-75">
-      <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent opacity-50 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-br from-neutral-500/5 to-transparent opacity-50 pointer-events-none" />
       <div className="relative z-10 flex flex-col items-center pt-8 pb-4">
         <h3 className="text-zinc-400 text-sm font-medium uppercase tracking-wider mb-1">
           Ranked Rating

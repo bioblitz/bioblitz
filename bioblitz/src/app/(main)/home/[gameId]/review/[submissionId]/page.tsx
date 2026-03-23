@@ -107,10 +107,10 @@ export default function ReviewPage() {
   if (loading || !submission) {
     return (
       <div
-        className={`${dmSans.className} flex items-center justify-center h-screen bg-black text-white`}
+        className={`${dmSans.className} flex items-center justify-center h-screen bg-neutral-900 text-white`}
       >
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
+          <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
           <p className="text-zinc-500 font-medium tracking-wide animate-pulse">
             Loading Review...
           </p>
@@ -126,7 +126,7 @@ export default function ReviewPage() {
 
   return (
     <div
-      className={`${dmSans.className} min-h-screen bg-black text-white flex flex-col pt-24 pb-20 select-text`}
+      className={`${dmSans.className} min-h-screen bg-neutral-900 text-white flex flex-col pt-24 pb-20 select-text`}
     >
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
@@ -154,7 +154,7 @@ export default function ReviewPage() {
                 Attempt Review
               </h1>
             </div>
-            <div className="h-[3px] w-20 bg-violet-600 rounded-full mt-4"></div>
+            <div className="h-[3px] w-20 bg-neutral-600 rounded-full mt-4"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
@@ -163,7 +163,7 @@ export default function ReviewPage() {
                 Accuracy
               </h2>
               <p className="text-[24px] font-[900] text-white">
-                <span className="text-violet-400">
+                <span className="text-neutral-400">
                   {submission.correctCount}
                 </span>
                 <span className={`${mono} text-zinc-600 text-[24px]`}>
@@ -185,8 +185,8 @@ export default function ReviewPage() {
                 {formatTime(submission.timeTaken)}
               </p>
             </div>
-            <div className="relative bg-[rgba(9,9,11,0.8)] border border-violet-500/30 p-6 rounded-2xl text-center overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-violet-600/[0.08] to-transparent pointer-events-none" />
+            <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
               <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">
                 Rating
               </h2>

@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-violet-500/30">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-neutral-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
         <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
@@ -97,7 +97,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-2xl font-bold text-white mb-4">
               4. Disclaimer & Liability
             </h2>
-            <div className="bg-zinc-900/50 border-l-4 border-violet-400 p-6 rounded-r-lg">
+            <div className="bg-zinc-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
               <p>
                 BioBlitz is provided on an "as is" basis. While we strive for
                 accuracy, we do not guarantee that the service will be
@@ -125,7 +125,7 @@ export default function TermsOfServicePage() {
             If you have questions regarding these Terms, please contact us at{" "}
             <a
               href="mailto:admin@bioblitz.net"
-              className="text-violet-400 hover:text-violet-300 underline"
+              className="text-neutral-400 hover:text-neutral-300 underline"
             >
               admin@bioblitz.net
             </a>
@@ -138,13 +138,13 @@ export default function TermsOfServicePage() {
         <div className="flex justify-center gap-6 mb-4">
           <Link
             href="/privacy-policy"
-            className="hover:text-violet-400 transition-colors"
+            className="hover:text-neutral-400 transition-colors"
           >
             Privacy
           </Link>
           <Link
             href="/terms-and-conditions"
-            className="hover:text-violet-400 transition-colors"
+            className="hover:text-neutral-400 transition-colors"
           >
             Terms and Conditions
           </Link>
@@ -154,7 +154,7 @@ export default function TermsOfServicePage() {
           href="https://mitosisphere.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-violet-400 transition-colors font-medium"
+          className="hover:text-neutral-400 transition-colors font-medium"
         >
           Mitosisphere
         </Link>

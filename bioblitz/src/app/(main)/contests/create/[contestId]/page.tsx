@@ -180,7 +180,6 @@ export default function EditContestPage() {
             ) {
               const choiceKeys = ["a", "b", "c", "d", "e"] as const;
               const editable = (contest.questions as any[]).map((q) => {
-                // Subcollection format: {id, content, a, b, c, d?, e?, correct, imgURL, solution}
                 const choices = choiceKeys
                   .filter((k) => q[k])
                   .map((k, idx) => ({
@@ -236,7 +235,6 @@ export default function EditContestPage() {
     setQuestions(newQuestions);
   };
 
-  // Converts EditableQuestion → subcollection doc format: {content, a, b, c, d?, e?, correct, imgURL, solution}
   const convertToQuestions = (editableQuestions: EditableQuestion[]) => {
     const choiceKeys = ["a", "b", "c", "d", "e"] as const;
     return editableQuestions.map((eq) => {
@@ -258,14 +256,12 @@ export default function EditContestPage() {
     });
   };
 
-  // Detect successful publish via state message
   useEffect(() => {
     if (state.message?.startsWith("Blitz saved with ID:")) {
       const wasAlreadyPublished = isPublished;
       setIsPublished(true);
       setIsHidden(false);
 
-      // Notify subscribers only on first publish, not updates
       if (!wasAlreadyPublished && contestId) {
         (async () => {
           try {
@@ -311,7 +307,7 @@ export default function EditContestPage() {
         }),
       });
     } catch (e) {
-      setIsHidden(!newHidden); // revert on error
+      setIsHidden(!newHidden);
     }
   };
 
@@ -369,7 +365,6 @@ export default function EditContestPage() {
     if (!token) return;
     setIdToken(token);
 
-    // build compact snapshot of important fields
     const snapshot = JSON.stringify({
       title,
       description,
@@ -379,7 +374,6 @@ export default function EditContestPage() {
       bannerUrl,
     });
 
-    // avoid saving if nothing meaningful changed since last save
     if (lastSavedSnapshotRef.current === snapshot) return;
 
     const formData = new FormData();
@@ -396,7 +390,6 @@ export default function EditContestPage() {
       "topic",
       selectedTopic === "Other" ? customTopic : selectedTopic,
     );
-    // preserve published status when editing an already-published blitz
     formData.append("status", isPublished ? "completed" : "incomplete");
     formData.append("hidden", isPublished ? isHidden.toString() : "true");
     formData.append("isAiGenerated", isAiGenerated.toString());
@@ -566,7 +559,6 @@ export default function EditContestPage() {
       formData.append("hidden", "false");
       formData.append("isAiGenerated", isAiGenerated.toString());
 
-      // update snapshot so unload handler doesn't resend the same draft
       try {
         lastSavedSnapshotRef.current = JSON.stringify({
           title,
@@ -577,7 +569,6 @@ export default function EditContestPage() {
           bannerUrl,
         });
       } catch (e) {
-        // ignore
       }
 
       startTransition(() => {
@@ -593,7 +584,7 @@ export default function EditContestPage() {
     "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans pt-24 pb-16">
+    <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
           <div>
@@ -604,7 +595,7 @@ export default function EditContestPage() {
               Build your question set and preview it live.
             </p>
             {postAsUsername && (
-              <p className="text-xs text-violet-300 mt-1">
+              <p className="text-xs text-neutral-300 mt-1">
                 Posting as{" "}
                 <span className="font-semibold">{postAsUsername}</span>
               </p>
@@ -643,9 +634,7 @@ export default function EditContestPage() {
 
         <form onSubmit={validateAndSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Left: Editor */}
             <div className="space-y-8">
-              {/* Blitz Details */}
               <section>
                 <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
                   Blitz Details
@@ -747,7 +736,7 @@ export default function EditContestPage() {
                         onClick={() => setIsAiGenerated((v) => !v)}
                         className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                           isAiGenerated
-                            ? "border-violet-600/60 bg-violet-900/20 text-violet-300"
+                            ? "border-neutral-600/60 bg-neutral-900/20 text-neutral-300"
                             : "border-zinc-700 bg-zinc-800 text-zinc-500"
                         }`}
                       >
@@ -775,7 +764,6 @@ export default function EditContestPage() {
                 </div>
               </section>
 
-              {/* Questions */}
               <section>
                 <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
                   Questions
@@ -845,7 +833,6 @@ export default function EditContestPage() {
               </div>
             </div>
 
-            {/* Right: Preview */}
             <div>
               <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
                 Live Preview

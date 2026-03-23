@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-violet-500/30">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-neutral-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
         <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
               do not use cookies or tracking technologies, and all data is
               collected directly from you.
             </p>
-            <div className="bg-zinc-900/50 border-l-4 border-violet-400 p-6 rounded-r-lg">
+            <div className="bg-zinc-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
               <h3 className="text-white font-bold mb-2">Children's Privacy</h3>
               <p>
                 Protecting younger users is important to us. Our services are
@@ -222,19 +222,19 @@ export default function PrivacyPolicyPage() {
         <div className="flex justify-center gap-6 mb-4">
           <Link
             href="/privacy-policy"
-            className="hover:text-violet-400 transition-colors"
+            className="hover:text-neutral-400 transition-colors"
           >
             Privacy
           </Link>
           <Link
             href="/terms-and-conditions"
-            className="hover:text-violet-400 transition-colors"
+            className="hover:text-neutral-400 transition-colors"
           >
             Terms and Conditions
           </Link>
           <Link
             href="/about"
-            className="hover:text-violet-400 transition-colors"
+            className="hover:text-neutral-400 transition-colors"
           >
             About
           </Link>
@@ -244,7 +244,7 @@ export default function PrivacyPolicyPage() {
           href="https://mitosisphere.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-violet-400 transition-colors font-medium"
+          className="hover:text-neutral-400 transition-colors font-medium"
         >
           Mitosisphere
         </Link>
