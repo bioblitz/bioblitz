@@ -266,7 +266,7 @@ export default function ChannelPage() {
                 </p>
                 <Link
                   href="/home"
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                  className="text-neutral-400 hover:text-neutral-300 transition-colors"
                 >
                   Back to home
                 </Link>

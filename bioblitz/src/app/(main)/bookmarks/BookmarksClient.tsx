@@ -436,14 +436,14 @@ export default function BookmarksClient() {
                                     console.error("Error saving note:", err);
                                   }
                                 }}
-                                className="w-full bg-[rgba(24,24,27,0.5)] border border-zinc-700/40 rounded-xl px-4 py-3 text-[13px] text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/50 resize-none min-h-[60px] transition-colors"
+                                className="w-full bg-[rgba(24,24,27,0.5)] border border-zinc-700/40 rounded-xl px-4 py-3 text-[13px] text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-neutral-500/50 resize-none min-h-[60px] transition-colors"
                                 rows={2}
                               />
                             </div>
 
                             <Link
                               href={`/home/${bookmark.gameId}`}
-                              className={`${mono} inline-flex items-center gap-1.5 mt-4 text-[11px] font-bold text-violet-400 hover:text-violet-300 transition-colors`}
+                              className={`${mono} inline-flex items-center gap-1.5 mt-4 text-[11px] font-bold text-neutral-400 hover:text-neutral-300 transition-colors`}
                             >
                               View full blitz →
                             </Link>

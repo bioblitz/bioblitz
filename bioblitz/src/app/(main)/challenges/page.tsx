@@ -124,11 +124,11 @@ function FriendRanking({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-xl border border-violet-500/30 bg-violet-500/[0.05] px-4 py-3 flex items-center justify-between mx-3 mt-3"
+          className="rounded-xl border border-neutral-500/30 bg-neutral-500/[0.05] px-4 py-3 flex items-center justify-between mx-3 mt-3"
         >
           <div>
             <p
-              className={`${mono} text-[10px] font-[800] uppercase text-violet-400/60`}
+              className={`${mono} text-[10px] font-[800] uppercase text-neutral-400/60`}
               style={{ letterSpacing: "0.12em" }}
             >
               Your rank
@@ -141,7 +141,7 @@ function FriendRanking({
           </div>
           <div className="text-right">
             <p
-              className={`${mono} text-[20px] font-[800] text-violet-400 tabular-nums`}
+              className={`${mono} text-[20px] font-[800] text-neutral-400 tabular-nums`}
             >
               {sorted[myRank]?.bElo}
             </p>
@@ -176,7 +176,7 @@ function FriendRanking({
                 <Link href={`/profile/${friend.username}`}>
                   <div
                     className={`relative group rounded-xl overflow-hidden cursor-pointer transition-all ${
-                      isMe ? "bg-violet-500/[0.04]" : "hover:bg-zinc-900/60"
+                      isMe ? "bg-neutral-500/[0.04]" : "hover:bg-neutral-600/60"
                     }`}
                   >
                     <div
@@ -226,7 +226,7 @@ function FriendRanking({
 
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? "text-violet-400" : "text-zinc-200"}`}
+                          className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? "text-neutral-400" : "text-zinc-200"}`}
                         >
                           {isMe ? "You" : friend.displayName}
                         </p>
@@ -314,13 +314,12 @@ function ChallengeCard({
         <div
           className={`group relative rounded-2xl border transition-all cursor-pointer overflow-hidden ${
             urgent && needsMyPlay
-              ? "border-violet-500/50 bg-gradient-to-r from-violet-950/40 to-[rgba(9,9,11,0.8)] hover:border-violet-400/70"
+              ? "border-neutral-500/50"
               : isCompleted && iWon
-                ? "border-emerald-500/25 bg-[rgba(9,9,11,0.7)] hover:border-emerald-500/40"
+                ? "border-neutral-500/25 bg-[rgba(9,9,11,0.7)] hover:border-neutral-500/40"
                 : "border-zinc-800 bg-[rgba(9,9,11,0.6)] hover:border-zinc-700"
           }`}
         >
-          {/* Urgent glow */}
           {urgent && needsMyPlay && (
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -331,7 +330,6 @@ function ChallengeCard({
             />
           )}
 
-          {/* Side strip */}
           <div
             className={`absolute left-0 top-0 bottom-0 w-[3px] ${
               urgent && needsMyPlay
@@ -343,7 +341,6 @@ function ChallengeCard({
           />
 
           <div className="flex items-center gap-3.5 p-4 pl-5">
-            {/* Avatar */}
             <div className="relative flex-shrink-0">
               {opponent.photo ? (
                 <img
@@ -351,7 +348,7 @@ function ChallengeCard({
                   alt={opponent.name}
                   className={`w-11 h-11 rounded-full object-cover transition-all ${
                     urgent && needsMyPlay
-                      ? "ring-2 ring-violet-500/50 ring-offset-1 ring-offset-[#09090b] shadow-[0_0_12px_rgba(139,92,246,0.2)]"
+                      ? "ring-2 ring-neutral-500/50 ring-offset-1"
                       : "border border-zinc-700"
                   }`}
                   referrerPolicy="no-referrer"
@@ -360,7 +357,7 @@ function ChallengeCard({
                 <div
                   className={`${mono} w-11 h-11 rounded-full flex items-center justify-center text-sm font-[800] transition-all ${
                     urgent && needsMyPlay
-                      ? "bg-violet-900/40 text-violet-300 ring-2 ring-violet-500/50 ring-offset-1 ring-offset-[#09090b]"
+                      ? "bg-neutral-400/40 text-neutral-300 ring-2 ring-neutral-500/50 ring-offset-1 ring-offset-[#09090b]"
                       : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                   }`}
                 >
@@ -369,13 +366,12 @@ function ChallengeCard({
               )}
               {needsMyPlay && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-violet-500 border-2 border-[#09090b]" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neutral-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-neutral-500 border-2 border-[#09090b]" />
                 </span>
               )}
             </div>
 
-            {/* Info */}
             <div className="flex-1 min-w-0">
               <p
                 className={`text-[14px] font-bold truncate leading-tight transition-colors ${
@@ -397,7 +393,7 @@ function ChallengeCard({
                     className={`${mono} inline-flex items-center gap-1 text-[10px] font-[800] uppercase px-2 py-1 rounded-lg ${
                       isExpiringSoon
                         ? "text-red-300 bg-red-500/12 border border-red-500/30"
-                        : "text-violet-200 bg-violet-500/15 border border-violet-500/30"
+                        : "text-neutral-200 bg-neutral-500/15 border border-neutral-500/30"
                     }`}
                     style={{ letterSpacing: "0.06em" }}
                   >
@@ -454,7 +450,7 @@ function ChallengeCard({
               <div
                 className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                   urgent
-                    ? "bg-violet-600 group-hover:bg-violet-500 shadow-lg shadow-violet-900/40"
+                    ? "bg-neutral-600 group-hover:bg-neutral-500."
                     : "bg-zinc-800 group-hover:bg-zinc-700"
                 }`}
               >
@@ -463,9 +459,8 @@ function ChallengeCard({
             ) : null}
           </div>
 
-          {/* Bottom glow line for urgent */}
           {urgent && needsMyPlay && (
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px" />
           )}
         </div>
       </Link>
@@ -580,14 +575,13 @@ export default function ChallengesPage() {
       <div
         className={`${dmSans.className} min-h-screen bg-black flex items-center justify-center`}
       >
-        <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+        <Loader2 className="w-6 h-6 text-neutral-500 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className={`${dmSans.className} min-h-screen bg-black text-white`}>
-      {/* Dot grid */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
@@ -597,15 +591,14 @@ export default function ChallengesPage() {
       />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 relative z-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="text-center mb-10"
         >
-          <div className="relative inline-flex items-center justify-center w-[72px] h-[72px] rounded-2xl bg-violet-500/12 border border-violet-500/25 mb-4">
-            <Swords className="w-10 h-10 text-violet-400" />
+          <div className="relative inline-flex items-center justify-center w-[72px] h-[72px] rounded-2xl bg-neutral-500/12 border border-neutral-500/25 mb-4">
+            <Swords className="w-10 h-10 text-neutral-400" />
             <div className="absolute inset-[-20px] bg-[radial-gradient(circle,rgba(139,92,246,0.12)_0%,transparent_70%)] rounded-full pointer-events-none" />
           </div>
           <h1
@@ -620,11 +613,11 @@ export default function ChallengesPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-violet-500/12 border border-violet-500/30 text-violet-300 text-[13px] font-bold"
+              className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-neutral-500/12 border border-neutral-500/30 text-neutral-300 text-[13px] font-bold"
             >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neutral-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-500" />
               </span>
               {needsMyPlay.length} challenge
               {needsMyPlay.length !== 1 ? "s" : ""} waiting for you
@@ -633,16 +626,14 @@ export default function ChallengesPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-7 items-start">
-          {/* Left column */}
           <div className="space-y-4">
-            {/* Tab bar */}
             <div className="inline-flex items-center gap-0.5 p-[3px] bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-xl">
               <button
                 onClick={() => setActiveTab("active")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === "active"
                     ? needsMyPlay.length > 0
-                      ? "bg-violet-600 text-white shadow-lg shadow-violet-900/40"
+                      ? "bg-neutral-600 text-white"
                       : "bg-zinc-800 text-white"
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
@@ -651,7 +642,7 @@ export default function ChallengesPage() {
                 Active
                 {needsMyPlay.length > 0 && (
                   <span
-                    className={`${mono} w-5 h-5 rounded-full bg-white text-violet-700 text-[10px] font-[800] flex items-center justify-center leading-none`}
+                    className={`${mono} w-5 h-5 rounded-full bg-white text-[10px] font-[800] flex items-center justify-center leading-none`}
                   >
                     {needsMyPlay.length}
                   </span>
@@ -691,11 +682,11 @@ export default function ChallengesPage() {
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neutral-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-500" />
                         </span>
                         <p
-                          className={`${mono} text-[10px] font-[800] text-violet-400 uppercase`}
+                          className={`${mono} text-[10px] font-[800] text-neutral-400 uppercase`}
                           style={{ letterSpacing: "0.12em" }}
                         >
                           Your turn

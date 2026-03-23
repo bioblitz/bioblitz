@@ -423,7 +423,7 @@ export default function AdminPage() {
                               setEditingUser(null);
                               setEditingOriginal(null);
                             }}
-                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
+                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
                           />
                         ) : (
                           u.displayName || "Unnamed"
@@ -451,7 +451,7 @@ export default function AdminPage() {
                               setEditingUser(null);
                               setEditingOriginal(null);
                             }}
-                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-violet-500"
+                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
                           />
                         ) : (
                           `@${u.username || "no-username"}`

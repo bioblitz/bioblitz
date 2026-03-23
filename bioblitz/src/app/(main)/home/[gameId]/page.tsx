@@ -415,7 +415,7 @@ export default function GameDetailPage() {
   if (loadingGame) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white">
-        <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
+        <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
       </div>
     );
   }

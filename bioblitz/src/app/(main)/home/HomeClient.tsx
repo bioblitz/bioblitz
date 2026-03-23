@@ -286,13 +286,13 @@ export default function HomeClient() {
 
             <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative group flex-grow sm:flex-grow-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-violet-500 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-neutral-500 transition-colors" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search titles..."
-                  className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600"
+                  className="w-full sm:w-64 bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-all placeholder:text-zinc-600"
                   suppressHydrationWarning
                 />
               </div>
@@ -311,7 +311,7 @@ export default function HomeClient() {
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>Filters</span>
                 {activeFilterCount > 0 && (
-                  <span className="bg-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem]">
+                  <span className="bg-neutral-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem]">
                     {activeFilterCount}
                   </span>
                 )}
@@ -387,7 +387,7 @@ export default function HomeClient() {
                                   px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                                   ${
                                     topic === t.value
-                                      ? "bg-violet-600/15 text-violet-300 border-violet-500/30"
+                                      ? "bg-neutral-600/15 text-neutral-300 border-neutral-500/30"
                                       : "bg-transparent text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white"
                                   }
                                 `}
@@ -417,7 +417,7 @@ export default function HomeClient() {
                   setStatusFilter("All");
                   setTypeFilter("All");
                 }}
-                className="mt-4 text-violet-400 hover:text-violet-500 font-medium transition-colors"
+                className="mt-4 text-neutral-400 hover:text-neutral-500 font-medium transition-colors"
               >
                 Clear Filters
               </button>
@@ -455,7 +455,7 @@ export default function HomeClient() {
         <div ref={loaderRef} />
         {loadingPage && (
           <div className="flex justify-center mt-10">
-            <div className="w-5 h-5 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-zinc-700 rounded-full animate-spin" />
           </div>
         )}
       </main>

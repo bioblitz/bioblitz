@@ -78,7 +78,7 @@ function SubmitButton({ isPublished }: { isPublished: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors"
+      className="bg-neutral-600 hover:bg-neutral-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors"
     >
       {pending
         ? isPublished
