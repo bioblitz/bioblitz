@@ -1,11 +1,6 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from "recharts";
-
-interface EloHistoryPoint {
-  date: string;
-  elo: number;
-  fullDate: string;
-}
+import { AreaChart, Area, Tooltip, ResponsiveContainer, YAxis } from "recharts";
+import { EloHistoryPoint } from "@/hooks/profile/types";
 
 interface RankedRatingCardProps {
   rating: number;
@@ -18,6 +13,11 @@ export default function RankedRatingCard({
   eloHistory,
   isTrendingUp,
 }: RankedRatingCardProps) {
+  const elos = eloHistory.map(h => h.elo);
+  const minElo = Math.min(...elos);
+  const maxElo = Math.max(...elos);
+  const padding = (maxElo - minElo) * 0.2 || 50;
+
   return (
     <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl flex flex-col shadow-xl relative overflow-hidden h-full min-h-75">
       <div className="absolute inset-0 bg-linear-to-br from-neutral-500/5 to-transparent opacity-50 pointer-events-none" />
@@ -57,17 +57,28 @@ export default function RankedRatingCard({
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                 </linearGradient>
               </defs>
+              <YAxis 
+                hide 
+                domain={[Math.floor(minElo - padding), Math.ceil(maxElo + padding)]} 
+              />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #27272a",
-                  borderRadius: "8px",
-                }}
-                itemStyle={{ color: "#a1a1aa" }}
-                labelStyle={{
-                  color: "#fff",
-                  fontWeight: "bold",
-                  marginBottom: "4px",
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload as EloHistoryPoint;
+                    return (
+                      <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-2xl backdrop-blur-md">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-bold text-white">{Math.round(data.elo)}</span>
+                          {data.delta !== undefined && data.delta !== 0 && (
+                            <span className={`text-[10px] font-bold ${data.delta > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {data.delta > 0 ? '+' : ''}{Math.round(data.delta)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
                 }}
               />
               <Area
@@ -77,6 +88,7 @@ export default function RankedRatingCard({
                 strokeWidth={3}
                 fillOpacity={1}
                 fill="url(#colorElo)"
+                animationDuration={1500}
               />
             </AreaChart>
           </ResponsiveContainer>

@@ -26,6 +26,7 @@ import ProfileFriendsPanel from "@/components/profile/ProfileFriendsPanel";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ReportModal from "@/components/profile/ReportModal";
 import RankedRatingCard from "@/components/profile/RankedRatingCard";
+import { EloChart } from "@/components/profile";
 import { useProfileData } from "@/hooks/profile/useProfileData";
 import { useFriendActions } from "@/hooks/profile/useFriendActions";
 import { useProfileReport } from "@/hooks/profile/useProfileReport";
@@ -264,7 +265,6 @@ export default function ProfilePage() {
     .sort((a, b) => b.totalScore - a.totalScore)
     .slice(0, 5);
 
-  // helper: build profile path without breaking UID case-sensitivity
   const profilePathFor = (u: Pick<UserProfile, "uid" | "username">) => {
     const uname = (u.username || "").trim();
     if (uname) return `/profile/${uname.toLowerCase()}`;
@@ -300,7 +300,7 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid lg:grid-cols-3 gap-6"
+          className="grid gap-6"
         >
           <ProfileHeroCard
             userProfile={userProfile}
@@ -318,11 +318,13 @@ export default function ProfilePage() {
             onOpenReport={() => setReporting(true)}
           />
 
-          <RankedRatingCard
-            rating={userProfile?.bElo || 0}
-            eloHistory={eloHistory}
-            isTrendingUp={isTrendingUp}
-          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <EloChart eloHistory={eloHistory} />
         </motion.div>
 
         <motion.div

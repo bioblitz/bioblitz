@@ -223,7 +223,6 @@ export default function BookmarksClient() {
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
-          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />

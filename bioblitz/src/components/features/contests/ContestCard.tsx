@@ -53,7 +53,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
       href={href || `/contests/${contest.id}`}
       className="block group w-full"
     >
-      <div className="relative h-full flex flex-col bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
+      <div className="relative h-full flex flex-col bg-black border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
         <div className="relative w-full h-28 bg-neutral-900">
           {contest?.bannerUrl ? (
             <div

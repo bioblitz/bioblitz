@@ -23,6 +23,7 @@ export interface EloHistoryPoint {
   date: string;
   elo: number;
   fullDate: string;
+  delta?: number;
 }
 
 export interface SetPlayed {

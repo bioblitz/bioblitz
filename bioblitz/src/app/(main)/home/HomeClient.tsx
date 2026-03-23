@@ -430,24 +430,6 @@ export default function HomeClient() {
                   href={`/home/${game.id}`}
                   isCompleted={playedGameIds.has(game.id)}
                 />
-                {isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleDeleteContest(game.id, game.title);
-                    }}
-                    disabled={deletingId === game.id}
-                    className="absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-neutral-900/80 border border-neutral-700 text-neutral-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
-                    title="Delete contest"
-                  >
-                    {deletingId === game.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <X className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
               </div>
             ))
           )}
