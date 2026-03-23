@@ -64,35 +64,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err?.message || "Unauthorized" }, { status });
   }
 
-  const url = new URL(request.url);
-  const usernameParam = url.searchParams.get("username")?.trim().toLowerCase();
-
-  if (usernameParam) {
-    const snap = await adminFirestore
-      .collection("users")
-      .where("username", "==", usernameParam)
-      .limit(1)
-      .get();
-
-    if (snap.empty) {
-      return NextResponse.json({ users: [] });
-    }
-
-    const docSnap = snap.docs[0];
+  const usersSnap = await adminFirestore.collection("users").get();
+  const users = usersSnap.docs.map((docSnap) => {
     const data = docSnap.data() as any;
-    return NextResponse.json({
-      users: [{
-        uid: docSnap.id,
-        displayName: data.displayName || "",
-        username: data.username || "",
-        email: data.email || "",
-        roles: normalizeRoles(data.roles),
-        createdAt: formatCreatedAt(data.createdAt),
-      }],
-    });
-  }
-
-  // Stats-only (no username param) — return counts without loading all users
+    return {
+      uid: docSnap.id,
+      displayName: data.displayName || "",
+      username: data.username || "",
+      email: data.email || "",
+      roles: normalizeRoles(data.roles),
+      createdAt: formatCreatedAt(data.createdAt),
+    };
+  });
   let submissionsCount = 0;
   try {
     const submissionsSnap = await adminFirestore.collection("gameSubmissions").get();
@@ -101,7 +84,7 @@ export async function GET(request: Request) {
     submissionsCount = 0;
   }
 
-  return NextResponse.json({ users: [], submissionsCount });
+  return NextResponse.json({ users, submissionsCount });
 }
 
 export async function DELETE(request: Request) {
