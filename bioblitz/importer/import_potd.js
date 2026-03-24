@@ -2,7 +2,6 @@ const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
 
-// Paths (adjust if needed)
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, "serviceAccountKey.json");
 const JSON_PATH = path.join(__dirname, "potd_import.json");
 
@@ -12,7 +11,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// Firestore batch limit is 500 writes; using safe headroom
 const BATCH_LIMIT = 450;
 
 function chunk(arr, size) {
@@ -22,7 +20,6 @@ function chunk(arr, size) {
 }
 
 function toTimestamp(dateString) {
-  // Expects ISO string like "2026-01-04T12:00:00-05:00"
   const d = new Date(dateString);
   if (Number.isNaN(d.getTime())) {
     throw new Error(`Invalid date string: ${dateString}`);
@@ -67,10 +64,10 @@ async function run() {
     console.log(`Committed batch ${i + 1}/${chunks.length}`);
   }
 
-  console.log(`✅ POTD import complete: ${data.potd.length} docs into potd/`);
+  console.log(` POTD import complete: ${data.potd.length} docs into potd/`);
 }
 
 run().catch((err) => {
-  console.error("❌ Import failed:", err);
+  console.error(" Import failed:", err);
   process.exit(1);
 });

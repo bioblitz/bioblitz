@@ -136,7 +136,7 @@ export function UsernamePopup() {
       >
         <div className="h-1 w-full bg-zinc-800">
           <div
-            className="h-full bg-neutral-500 transition-all duration-500 ease-out"
+            className="h-full bg-yellow-300 transition-all duration-500 ease-out"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
           />
         </div>
@@ -174,38 +174,38 @@ export function UsernamePopup() {
                     setError(null);
                   }}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder="your_username"
+                  placeholder="ramiz_elias"
                   maxLength={24}
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition-all font-mono text-sm"
+                  className="w-full bg-zinc-900 border border-neutral-300 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-200 hover:border-neutral-200 transition-all text-sm"
                 />
                 {error && (
                   <p className="text-red-400 text-xs font-medium">{error}</p>
                 )}
                 <p className="text-zinc-600 text-xs">
-                  3-24 characters · letters, numbers, underscores only
+                  3-24 characters, letters, numbers, underscores only
                 </p>
 
                 <div
                   onClick={() => setWantsMarketing(!wantsMarketing)}
-                  className={`mt-4 p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                  className={`mt-4 p-4 rounded bg-neutral-900 transition-all cursor-pointer flex items-center gap-4 ${
                     wantsMarketing
                       ? "bg-neutral-500/10 border-neutral-500/50"
-                      : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                      : "bg-neutral-900 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
                   <div
-                    className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
                       wantsMarketing
-                        ? "bg-neutral-600 border-neutral-500"
-                        : "bg-zinc-800 border-zinc-700"
+                        ? "bg-neutral-400 border-yellow-200"
+                        : "bg-neutral-800 border-yellow-300"
                     }`}
                   >
                     {wantsMarketing && <Check className="w-4 h-4 text-white" />}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center bg-neutral-800 gap-2 mb-0.5">
                       <span
-                        className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-zinc-400"}`}
+                        className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-neutral-300"}`}
                       >
                         Stay in the loop!
                       </span>

@@ -208,21 +208,18 @@ export default function HomeClient() {
       case "Anat & Phys":
         return {
           bg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-          shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50",
           badge: "bg-blue-500 text-white",
         };
       case "Cell Biology":
       case "Cell Bio":
         return {
           bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-          shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50",
           badge: "bg-cyan-500 text-white",
         };
       case "Plant Biology":
       case "Plant Bio":
         return {
           bg: "bg-green-500/10 text-green-400 border-green-500/20",
-          shadow: "hover:shadow-green-500/10 hover:border-green-500/50",
           badge: "bg-green-600 text-white",
         };
       case "Genetics & Evolution":
@@ -230,38 +227,32 @@ export default function HomeClient() {
       case "Genetics":
         return {
           bg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
-          shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50",
           badge: "bg-lime-600 text-white",
         };
       case "Biosystematics":
       case "Biosys":
         return {
           bg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-          shadow: "hover:shadow-indigo-500/10 hover:border-indigo-500/50",
           badge: "bg-indigo-600 text-white",
         };
       case "Ecology":
         return {
           bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-          shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50",
           badge: "bg-emerald-600 text-white",
         };
       case "Ethology":
         return {
           bg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-          shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50",
           badge: "bg-orange-600 text-white",
         };
       case "Multiple":
         return {
           bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-          shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50",
           badge: "bg-yellow-600 text-white",
         };
       default:
         return {
           bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20",
-          shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50",
           badge: "bg-neutral-600 text-white",
         };
     }
@@ -273,12 +264,12 @@ export default function HomeClient() {
     (topic !== "All Topics" ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-neutral-900">
       <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-white">Welcome back!</h1>
+              <h1 className="text-4xl font-bold text-neutral-300">Welcome back!</h1>
               <p className="text-neutral-400 mt-1">
                 Select a Blitz to start competing
               </p>

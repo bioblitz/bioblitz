@@ -5,6 +5,7 @@ import ChallengeButton from "@/components/features/challenges/ChallengeButton";
 import Link from "next/link";
 import { allGames } from "@/lib/gameRoomsAll";
 import { gameRoom } from "@/types/index";
+import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import {
   Loader2,
   History,
@@ -496,20 +497,30 @@ export default function GameDetailPage() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 mt-3 text-sm text-zinc-400">
-                <span>
-                  Created by{" "}
+              <div className="flex items-center gap-6 mt-3 text-md text-neutral-400">
+                <div className="flex items-center gap-2">
+                 <span>Hosted by: {" "}</span>
                   {game.creatorUsername ? (
-                    <Link
-                      href={`/profile/${game.creatorUsername}`}
-                      className="text-zinc-200 hover:underline transition-colors"
-                    >
-                      {game.creatorUsername}
+                    <Link href={`/profile/${game.creatorUsername}`} className="flex items-center gap-2 text-zinc-200 hover:underline transition-colors">
+                      {game.creatorPfp ? (
+                        <img
+                          src={game.creatorPfp}
+                          alt={game.creatorUsername}
+                          className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-neutral-500"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 flex-shrink-0">
+                          <DefaultAvatar name={game.creatorUsername || ""} />
+                        </div>
+                      )}
+                      <span>{game.creatorUsername}</span>
+
                     </Link>
                   ) : (
                     <span className="text-zinc-200">Unknown</span>
                   )}
-                </span>
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-3 mt-4">
@@ -548,27 +559,19 @@ export default function GameDetailPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <div>
-                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
-                  Questions
-                </div>
                 <div className="text-xl font-bold text-white">
                   {game.number_of_questions}
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
-                  Time Limit
-                </div>
-                <div className="text-xl font-bold text-white flex items-center gap-2">
-                  {timeLimitMinutes} min
+                <div className="text-[11px] font-bold tracking-wide text-neutral-500">
+                  Questions
                 </div>
               </div>
               <div>
-                <div className="text-[11px] uppercase font-bold tracking-wide text-zinc-500">
-                  Attempts
-                </div>
                 <div className="text-xl font-bold text-white flex items-center gap-2">
-                  {loadingAttempts ? "-" : previousAttempts.length}
+                  {timeLimitMinutes}
+                </div>
+                <div className="text-[11px] font-bold tracking-wide text-neutral-500">
+                  Minutes
                 </div>
               </div>
             </div>

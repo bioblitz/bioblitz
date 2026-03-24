@@ -123,12 +123,10 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     const sortedCorrect = [...puzzle.correctAnswer].sort();
     const correct = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
     
-    // Optimistic UI updates (Make it feel instant)
     setIsCorrect(correct);
     setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
-    // Optionally assume streak increased for UI purposes (will be corrected on refresh)
     if (correct) { 
-        // Logic to visually increment streak if you want
+
     }
 
     try {
@@ -136,13 +134,12 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       const userRef = doc(db, "users", user.uid);
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
       
-      // *** CRITICAL: You must include puzzleDate here ***
       await setDoc(setPlayedRef, {
         gameId: puzzle.id,
         timestamp: serverTimestamp(),
         correct: correct,
         answers: sortedSelected,
-        puzzleDate: puzzle.date // <--- REQUIRED for index.ts to trigger
+        puzzleDate: puzzle.date
       });
 
       await setDoc(
@@ -200,28 +197,28 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50" };
+        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20"};
       case "Cell Biology":
       case "Cell Bio":
-        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50" };
+        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"};
       case "Plant Biology":
       case "Plant Bio":
-        return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50" };
+        return { bg: "bg-green-500/10 text-green-400 border-green-500/20"};
       case "Genetics & Evolution":
       case "Gen & Evo":
       case "Genetics":
-        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50" };
+        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20"};
       case "Biosystematics":
       case "Biosys":
-        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20", shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50" };
+        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"};
       case "Ecology":
-        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50" };
+        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"};
       case "Ethology":
-        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50" };
+        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20"};
       case "Multiple":
-        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50" };
+        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"};
       default:
-        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50" };
+        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"};
     }
   };
 
@@ -229,7 +226,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     const d = new Date(dateString);
     const now = new Date();
 
-    // 1. Get the current Calendar Date in Pacific Time
     const currentPstString = now.toLocaleDateString("en-US", {
       timeZone: "America/Los_Angeles",
       year: "numeric",
@@ -237,8 +233,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       day: "numeric",
     });
 
-    // 2. Get the Puzzle's Calendar Date (using UTC to avoid timezone shifting)
-    // We assume the puzzle date (e.g. "2025-01-10") represents the target day.
     const puzzleDateString = d.toLocaleDateString("en-US", {
       timeZone: "UTC",
       year: "numeric",
@@ -246,7 +240,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       day: "numeric",
     });
 
-    // 3. Compare: This ensures the puzzle for "Jan 10" shows up exactly when it is "Jan 10" in PST.
     return currentPstString === puzzleDateString;
   };
 
@@ -574,9 +567,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                 )
               ) : (
                 <div className="p-12 rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 text-center">
-                  <div className="bg-zinc-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="w-8 h-8 text-zinc-500" />
-                  </div>
                   <h3 className="text-2xl font-bold text-white mb-2">
                     No Problem for Today (Yet)
                   </h3>
@@ -628,17 +618,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-zinc-600"
                       />
                     </div>
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                        showFilters || activeFilterCount > 0
-                          ? "bg-zinc-800 text-white border-zinc-700"
-                          : "bg-zinc-900 text-zinc-400 border-zinc-800"
-                      }`}
-                    >
-                      <SlidersHorizontal className="w-4 h-4" />
-                      Filters
-                    </button>
                   </div>
                 </div>
 
@@ -659,7 +638,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           className="block group"
                         >
                           <div
-                            className={`relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}
+                            className={`relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1`}
                           >
                             <div className="p-5">
                               <div className="flex justify-between items-start mb-3">
