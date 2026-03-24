@@ -7,10 +7,6 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 admin.initializeApp();
 const db = admin.firestore();
 
-// ---------------------------------------------------------------------------
-// Rating Math Helpers (pure functions, no Firebase calls)
-// ---------------------------------------------------------------------------
-
 function computeExpectedPercentile(Rp: number, Rc: number): number {
   return 1 / (1 + Math.pow(10, (Rc - Rp) / 400));
 }
@@ -36,20 +32,7 @@ function applyIntegerRounding(deltaRaw: number): number {
   return Math.round(deltaRaw);
 }
 
-/**
- * Computes the final integer rating delta for a single participant.
- * All inputs come from the caller; no Firestore reads happen here.
- *
- * @param Rp             - Player's current bElo
- * @param Rc             - Contest rating
- * @param pi             - Observed percentile (0–1, 1 = 1st place)
- * @param piHat          - Expected percentile from logistic formula
- * @param Kp             - K-factor for this player/contest pair
- * @param contestsPlayed - Number of rated contests completed so far (experience multiplier)
- * @param lastContestAt  - Date of last rated contest, or null (inactivity multiplier)
- * @param isEarlyEntry   - Whether player submitted before the 25-participant threshold
- * @param isFirst        - Whether player finished 1st (first-place protection)
- */
+
 function computeFinalDelta(
   Rp: number,
   Rc: number,
@@ -61,7 +44,8 @@ function computeFinalDelta(
   isEarlyEntry: boolean,
   isFirst: boolean
 ): number {
-  const deltaBase = Kp * (pi - piHat);
+  const piHatShifted = piHat * (1-Math.exp(-Rp / 1000))
+  const deltaBase = Kp * (pi - piHatShifted);
   const deltaFloor = Math.max(0, (Rc - Rp) / 10000);
 
   const Mexp   = computeExperienceMultiplier(contestsPlayed);
@@ -70,37 +54,26 @@ function computeFinalDelta(
 
   let deltaRaw = deltaBase * Mexp * Minact * Mearly + deltaFloor;
 
-  // First-place protection: 1st-place finisher never loses rating
   if (isFirst) deltaRaw = Math.max(deltaRaw, 0);
 
   return applyIntegerRounding(deltaRaw);
 }
 
-// ---------------------------------------------------------------------------
-// Participant type used in rating functions
-// ---------------------------------------------------------------------------
 
 interface ParticipantEntry {
   submissionId: string;
   userId: string;
-  score: number;       // Combined score (accuracyScore + timeBonus) used for ranking
+  score: number;
   correctCount: number;
   totalQuestions: number;
 }
 
-// ---------------------------------------------------------------------------
-// activateContest
-// Batch-rates all participants when the 25-person threshold is first crossed.
-// All participants are treated as early-entry (Mearly = 2×).
-// ---------------------------------------------------------------------------
 
 async function activateContest(
   gameId: string,
   setTitle: string,
   currentSub: ParticipantEntry
 ): Promise<void> {
-  // 1. Query all submissions for this game, filter first-attempts in memory.
-  //    Using a single equality filter avoids composite-index requirements.
   const submissionsSnap = await db
     .collection("gameSubmissions")
     .where("gameId", "==", gameId)
@@ -116,8 +89,6 @@ async function activateContest(
       totalQuestions: doc.data().totalQuestions ?? 1,
     }));
 
-  // Ensure the current submission is included (it may not be visible yet if the
-  // write hasn't propagated, though in practice it should be).
   if (!submissions.find((s) => s.submissionId === currentSub.submissionId)) {
     submissions.push(currentSub);
   }
@@ -125,7 +96,6 @@ async function activateContest(
   const P = submissions.length;
   if (P === 0) return;
 
-  // 2. Fetch all participant user docs in parallel
   const userIds = [...new Set(submissions.map((s) => s.userId))];
   const userDocs = await Promise.all(
     userIds.map((uid) => db.collection("users").doc(uid).get())
@@ -146,8 +116,6 @@ async function activateContest(
     }
   });
 
-  // 3. Compute contest rating Rc = R̄ × δ
-  //    R̄ = mean player rating, δ = mean accuracy (clamped to [0.01, 1])
   const Rbar =
     submissions.reduce((sum, s) => sum + (userMap[s.userId]?.bElo ?? 500), 0) /
     P;
@@ -159,14 +127,12 @@ async function activateContest(
   const delta = Math.max(0.01, Math.min(1.0, sbar));
   const Rc = Rbar * delta;
 
-  // 4. Sort by score descending to assign ranks
   const sorted = [...submissions].sort((a, b) => b.score - a.score);
   const rankMap: Record<string, number> = {};
   sorted.forEach((s, idx) => {
     rankMap[s.submissionId] = idx + 1;
   });
 
-  // 5. Compute percentiles: π_i = |{j : rank_j > rank_i}| / (|P| − 1)
   const piMap: Record<string, number> = {};
   submissions.forEach((s) => {
     const rankI = rankMap[s.submissionId];
@@ -174,8 +140,7 @@ async function activateContest(
     piMap[s.submissionId] = P > 1 ? beaten / (P - 1) : 1.0;
   });
 
-  // 6. Build batched writes
-  const BATCH_SIZE = 499; // stay safely under 500
+  const BATCH_SIZE = 499; 
   let currentBatch = db.batch();
   let ops = 0;
   const batches: FirebaseFirestore.WriteBatch[] = [];
@@ -198,7 +163,6 @@ async function activateContest(
     const pi = piMap[sub.submissionId];
     const isFirst = rankMap[sub.submissionId] === 1;
 
-    // All activation participants receive the early-entry 2× bonus
     const deltaFinal = computeFinalDelta(
       Rp,
       Rc,
@@ -207,7 +171,7 @@ async function activateContest(
       Kp,
       user.contestsPlayed,
       user.lastContestAt,
-      true, // isEarlyEntry
+      true,
       isFirst
     );
     const newElo = Rp + deltaFinal;
@@ -231,8 +195,6 @@ async function activateContest(
     ops++;
     flush();
 
-    // Write ratingDelta + newElo back to the submission so the client
-    // can display the result via its existing onSnapshot listener.
     const submissionRef = db.collection("gameSubmissions").doc(sub.submissionId);
     currentBatch.update(submissionRef, { ratingDelta: deltaFinal, newElo });
     ops++;
@@ -255,7 +217,6 @@ async function activateContest(
     flush();
   }
 
-  // Store Rc on the set document so future participants can use it
   const setRef = db.collection("sets").doc(gameId);
   currentBatch.update(setRef, { contestRating: Rc });
   ops++;
@@ -268,11 +229,6 @@ async function activateContest(
   );
 }
 
-// ---------------------------------------------------------------------------
-// rateParticipant
-// Rates a single participant in an already-activated contest.
-// Uses the stored contestRating (Rc) and recomputes rank among all submissions.
-// ---------------------------------------------------------------------------
 
 async function rateParticipant(
   userId: string,
@@ -280,8 +236,6 @@ async function rateParticipant(
   gameId: string,
   score: number
 ): Promise<void> {
-  // 1. Fetch all submissions for this game, filter first-attempts in memory.
-  //    Single equality filter avoids composite-index requirements.
   const submissionsSnap = await db
     .collection("gameSubmissions")
     .where("gameId", "==", gameId)
@@ -295,18 +249,15 @@ async function rateParticipant(
       score: doc.data().score ?? 0,
     }));
 
-  // Ensure current submission is in the list
   if (!submissions.find((s) => s.submissionId === submissionId)) {
     submissions.push({ submissionId, userId, score });
   }
 
   const P = submissions.length;
 
-  // 2. Fetch stored Rc from the set document
   const setDoc = await db.collection("sets").doc(gameId).get();
   let Rc = setDoc.data()?.contestRating as number | undefined;
 
-  // Fallback: recompute Rc if missing (shouldn't happen but defensive)
   if (typeof Rc !== "number") {
     const userIds = [...new Set(submissions.map((s) => s.userId))];
     const userDocs = await Promise.all(
@@ -317,12 +268,10 @@ async function rateParticipant(
       0
     );
     const Rbar = ratingSum / userIds.length;
-    // Use a neutral δ = 0.5 as fallback (we can't compute sbar without correctCount)
     Rc = Rbar * 0.5;
     console.warn(`contestRating missing for ${gameId}, using fallback Rc=${Rc.toFixed(1)}`);
   }
 
-  // 3. Sort by score, find rank and percentile for this participant
   const sorted = [...submissions].sort((a, b) => b.score - a.score);
   const myIdx = sorted.findIndex((s) => s.submissionId === submissionId);
   const myRank = myIdx + 1;
@@ -330,14 +279,12 @@ async function rateParticipant(
   const pi = P > 1 ? beaten / (P - 1) : 1.0;
   const isFirst = myRank === 1;
 
-  // 4. Fetch user data
   const userDoc = await db.collection("users").doc(userId).get();
   const userData = userDoc.data();
   const Rp = userData?.bElo ?? 500;
   const n = userData?.contestsPlayed ?? 0;
   const lastContestAt: Date | null = userData?.lastContestAt?.toDate() ?? null;
 
-  // 5. Compute and apply delta
   const piHat = computeExpectedPercentile(Rp, Rc);
   const Kp = computeKFactor(Rp, Rc);
   const deltaFinal = computeFinalDelta(
@@ -348,7 +295,7 @@ async function rateParticipant(
     Kp,
     n,
     lastContestAt,
-    false, // not early entry
+    false,
     isFirst
   );
   const newElo = Rp + deltaFinal;
@@ -378,9 +325,6 @@ async function rateParticipant(
   );
 }
 
-// ---------------------------------------------------------------------------
-// gradeTest — main Cloud Function
-// ---------------------------------------------------------------------------
 
 export const gradeTest = onDocumentCreated(
   "gameSubmissions/{submissionId}",
@@ -418,7 +362,6 @@ export const gradeTest = onDocumentCreated(
       const timeTotal = gameDoc.data()?.timeLimit as number;
       const gameData = gameDoc.data();
 
-      // ── Grade the submission ──────────────────────────────────────────────
       let totalQuestions = 0;
       const correctAnswersMap: { [key: number]: string } = {};
 
@@ -491,8 +434,6 @@ export const gradeTest = onDocumentCreated(
         return;
       }
 
-      // ── First attempt ─────────────────────────────────────────────────────
-      // Determine activation state via atomic transaction
       const txResult = await db.runTransaction(async (txn) => {
         const setSnap = await txn.get(gameDocRef);
         const currentCount = setSnap.data()?.firstAttemptCount ?? 0;
@@ -512,10 +453,8 @@ export const gradeTest = onDocumentCreated(
         };
       });
 
-      // earlyEntry = true for anyone who submitted before/at the activation point
       const isEarlyEntry = !txResult.alreadyActivated;
 
-      // Write all first-attempt data
       const userHistoryData = {
         submission: snap.id,
         history: [snap.id],
@@ -541,9 +480,7 @@ export const gradeTest = onDocumentCreated(
         gameSetUpdate,
       ]);
 
-      // ── Apply rating update ───────────────────────────────────────────────
       if (txResult.justActivated) {
-        // Batch-rate all 25 participants with 2× early-entry bonus
         await activateContest(gameId, gameTitle, {
           submissionId: snap.id,
           userId,
@@ -552,10 +489,8 @@ export const gradeTest = onDocumentCreated(
           totalQuestions,
         });
       } else if (txResult.alreadyActivated) {
-        // Rate this participant individually using stored Rc
         await rateParticipant(userId, snap.id, gameId, finalScore);
       } else {
-        // Pre-activation: no rating change yet
         console.log(
           `Contest ${gameId}: pre-activation (earlyEntry). No rating change for ${userId}.`
         );
@@ -573,9 +508,6 @@ export const gradeTest = onDocumentCreated(
   }
 );
 
-// ---------------------------------------------------------------------------
-// Remaining Cloud Functions (unchanged)
-// ---------------------------------------------------------------------------
 
 export const getPublicQuestions = onCall(async (request) => {
   if (!request.auth) {
