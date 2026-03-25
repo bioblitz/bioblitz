@@ -56,10 +56,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const db = getFirestore(app);
 
-  const handlePfpUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {

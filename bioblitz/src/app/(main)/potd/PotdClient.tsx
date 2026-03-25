@@ -290,7 +290,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     <div
       className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 relative overflow-hidden`}
     >
-      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900 pointer-events-none" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
@@ -308,7 +308,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
           {isStaffUser && (
             <Link
               href="/potd/staff"
-              className="text-sm font-semibold text-orange-300 border border-orange-500/40 hover:border-orange-500 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+              className="text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
             >
               Manage Queue
             </Link>
@@ -327,13 +327,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
             <section className="relative">
               {activePuzzle ? (
                 !isFallback && isTodayCompleted && !viewAnyway ? (
-                  <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-xl p-12 text-center animate-in fade-in duration-500">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                  <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm shadow-xl p-12 text-center animate-in fade-in duration-500">
 
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className="bg-green-500/20 p-4 rounded-full mb-6">
-                        <Trophy className="w-10 h-10 text-green-500" />
-                      </div>
                       <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
                         Daily Problem Completed!
                       </h2>
@@ -361,8 +357,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-2xl group text-center">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-neutral-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                  <div className="relative overflow-hidden rounded-3xl bg-neutral-900 group text-center">
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
                       {isFallback && (
@@ -379,11 +374,13 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           {activePuzzle.topic}
                         </span>
                         <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
+                          {/*
                           {activePuzzle.multiSelect ? (
                             <ListChecks className="w-3 h-3" />
                           ) : (
                             <MousePointerClick className="w-3 h-3" />
                           )}
+                          */}
                           {activePuzzle.multiSelect
                             ? "Multi-Select"
                             : "Single Choice"}
@@ -490,38 +487,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       {(isSubmitted ||
                         ((viewAnyway || isFallback) && isActiveCompleted)) && (
                         <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                          {isSubmitted && (
-                            <div
-                              className={`p-6 rounded-2xl border mb-6 flex flex-col items-center gap-3 ${
-                                isCorrect
-                                  ? "bg-green-500/10 border-green-500/20"
-                                  : "bg-red-500/10 border-red-500/20"
-                              }`}
-                            >
-                              {isCorrect ? (
-                                <>
-                                  <div className="bg-green-500/20 p-3 rounded-full">
-                                    <Trophy className="w-8 h-8 text-green-500" />
-                                  </div>
-                                  <h3 className="text-xl font-bold text-green-400">
-                                    Correct! Great Job!
-                                  </h3>
-                                 
-                                </>
-                              ) : (
-                                <>
-                                  <div className="bg-red-500/20 p-3 rounded-full">
-                                    <XCircle className="w-8 h-8 text-red-500" />
-                                  </div>
-                                  <h3 className="text-xl font-bold text-red-400">
-                                    Incorrect. Keep Learning!
-                                  </h3>
-                                </>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-left">
+                          <div className="bg-zinc-900 rounded p-6 text-left">
                             <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm font-bold uppercase tracking-wider">
                               <Lightbulb className="w-4 h-4 text-yellow-500" />
                               Explanation
@@ -648,7 +614,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                   {puzzle.topic || "General"}
                                 </span>
                                 {isPlayed && (
-                                  <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>Completed</span>
                                   </div>
