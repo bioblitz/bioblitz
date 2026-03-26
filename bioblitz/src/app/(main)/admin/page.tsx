@@ -305,7 +305,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
         <div className="text-center text-zinc-300">Loading...</div>
         </div>
@@ -315,7 +315,7 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-4 text-zinc-100">Access Denied</h1>
           <p className="text-zinc-300">You do not have permission to view this page.</p>
@@ -325,7 +325,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-neutral-900">
       <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>

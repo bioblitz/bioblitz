@@ -10,26 +10,18 @@ const inter = Inter({ subsets: ["latin"] });
 export default function NotFound() {
   return (
     <div
-      className={`${inter.className} min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden px-4`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-white flex items-center justify-center relative overflow-hidden px-4`}
     >
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-2xl w-full text-center relative z-10">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto w-24 h-24 bg-zinc-900/80 border border-zinc-800 rounded-3xl flex items-center justify-center mb-8"
-        >
-          <SearchX className="w-10 h-10 text-yellow-400" />
-        </motion.div>
+       
 
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 tracking-tighter mb-4"
+          className="text-7xl md:text-9xl font-black  tracking-tighter mb-4"
         >
           404
         </motion.h1>

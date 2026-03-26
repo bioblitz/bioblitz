@@ -68,7 +68,7 @@ export default function SubscribersModal({
       {/* Backdrop with Blur */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+        className="absolute inset-0 bg-neutral-900/80 backdrop-blur-sm animate-in fade-in duration-200"
       />
 
       {/* Modal Content */}
@@ -76,8 +76,8 @@ export default function SubscribersModal({
         {/* Header */}
         <div className="p-5 border-b border-zinc-800/50 flex justify-between items-center bg-zinc-900/30 rounded-t-3xl">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-              <Users className="w-5 h-5 text-violet-400" />
+            <div className="w-10 h-10 rounded-full bg-neutral-500/10 flex items-center justify-center border border-neutral-500/20">
+              <Users className="w-5 h-5 text-neutral-400" />
             </div>
             <div>
               <h3 className="font-bold text-white text-lg leading-tight">
@@ -97,10 +97,10 @@ export default function SubscribersModal({
         </div>
 
         {/* List Body with Purple Scrollbar */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <Loader2 className="w-6 h-6 border-violet-500 animate-spin text-violet-500" />
+              <Loader2 className="w-6 h-6 border-neutral-500 animate-spin text-neutral-500" />
               <p className="text-xs text-zinc-500 font-medium">
                 Loading fans...
               </p>
@@ -125,19 +125,19 @@ export default function SubscribersModal({
                         <img
                           src={sub.photoURL}
                           alt={sub.username || "User"}
-                          className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-violet-500/30 transition-colors"
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-neutral-500/30 transition-colors"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                             e.currentTarget.nextElementSibling?.classList.remove("hidden");
                           }}
                         />
-                        <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-violet-900/20 flex items-center justify-center text-violet-300 font-bold border border-violet-500/20">
+                        <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-neutral-900/20 flex items-center justify-center text-neutral-300 font-bold border border-neutral-500/20">
                           {sub.displayName?.[0]?.toUpperCase() || "?"}
                         </div>
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-violet-900/20 flex items-center justify-center text-violet-300 font-bold border border-violet-500/20">
+                      <div className="w-10 h-10 rounded-full bg-neutral-900/20 flex items-center justify-center text-neutral-300 font-bold border border-neutral-500/20">
                         {sub.displayName?.[0]?.toUpperCase() || "?"}
                       </div>
                     )}
@@ -154,7 +154,7 @@ export default function SubscribersModal({
                   </div>
 
                   {/* Icon */}
-                  <ArrowUpRight className="w-4 h-4 text-zinc-700 group-hover:text-violet-400 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="w-4 h-4 text-zinc-700 group-hover:text-neutral-400 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               ))}
             </>

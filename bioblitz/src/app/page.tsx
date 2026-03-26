@@ -29,15 +29,14 @@ export default async function mainPage({
 
         <section id="demo" className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20">
           <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
-            <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop"
-              style={{ boxShadow: "0 0 0 1px rgba(61,184,112,0.06), 0 32px 80px rgba(0,0,0,0.5)" }}>
+            <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
                   <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
                 </div>
-                <div className="ml-4 px-3 py-1 bg-black/40 rounded text-[10px] text-zinc-500 font-mono w-64 border border-zinc-800/50">
+                <div className="ml-4 px-3 py-1 bg-neutral-900/40 rounded text-[10px] text-zinc-500 font-mono w-64 border border-zinc-800/50">
                   bioblitz.com/home/opens2014
                 </div>
               </div>
@@ -69,7 +68,7 @@ export default async function mainPage({
                     </p>
                     <div className="flex flex-col space-y-3">
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-black/20 text-zinc-400">A</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">A</span>
                         <span className="text-lg">ATP, CO2, and Acetyl-CoA</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-emerald-600 text-white border-emerald-300  scale-[1.01] cursor-pointer transition-all">
@@ -77,11 +76,11 @@ export default async function mainPage({
                         <span className="text-lg">ATP, CO2, and Ethanol</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-black/20 text-zinc-400">C</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">C</span>
                         <span className="text-lg">ATP, NADH, and Pyruvate</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-black/20 text-zinc-400">D</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">D</span>
                         <span className="text-lg">ATP, Pyruvate, and Acetyl-CoA</span>
                       </div>
                     </div>
@@ -134,7 +133,7 @@ export default async function mainPage({
               <h2 className="text-3xl font-bold text-white-100">From the community</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-6 bg-black border border-slate-800 rounded-xl">
+              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-xl">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-10 h-10 rounded-lg border flex items-center justify-center text-sm font-bold">A</div>
                   <div>
@@ -146,7 +145,7 @@ export default async function mainPage({
                   "The problem quality is legitimately good. I stopped just re-reading Campbell's and started actually understanding the material. Hit Gold Tier last week."
                 </p>
               </div>
-              <div className="p-6 bg-black border border-slate-800 rounded-lg">
+              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm border font-bold">S</div>
                   <div>
@@ -216,7 +215,7 @@ export default async function mainPage({
               Your first Blitz is free. No account required to start.
             </p>
             <Link href="/home">
-              <button className="bg-black text-white font-bold py-3 px-10 rounded-full hover:bg-neutral-900 transition-colors shadow-lg shadow-white/10">
+              <button className="bg-neutral-900 text-white font-bold py-3 px-10 rounded-full hover:bg-neutral-900 transition-colors shadow-lg shadow-white/10">
                 Start a Blitz
               </button>
             </Link>

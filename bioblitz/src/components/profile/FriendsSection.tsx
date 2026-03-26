@@ -25,12 +25,12 @@ export default function FriendsSection({
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-bold text-white">Friends</h3>
           {friends.length > 0 && (
-            <span className="px-2 py-0.5 bg-violet-500/20 text-violet-400 text-xs font-bold rounded-full">
+            <span className="px-2 py-0.5 bg-neutral-500/20 text-neutral-400 text-xs font-bold rounded-full">
               {friends.length}
             </span>
           )}
         </div>
-        <Users className="w-5 h-5 text-violet-500" />
+        <Users className="w-5 h-5 text-neutral-500" />
       </div>
 
       {loadingFriends ? (
@@ -38,8 +38,8 @@ export default function FriendsSection({
       ) : (
         <>
           {isOwnProfile && incomingRequests.length > 0 && (
-            <div className="mb-4 p-3 bg-violet-950/30 border border-violet-500/30 rounded-xl">
-              <p className="text-sm text-violet-400 font-medium mb-2">
+            <div className="mb-4 p-3 bg-neutral-950/30 border border-neutral-500/30 rounded-xl">
+              <p className="text-sm text-neutral-400 font-medium mb-2">
                 Pending Requests ({incomingRequests.length})
               </p>
               <div className="space-y-2">
@@ -50,7 +50,7 @@ export default function FriendsSection({
                   >
                     <Link
                       href={`/profile/${req.username}`}
-                      className="text-white hover:text-violet-400 transition-colors"
+                      className="text-white hover:text-neutral-400 transition-colors"
                     >
                       {req.displayName}
                     </Link>
@@ -84,12 +84,12 @@ export default function FriendsSection({
                           e.currentTarget.nextElementSibling?.classList.remove("hidden");
                         }}
                       />
-                      <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                      <div className="hidden absolute inset-0 w-10 h-10 rounded-full bg-gradient-to-br from-neutral-600 to-purple-600 flex items-center justify-center text-white font-bold">
                         {friend.displayName?.[0]?.toUpperCase() || "?"}
                       </div>
                     </div>
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-600 to-purple-600 flex items-center justify-center text-white font-bold">
                       {friend.displayName?.[0]?.toUpperCase() || "?"}
                     </div>
                   )}
@@ -99,7 +99,7 @@ export default function FriendsSection({
                     </p>
                     <p className="text-xs text-zinc-500">@{friend.username}</p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-violet-400 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-neutral-400 transition-colors" />
                 </Link>
               ))}
               {friends.length > 5 && (

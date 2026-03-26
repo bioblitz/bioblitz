@@ -77,11 +77,12 @@ export default function MountainHero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <canvas
         ref={starsRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40"
+        className="absolute inset-0 w-full h-full pointer-events-none z-0 bg-neutral-800 opacity-40"
       />
+      {/** 
       <div
         className="absolute inset-0 w-full h-full pointer-events-none z-[5]"
         style={{
@@ -91,6 +92,7 @@ export default function MountainHero() {
           backgroundSize: "cover",
         }}
       />
+      */}
       <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center">
         <h1
           className="text-white mb-0 tracking-tight leading-[0.95]"
@@ -167,7 +169,7 @@ export default function MountainHero() {
             href="/auth"
             className="bg-white hover:shadow-[0 0 30px rgba(245, 224, 36, 0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
           >
-            <span className="pointer-events-none absolute inset-0 z-30 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
+            <span className="pointer-events-none absolute inset-0 z-30 bg-neutral-900 opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
 
             <span className="pointer-events-none absolute top-0 left-0 z-20 h-full w-full blur-[1px]" aria-hidden="true">
               <span className="blurred-border absolute -top-px -left-px z-20 h-full w-full" />

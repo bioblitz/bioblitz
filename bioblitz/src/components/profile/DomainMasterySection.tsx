@@ -30,7 +30,7 @@ export default function DomainMasterySection({
     <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl h-[42rem]">
       <div className="h-px w-full bg-zinc-800/50 shrink-0" />
       <h3 className="text-lg font-semibold text-white shrink-0 flex items-center gap-2">
-        <BrainCircuit className="w-5 h-5 text-violet-500" />
+        <BrainCircuit className="w-5 h-5 text-neutral-500" />
         Domain Mastery
       </h3>
       <p className="text-xs text-zinc-500 -mt-2">Cumulative Score Per Topic</p>
@@ -81,7 +81,7 @@ export default function DomainMasterySection({
                         <div className="space-y-1">
                           <div className="flex items-center justify-between gap-4">
                             <span className="text-zinc-400 text-[10px]">Total Score</span>
-                            <span className="text-violet-400 font-mono text-xs">
+                            <span className="text-neutral-400 font-mono text-xs">
                               {data.totalScore.toLocaleString()}
                             </span>
                           </div>

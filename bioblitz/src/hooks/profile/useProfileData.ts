@@ -218,16 +218,17 @@ export function useProfileData({
     const fetchHistory = async () => {
       try {
         const historyRef = collection(db, "users", profileUid, "ratingHistory");
-        const q = query(historyRef, orderBy("timestamp", "asc"), limit(20));
+        const q = query(historyRef, orderBy("timestamp", "desc"), limit(50));
         const snap = await getDocs(q);
 
-        const historyData: EloHistoryPoint[] = snap.docs.map((docSnap) => {
+        const fetchedHistory: EloHistoryPoint[] = snap.docs.reverse().map((docSnap) => {
           const data: any = docSnap.data();
           const date = data.timestamp
             ? new Date(data.timestamp.seconds * 1000)
             : new Date();
           return {
             elo: data.newElo,
+            delta: data.delta || 0,
             date: date.toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",
@@ -236,16 +237,32 @@ export function useProfileData({
           };
         });
 
-        if (historyData.length === 0 && userProfile.bElo) {
+        const historyData: EloHistoryPoint[] = [];
+
+        if (fetchedHistory.length > 0) {
+          const firstPoint = fetchedHistory[0];
+          const startElo = firstPoint.elo - (firstPoint.delta || 0);
+          
+          historyData.push({
+            elo: startElo,
+            date: "Start",
+            fullDate: "Initial",
+            delta: 0
+          });
+
+          historyData.push(...fetchedHistory);
+        } else if (userProfile.bElo) {
+          historyData.push({
+            elo: 500,
+            date: "Joined",
+            fullDate: "Start",
+            delta: 0
+          });
           historyData.push({
             elo: userProfile.bElo,
             date: "Now",
             fullDate: new Date().toLocaleDateString(),
-          });
-          historyData.unshift({
-            elo: 1200,
-            date: "Joined",
-            fullDate: "Start",
+            delta: 0
           });
         }
 

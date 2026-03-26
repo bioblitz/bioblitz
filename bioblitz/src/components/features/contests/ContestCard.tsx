@@ -22,7 +22,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return "bg-blue-600";
+        return "bg-blue-400";
       case "Cell Biology":
       case "Cell Bio":
         return "bg-cyan-600";
@@ -53,36 +53,29 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
       href={href || `/contests/${contest.id}`}
       className="block group w-full"
     >
-      <div className="relative h-full flex flex-col bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
-        <div className="relative w-full h-28 bg-black">
+      <div className="relative h-full flex flex-col bg-black border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
+        <div className="relative w-full h-28 bg-neutral-900">
           {contest?.bannerUrl ? (
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${contest.bannerUrl})` }}
             />
-          ) : contest.creatorPfp ? (
-            <>
-              <img
-                src={contest.creatorPfp}
-                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
-                alt=""
-                aria-hidden
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/60" />
-              <div className="relative h-full flex items-center justify-center">
-                <img
-                  src={contest.creatorPfp}
-                  alt="Channel owner"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </>
-          ) : (
+            ) : contest.creatorPfp ? (
+              <>
+                <div className="absolute inset-0 bg-neutral-900" />
+                <div className="relative h-full flex items-center justify-center">
+                  <img
+                    src={contest.creatorPfp}
+                    alt="Channel owner"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </>         
+               ) : (
             <div className="absolute inset-0 bg-neutral-900" />
           )}
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 bg-neutral-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <p className="text-white text-sm font-semibold text-center px-4">
               {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
             </p>
@@ -100,7 +93,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
             </div>
           )}
           <div className="absolute bottom-2 right-2 z-10">
-            <div className="flex items-center gap-1 bg-black/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
+            <div className="flex items-center gap-1 bg-neutral-900/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-xs font-semibold">{timeInMinutes} min</span>
             </div>

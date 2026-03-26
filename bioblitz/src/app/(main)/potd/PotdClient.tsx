@@ -123,12 +123,10 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     const sortedCorrect = [...puzzle.correctAnswer].sort();
     const correct = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
     
-    // Optimistic UI updates (Make it feel instant)
     setIsCorrect(correct);
     setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
-    // Optionally assume streak increased for UI purposes (will be corrected on refresh)
     if (correct) { 
-        // Logic to visually increment streak if you want
+
     }
 
     try {
@@ -136,13 +134,12 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       const userRef = doc(db, "users", user.uid);
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
       
-      // *** CRITICAL: You must include puzzleDate here ***
       await setDoc(setPlayedRef, {
         gameId: puzzle.id,
         timestamp: serverTimestamp(),
         correct: correct,
         answers: sortedSelected,
-        puzzleDate: puzzle.date // <--- REQUIRED for index.ts to trigger
+        puzzleDate: puzzle.date
       });
 
       await setDoc(
@@ -200,28 +197,28 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20", shadow: "hover:shadow-blue-500/10 hover:border-blue-500/50" };
+        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20"};
       case "Cell Biology":
       case "Cell Bio":
-        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", shadow: "hover:shadow-cyan-500/10 hover:border-cyan-500/50" };
+        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"};
       case "Plant Biology":
       case "Plant Bio":
-        return { bg: "bg-green-500/10 text-green-400 border-green-500/20", shadow: "hover:shadow-green-500/10 hover:border-green-500/50" };
+        return { bg: "bg-green-500/10 text-green-400 border-green-500/20"};
       case "Genetics & Evolution":
       case "Gen & Evo":
       case "Genetics":
-        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50" };
+        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20"};
       case "Biosystematics":
       case "Biosys":
-        return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50" };
+        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"};
       case "Ecology":
-        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50" };
+        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"};
       case "Ethology":
-        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20", shadow: "hover:shadow-orange-500/10 hover:border-orange-500/50" };
+        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20"};
       case "Multiple":
-        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50" };
+        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"};
       default:
-        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50" };
+        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"};
     }
   };
 
@@ -229,7 +226,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     const d = new Date(dateString);
     const now = new Date();
 
-    // 1. Get the current Calendar Date in Pacific Time
     const currentPstString = now.toLocaleDateString("en-US", {
       timeZone: "America/Los_Angeles",
       year: "numeric",
@@ -237,8 +233,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       day: "numeric",
     });
 
-    // 2. Get the Puzzle's Calendar Date (using UTC to avoid timezone shifting)
-    // We assume the puzzle date (e.g. "2025-01-10") represents the target day.
     const puzzleDateString = d.toLocaleDateString("en-US", {
       timeZone: "UTC",
       year: "numeric",
@@ -246,7 +240,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       day: "numeric",
     });
 
-    // 3. Compare: This ensures the puzzle for "Jan 10" shows up exactly when it is "Jan 10" in PST.
     return currentPstString === puzzleDateString;
   };
 
@@ -295,9 +288,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   return (
     <div
-      className={`${inter.className} min-h-screen bg-black text-zinc-100 relative overflow-hidden`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 relative overflow-hidden`}
     >
-      <div className="absolute top-0 left-0 w-full h-125 bg-violet-900/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900 pointer-events-none" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
@@ -315,7 +308,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
           {isStaffUser && (
             <Link
               href="/potd/staff"
-              className="text-sm font-semibold text-orange-300 border border-orange-500/40 hover:border-orange-500 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+              className="text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
             >
               Manage Queue
             </Link>
@@ -324,7 +317,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
         {userDataLoading ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
-            <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
+            <Loader2 className="w-10 h-10 text-neutral-500 animate-spin" />
             <p className="text-zinc-500 text-sm font-medium animate-pulse">
               Loading Your Progress...
             </p>
@@ -334,13 +327,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
             <section className="relative">
               {activePuzzle ? (
                 !isFallback && isTodayCompleted && !viewAnyway ? (
-                  <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-xl p-12 text-center animate-in fade-in duration-500">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                  <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm shadow-xl p-12 text-center animate-in fade-in duration-500">
 
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className="bg-green-500/20 p-4 rounded-full mb-6">
-                        <Trophy className="w-10 h-10 text-green-500" />
-                      </div>
                       <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
                         Daily Problem Completed!
                       </h2>
@@ -352,7 +341,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       <div className="flex flex-col sm:flex-row gap-4">
                         <button
                           onClick={() => setShowArchive(true)}
-                          className="bg-violet-500/10 border border-violet-500/50 text-violet-200 hover:bg-violet-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                          className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                         >
                           <History className="w-5 h-5" />
                           Practice Past Problems
@@ -368,8 +357,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative overflow-hidden rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 shadow-2xl group text-center">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                  <div className="relative overflow-hidden rounded-3xl bg-neutral-900 group text-center">
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
                       {isFallback && (
@@ -386,11 +374,13 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           {activePuzzle.topic}
                         </span>
                         <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
+                          {/*
                           {activePuzzle.multiSelect ? (
                             <ListChecks className="w-3 h-3" />
                           ) : (
                             <MousePointerClick className="w-3 h-3" />
                           )}
+                          */}
                           {activePuzzle.multiSelect
                             ? "Multi-Select"
                             : "Single Choice"}
@@ -434,9 +424,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               textClass = "text-red-100";
                             }
                           } else if (isSelected) {
-                            borderClass = "border-violet-500/50";
-                            bgClass = "bg-violet-500/10";
-                            textClass = "text-violet-100";
+                            borderClass = "border-neutral-500/50";
+                            bgClass = "bg-neutral-500/10";
+                            textClass = "text-neutral-100";
                           }
 
                           return (
@@ -480,7 +470,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                               <div className="absolute right-4 animate-in zoom-in duration-200">
                                 {!showResults && isSelected && (
-                                  <CheckCircle2 className="w-5 h-5 text-violet-500" />
+                                  <CheckCircle2 className="w-5 h-5 text-neutral-500" />
                                 )}
                                 {showResults && isCorrectKey && (
                                   <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -497,38 +487,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       {(isSubmitted ||
                         ((viewAnyway || isFallback) && isActiveCompleted)) && (
                         <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                          {isSubmitted && (
-                            <div
-                              className={`p-6 rounded-2xl border mb-6 flex flex-col items-center gap-3 ${
-                                isCorrect
-                                  ? "bg-green-500/10 border-green-500/20"
-                                  : "bg-red-500/10 border-red-500/20"
-                              }`}
-                            >
-                              {isCorrect ? (
-                                <>
-                                  <div className="bg-green-500/20 p-3 rounded-full">
-                                    <Trophy className="w-8 h-8 text-green-500" />
-                                  </div>
-                                  <h3 className="text-xl font-bold text-green-400">
-                                    Correct! Great Job!
-                                  </h3>
-                                 
-                                </>
-                              ) : (
-                                <>
-                                  <div className="bg-red-500/20 p-3 rounded-full">
-                                    <XCircle className="w-8 h-8 text-red-500" />
-                                  </div>
-                                  <h3 className="text-xl font-bold text-red-400">
-                                    Incorrect. Keep Learning!
-                                  </h3>
-                                </>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-left">
+                          <div className="bg-zinc-900 rounded p-6 text-left">
                             <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm font-bold uppercase tracking-wider">
                               <Lightbulb className="w-4 h-4 text-yellow-500" />
                               Explanation
@@ -553,7 +512,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                     ${
                                                       selectedOptions.length >
                                                         0 && !submitting
-                                                        ? "bg-violet-600 text-white hover:bg-violet-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-violet-900/20"
+                                                        ? "bg-neutral-600 text-white hover:bg-neutral-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-neutral-900/20"
                                                         : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                                     }
                                                 `}
@@ -574,9 +533,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                 )
               ) : (
                 <div className="p-12 rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 text-center">
-                  <div className="bg-zinc-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="w-8 h-8 text-zinc-500" />
-                  </div>
                   <h3 className="text-2xl font-bold text-white mb-2">
                     No Problem for Today (Yet)
                   </h3>
@@ -625,20 +581,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search past questions..."
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-zinc-600"
                       />
                     </div>
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                        showFilters || activeFilterCount > 0
-                          ? "bg-zinc-800 text-white border-zinc-700"
-                          : "bg-zinc-900 text-zinc-400 border-zinc-800"
-                      }`}
-                    >
-                      <SlidersHorizontal className="w-4 h-4" />
-                      Filters
-                    </button>
                   </div>
                 </div>
 
@@ -659,7 +604,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           className="block group"
                         >
                           <div
-                            className={`relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.shadow}`}
+                            className={`relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1`}
                           >
                             <div className="p-5">
                               <div className="flex justify-between items-start mb-3">
@@ -669,7 +614,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                   {puzzle.topic || "General"}
                                 </span>
                                 {isPlayed && (
-                                  <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>Completed</span>
                                   </div>

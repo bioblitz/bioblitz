@@ -206,7 +206,7 @@ export default function BookmarksClient() {
   if (loading) {
     return (
       <div
-        className={`${dmSans.className} min-h-screen bg-black flex items-center justify-center`}
+        className={`${dmSans.className} min-h-screen bg-neutral-900 flex items-center justify-center`}
       >
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
@@ -219,11 +219,10 @@ export default function BookmarksClient() {
   }
 
   return (
-    <div className={`${dmSans.className} min-h-screen bg-black text-white`}>
+    <div className={`${dmSans.className} min-h-screen bg-neutral-900 text-white`}>
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
-          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />

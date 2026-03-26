@@ -30,7 +30,7 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
     <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-white">Recent Sets</h3>
-        <BookOpen className="w-5 h-5 text-violet-500" />
+        <BookOpen className="w-5 h-5 text-neutral-500" />
       </div>
       <div ref={scrollRef} className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
         {setsPlayed.slice(0, 10).map((set, i) => (
@@ -55,7 +55,7 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
               >
                 {set.score}%
               </span>
-              <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-violet-400 transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-neutral-400 transition-colors" />
             </div>
           </Link>
         ))}

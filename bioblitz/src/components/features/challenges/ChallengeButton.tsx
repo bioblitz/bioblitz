@@ -45,7 +45,6 @@ export default function ChallengeButton({
   const db = getFirestore(app);
   const user = auth.currentUser;
 
-  // Check if user already has an open challenge on this blitz
   useEffect(() => {
     if (!user) {
       setCheckingStatus(false);
@@ -74,7 +73,6 @@ export default function ChallengeButton({
           if (!snap.exists()) return null;
           const data = snap.data() as any;
 
-          // Check if this friend has already played this blitz ranked
           const submissionSnap = await getDocs(
             query(
               collection(db, "gameSubmissions"),
@@ -83,7 +81,7 @@ export default function ChallengeButton({
               where("ranked", "==", true),
             ),
           );
-          if (!submissionSnap.empty) return null; // already played, exclude
+          if (!submissionSnap.empty) return null;
 
           return {
             uid: friendUid,
@@ -156,13 +154,10 @@ export default function ChallengeButton({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                  <Swords className="w-4 h-4 text-blue-400" />
-                </div>
                 <div>
                   <p className="text-white font-bold text-sm">
                     Challenge a Friend
@@ -229,7 +224,7 @@ export default function ChallengeButton({
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-violet-900/30 flex items-center justify-center text-violet-300 font-bold text-sm flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-neutral-900/30 flex items-center justify-center text-neutral-300 font-bold text-sm flex-shrink-0">
                           {friend.displayName[0]?.toUpperCase()}
                         </div>
                       )}

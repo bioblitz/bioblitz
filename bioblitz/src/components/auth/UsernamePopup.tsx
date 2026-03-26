@@ -129,14 +129,14 @@ export function UsernamePopup() {
   const introStep = INTRO_STEPS[step];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/85 backdrop-blur-md px-4">
       <div
         className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
         style={{ maxHeight: "88vh" }}
       >
         <div className="h-1 w-full bg-zinc-800">
           <div
-            className="h-full bg-violet-500 transition-all duration-500 ease-out"
+            className="h-full bg-yellow-300 transition-all duration-500 ease-out"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
           />
         </div>
@@ -174,38 +174,38 @@ export function UsernamePopup() {
                     setError(null);
                   }}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder="your_username"
+                  placeholder="ramiz_elias"
                   maxLength={24}
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-mono text-sm"
+                  className="w-full bg-zinc-900 border border-neutral-300 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-200 hover:border-neutral-200 transition-all text-sm"
                 />
                 {error && (
                   <p className="text-red-400 text-xs font-medium">{error}</p>
                 )}
                 <p className="text-zinc-600 text-xs">
-                  3-24 characters · letters, numbers, underscores only
+                  3-24 characters, letters, numbers, underscores only
                 </p>
 
                 <div
                   onClick={() => setWantsMarketing(!wantsMarketing)}
-                  className={`mt-4 p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                  className={`mt-4 p-4 rounded bg-neutral-900 transition-all cursor-pointer flex items-center gap-4 ${
                     wantsMarketing
-                      ? "bg-violet-500/10 border-violet-500/50"
-                      : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                      ? "bg-neutral-500/10 border-neutral-500/50"
+                      : "bg-neutral-900 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
                   <div
-                    className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
                       wantsMarketing
-                        ? "bg-violet-600 border-violet-500"
-                        : "bg-zinc-800 border-zinc-700"
+                        ? "bg-neutral-400 border-yellow-200"
+                        : "bg-neutral-800 border-yellow-300"
                     }`}
                   >
                     {wantsMarketing && <Check className="w-4 h-4 text-white" />}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center bg-neutral-800 gap-2 mb-0.5">
                       <span
-                        className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-zinc-400"}`}
+                        className={`text-sm font-bold ${wantsMarketing ? "text-white" : "text-neutral-300"}`}
                       >
                         Stay in the loop!
                       </span>
@@ -229,7 +229,7 @@ export function UsernamePopup() {
                 key={i}
                 className={`rounded-full transition-all duration-300 ${
                   i === step
-                    ? "w-4 h-2 bg-violet-500"
+                    ? "w-4 h-2 bg-neutral-500"
                     : i < step
                       ? "w-2 h-2 bg-zinc-600"
                       : "w-2 h-2 bg-zinc-800"
@@ -252,7 +252,7 @@ export function UsernamePopup() {
             {!isUsernameStep ? (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white transition-all"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-bold bg-neutral-600 hover:bg-neutral-500 text-white transition-all"
               >
                 Next
                 <ArrowRight className="w-4 h-4" />
@@ -261,7 +261,7 @@ export function UsernamePopup() {
               <button
                 onClick={handleSubmit}
                 disabled={loading || username.trim().length < 3}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-bold bg-neutral-600 hover:bg-neutral-500 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="animate-pulse">Saving…</span>

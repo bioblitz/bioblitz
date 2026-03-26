@@ -26,6 +26,7 @@ import ProfileFriendsPanel from "@/components/profile/ProfileFriendsPanel";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ReportModal from "@/components/profile/ReportModal";
 import RankedRatingCard from "@/components/profile/RankedRatingCard";
+import { EloChart } from "@/components/profile";
 import { useProfileData } from "@/hooks/profile/useProfileData";
 import { useFriendActions } from "@/hooks/profile/useFriendActions";
 import { useProfileReport } from "@/hooks/profile/useProfileReport";
@@ -264,7 +265,6 @@ export default function ProfilePage() {
     .sort((a, b) => b.totalScore - a.totalScore)
     .slice(0, 5);
 
-  // helper: build profile path without breaking UID case-sensitivity
   const profilePathFor = (u: Pick<UserProfile, "uid" | "username">) => {
     const uname = (u.username || "").trim();
     if (uname) return `/profile/${uname.toLowerCase()}`;
@@ -279,28 +279,28 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
+        <div className="w-6 h-6 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
   if (error)
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
+      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
         <p className="text-red-500">{error}</p>
       </div>
     );
 
   return (
     <main
-      className={`${inter.className} min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
     >
-      <div className="absolute top-0 left-0 w-full h-125 bg-violet-900/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid lg:grid-cols-3 gap-6"
+          className="grid gap-6"
         >
           <ProfileHeroCard
             userProfile={userProfile}
@@ -318,11 +318,13 @@ export default function ProfilePage() {
             onOpenReport={() => setReporting(true)}
           />
 
-          <RankedRatingCard
-            rating={userProfile?.bElo || 0}
-            eloHistory={eloHistory}
-            isTrendingUp={isTrendingUp}
-          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <EloChart eloHistory={eloHistory} />
         </motion.div>
 
         <motion.div
@@ -381,7 +383,7 @@ export default function ProfilePage() {
                   aria-hidden
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/60" />
+                <div className="absolute inset-0 bg-neutral-900/60" />
                 <div className="relative h-full flex items-center justify-center">
                   <img
                     src={userProfile.photoURL}
@@ -408,7 +410,7 @@ export default function ProfilePage() {
                 @{userProfile?.username || "user"}
               </p>
             </div>
-            <span className="inline-flex items-center justify-center px-4 py-2 rounded-full border border-violet-500/30 text-violet-300 text-sm font-medium group-hover:bg-violet-500/10 transition">
+            <span className="inline-flex items-center justify-center px-4 py-2 rounded-full border border-neutral-500/30 text-neutral-300 text-sm font-medium group-hover:bg-neutral-500/10 transition">
               Visit Channel
             </span>
           </div>

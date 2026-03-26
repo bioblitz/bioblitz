@@ -66,7 +66,7 @@ const RANK_COLORS = [
     bar: "#a855f7",
     text: "text-black-400",
     glow: "shadow-black-500/40",
-    bg: "bg-black-500/10",
+    bg: "bg-neutral-900-500/10",
     border: "border-black-500/30",
   }, // purple
   {
@@ -333,7 +333,7 @@ function ChallengeCard({
           <div
             className={`absolute left-0 top-0 bottom-0 w-[3px] ${
               urgent && needsMyPlay
-                ? "bg-black"
+                ? "bg-neutral-900"
                 : iWon
                   ? "bg-emerald-500"
                   : "bg-zinc-700"
@@ -573,7 +573,7 @@ export default function ChallengesPage() {
   if (loading) {
     return (
       <div
-        className={`${dmSans.className} min-h-screen bg-black flex items-center justify-center`}
+        className={`${dmSans.className} min-h-screen bg-neutral-900 flex items-center justify-center`}
       >
         <Loader2 className="w-6 h-6 text-neutral-500 animate-spin" />
       </div>
@@ -581,7 +581,7 @@ export default function ChallengesPage() {
   }
 
   return (
-    <div className={`${dmSans.className} min-h-screen bg-black text-white`}>
+    <div className={`${dmSans.className} min-h-screen bg-neutral-900 text-white`}>
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{

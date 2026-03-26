@@ -102,7 +102,7 @@ export default function ImageCropper({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+    <div className="fixed inset-0 z-50 bg-neutral-900/90 flex flex-col">
       <div className="flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800">
         <h2 className="text-xl font-bold text-white">{title}</h2>
         <div className="flex gap-2">

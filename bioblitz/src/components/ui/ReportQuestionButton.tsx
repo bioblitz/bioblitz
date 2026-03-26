@@ -102,7 +102,7 @@ export default function ReportButton({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Describe the issue with this question."
-            className="w-full bg-[rgba(24,24,27,0.5)] border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/50 resize-none min-h-[60px]"
+            className="w-full bg-[rgba(24,24,27,0.5)] border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-neutral-500/50 resize-none min-h-[60px]"
             rows={2}
             autoFocus
           />

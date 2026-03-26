@@ -77,7 +77,7 @@ export default function ProfileHeroCard({
               }}
             />
           ) : (
-            <div className="w-full h-full bg-violet-900/30 flex items-center justify-center text-violet-400 text-4xl font-bold group-hover:bg-violet-900/50 transition-colors">
+            <div className="w-full h-full bg-neutral-900/30 flex items-center justify-center text-neutral-400 text-4xl font-bold group-hover:bg-neutral-900/50 transition-colors">
               {userProfile?.displayName?.[0]?.toUpperCase() || "?"}
             </div>
           )}
@@ -95,7 +95,7 @@ export default function ProfileHeroCard({
             {!isAuthenticated ? (
               <button
                 onClick={onOpenAuth}
-                className="px-4 py-2 bg-violet-600/40 border border-violet-600/40 rounded-full text-white font-semibold hover:bg-violet-800/40 transition"
+                className="px-4 py-2 bg-neutral-600/40 border border-neutral-600/40 rounded-full text-white font-semibold hover:bg-neutral-800/40 transition"
               >
                 Sign In to Add Friend
               </button>
@@ -104,7 +104,7 @@ export default function ProfileHeroCard({
                 {friendshipStatus === "none" && (
                   <button
                     onClick={onSendFriendRequest}
-                    className="px-4 py-2 bg-violet-600 rounded-full text-white font-semibold hover:bg-violet-500 transition"
+                    className="px-4 py-2 bg-neutral-600 rounded-full text-white font-semibold hover:bg-neutral-500 transition"
                   >
                     Add Friend
                   </button>
@@ -174,9 +174,9 @@ export default function ProfileHeroCard({
             {isOwnProfile ? (
               <button
                 onClick={onEditProfile}
-                className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-violet-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
+                className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-neutral-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
               >
-                <Pencil className="w-3 h-3 group-hover:text-violet-400" />
+                <Pencil className="w-3 h-3 group-hover:text-neutral-400" />
                 Edit Profile
               </button>
             ) : (
@@ -205,24 +205,24 @@ export default function ProfileHeroCard({
         <div className="flex flex-wrap justify-center md:justify-start gap-3">
           {userProfile?.location && (
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <MapPin className="w-3 h-3 text-violet-400" />
+              <MapPin className="w-3 h-3 text-neutral-400" />
               {userProfile.location}
             </div>
           )}
           {userProfile?.school && (
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <School className="w-3 h-3 text-violet-400" />
+              <School className="w-3 h-3 text-neutral-400" />
               {userProfile.school}
             </div>
           )}
           {userProfile?.grade && (
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <GraduationCap className="w-3 h-3 text-violet-400" />
+              <GraduationCap className="w-3 h-3 text-neutral-400" />
               {userProfile.grade}
             </div>
           )}
           <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-            <Calendar className="w-3 h-3 text-violet-400" />
+            <Calendar className="w-3 h-3 text-neutral-400" />
             Joined{" "}
             {userProfile?.createdAt
               ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString(undefined, {

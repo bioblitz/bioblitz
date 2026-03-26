@@ -53,14 +53,14 @@ export default function LeaderboardClient({
   // Tier thresholds per the Bioblitz rating spec (Section 11)
   const getEloColor = (elo: number) => {
     if (elo >= 2250) return "bg-cyan-400/20 text-cyan-300 border-cyan-400/50";     // Diamond
-    if (elo >= 1750) return "bg-violet-500/20 text-violet-400 border-violet-500/50"; // Platinum
+    if (elo >= 1750) return "bg-neutral-500/20 text-neutral-400 border-neutral-500/50"; // Platinum
     if (elo >= 1250) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50"; // Gold
     if (elo >= 750)  return "bg-zinc-300/20 text-zinc-300 border-zinc-400/50";       // Silver
     return "bg-orange-700/20 text-orange-500 border-orange-700/50";                  // Bronze
   };
 
   return (
-    <main className={`${inter.className} min-h-screen bg-black text-white pt-24 px-4 pb-12`}>
+    <main className={`${inter.className} min-h-screen bg-neutral-900 text-white pt-24 px-4 pb-12`}>
       <div className="max-w-3xl mx-auto">
         
         {/* Header Section */}
@@ -70,7 +70,7 @@ export default function LeaderboardClient({
             animate={{ opacity: 1, scale: 1 }}
             className={`inline-flex items-center justify-center p-3 rounded-full mb-4 ring-1 transition-colors duration-300 ${
                 activeTab === "elo" 
-                ? "bg-violet-500/10 ring-violet-500/30 text-violet-400" 
+                ? "bg-neutral-500/10 ring-neutral-500/30 text-neutral-400" 
                 : "bg-orange-500/10 ring-orange-500/30 text-orange-400"
             }`}
           >
@@ -123,7 +123,7 @@ export default function LeaderboardClient({
                 className={`
                     relative flex items-center p-3 sm:p-4 rounded-2xl border transition-all duration-200
                     ${getRankStyle(index)}
-                    ${user.uid === currentUserUid ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-black scale-[1.01]" : "hover:border-zinc-700"}
+                    ${user.uid === currentUserUid ? "ring-2 ring-neutral-500 ring-offset-2 ring-offset-black scale-[1.01]" : "hover:border-zinc-700"}
                 `}
                 >
                     <div className="flex-shrink-0 w-8 sm:w-12 flex justify-center items-center">
@@ -155,7 +155,7 @@ export default function LeaderboardClient({
                     </div>
 
                     <div className="flex-grow min-w-0 pr-4">
-                        <h3 className={`font-bold truncate text-sm sm:text-base ${user.uid === currentUserUid ? "text-violet-400" : "text-white"}`}>
+                        <h3 className={`font-bold truncate text-sm sm:text-base ${user.uid === currentUserUid ? "text-neutral-400" : "text-white"}`}>
                         {user.username ? (
                           <Link href={`/profile/${user.username}`}>
                               <span className="cursor-pointer hover:underline">{user.displayName}</span>

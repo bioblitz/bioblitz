@@ -21,6 +21,7 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { BarChart2 } from "lucide-react";
+/**hi */
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -320,20 +321,22 @@ export default function MainNavbar() {
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
           scrolled
-            ? "bg-black/80 backdrop-blur-md border-white/10"
+            ? "bg-neutral-900/80 backdrop-blur-md border-white/10"
             : "bg-transparent border-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/home" className="flex items-center space-x-2 group">
+            <Link href="/" className="flex items-center space-x-2 group">
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                <Zap className="w-6 h-6 text-yellow-400" />
+                <img src="/icons/favicon.ico" className="w-6 h-6" alt="BioBlitz" />
               </div>
-              <span className="text-white text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+              <span style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }} className="text-white text-xl">
                 BioBlitz
-              </span>
+              </span>          
             </Link>
+
+
 
             <SearchBar />
 
@@ -344,7 +347,7 @@ export default function MainNavbar() {
 
       <aside
         className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 ${
-          railOpen ? "bg-black/90" : "bg-transparent"
+          railOpen ? "bg-neutral-900/90" : "bg-transparent"
         }`}
         onMouseLeave={() => {
           setRailOpen(false);

@@ -2,7 +2,7 @@ import { Trophy } from "lucide-react";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-black text-white pt-24 px-4 pb-12">
+    <main className="min-h-screen bg-neutral-900 text-white pt-24 px-4 pb-12">
       <div className="max-w-3xl mx-auto">
         
         {/* Header Skeleton */}

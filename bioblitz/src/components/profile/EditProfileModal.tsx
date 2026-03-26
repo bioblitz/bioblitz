@@ -28,13 +28,13 @@ export default function EditProfileModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-2xl shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto"
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/5 blur-[60px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-neutral-500/5 blur-[60px] pointer-events-none" />
 
         <button
           onClick={onClose}
@@ -45,8 +45,8 @@ export default function EditProfileModal({
 
         <div className="relative">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0">
-              <Pencil className="w-6 h-6 text-violet-500" />
+            <div className="w-12 h-12 rounded-full bg-neutral-500/10 flex items-center justify-center shrink-0">
+              <Pencil className="w-6 h-6 text-neutral-500" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
@@ -65,7 +65,7 @@ export default function EditProfileModal({
                   type="text"
                   value={tempProfile.displayName}
                   onChange={(e) => onChange("displayName", e.target.value)}
-                  className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                 />
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function EditProfileModal({
                   type="text"
                   value={tempProfile.username}
                   onChange={(e) => onChange("username", e.target.value)}
-                  className="w-full bg-zinc-900 text-white p-2.5 pl-8 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-zinc-900 text-white p-2.5 pl-8 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                 />
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function EditProfileModal({
                 value={tempProfile.bio}
                 onChange={(e) => onChange("bio", e.target.value)}
                 rows={3}
-                className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors resize-none placeholder:text-zinc-600"
+                className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors resize-none placeholder:text-zinc-600"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -109,7 +109,7 @@ export default function EditProfileModal({
                     type="text"
                     value={tempProfile.location}
                     onChange={(e) => onChange("location", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                   />
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default function EditProfileModal({
                     type="text"
                     value={tempProfile.grade}
                     onChange={(e) => onChange("grade", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                   />
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function EditProfileModal({
                     type="text"
                     value={tempProfile.school}
                     onChange={(e) => onChange("school", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-violet-500 focus:outline-none transition-colors placeholder:text-zinc-600"
+                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
                   />
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function EditProfileModal({
           <div className="flex gap-3 mt-8 pt-4 border-t border-zinc-900">
             <button
               onClick={onSave}
-              className="flex-1 bg-violet-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-violet-500 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 bg-neutral-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-neutral-500 transition-colors flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               Save Changes

@@ -16,7 +16,7 @@ export default function NavbarWrapper() {
   }, []);
 
   const SkeletonNavbar = (
-    <div className="fixed w-full h-16 bg-black z-50 border-b border-zinc-800" />
+    <div className="fixed w-full h-16 bg-neutral-900 z-50 border-b border-zinc-800" />
   );
 
   if (!mounted || loading) {

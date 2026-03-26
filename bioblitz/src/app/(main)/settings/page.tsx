@@ -56,10 +56,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const db = getFirestore(app);
 
-  const handlePfpUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -296,48 +292,30 @@ export default function SettingsPage() {
 
   if (checkingAuth) {
     return (
-      <main className="min-h-screen bg-black flex items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <main className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
       </main>
     );
   }
   return (
-    <>
-      {imageToEdit && (
-        <ImageCropper
-          image={imageToEdit}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          aspect={1}
-          shape="round"
-          title="Adjust Profile Picture"
-          imageType={imageType}
-        />
-      )}
       <main
-      className={`${inter.className} min-h-screen bg-black text-white p-8 overflow-y-auto pt-24`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-white p-8 overflow-y-auto pt-24`}
     >
       {toastMessage && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-black px-4 py-2 rounded-xl shadow-lg z-50"
+          className="fixed top-4 left-1/2 -translate-x-1/2 bg-neutral-500 text-black px-4 py-2 rounded-xl shadow-lg z-50"
         >
           {toastMessage}
         </motion.div>
       )}
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="text-2xl font-bold text-left mb-8">
           Settings & Preferences
         </h1>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
-        >
-          <h2 className="text-2xl font-semibold mb-4">Profile</h2>
+          <h2 className="text-2xl mb-4">Profile</h2>
           <input
             type="file"
             ref={fileInputRef}
@@ -347,35 +325,12 @@ export default function SettingsPage() {
           />
           <div className="flex items-center gap-4 mb-4">
             <div className="relative group">
-              {isProfileLoading || pfpLoading ? (
-                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 animate-pulse">
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                </div>
-              ) : profileData?.photoURL || user?.photoURL ? (
-                <>
-                  <img
-                    src={profileData?.photoURL || user?.photoURL}
-                    alt="Profile picture"
-                    className="w-16 h-16 rounded-full object-cover border border-zinc-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <button
-                    onClick={handlePfpUploadClick}
-                    className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                    title="Change profile picture"
-                  >
-                    <Camera className="w-5 h-5 text-white" />
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handlePfpUploadClick}
-                  className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-zinc-700 transition-colors"
-                  title="Upload profile picture"
-                >
-                  <Camera className="w-5 h-5" />
-                </button>
-              )}
+              <img
+                src={profileData?.photoURL || user?.photoURL}
+                alt="Profile picture"
+                className="w-16 h-16 rounded-full object-cover border border-zinc-700"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
               <p className="font-medium">
@@ -390,25 +345,24 @@ export default function SettingsPage() {
           </div>
           <Link
             href={username ? `/profile/${username}` : "#"}
-            className="bg-indigo-500 px-4 py-2 rounded-xl text-black font-semibold hover:scale-105 transition-transform inline-block"
+            className="bg-neutral-300 border px-4 py-2 mb-10 rounded-lg text-neutral-800 font-semibold hover:scale-105 transition-transform inline-block"
           >
             View Profile
           </Link>
-        </motion.section>
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
+          className="rounded-xl p-6 mb-6"
         >
-          <h2 className="text-2xl font-semibold mb-4">Email Preferences</h2>
+          <h2 className="text-2xl mb-4">Email Preferences</h2>
           <div className="flex items-center justify-between">
             <p>Receive Email Notifications</p>
             <Switch
               checked={emailNotifications}
               onCheckedChange={handleEmailToggle}
-              className="transition-colors duration-200 data-[state=checked]:bg-indigo-500 data-[state=unchecked]:bg-zinc-800"
+              className="transition-colors duration-200 data-[state=checked]:bg-neutral-200 data-[state=unchecked]:bg-zinc-600"
             />
           </div>
           <p className="text-sm text-gray-400 mt-3">
@@ -420,49 +374,8 @@ export default function SettingsPage() {
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6 mb-6"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-2xl font-semibold">Experimental</h2>
-            {gregoryMode && (
-              <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full animate-bounce">
-                ON
-              </span>
-            )}
-
-            <div className="group relative flex items-center">
-              <Info className="w-5 h-5 text-zinc-500 cursor-help hover:text-pink-400 transition-colors" />
-              <div className="absolute left-full ml-3 w-64 p-3 bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
-                This was inspired by a friend of ours who loves hot pink. We
-                don&apos;t recommend using it unless your eyes are quite
-                resilient.
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={gregoryMode ? "text-pink-500 font-bold" : ""}>
-                Gregory Mode
-              </p>
-            </div>
-            <Switch
-              checked={gregoryMode}
-              onCheckedChange={(val) => {
-                setGregoryMode(val);
-                localStorage.setItem("gregoryMode", val.toString());
-              }}
-              className="transition-colors duration-200 data-[state=checked]:bg-pink-600 data-[state=unchecked]:bg-zinc-800"
-            />
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-zinc-950 border-2 border-zinc-800 rounded-3xl p-6"
+          className="bg-neutral-900 rounded-3xl p-6"
         >
           <h2 className="text-2xl font-semibold mb-1">Account</h2>
           <p className="text-sm text-gray-400 mb-4">
@@ -474,7 +387,7 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <button
               onClick={handleSignOut}
-              className="bg-[#5CA3FF]/80 hover:bg-[#5CA3FF]/60 transition-colors px-4 py-2 rounded-xl w-full text-left text-black font-semibold"
+              className="bg-blue-200 transition-colors px-4 py-2 rounded-xl w-full text-left text-black font-semibold"
             >
               Sign Out
             </button>
@@ -490,13 +403,12 @@ export default function SettingsPage() {
         <div className="text-center mt-8">
           <Link
             href="/home"
-            className="text-[#8c52ff] hover:underline text-sm tracking-wide"
+            className="text-neutral-500 hover:underline text-sm tracking-wide"
           >
             ← Back to Home
           </Link>
         </div>
       </div>
     </main>
-    </>
   );
 }

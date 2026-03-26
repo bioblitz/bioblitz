@@ -353,7 +353,7 @@ function EloSection({
 
   return (
     <div className="relative rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] overflow-hidden h-full flex flex-col">
-      <div className="absolute top-0 left-0 right-0 h-[120px] bg-gradient-to-b from-violet-600/[0.08] to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[120px] bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
 
       <div className="relative p-5 pb-2">
         <div className="flex items-start justify-between gap-3">
@@ -389,7 +389,7 @@ function EloSection({
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
               {globalRank !== null && (
                 <span
-                  className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold bg-violet-500/15 text-[#c4b5fd] border border-violet-500/30 px-2 py-0.5 rounded-md`}
+                  className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold bg-neutral-500/15 text-[#c4b5fd] border border-neutral-500/30 px-2 py-0.5 rounded-md`}
                 >
                   <Crown className="w-2.5 h-2.5" />#{globalRank}
                 </span>
@@ -437,7 +437,7 @@ function EloSection({
                 onClick={() => setRange(r)}
                 className={`${mono} px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${
                   range === r
-                    ? "bg-[#7c3aed] text-white shadow-lg shadow-violet-600/30"
+                    ? "bg-[#7c3aed] text-white shadow-lg shadow-neutral-600/30"
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
@@ -552,10 +552,10 @@ function ActivitySection({
   const getColor = (count: number) => {
     if (count === 0) return "bg-[rgba(24,24,27,0.8)]";
     const i = count / maxCount;
-    if (i > 0.75) return "bg-violet-400";
-    if (i > 0.5) return "bg-violet-500/90";
-    if (i > 0.25) return "bg-violet-600/70";
-    return "bg-violet-800/60";
+    if (i > 0.75) return "bg-neutral-400";
+    if (i > 0.5) return "bg-neutral-500/90";
+    if (i > 0.25) return "bg-neutral-600/70";
+    return "bg-neutral-800/60";
   };
 
   const weeks = useMemo(() => {
@@ -620,10 +620,10 @@ function ActivitySection({
           <span>Less</span>
           {[
             "bg-[rgba(24,24,27,0.8)]",
-            "bg-violet-800/60",
-            "bg-violet-600/70",
-            "bg-violet-500/90",
-            "bg-violet-400",
+            "bg-neutral-800/60",
+            "bg-neutral-600/70",
+            "bg-neutral-500/90",
+            "bg-neutral-400",
           ].map((c, i) => (
             <div key={i} className={`w-[10px] h-[10px] rounded-[2px] ${c}`} />
           ))}
@@ -637,7 +637,7 @@ function ActivitySection({
           {
             val: totalBlitzes,
             label: "Blitzes",
-            color: "text-violet-400",
+            color: "text-neutral-400",
             icon: <Zap className="w-3 h-3" />,
           },
           {
@@ -815,7 +815,7 @@ function WeeklySnapshotSection({
             {
               val: thisWeekStats.blitzes,
               label: "Blitzes",
-              color: "text-violet-400",
+              color: "text-neutral-400",
             },
             {
               val: thisWeekStats.questions,
@@ -860,7 +860,7 @@ function WeeklySnapshotSection({
           className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all group"
         >
           <div className="flex items-center gap-2.5">
-            <FileText className="w-4 h-4 text-violet-400" />
+            <FileText className="w-4 h-4 text-neutral-400" />
             <span className="text-[13px] font-bold text-zinc-300 group-hover:text-white transition-colors">
               See where you stand on the global leaderboard
             </span>
@@ -1326,10 +1326,10 @@ export default function ProgressClient() {
   if (loading)
     return (
       <div
-        className={`${dmSans.className} min-h-screen bg-black flex items-center justify-center`}
+        className={`${dmSans.className} min-h-screen bg-neutral-900 flex items-center justify-center`}
       >
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+          <Loader2 className="w-6 h-6 text-neutral-500 animate-spin" />
           <p className="text-zinc-500 text-sm font-medium animate-pulse">
             Loading progress...
           </p>
@@ -1338,7 +1338,7 @@ export default function ProgressClient() {
     );
 
   return (
-    <div className={`${dmSans.className} min-h-screen bg-black text-white`}>
+    <div className={`${dmSans.className} min-h-screen bg-neutral-900 text-white`}>
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
@@ -1353,8 +1353,8 @@ export default function ProgressClient() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 flex items-center gap-3"
         >
-          <div className="bg-violet-500/15 border border-violet-500/30 p-2.5 rounded-xl">
-            <BarChart3 className="w-6 h-6 text-violet-400" />
+          <div className="bg-neutral-500/15 border border-neutral-500/30 p-2.5 rounded-xl">
+            <BarChart3 className="w-6 h-6 text-neutral-400" />
           </div>
           <div>
             <h1

@@ -45,7 +45,7 @@ export default function ProfileFriendsPanel({
     <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl h-[42rem]">
       <div className="h-px w-full bg-zinc-800/50 shrink-0" />
       <h3 className="text-lg font-semibold text-white shrink-0">Friends</h3>
-      <div className="flex-1 overflow-y-auto pr-2 min-h-0 space-y-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
+      <div className="flex-1 overflow-y-auto pr-2 min-h-0 space-y-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
         {loadingFriends ? (
           <div className="flex flex-col items-center justify-center py-6 text-zinc-500 gap-2">
             <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
@@ -73,7 +73,7 @@ export default function ProfileFriendsPanel({
                     }}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                  <div className="w-8 h-8 rounded-full bg-neutral-900/50 flex items-center justify-center text-xs text-neutral-300 font-bold">
                     {friend.displayName?.[0]}
                   </div>
                 )}
@@ -96,7 +96,7 @@ export default function ProfileFriendsPanel({
           ) : incomingRequests.length === 0 ? (
             <p className="text-zinc-400 text-sm">No incoming requests.</p>
           ) : (
-            <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500  [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0 [&::-webkit-scrollbar-corner]:bg-transparent">
+            <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#8b5cf6_transparent] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500  [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0 [&::-webkit-scrollbar-corner]:bg-transparent">
               {incomingRequests.map((request) => (
                 <div
                   key={request.uid}
@@ -115,7 +115,7 @@ export default function ProfileFriendsPanel({
                         }}
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-violet-900/50 flex items-center justify-center text-xs text-violet-300 font-bold">
+                      <div className="w-8 h-8 rounded-full bg-neutral-900/50 flex items-center justify-center text-xs text-neutral-300 font-bold">
                         {request.displayName?.[0]}
                       </div>
                     )}

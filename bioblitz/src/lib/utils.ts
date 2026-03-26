@@ -53,7 +53,7 @@ export const getTopicColors = (topic: string | undefined) => {
       return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20", shadow: "hover:shadow-lime-500/10 hover:border-lime-500/50", badge: "bg-lime-600 text-white" };
     case "Biosystematics":
     case "Biosys":
-      return { bg: "bg-violet-500/10 text-violet-400 border-violet-500/20", shadow: "hover:shadow-violet-500/10 hover:border-violet-500/50", badge: "bg-violet-600 text-white" };
+      return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20", shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50", badge: "bg-neutral-600 text-white" };
     case "Ecology":
       return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", shadow: "hover:shadow-emerald-500/10 hover:border-emerald-500/50", badge: "bg-emerald-600 text-white" };
     case "Ethology":
