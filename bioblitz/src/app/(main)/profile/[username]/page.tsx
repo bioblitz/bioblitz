@@ -62,7 +62,7 @@ export default function ProfilePage() {
   const db = getFirestore(app);
   const storage = getStorage(app);
   const router = useRouter();
-  const { updateUsername } = useAuth();
+  const { updateUsername, loading: authLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"rating" | "friends" | "sets">("rating");
   const [editing, setEditing] = useState(false);
@@ -85,7 +85,7 @@ export default function ProfilePage() {
     eloHistory,
     loading,
     error,
-  } = useProfileData({ db, usernameParamRaw, usernameParamNormalized });
+  } = useProfileData({ db, usernameParamRaw, usernameParamNormalized, authLoading });
 
   const {
     friendshipStatus,
@@ -236,10 +236,11 @@ export default function ProfilePage() {
     return `/channel/${u.uid}`;
   };
 
-  if (loading)
+  if (authLoading || loading)
     return (
-      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
-        <div className="w-6 h-6 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center h-screen bg-neutral-900 gap-4">
+        <div className="w-10 h-10 border-[3px] border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+        <span className="text-yellow-400 text-sm font-medium">Loading...</span>
       </div>
     );
 

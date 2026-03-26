@@ -20,7 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import {
   getFirestore,
   doc,
@@ -29,6 +29,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HomeClient() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,9 +51,9 @@ export default function HomeClient() {
   const [hasMore, setHasMore] = useState(true);
 
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
-  const [user, setUser] = useState<any>(null);
+  const [playedGamesLoaded, setPlayedGamesLoaded] = useState(false);
+  const { user: authUser, loading: authLoading } = useAuth();
 
-  const auth = getAuth(app);
   const db = getFirestore(app);
   const [isAdmin, setIsAdmin] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -70,25 +71,26 @@ export default function HomeClient() {
   ];
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchPlayedGames(currentUser.uid);
-        currentUser.getIdTokenResult(true).then((result) => {
+    if (authLoading) return;
+    if (authUser?.uid) {
+      fetchPlayedGames(authUser.uid);
+      // Admin claim check — Firebase is guaranteed initialized by the time
+      // AuthContext resolves, so currentUser is available here
+      const firebaseUser = getAuth(app).currentUser;
+      if (firebaseUser) {
+        firebaseUser.getIdTokenResult(true).then((result) => {
           const claims: any = result.claims || {};
           const roles = Array.isArray(claims.roles)
             ? claims.roles.map((r: any) => String(r).toLowerCase())
             : [];
           setIsAdmin(claims.admin === true || roles.includes("admin"));
-        });
-      } else {
-        setPlayedGameIds(new Set());
-        setIsAdmin(false);
+        }).catch(() => {});
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
+    } else {
+      setPlayedGamesLoaded(true);
+      setIsAdmin(false);
+    }
+  }, [authLoading, authUser?.uid]);
 
   const fetchPlayedGames = async (uid: string) => {
     try {
@@ -97,6 +99,8 @@ export default function HomeClient() {
       setPlayedGameIds(new Set(ids));
     } catch (error) {
       console.error("Error fetching played games:", error);
+    } finally {
+      setPlayedGamesLoaded(true);
     }
   };
 
@@ -394,43 +398,45 @@ export default function HomeClient() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredGames.length === 0 ? (
-            <div className="col-span-full py-20 text-center bg-neutral-900/50 rounded-2xl border border-white/5">
-              <Filter className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-              <p className="text-neutral-400 text-lg">
-                No Blitzes found matching these filters.
-              </p>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setTopic("All Topics");
-                  setStatusFilter("All");
-                  setTypeFilter("All");
-                }}
-                className="mt-4 text-neutral-400 hover:text-neutral-500 font-medium transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          ) : (
-            filteredGames.map((game: gameRoom) => (
-              <div key={game.id} className="relative group">
-                <ContestCard
-                  contest={game}
-                  href={`/home/${game.id}`}
-                  isCompleted={playedGameIds.has(game.id)}
-                />
+        {authLoading || pages.length === 0 || !playedGamesLoaded ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+            <div className="w-10 h-10 border-[3px] border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+            <span className="text-yellow-400 text-sm font-medium">Loading...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredGames.length === 0 ? (
+              <div className="col-span-full py-20 text-center bg-neutral-900/50 rounded-2xl border border-white/5">
+                <Filter className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+                <p className="text-neutral-400 text-lg">
+                  No Blitzes found matching these filters.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setTopic("All Topics");
+                    setStatusFilter("All");
+                    setTypeFilter("All");
+                  }}
+                  className="mt-4 text-neutral-400 hover:text-neutral-500 font-medium transition-colors"
+                >
+                  Clear Filters
+                </button>
               </div>
-            ))
-          )}
-        </div>
-        <div ref={loaderRef} />
-        {loadingPage && (
-          <div className="flex justify-center mt-10">
-            <div className="w-5 h-5 border-2 border-neutral-700 rounded-full animate-spin" />
+            ) : (
+              filteredGames.map((game: gameRoom) => (
+                <div key={game.id} className="relative group">
+                  <ContestCard
+                    contest={game}
+                    href={`/home/${game.id}`}
+                    isCompleted={playedGameIds.has(game.id)}
+                  />
+                </div>
+              ))
+            )}
           </div>
         )}
+        <div ref={loaderRef} />
       </main>
     </div>
   );

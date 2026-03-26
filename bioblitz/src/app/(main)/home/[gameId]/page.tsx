@@ -70,6 +70,7 @@ interface LeaderboardEntry {
   correctCount: number;
   totalQuestions: number;
   questionResults?: boolean[];
+  questionTimings?: number[];
   timeTaken: number;
   tabSwitchCount?: number;
   timeOffTab?: number;
@@ -242,6 +243,7 @@ export default function GameDetailPage() {
                 correctCount: submission.correctCount ?? 0,
                 totalQuestions: submission.totalQuestions ?? 0,
                 questionResults: (submission as any).questionResults,
+                questionTimings: (submission as any).questionTimings,
                 timeTaken: submission.timeTaken,
                 tabSwitchCount: (submission as any).tabSwitchCount,
                 timeOffTab: (submission as any).timeOffTab,
@@ -275,6 +277,7 @@ export default function GameDetailPage() {
               correctCount: submission.correctCount ?? 0,
               totalQuestions: submission.totalQuestions ?? 0,
               questionResults: (submission as any).questionResults,
+              questionTimings: (submission as any).questionTimings,
               timeTaken: submission.timeTaken,
               tabSwitchCount: (submission as any).tabSwitchCount,
               timeOffTab: (submission as any).timeOffTab,
@@ -348,6 +351,12 @@ export default function GameDetailPage() {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}m ${s}s`;
+  };
+
+  const formatQuestionTime = (ms: number) => {
+    if (!ms || ms < 1000) return "<1s";
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+    return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`;
   };
 
   const formatCountdown = (totalSeconds: number) => {
@@ -908,22 +917,26 @@ export default function GameDetailPage() {
                   {expandedEntries.has(entry.submissionId) && (
                     <div className="px-4 pb-4 pt-1 border-t border-zinc-800/60">
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {(entry.questionResults
-                          ? entry.questionResults
-                          : Array.from({ length: entry.totalQuestions }, (_, i) => i < entry.correctCount)
-                        ).map((correct, qi) => (
-                          <div key={qi} className="flex flex-col items-center gap-0.5">
-                            <div
-                              className={`w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ${
-                                correct
-                                  ? "bg-green-300/15 border border-green-400/30 text-green-300"
-                                  : "bg-red-300/15 border border-red-400/30 text-red-300"
-                              }`}
-                            >
-                              {qi + 1}
+                        {entry.questionResults ? (
+                          entry.questionResults.map((correct, qi) => (
+                            <div key={qi} className="relative group">
+                              <div
+                                className={`w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ${
+                                  correct
+                                    ? "bg-green-300/15 border border-green-400/30 text-green-300"
+                                    : "bg-red-300/15 border border-red-400/30 text-red-300"
+                                }`}
+                              >
+                                {qi + 1}
+                              </div>
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-zinc-900 border border-zinc-700 text-zinc-100 text-[9px] font-mono px-1.5 py-0.5 rounded pointer-events-none z-10">
+                                {entry.questionTimings?.[qi] != null ? formatQuestionTime(entry.questionTimings[qi]) : "N/A"}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <span className="text-zinc-500 text-[11px]">no breakdown data</span>
+                        )}
                       </div>
 
                       {/* Stats row */}
@@ -935,19 +948,19 @@ export default function GameDetailPage() {
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5 text-[10px] font-mono">
                             <span className="text-zinc-100">tab switches</span>
-                            <span className={`font-semibold ${(entry.tabSwitchCount ?? 0) > 3 ? "text-amber-400" : "text-zinc-100"}`}>
-                              {entry.tabSwitchCount ?? 0}
+                            <span className={`font-semibold ${entry.tabSwitchCount == null ? "text-zinc-500" : entry.tabSwitchCount > 3 ? "text-amber-400" : "text-zinc-100"}`}>
+                              {entry.tabSwitchCount == null ? "N/A" : entry.tabSwitchCount}
                             </span>
                           </div>
                           <div className="w-px h-3 bg-zinc-700" />
                           <div className="flex items-center gap-1.5 text-[10px] font-mono">
                             <span className="text-zinc-100">time off tab</span>
-                            <span className={`font-semibold ${(entry.timeOffTab ?? 0) > 10000 ? "text-amber-400" : "text-zinc-100"}`}>
-                              {entry.timeOffTab
-                                ? entry.timeOffTab >= 60000
+                            <span className={`font-semibold ${entry.timeOffTab == null ? "text-zinc-500" : entry.timeOffTab > 10000 ? "text-amber-400" : "text-zinc-100"}`}>
+                              {entry.timeOffTab == null
+                                ? "N/A"
+                                : entry.timeOffTab >= 60000
                                   ? `${Math.floor(entry.timeOffTab / 60000)}m ${Math.floor((entry.timeOffTab % 60000) / 1000)}s`
-                                  : `${(entry.timeOffTab / 1000).toFixed(1)}s`
-                                : "0s"}
+                                  : `${(entry.timeOffTab / 1000).toFixed(1)}s`}
                             </span>
                           </div>
                         </div>

@@ -18,12 +18,14 @@ interface UseProfileDataParams {
   db: Firestore;
   usernameParamRaw: string;
   usernameParamNormalized: string;
+  authLoading: boolean;
 }
 
 export function useProfileData({
   db,
   usernameParamRaw,
   usernameParamNormalized,
+  authLoading,
 }: UseProfileDataParams) {
   const [profileUid, setProfileUid] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -33,6 +35,8 @@ export function useProfileData({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
     const fetchUserByUsernameOrUid = async () => {
       if (!usernameParamRaw || usernameParamRaw === "undefined") {
         setLoading(false);
@@ -101,7 +105,7 @@ export function useProfileData({
     };
 
     fetchUserByUsernameOrUid();
-  }, [db, usernameParamRaw, usernameParamNormalized]);
+  }, [db, usernameParamRaw, usernameParamNormalized, authLoading]);
 
   useEffect(() => {
     if (!profileUid) return;

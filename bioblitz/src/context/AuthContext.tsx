@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { getAuth } from "firebase/auth";
-import { useRouter } from 'next/navigation';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { UserProfile, cacheUserPhotoURL } from '@/lib/user';
 
 interface AuthContextType {
@@ -23,37 +22,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isCachingPhoto = useRef(false);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
+    const auth = getAuth();
+
+    // Wait for Firebase Auth to restore its state from IndexedDB before doing
+    // anything. This fires once with the real auth state (no null-then-user
+    // indeterminate period for cached sessions), so we never check
+    // auth.currentUser synchronously, which was the race condition that caused
+    // force-logouts on every page reload.
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
-        const res = await fetch('/api/auth-status');
-        if (res.ok) {
+        if (firebaseUser) {
+          const res = await fetch('/api/auth-status');
+          if (!res.ok) throw new Error('auth-status failed');
           const data = await res.json();
-          const auth = getAuth();
-          const currentAuthUser = auth.currentUser;
 
-          if (data.isAuthenticated && !currentAuthUser) {
-            await fetch("/api/logout", { method: "POST" });
-            setIsAuthenticated(false);
-            setUser(null);
-            return;
-          }
-
-          setIsAuthenticated(data.isAuthenticated);
-          if (data.isAuthenticated) {
-            // prefer server-provided user profile, but if it lacks a photoURL
-            // fall back to Firebase Auth's currentUser.photoURL so the navbar
-            // can show the user's pfp immediately
+          if (data.isAuthenticated && data.user) {
             const serverUser = data.user;
 
-            if (serverUser) {
-              if (!serverUser.photoURL && currentAuthUser?.photoURL) {
-                serverUser.photoURL = currentAuthUser.photoURL as string;
-              }
+            if (!serverUser.photoURL && firebaseUser.photoURL) {
+              serverUser.photoURL = firebaseUser.photoURL as string;
             }
 
+            setIsAuthenticated(true);
             setUser(serverUser);
+
             if (
-              serverUser?.photoURL &&
+              serverUser.photoURL &&
               !isCachingPhoto.current &&
               serverUser.photoURL.includes("googleusercontent.com") &&
               !serverUser.photoURL.includes("firebasestorage.googleapis.com")
@@ -69,6 +63,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   isCachingPhoto.current = false;
                 });
             }
+          } else {
+            // Firebase user exists but server session is expired — clean up
+            await fetch("/api/logout", { method: "POST" });
+            setIsAuthenticated(false);
+            setUser(null);
           }
         } else {
           setIsAuthenticated(false);
@@ -81,21 +80,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    checkAuthStatus();
+    return () => unsubscribe();
   }, []);
 
   const updateUserPhoto = (photoURL: string) => {
-    if (user) {
-      setUser({ ...user, photoURL });
-    }
+    if (user) setUser({ ...user, photoURL });
   };
 
   const updateUsername = (username: string) => {
-    if (user) {
-      setUser({ ...user, username });
-    }
+    if (user) setUser({ ...user, username });
   };
 
   return (
