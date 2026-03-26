@@ -1,41 +1,50 @@
+import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
-import { buildDigestForUser, buildDigestHtml } from "@/lib/weeklyDigest";
+import { gatherWeeklyDigest } from "@/lib/digest-data";
+import { generateDigestHtml } from "@/lib/digest-email";
 
-export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization") || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
-  if (!token) {
-    return new Response("No token provided", {
-      status: 401,
-      headers: { "Content-Type": "text/plain" },
-    });
-  }
-
+/**
+ * GET /api/digest/preview
+ *
+ * Returns the rendered HTML of the weekly digest for the authenticated user.
+ * Used by /weekly_email_preview to preview the email in an iframe.
+ *
+ * Auth: Bearer <idToken>
+ */
+export async function GET(req: NextRequest) {
   try {
-    const decoded = await adminAuth.verifyIdToken(token);
-    const data = await buildDigestForUser(decoded.uid);
-
-    if (!data) {
-      return new Response(
-        "No digest data — no activity this week or no email on account.",
-        {
-          status: 404,
-          headers: { "Content-Type": "text/plain" },
-        },
-      );
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new NextResponse("Missing or malformed Authorization header", {
+        status: 401,
+      });
     }
 
-    const html = buildDigestHtml(data);
-    return new Response(html, {
-      status: 200,
+    const token = authHeader.split("Bearer ")[1];
+
+    let uid: string;
+    try {
+      const decoded = await adminAuth.verifyIdToken(token);
+      uid = decoded.uid;
+    } catch {
+      return new NextResponse("Invalid or expired token", { status: 401 });
+    }
+
+    const data = await gatherWeeklyDigest(uid);
+    if (!data) {
+      return new NextResponse("User not found or has no email", {
+        status: 404,
+      });
+    }
+
+    const html = generateDigestHtml(data);
+    return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
-  } catch (err: any) {
-    console.error("Digest preview error:", err);
-    return new Response(`Error: ${err?.message || String(err)}`, {
+  } catch (error: any) {
+    console.error("[digest/preview] Error:", error);
+    return new NextResponse(error?.message || "Internal server error", {
       status: 500,
-      headers: { "Content-Type": "text/plain" },
     });
   }
 }
