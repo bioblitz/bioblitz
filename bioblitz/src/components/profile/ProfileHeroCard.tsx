@@ -15,6 +15,7 @@ interface UserProfileLite {
   streak?: number;
   createdAt?: { seconds: number };
   roles?: string[];
+  bElo?: number;
 }
 
 interface ProfileHeroCardProps {

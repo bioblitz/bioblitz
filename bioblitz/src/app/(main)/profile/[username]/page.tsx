@@ -19,13 +19,10 @@ import {
 } from "firebase/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
-import DomainMasterySection from "@/components/profile/DomainMasterySection";
 import RecentSetsCarousel from "@/components/profile/RecentSetsCarousel";
 import ProfileHeroCard from "@/components/profile/ProfileHeroCard";
-import ProfileFriendsPanel from "@/components/profile/ProfileFriendsPanel";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ReportModal from "@/components/profile/ReportModal";
-import RankedRatingCard from "@/components/profile/RankedRatingCard";
 import { EloChart } from "@/components/profile";
 import { useProfileData } from "@/hooks/profile/useProfileData";
 import { useFriendActions } from "@/hooks/profile/useFriendActions";
@@ -58,15 +55,6 @@ export default function ProfilePage() {
     return usernameParamRaw.trim().toLowerCase();
   }, [usernameParamRaw]);
 
-  const CHART_COLORS = [
-    "#8b5cf6",
-    "#3b82f6",
-    "#10b981",
-    "#f59e0b",
-    "#ec4899",
-    "#06b6d4",
-  ];
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +64,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { updateUsername } = useAuth();
 
+  const [activeTab, setActiveTab] = useState<"rating" | "friends" | "sets">("rating");
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
@@ -235,36 +224,6 @@ export default function ProfilePage() {
     }
   };
 
-  const isTrendingUp =
-    eloHistory.length >= 2 &&
-    eloHistory[eloHistory.length - 1].elo >=
-      eloHistory[eloHistory.length - 2].elo;
-
-  const topicStats = setsPlayed.reduce((acc, set) => {
-    const topic = set.topic || "General";
-
-    if (!acc[topic]) {
-      acc[topic] = {
-        name: topic,
-        totalScore: 0,
-        sets: 0,
-        avg: 0,
-      };
-    }
-
-    acc[topic].totalScore += set.score;
-    acc[topic].sets += 1;
-    return acc;
-  }, {} as Record<string, { name: string; totalScore: number; sets: number; avg: number }>);
-
-  const chartData = Object.values(topicStats)
-    .map((stat) => ({
-      ...stat,
-      avg: Math.round(stat.totalScore / stat.sets),
-    }))
-    .sort((a, b) => b.totalScore - a.totalScore)
-    .slice(0, 5);
-
   const profilePathFor = (u: Pick<UserProfile, "uid" | "username">) => {
     const uname = (u.username || "").trim();
     if (uname) return `/profile/${uname.toLowerCase()}`;
@@ -323,40 +282,154 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl shadow-xl overflow-hidden"
         >
-          <EloChart eloHistory={eloHistory} />
+          {/* Tab bar */}
+          <div className="flex border-b border-zinc-800 px-6 pt-5 gap-6">
+            {(["rating", "friends", "sets"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? "border-violet-500 text-white"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {tab === "rating" ? "Rating Graph" : tab === "friends" ? "Friends" : "Sets Played"}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="p-6">
+            {activeTab === "rating" && (
+              <EloChart eloHistory={eloHistory} />
+            )}
+
+            {activeTab === "friends" && (
+              <div className="flex gap-6 min-h-80">
+                {/* Left: friends list */}
+                <div className="w-1/2 flex flex-col gap-3">
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    {friends.length} {friends.length === 1 ? "Friend" : "Friends"}
+                  </p>
+                  <div className="flex-1 overflow-y-auto space-y-1 [scrollbar-width:thin] [scrollbar-color:#52525b_transparent]">
+                    {loadingFriends ? (
+                      <div className="flex items-center gap-2 text-zinc-500 py-4">
+                        <div className="w-4 h-4 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm">Loading…</span>
+                      </div>
+                    ) : friends.length === 0 ? (
+                      <p className="text-zinc-500 text-sm py-4">No friends yet.</p>
+                    ) : (
+                      friends.map((friend) => (
+                        <Link
+                          key={friend.uid}
+                          href={profilePathFor(friend)}
+                          className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-zinc-800/70 transition"
+                        >
+                          {friend.photoURL ? (
+                            <img
+                              src={friend.photoURL}
+                              alt={friend.displayName}
+                              className="w-8 h-8 rounded-full object-cover shrink-0"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }}
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0">
+                              {friend.displayName?.[0]}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-white truncate">{friend.displayName}</p>
+                            {friend.username && <p className="text-xs text-zinc-500 truncate">@{friend.username}</p>}
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px bg-zinc-800 shrink-0" />
+
+                {/* Right: add friend + requests */}
+                <div className="w-1/2 flex flex-col gap-5">
+                  {auth.currentUser?.uid === profileUid && (
+                    <>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Add Friend</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Enter username…"
+                            value={friendUsernameInput}
+                            onChange={(e) => setFriendUsernameInput(e.target.value)}
+                            className="flex-1 bg-indigo-500/10 text-white text-sm p-2.5 rounded-xl border border-indigo-500/30 focus:border-indigo-500 focus:outline-none placeholder:text-indigo-200/40 transition-colors"
+                          />
+                          <button
+                            onClick={addFriendByUsername}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-xl font-semibold transition-colors shrink-0"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+
+                      {incomingRequests.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                            Requests ({incomingRequests.length})
+                          </p>
+                          <div className="space-y-1.5 overflow-y-auto max-h-48 [scrollbar-width:thin] [scrollbar-color:#52525b_transparent]">
+                            {incomingRequests.map((req) => (
+                              <div key={req.uid} className="flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-zinc-800/50">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {req.photoURL ? (
+                                    <img src={req.photoURL} alt={req.displayName} className="w-7 h-7 rounded-full object-cover shrink-0"
+                                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }} />
+                                  ) : (
+                                    <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0">
+                                      {req.displayName?.[0]}
+                                    </div>
+                                  )}
+                                  <span className="text-sm text-white truncate">{req.displayName}</span>
+                                </div>
+                                <div className="flex gap-1.5 shrink-0">
+                                  <button onClick={() => handleAcceptIncomingRequest(req)}
+                                    className="px-2.5 py-1 bg-green-600 hover:bg-green-500 rounded-full text-white text-xs font-medium transition">
+                                    Accept
+                                  </button>
+                                  <button onClick={() => handleDeclineIncomingRequest(req)}
+                                    className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 text-xs font-medium transition">
+                                    Decline
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {auth.currentUser?.uid !== profileUid && (
+                    <p className="text-zinc-500 text-sm pt-4">Only visible to the profile owner.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "sets" && (
+              <RecentSetsCarousel
+                setsPlayed={setsPlayed}
+                scrollRef={scrollRef}
+                onScrollLeft={() => scroll("left")}
+                onScrollRight={() => scroll("right")}
+              />
+            )}
+          </div>
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid lg:grid-cols-2 gap-6"
-        >
-          <ProfileFriendsPanel
-            loadingFriends={loadingFriends}
-            friends={friends}
-            incomingRequests={incomingRequests}
-            isOwnProfile={auth.currentUser?.uid === profileUid}
-            friendUsernameInput={friendUsernameInput}
-            onFriendUsernameInputChange={setFriendUsernameInput}
-            onAddFriendByUsername={addFriendByUsername}
-            onAcceptIncomingRequest={handleAcceptIncomingRequest}
-            onDeclineIncomingRequest={handleDeclineIncomingRequest}
-            profilePathFor={profilePathFor}
-          />
-
-          <DomainMasterySection
-            chartData={chartData}
-            chartColors={CHART_COLORS}
-          />
-        </motion.div>
-
-        <RecentSetsCarousel
-          setsPlayed={setsPlayed}
-          scrollRef={scrollRef}
-          onScrollLeft={() => scroll("left")}
-          onScrollRight={() => scroll("right")}
-        />
 
         <Link
           href={userProfile ? channelPathFor(userProfile) : "/channel"}
