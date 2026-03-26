@@ -25,6 +25,8 @@ import {
   AlertTriangle,
   X,
   ShieldAlert,
+  LayoutGrid,
+  Info,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
@@ -67,6 +69,7 @@ interface LeaderboardEntry {
   photoURL?: string;
   correctCount: number;
   totalQuestions: number;
+  questionResults?: boolean[];
   timeTaken: number;
   tabSwitchCount?: number;
   timeOffTab?: number;
@@ -95,6 +98,7 @@ export default function GameDetailPage() {
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   const [activeSession, setActiveSession] = useState<{
     timeLeft: number;
@@ -237,6 +241,7 @@ export default function GameDetailPage() {
                 photoURL: submission.photoURL,
                 correctCount: submission.correctCount ?? 0,
                 totalQuestions: submission.totalQuestions ?? 0,
+                questionResults: (submission as any).questionResults,
                 timeTaken: submission.timeTaken,
                 tabSwitchCount: (submission as any).tabSwitchCount,
                 timeOffTab: (submission as any).timeOffTab,
@@ -269,6 +274,7 @@ export default function GameDetailPage() {
               photoURL: photoURL,
               correctCount: submission.correctCount ?? 0,
               totalQuestions: submission.totalQuestions ?? 0,
+              questionResults: (submission as any).questionResults,
               timeTaken: submission.timeTaken,
               tabSwitchCount: (submission as any).tabSwitchCount,
               timeOffTab: (submission as any).timeOffTab,
@@ -809,78 +815,145 @@ export default function GameDetailPage() {
               {leaderboard.map((entry, index) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                  className={`rounded-xl border transition-all overflow-hidden ${
                     authResolved && user && entry.userId === user.uid
                       ? "bg-neutral-500/10 border-neutral-500/30"
                       : "bg-zinc-950/50 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 flex justify-center">
-                      {getRankIcon(index)}
+                  {/* Main row */}
+                  <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 flex justify-center">
+                        {getRankIcon(index)}
+                      </div>
+
+                      {entry.photoURL ? (
+                        <img
+                          src={entry.photoURL}
+                          alt={entry.username}
+                          className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
+                          {entry.username[0]?.toUpperCase()}
+                        </div>
+                      )}
+
+                      <div>
+                        <div
+                          className={`text-sm font-bold ${
+                            authResolved && user && entry.userId === user.uid
+                              ? "text-neutral-300"
+                              : "text-zinc-200"
+                          }`}
+                        >
+                          {entry.handle ? (
+                            <Link
+                              href={`/profile/${entry.handle}`}
+                              className="hover:underline hover:text-white transition-colors"
+                            >
+                              {authResolved && user && entry.userId === user.uid
+                                ? "You"
+                                : entry.username}
+                            </Link>
+                          ) : (
+                            <span>
+                              {authResolved && user && entry.userId === user.uid
+                                ? "You"
+                                : entry.username}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-zinc-100 font-mono">
+                          {formatTimePlayed(entry.timeTaken)}
+                        </div>
+                      </div>
                     </div>
 
-                    {entry.photoURL ? (
-                      <img
-                        src={entry.photoURL}
-                        alt={entry.username}
-                        className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
-                        {entry.username[0]?.toUpperCase()}
-                      </div>
-                    )}
-
-                    <div>
-                      <div
-                        className={`text-sm font-bold ${
-                          authResolved && user && entry.userId === user.uid
-                            ? "text-neutral-300"
-                            : "text-zinc-200"
-                        }`}
-                      >
-                        {entry.handle ? (
-                          <Link
-                            href={`/profile/${entry.handle}`}
-                            className="hover:underline hover:text-white transition-colors"
-                          >
-                            {authResolved && user && entry.userId === user.uid
-                              ? "You"
-                              : entry.username}
-                          </Link>
-                        ) : (
-                          <span>
-                            {authResolved && user && entry.userId === user.uid
-                              ? "You"
-                              : entry.username}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
-                        {formatTimePlayed(entry.timeTaken)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-right">
-                      <div className="font-bold text-white text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-white text-sm tabular-nums">
                         {entry.correctCount}/{entry.totalQuestions}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setExpandedEntries((prev) => {
+                            const next = new Set(prev);
+                            next.has(entry.submissionId) ? next.delete(entry.submissionId) : next.add(entry.submissionId);
+                            return next;
+                          })
+                        }
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          expandedEntries.has(entry.submissionId)
+                            ? "text-violet-400 bg-violet-500/10"
+                            : "text-zinc-100 hover:text-white hover:bg-zinc-800"
+                        }`}
+                        title="View question breakdown"
+                      >
+                        <LayoutGrid className="w-3.5 h-3.5" />
+                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setInspectEntry(entry)}
+                          className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          title="Inspect attempt"
+                        >
+                          <ShieldAlert className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Expandable breakdown panel */}
+                  {expandedEntries.has(entry.submissionId) && (
+                    <div className="px-4 pb-4 pt-1 border-t border-zinc-800/60">
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {(entry.questionResults
+                          ? entry.questionResults
+                          : Array.from({ length: entry.totalQuestions }, (_, i) => i < entry.correctCount)
+                        ).map((correct, qi) => (
+                          <div key={qi} className="flex flex-col items-center gap-0.5">
+                            <div
+                              className={`w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ${
+                                correct
+                                  ? "bg-green-300/15 border border-green-400/30 text-green-300"
+                                  : "bg-red-300/15 border border-red-400/30 text-red-300"
+                              }`}
+                            >
+                              {qi + 1}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
-                        {formatTimePlayed(entry.timeTaken)}
+
+                      {/* Stats row */}
+                      <div className="flex items-center justify-between pt-2 border-t border-zinc-800/40">
+                        <div className="flex items-center gap-1 text-zinc-100">
+                          <Info className="w-3 h-3" />
+                          <span className="text-[10px]">attempt stats</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                            <span className="text-zinc-100">tab switches</span>
+                            <span className={`font-semibold ${(entry.tabSwitchCount ?? 0) > 3 ? "text-amber-400" : "text-zinc-100"}`}>
+                              {entry.tabSwitchCount ?? 0}
+                            </span>
+                          </div>
+                          <div className="w-px h-3 bg-zinc-700" />
+                          <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                            <span className="text-zinc-100">time off tab</span>
+                            <span className={`font-semibold ${(entry.timeOffTab ?? 0) > 10000 ? "text-amber-400" : "text-zinc-100"}`}>
+                              {entry.timeOffTab
+                                ? entry.timeOffTab >= 60000
+                                  ? `${Math.floor(entry.timeOffTab / 60000)}m ${Math.floor((entry.timeOffTab % 60000) / 1000)}s`
+                                  : `${(entry.timeOffTab / 1000).toFixed(1)}s`
+                                : "0s"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {isAdmin && (
-                      <button
-                        onClick={() => setInspectEntry(entry)}
-                        className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                        title="Inspect attempt"
-                      >
-                        <ShieldAlert className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
               ))}
             </div>

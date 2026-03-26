@@ -392,10 +392,11 @@ export const gradeTest = onDocumentCreated(
       }
 
       let correctCount = 0;
+      const questionResults: boolean[] = [];
       for (let i = 0; i < totalQuestions; i++) {
-        if (userAnswers[i] && userAnswers[i] === correctAnswersMap[i]) {
-          correctCount++;
-        }
+        const isCorrect = !!(userAnswers[i] && userAnswers[i] === correctAnswersMap[i]);
+        questionResults.push(isCorrect);
+        if (isCorrect) correctCount++;
       }
 
       const accuracyScore = (correctCount / totalQuestions) * 1000;
@@ -424,6 +425,7 @@ export const gradeTest = onDocumentCreated(
             score: finalScore,
             correctCount,
             totalQuestions,
+            questionResults,
             correctAnswers: correctAnswersMap,
             gradedAt: FieldValue.serverTimestamp(),
             isFirstAttempt: false,
@@ -473,6 +475,7 @@ export const gradeTest = onDocumentCreated(
           score: finalScore,
           correctCount,
           totalQuestions,
+          questionResults,
           correctAnswers: correctAnswersMap,
           status: "graded",
           isFirstAttempt: true,

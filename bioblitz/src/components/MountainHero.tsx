@@ -78,22 +78,23 @@ export default function MountainHero() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      <canvas
-        ref={starsRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0 bg-neutral-800 opacity-40"
-      />
-      {/** 
+      {/* Banner background */}
       <div
-        className="absolute inset-0 w-full h-full pointer-events-none z-[5]"
+        className="absolute inset-0 w-full h-full pointer-events-none z-0"
         style={{
-          backgroundImage: "url(/images/header.png)",
+          backgroundImage: "url(/images/banner.jpg)",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "center top",
+          backgroundPosition: "center center",
           backgroundSize: "cover",
         }}
       />
-      */}
-      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center">
+      {/* Dark overlay so text stays readable */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-[1] bg-neutral-900/60" />
+      <canvas
+        ref={starsRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-[2] opacity-40"
+      />
+      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center" style={{ zIndex: 10 }}>
         <h1
           className="text-white mb-0 tracking-tight leading-[0.95]"
           style={{
