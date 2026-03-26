@@ -12,7 +12,11 @@ const db = admin.firestore();
 // ---------------------------------------------------------------------------
 
 function computeExpectedPercentile(Rp: number, Rc: number): number {
-  return 1 / (1 + Math.pow(10, (Rc - Rp) / 400));
+  const logistic = 1 / (1 + Math.pow(10, (Rc - Rp) / 400));
+  // Rating-dependent downward shift so lower-rated players need a lower percentile to gain.
+  // At par (500) break-even ≈ 20th percentile; at 1000 ≈ 40th; above 1500 ≈ standard 50th.
+  const shift = 0.30 * Math.exp(-0.0022 * (Rp - 500));
+  return Math.max(0, Math.min(1, logistic - shift));
 }
 
 function computeKFactor(Rp: number, Rc: number): number {
