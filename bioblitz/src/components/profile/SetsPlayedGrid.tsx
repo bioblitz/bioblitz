@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Activity } from "lucide-react";
+import { Star, Trophy, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { getRatingTier } from "@/lib/rating";
 
 interface SetPlayed {
   name: string;
@@ -13,83 +14,108 @@ interface SetPlayed {
   topic: string;
   setId: string;
   delta?: number;
-}
-
-const PAGE_SIZE = 50;
-
-function boxClass(delta?: number) {
-  if (delta == null) return "bg-zinc-800 border-zinc-700 hover:bg-zinc-700";
-  if (delta > 0) return "bg-emerald-500/25 border-emerald-500/40 hover:bg-emerald-500/35";
-  if (delta < 0) return "bg-red-500/25 border-red-500/40 hover:bg-red-500/35";
-  return "bg-zinc-800 border-zinc-700 hover:bg-zinc-700";
+  contestRating?: number;
+  rank?: number | string | null;
 }
 
 function deltaLabel(delta?: number) {
-  if (delta == null) return null;
-  if (delta > 0) return <span className="text-emerald-400 font-semibold">+{delta}</span>;
-  if (delta < 0) return <span className="text-red-400 font-semibold">{delta}</span>;
-  return <span className="text-zinc-500">±0</span>;
+  if (delta == null) return <span className="text-neutral-600">—</span>;
+  if (delta > 0) return <span className="text-emerald-400 font-bold">+{delta}</span>;
+  if (delta < 0) return <span className="text-red-400 font-bold">{delta}</span>;
+  return <span className="text-neutral-500 font-bold">±0</span>;
+}
+
+function formatRank(rank?: number | string | null) {
+  if (rank == null) return <span className="text-neutral-600">—</span>;
+  const r = String(rank);
+  if (r === "1") return <span className="text-yellow-500 font-bold">#1 🥇</span>;
+  if (r === "2") return <span className="text-neutral-400 font-bold">#2 🥈</span>;
+  if (r === "3") return <span className="text-orange-400 font-bold">#3 🥉</span>;
+  return <span className="text-neutral-400 font-bold">#{rank}</span>;
 }
 
 export default function SetsPlayedGrid({ setsPlayed }: { setsPlayed: SetPlayed[] }) {
-  const [page, setPage] = useState(1);
-  const visible = setsPlayed.slice(0, page * PAGE_SIZE);
-  const hasMore = visible.length < setsPlayed.length;
+  const [displayLimit, setDisplayLimit] = useState(5);
+  const visible = setsPlayed.slice(0, displayLimit);
+  const hasMore = displayLimit < setsPlayed.length;
 
   return (
     <motion.div
       initial={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      className="space-y-6"
     >
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
           Blitzes Completed
         </h2>
-        <span className="text-sm text-zinc-500">{setsPlayed.length} total</span>
+      
       </div>
 
       {setsPlayed.length === 0 ? (
-        <div className="p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-500">
-          No blitzes completed yet.
+        <div className="p-12 text-center border border-dashed border-neutral-800 rounded-3xl text-neutral-600">
+          <p className="text-sm font-medium">No blitzes completed yet.</p>
         </div>
       ) : (
-        <>
-          <div className="flex flex-wrap gap-2">
-            {visible.map((set, i) => (
-              <Link
-                key={i}
-                href={`/home/${set.setId}`}
-                className={`relative group w-8 h-8 rounded-lg border transition-colors ${boxClass(set.delta)}`}
-              >
-                {/* Hover tooltip */}
-                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:block w-max max-w-[200px]">
-                  <div className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 shadow-xl">
-                    <p className="text-white text-xs font-medium line-clamp-2 leading-snug mb-1">
+        <div className="space-y-2">
+          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-neutral-500 tracking-widest border-b border-neutral-900">
+            <div className="col-span-6">Blitz Name</div>
+            <div className="col-span-2 text-center">Contest Rating</div>
+            <div className="col-span-2 text-center">+/-</div>
+          </div>
+          
+          <div className="space-y-1">
+            {visible.map((set, i) => {
+              const elo = Math.round(set.contestRating || 0);
+              const tier = getRatingTier(elo);
+              
+              return (
+                <Link
+                  key={i}
+                  href={`/home/${set.setId}`}
+                  className="grid grid-cols-12 gap-4 items-center p-4 bg-neutral-900/40 border border-transparent hover:border-neutral-700 hover:bg-neutral-800/60 rounded-2xl transition-all group"
+                >
+                  <div className="col-span-6 min-w-0">
+                    <p className="text-sm font-bold text-white truncate transition-colors">
                       {set.name}
                     </p>
-                    <div className="flex items-center justify-between gap-3 text-xs text-zinc-500">
-                      {set.correctCount != null && set.totalQuestions != null && (
-                        <span>{set.correctCount}/{set.totalQuestions} correct</span>
-                      )}
+                    <p className="text-[10px] text-neutral-500 font-bold tracking-tight mt-0.5">
+                      {set.topic}
+                    </p>
+                  </div>
+                  
+                  <div className="col-span-2 flex flex-col items-center">
+                    <span className={`text-sm font-bold ${tier.textClass}`}>
+                      {elo > 0 ? elo : "—"}
+                    </span>
+                  </div>
+
+                  <div className="col-span-2 text-center">
+                    <div className="text-sm">
                       {deltaLabel(set.delta)}
                     </div>
                   </div>
-                  {/* Arrow */}
-                  <div className="w-2 h-2 bg-zinc-950 border-r border-b border-zinc-800 rotate-45 mx-auto -mt-1" />
-                </div>
-              </Link>
-            ))}
+
+                  <div className="col-span-2 text-center">
+                    <div className="text-sm">
+                      {formatRank(set.rank)}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
           {hasMore && (
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              className="mt-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              Load more ({setsPlayed.length - visible.length} remaining)
-            </button>
+            <div className="pt-4 text-center">
+              <button
+                onClick={() => setDisplayLimit((prev) => prev + 5)}
+                className="text-sm font-bold text-neutral-500 hover:text-white hover:underline transition-all"
+              >
+                View more
+              </button>
+            </div>
           )}
-        </>
+        </div>
       )}
     </motion.div>
   );

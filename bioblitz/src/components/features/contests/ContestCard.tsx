@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { Clock, Star, Users, CheckCircle2, Zap } from "lucide-react";
+import { Clock, Star, Users, Zap, Trophy } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { getTopicShortLabel } from "@/lib/utils";
+import { getRatingTier } from "@/lib/rating";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "@/lib/firebase";
+import { getAuth } from "firebase/auth";
+
 interface ContestCardProps {
   contest: gameRoom;
   href?: string;
@@ -11,6 +16,30 @@ interface ContestCardProps {
 }
 
 const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted }) => {
+  const [userSubmission, setUserSubmission] = useState<{ rank?: number } | null>(null);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  useEffect(() => {
+    if (isCompleted && auth.currentUser) {
+      const fetchSubmission = async () => {
+        try {
+          const subRef = doc(db, "gameSubmissions", `${auth.currentUser?.uid}_${contest.id}`);
+          const subSnap = await getDoc(subRef);
+          if (subSnap.exists()) {
+            const data = subSnap.data();
+            setUserSubmission({
+              rank: data.rank || data.ranking,
+            });
+          }
+        } catch (e) {
+          console.error("Error fetching submission for card:", e);
+        }
+      };
+      fetchSubmission();
+    }
+  }, [isCompleted, contest.id, auth.currentUser?.uid]);
+
   const timeInMinutes = contest.timeLimit 
     ? (typeof contest.timeLimit === 'string' && contest.timeLimit.includes('min') 
         ? parseInt(contest.timeLimit) 
@@ -47,6 +76,9 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
     }
   };
 
+  const contestElo = Math.round(contest.contestRating || 0);
+  const tier = getRatingTier(contestElo);
+
   return (
     <Link
       key={contest.id}
@@ -80,16 +112,34 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
             </p>
           </div>
+          {isCompleted && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-20 gap-2">
+              <span className="text-black text-[10px] font-bold uppercase tracking-widest bg-yellow-300 px-3 py-1 rounded-full border border-white/10">
+                Completed
+              </span>
+              {(userSubmission?.rank || contestElo > 0) && (
+                <div className="flex items-center gap-2 bg-black/80 px-3 py-1.5 rounded-xl border border-white/5 shadow-2xl">
+                  {userSubmission?.rank && (
+                    <div className="flex items-center gap-1">
+                      <Trophy className="w-3 h-3 text-yellow-500" />
+                      <span className="text-[11px] font-bold text-white">#{userSubmission.rank}</span>
+                    </div>
+                  )}
+                  {userSubmission?.rank && contestElo > 0 && <div className="w-px h-2.5 bg-white/20" />}
+                  {contestElo > 0 && (
+                    <span className={`text-[11px] font-bold ${tier?.textClass}`}>
+                      {contestElo}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10">
               <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}>
                 {getTopicShortLabel(contest.topic)}
               </span>
-            </div>
-          )}
-          {isCompleted && (
-            <div className="absolute top-2 right-2 z-10">
-              <CheckCircle2 className="w-5 h-5 text-green-400" />
             </div>
           )}
           {!contest.ratingActivated && (

@@ -208,7 +208,11 @@ async function activateContest(
     const submissionRef = db
       .collection("gameSubmissions")
       .doc(sub.submissionId);
-    currentBatch.update(submissionRef, { ratingDelta: deltaFinal, newElo });
+    currentBatch.update(submissionRef, { 
+      ratingDelta: deltaFinal, 
+      newElo,
+      rank: rankMap[sub.submissionId]
+    });
     ops++;
     flush();
 

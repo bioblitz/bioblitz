@@ -295,12 +295,8 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
   });
 
   return (
-    <div
-      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 relative overflow-hidden`}
-    >
-      <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900 pointer-events-none" />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
+    <div className="min-h-screen bg-neutral-900">
+      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
           <div className="flex flex-col items-start gap-2">
             <div className="flex items-center gap-3">
@@ -327,7 +323,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
           {isStaffUser && (
             <Link
               href="/potd/staff"
-              className="text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+              className="text-sm text-neutral-300 border border-neutral-200 hover:bg-neutral-700 hover:text-neutral-400 px-3 py-1.5 rounded-full transition-colors"
             >
               Manage Queue
             </Link>
@@ -343,7 +339,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
           </div>
         ) : (
           <div className="space-y-0">
-            {/* Tab bar */}
             <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 mb-8">
               {(["today", "archive"] as const).map((tab) => (
                 <button
@@ -351,7 +346,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                     activeTab === tab
-                      ? "bg-zinc-800 text-white shadow-sm shadow-white/5"
+                      ? "bg-zinc-800 text-white"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -363,7 +358,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
             {activeTab === "today" && <section className="relative">
               {activePuzzle ? (
                 !isFallback && isTodayCompleted && !viewAnyway ? (
-                  <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm shadow-xl p-12 text-center animate-in fade-in duration-500">
+                  <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm p-12 text-center animate-in fade-in duration-500">
 
                     <div className="relative z-10 flex flex-col items-center">
                       <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -377,7 +372,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       <div className="flex flex-col sm:flex-row gap-4">
                         <button
                           onClick={() => setActiveTab("archive")}
-                          className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                          className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
                         >
                           Practice Past Problems
                         </button>
@@ -409,13 +404,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           {activePuzzle.topic}
                         </span>
                         <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
-                          {/*
-                          {activePuzzle.multiSelect ? (
-                            <ListChecks className="w-3 h-3" />
-                          ) : (
-                            <MousePointerClick className="w-3 h-3" />
-                          )}
-                          */}
                           {activePuzzle.multiSelect
                             ? "Multi-Select"
                             : "Single Choice"}
@@ -474,12 +462,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               className={`
                                                         relative flex items-center justify-center w-full p-4 rounded-xl border transition-all duration-200
                                                         ${bgClass} ${borderClass}
-                                                        ${
-                                                          isSelected &&
-                                                          !showResults
-                                                            ? "shadow-[0_0_20px_rgba(139,92,246,0.15)]"
-                                                            : ""
-                                                        } 
+                                                        
                                                     `}
                             >
                               <div
@@ -503,17 +486,6 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                 {option.text}
                               </span>
 
-                              <div className="absolute right-4 animate-in zoom-in duration-200">
-                                {!showResults && isSelected && (
-                                  <CheckCircle2 className="w-5 h-5 text-neutral-500" />
-                                )}
-                                {showResults && isCorrectKey && (
-                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                )}
-                                {showResults && isSelected && !isCorrectKey && (
-                                  <XCircle className="w-5 h-5 text-red-500" />
-                                )}
-                              </div>
                             </button>
                           );
                         })}

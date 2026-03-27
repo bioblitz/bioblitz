@@ -34,6 +34,8 @@ export interface SetPlayed {
   topic: string;
   setId: string;
   delta?: number;
+  contestRating?: number;
+  rank?: number | string | null;
 }
 
 export type FriendshipStatus = "none" | "sent" | "received" | "friends";

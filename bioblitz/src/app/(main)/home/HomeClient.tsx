@@ -5,20 +5,14 @@ import { gameRoom } from "@/types";
 import { getGamesPage } from "@/lib/gameRoomsAll";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import ContestCard from "@/components/features/contests/ContestCard";
-import { X, Loader2 } from "lucide-react";
 import {
-  Clock,
-  HelpCircle,
   User,
-  Star,
   Filter,
   CheckCircle2,
   SlidersHorizontal,
   ChevronDown,
   ChevronUp,
   Search,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { getAuth } from "firebase/auth";
 import {
@@ -74,8 +68,6 @@ export default function HomeClient() {
     if (authLoading) return;
     if (authUser?.uid) {
       fetchPlayedGames(authUser.uid);
-      // Admin claim check — Firebase is guaranteed initialized by the time
-      // AuthContext resolves, so currentUser is available here
       const firebaseUser = getAuth(app).currentUser;
       if (firebaseUser) {
         firebaseUser.getIdTokenResult(true).then((result) => {
@@ -101,38 +93,6 @@ export default function HomeClient() {
       console.error("Error fetching played games:", error);
     } finally {
       setPlayedGamesLoaded(true);
-    }
-  };
-
-  const handleDeleteContest = async (gameId: string, title: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${title}"? This cannot be undone.`,
-      )
-    )
-      return;
-    if (!user) return;
-
-    setDeletingId(gameId);
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch("/api/admin/contests", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ gameId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setPages((prev) =>
-        prev.map((page) => page.filter((g) => g.id !== gameId)),
-      );
-    } catch (err: any) {
-      alert(err?.message || "Failed to delete contest.");
-    } finally {
-      setDeletingId(null);
     }
   };
   const loadPage = async (pageIndex: number) => {
@@ -164,7 +124,7 @@ export default function HomeClient() {
 
   const allGames = pages.flat();
   const filteredGames = useMemo(() => {
-    return allGames.filter((game: gameRoom) => {
+    const games = allGames.filter((game: gameRoom) => {
       const matchesSearch = game.title
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
@@ -187,6 +147,14 @@ export default function HomeClient() {
 
       return matchesSearch && matchesTopic && matchesStatus && matchesType;
     });
+
+    return [...games].sort((a, b) => {
+      const aPlayed = playedGameIds.has(a.id);
+      const bPlayed = playedGameIds.has(b.id);
+      if (aPlayed && !bPlayed) return 1;
+      if (!aPlayed && bPlayed) return -1;
+      return 0;
+    });
   }, [allGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -206,61 +174,6 @@ export default function HomeClient() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const getTopicColors = (topic: string | undefined) => {
-    switch (topic) {
-      case "Anatomy & Physiology":
-      case "Anat & Phys":
-        return {
-          bg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-          badge: "bg-blue-500 text-white",
-        };
-      case "Cell Biology":
-      case "Cell Bio":
-        return {
-          bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-          badge: "bg-cyan-500 text-white",
-        };
-      case "Plant Biology":
-      case "Plant Bio":
-        return {
-          bg: "bg-green-500/10 text-green-400 border-green-500/20",
-          badge: "bg-green-600 text-white",
-        };
-      case "Genetics & Evolution":
-      case "Gen & Evo":
-      case "Genetics":
-        return {
-          bg: "bg-lime-500/10 text-lime-400 border-lime-500/20",
-          badge: "bg-lime-600 text-white",
-        };
-      case "Biosystematics":
-      case "Biosys":
-        return {
-          bg: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-          badge: "bg-indigo-600 text-white",
-        };
-      case "Ecology":
-        return {
-          bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-          badge: "bg-emerald-600 text-white",
-        };
-      case "Ethology":
-        return {
-          bg: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-          badge: "bg-orange-600 text-white",
-        };
-      case "Multiple":
-        return {
-          bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-          badge: "bg-yellow-600 text-white",
-        };
-      default:
-        return {
-          bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20",
-          badge: "bg-neutral-600 text-white",
-        };
-    }
-  };
 
   const activeFilterCount =
     (statusFilter !== "All" ? 1 : 0) +

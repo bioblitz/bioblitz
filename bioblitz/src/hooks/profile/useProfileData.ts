@@ -122,12 +122,14 @@ export function useProfileData({
           getDocs(historyRef),
         ]);
 
-        // Build contestId → delta map for O(1) joins
-        const deltaMap = new Map<string, number>();
+        const deltaMap = new Map<string, { delta: number; elo: number }>();
         historySnap.docs.forEach((d) => {
           const data = d.data() as any;
           if (data.contestId) {
-            deltaMap.set(data.contestId, data.delta ?? 0);
+            deltaMap.set(data.contestId, { 
+              delta: data.delta ?? 0, 
+              elo: data.newElo ?? data.elo ?? 0 
+            });
           }
         });
 
@@ -159,6 +161,7 @@ export function useProfileData({
                 playedData.category ||
                 "General";
               let title = playedData.title || "Unknown Set";
+              let contestRatingFromSet = 0;
 
               let foundOriginal = false;
 
@@ -175,6 +178,7 @@ export function useProfileData({
                       originalData.category ||
                       topic;
                     title = originalData.title || title;
+                    contestRatingFromSet = originalData.contestRating || 0;
                     foundOriginal = true;
                     resolvedSetId = originalSetId;
                   }
@@ -201,6 +205,7 @@ export function useProfileData({
                       originalData.category ||
                       topic;
                     title = originalData.title || title;
+                    contestRatingFromSet = originalData.contestRating || 0;
                     foundOriginal = true;
                     resolvedSetId = matchedDoc.id;
                   }
@@ -213,6 +218,21 @@ export function useProfileData({
                 return null;
               }
 
+              let rank = playedData.rank || playedData.ranking || null;
+              if (rank === null) {
+                try {
+                  const subId = playedData.submission || playedData.submissionId;
+                  if (subId) {
+                    const subSnap = await getDoc(doc(db, "gameSubmissions", subId));
+                    if (subSnap.exists()) {
+                      rank = subSnap.data().rank || subSnap.data().ranking || null;
+                    }
+                  }
+                } catch (e) {}
+              }
+
+              const historyInfo = deltaMap.get(resolvedSetId);
+
               return {
                 name: title,
                 correctCount: playedData.correctCount,
@@ -220,7 +240,9 @@ export function useProfileData({
                 timeTaken: playedData.timeTaken,
                 topic,
                 setId: resolvedSetId,
-                delta: deltaMap.get(resolvedSetId),
+                delta: historyInfo?.delta,
+                contestRating: contestRatingFromSet || playedData.contestRating || 0,
+                rank: rank,
               } as SetPlayed;
             })
           )
