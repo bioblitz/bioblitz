@@ -329,14 +329,19 @@ export default function MainNavbar() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-2 group">
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                <img src="/icons/favicon.ico" className="w-6 h-6" alt="BioBlitz" />
+                <img
+                  src="/icons/favicon.ico"
+                  className="w-6 h-6"
+                  alt="BioBlitz"
+                />
               </div>
-              <span style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }} className="text-white text-xl">
+              <span
+                style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }}
+                className="text-white text-xl"
+              >
                 BioBlitz
-              </span>          
+              </span>
             </Link>
-
-
 
             <SearchBar />
 
@@ -346,7 +351,7 @@ export default function MainNavbar() {
       </nav>
 
       <aside
-        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 ${
+        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none ${
           railOpen ? "bg-neutral-900/90" : "bg-transparent"
         }`}
         onMouseLeave={() => {
@@ -355,7 +360,7 @@ export default function MainNavbar() {
         }}
       >
         <div
-          className="w-16 flex flex-col items-center justify-center py-6 gap-3 ml-2"
+          className="w-16 flex flex-col items-center justify-center py-6 gap-3 ml-2 pointer-events-auto"
           onMouseEnter={() => {
             if (!suppressRailHover) setRailOpen(true);
           }}

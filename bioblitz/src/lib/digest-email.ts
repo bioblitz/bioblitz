@@ -1,44 +1,65 @@
+/**
+ * Weekly digest email — table-based HTML.
+ * Dark, typographic, no icons, no gradients.
+ */
+
 import type { WeeklyDigestData } from "./digest-data";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.co";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.co";
 
-function esc(str: string): string {
-  return str
+const C = {
+  bg: "#0a0a0a",
+  card: "#131313",
+  surface: "#191919",
+  border: "#232323",
+  text: "#e5e5e5",
+  textHi: "#fafafa",
+  textMid: "#8a8a8a",
+  textLo: "#555555",
+  green: "#4ade80",
+  greenDeep: "#22874a",
+  red: "#f87171",
+  redDeep: "#b33a3a",
+  amber: "#fbbf24",
+  orange: "#ea580c",
+  orangeLight: "#f97316",
+  pillActive: "#9a3412",
+  pillOff: "#1c1917",
+};
+
+function esc(s: string): string {
+  return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
 
-function tierLabel(elo: number): string {
-  if (elo >= 2250) return "Diamond";
-  if (elo >= 1750) return "Platinum";
-  if (elo >= 1250) return "Gold";
-  if (elo >= 750) return "Silver";
-  return "Bronze";
-}
-
 function tierColor(elo: number): string {
-  if (elo >= 2250) return "#22d3ee";
+  if (elo >= 2250) return "#67e8f9";
   if (elo >= 1750) return "#a3a3a3";
   if (elo >= 1250) return "#fbbf24";
   if (elo >= 750) return "#d4d4d8";
-  return "#c2410c";
+  return "#ea580c";
 }
 
 function topicColor(topic: string): string {
   const map: Record<string, string> = {
-    "Anatomy & Physiology": "#3b82f6",
-    "Cell Biology": "#06b6d4",
-    "Plant Biology": "#22c55e",
-    "Genetics & Evolution": "#84cc16",
-    Biosystematics: "#8b5cf6",
-    Ecology: "#10b981",
-    Ethology: "#f97316",
-    Multiple: "#eab308",
+    "Anatomy & Physiology": "#60a5fa",
+    "Cell Biology": "#22d3ee",
+    "Plant Biology": "#4ade80",
+    "Genetics & Evolution": "#a3e635",
+    Biosystematics: "#a78bfa",
+    Ecology: "#34d399",
+    Ethology: "#fb923c",
+    Multiple: "#facc15",
   };
-  return map[topic] || "#71717a";
+  return map[topic] || "#8a8a8a";
 }
+
+const f =
+  "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+const m = "'Courier New',Courier,monospace";
 
 export function generateDigestHtml(data: WeeklyDigestData): string {
   const firstName = esc(data.displayName.split(" ")[0] || "there");
@@ -46,118 +67,151 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
     data.blitzesThisWeek > 0 || data.potdCompletedThisWeek > 0;
   const hasChallenges = data.challengeWins + data.challengeLosses > 0;
 
-  const eloColor =
-    data.eloChange > 0 ? "#34d399" : data.eloChange < 0 ? "#f87171" : "#a1a1aa";
+  const eloCol =
+    data.eloChange > 0 ? C.green : data.eloChange < 0 ? C.red : C.textMid;
   const eloSign = data.eloChange > 0 ? "+" : "";
-  const eloArrow =
-    data.eloChange > 0 ? "&#9650;" : data.eloChange < 0 ? "&#9660;" : "";
 
-  // ── Sections ──────────────────────────────────────────────────────────
-
-  const streakSection =
-    hasActivity && data.currentStreak >= 3
-      ? `<tr><td style="padding:0 32px 20px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#1c1306;border:1px solid #854d0e;border-radius:12px;">
-        <tr><td style="padding:14px 20px;text-align:center;">
-          <span style="font-size:20px;">&#128293;</span>
-          <span style="font-size:15px;font-weight:700;color:#fbbf24;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;vertical-align:middle;margin-left:6px;">${data.currentStreak}-day streak</span>
-        </td></tr>
-      </table>
-    </td></tr>`
-      : "";
-
-  const inactiveSection = !hasActivity
-    ? `<tr><td style="padding:8px 32px 20px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#171717;border:1px solid #3f3f46;border-radius:12px;">
-        <tr><td style="padding:24px;text-align:center;">
-          <p style="margin:0 0 4px;font-size:17px;font-weight:700;color:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">We missed you this week</p>
-          <p style="margin:0 0 16px;font-size:13px;color:#a1a1aa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">A quick blitz is all it takes to keep your streak alive.</p>
-          <a href="${SITE_URL}/home" style="display:inline-block;padding:10px 28px;background:#404040;border-radius:10px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Jump back in</a>
-        </td></tr>
-      </table>
-    </td></tr>`
-    : "";
-
-  const challengeSection = hasChallenges
-    ? `<tr><td style="padding:0 32px 20px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#0a0a0b;border:1px solid #27272a;border-radius:12px;">
-        <tr><td style="padding:16px 20px;text-align:center;">
-          <p style="margin:0 0 10px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#a1a1aa;font-family:'Courier New',monospace;">Challenges</p>
-          <table cellpadding="0" cellspacing="0" border="0" align="center"><tr>
-            <td style="padding:0 16px;text-align:center;">
-              <p style="margin:0;font-size:26px;font-weight:800;color:#34d399;font-family:'Courier New',monospace;">${data.challengeWins}</p>
-              <p style="margin:2px 0 0;font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:0.08em;font-family:'Courier New',monospace;">W</p>
-            </td>
-            <td style="width:1px;background:#27272a;font-size:0;">&nbsp;</td>
-            <td style="padding:0 16px;text-align:center;">
-              <p style="margin:0;font-size:26px;font-weight:800;color:#71717a;font-family:'Courier New',monospace;">${data.challengeLosses}</p>
-              <p style="margin:2px 0 0;font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:0.08em;font-family:'Courier New',monospace;">L</p>
-            </td>
-          </tr></table>
-        </td></tr>
-      </table>
-    </td></tr>`
-    : "";
-
-  const weakTopicSection = data.weakestTopic
-    ? `<tr><td style="padding:0 32px 20px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#1c1917;border:1px solid #44403c;border-radius:12px;">
-        <tr><td style="padding:16px 20px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#a1a1aa;font-family:'Courier New',monospace;">Area to improve</p>
-          <p style="margin:0;font-size:16px;font-weight:700;color:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">${esc(data.weakestTopic.name)}</p>
-          <p style="margin:4px 0 0;font-size:13px;color:#f59e0b;font-weight:700;font-family:'Courier New',monospace;">${Math.round(data.weakestTopic.accuracy)}% accuracy</p>
-        </td></tr>
-      </table>
-    </td></tr>`
-    : "";
-
-  let newBlitzRows = "";
-  for (const blitz of data.newBlitzes.slice(0, 5)) {
-    const tc = topicColor(blitz.topic);
-    newBlitzRows += `<tr>
-      <td style="padding:10px 0;border-bottom:1px solid #27272a;">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-          <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-            <a href="${SITE_URL}/home/${blitz.id}" style="color:#fafafa;text-decoration:none;font-weight:700;font-size:14px;">${esc(blitz.title)}</a><br/>
-            <span style="display:inline-block;margin-top:3px;font-size:11px;color:${tc};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">${esc(blitz.topic)}</span>
-            <span style="font-size:11px;color:#71717a;margin-left:8px;">${blitz.questionCount}q</span>
-          </td>
-          <td width="70" align="right" valign="middle">
-            <a href="${SITE_URL}/home/${blitz.id}" style="display:inline-block;padding:6px 14px;background:#262626;border:1px solid #3f3f46;border-radius:8px;color:#e4e4e7;font-size:12px;font-weight:700;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Play</a>
-          </td>
-        </tr></table>
-      </td>
-    </tr>`;
+  const days = ["M", "T", "W", "T", "F", "S", "S"];
+  let pills = "";
+  for (let i = 0; i < 7; i++) {
+    const on = data.activeDays[i];
+    pills += `<td align="center" style="padding:0 1px;">
+      <div style="width:100%;max-width:56px;height:7px;border-radius:4px;background:${on ? C.pillActive : C.pillOff};"></div>
+      <p style="margin:4px 0 0;font-size:10px;color:${on ? C.orangeLight : C.textLo};font-family:${m};font-weight:600;line-height:1;">${days[i]}</p>
+    </td>`;
   }
 
-  const newBlitzesSection =
-    data.newBlitzes.length > 0
-      ? `<tr><td style="padding:24px 32px 20px;">
-      <p style="margin:0 0 14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#a1a1aa;font-family:'Courier New',monospace;">New Blitzes</p>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">${newBlitzRows}</table>
+  let heroRight = "";
+  if (data.currentStreak >= 2) {
+    heroRight += `<p style="margin:0 0 6px;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
+      <span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span> day streak
+    </p>`;
+  }
+  if (data.eloChange !== 0) {
+    heroRight += `<p style="margin:0;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
+      <span style="font-weight:800;color:${eloCol};font-family:${m};">${eloSign}${data.eloChange}</span> this week
+    </p>`;
+  }
+
+  const aheadRow =
+    data.friendAhead && data.friendAhead.gap > 0
+      ? `<tr><td style="padding:0 28px 22px;">
+      <p style="margin:0;font-size:13px;color:${C.textMid};font-family:${f};line-height:1.4;">
+        You're <span style="font-weight:800;color:${C.amber};font-family:${m};">${data.friendAhead.gap}</span> Elo behind <span style="font-weight:700;color:${C.text};">${esc(data.friendAhead.displayName)}</span>
+      </p>
     </td></tr>`
       : "";
 
-  const potdSection =
+  const inactiveRow = !hasActivity
+    ? `<tr><td style="padding:0 28px 22px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:${C.text};font-family:${f};">Quiet week.</p>
+      <p style="margin:0;font-size:13px;color:${C.textMid};font-family:${f};">One blitz keeps your rating from decaying.</p>
+    </td></tr>`
+    : "";
+
+  const streakCallout =
+    hasActivity && data.currentStreak >= 7
+      ? `<tr><td style="padding:0 28px 22px;text-align:center;">
+      <p style="margin:0;font-size:14px;font-weight:700;color:${C.orangeLight};font-family:${f};">${data.currentStreak} days — don't break it</p>
+    </td></tr>`
+      : "";
+
+  const challengeRow = hasChallenges
+    ? `<tr><td style="padding:0 28px 22px;">
+      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Challenges</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:1px solid ${C.border};border-radius:8px 0 0 8px;">
+          <p style="margin:0;font-size:26px;font-weight:800;color:${C.green};font-family:${m};line-height:1;">${data.challengeWins}</p>
+          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">WON</p>
+        </td>
+        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:1px solid ${C.border};border-left:0;border-radius:0 8px 8px 0;">
+          <p style="margin:0;font-size:26px;font-weight:800;color:${C.textLo};font-family:${m};line-height:1;">${data.challengeLosses}</p>
+          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">LOST</p>
+        </td>
+      </tr></table>
+    </td></tr>`
+    : "";
+
+  const potdRow =
     data.potdAvailableThisWeek > 0
-      ? `<tr><td style="padding:4px 32px 20px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr><td style="padding:14px 20px;background:#0a0a0b;border:1px solid #27272a;border-radius:12px;">
+      ? `<tr><td style="padding:0 28px 22px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td style="padding:12px 16px;background:${C.surface};border:1px solid ${C.border};border-radius:8px;">
           <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-            <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-              <span style="font-size:14px;">&#128293;</span>
-              <span style="font-size:13px;font-weight:700;color:#fafafa;vertical-align:middle;margin-left:4px;">Daily Problems: ${data.potdCompletedThisWeek}/${data.potdAvailableThisWeek}</span>
+            <td>
+              <p style="margin:0;font-size:13px;font-weight:600;color:${C.text};font-family:${f};">Daily Problems</p>
+              <p style="margin:2px 0 0;font-size:11px;color:${C.textLo};font-family:${f};">${data.potdCompletedThisWeek} of ${data.potdAvailableThisWeek} this week</p>
             </td>
-            <td width="90" align="right">
-              <a href="${SITE_URL}/potd" style="font-size:12px;color:#a78bfa;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Solve now &rarr;</a>
+            <td width="80" align="right">
+              <a href="${SITE}/potd" style="font-size:12px;color:${C.textMid};text-decoration:none;font-family:${f};">Solve &#8594;</a>
             </td>
           </tr></table>
-        </td></tr>
-      </table>
+        </td>
+      </tr></table>
     </td></tr>`
       : "";
 
-  // ── Full email ────────────────────────────────────────────────────────
+  let fRows = "";
+  const fs = data.friends.slice(0, 5);
+  for (let i = 0; i < fs.length; i++) {
+    const fr = fs[i];
+    const me = fr.username === data.username;
+    const bg = me ? "#1a1a1a" : "transparent";
+    const nc = me ? C.textHi : C.text;
+    const ec = me ? C.textHi : C.textMid;
+    const nw = me ? "700" : "500";
+    const n = me ? "You" : esc(fr.displayName);
+    const bb = i < fs.length - 1 ? `border-bottom:1px solid ${C.border};` : "";
+
+    fRows += `<tr><td style="padding:9px 16px;background:${bg};${bb}">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td width="20" style="font-family:${m};font-size:11px;font-weight:600;color:${C.textLo};vertical-align:middle;">${i + 1}</td>
+        <td style="font-family:${f};font-size:13px;font-weight:${nw};color:${nc};vertical-align:middle;">${n}</td>
+        <td width="56" align="right" style="font-family:${m};font-size:12px;font-weight:700;color:${ec};vertical-align:middle;">${fr.bElo}</td>
+      </tr></table>
+    </td></tr>`;
+  }
+
+  const friendBlock =
+    data.friends.length > 1
+      ? `<tr><td style="padding:0 28px 22px;">
+      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Friends</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;">${fRows}</table>
+    </td></tr>`
+      : "";
+
+  let bRows = "";
+  for (let i = 0; i < Math.min(data.unplayedBlitzes.length, 4); i++) {
+    const b = data.unplayedBlitzes[i];
+    const tc = topicColor(b.topic);
+    const weak = data.weakestTopicName && b.topic === data.weakestTopicName;
+    const bb =
+      i < Math.min(data.unplayedBlitzes.length, 4) - 1
+        ? `border-bottom:1px solid ${C.border};`
+        : "";
+
+    bRows += `<tr><td style="padding:11px 0;${bb}">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td style="font-family:${f};">
+          <a href="${SITE}/home/${b.id}" style="color:${C.textHi};text-decoration:none;font-weight:600;font-size:13px;line-height:1.3;">${esc(b.title)}</a><br/>
+          <span style="font-size:10px;color:${tc};font-weight:700;font-family:${m};text-transform:uppercase;letter-spacing:0.04em;">${esc(b.topic)}</span>
+          <span style="font-size:10px;color:${C.textLo};margin-left:5px;">${b.questionCount}q</span>
+          ${weak ? `<span style="font-size:10px;color:${C.amber};margin-left:6px;font-weight:600;">&#8592; practice</span>` : ""}
+        </td>
+        <td width="50" align="right" valign="middle">
+          <a href="${SITE}/home/${b.id}" style="display:inline-block;padding:5px 12px;background:${C.border};border-radius:6px;color:${C.text};font-size:11px;font-weight:700;text-decoration:none;font-family:${f};">Play</a>
+        </td>
+      </tr></table>
+    </td></tr>`;
+  }
+
+  const blitzBlock =
+    data.unplayedBlitzes.length > 0
+      ? `<tr><td style="padding:0 28px 24px;">
+      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Blitzes for you</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%">${bRows}</table>
+    </td></tr>`
+      : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -165,84 +219,82 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>Your BioBlitz Weekly Digest</title>
+<title>BioBlitz Weekly</title>
 <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
 </head>
-<body style="margin:0;padding:0;background:#0a0a0a;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#0a0a0a;">
-<tr><td align="center" style="padding:24px 16px 48px;">
+<body style="margin:0;padding:0;background:${C.bg};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.bg};">
+<tr><td align="center" style="padding:20px 16px 40px;">
 
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#141414;border-radius:16px;overflow:hidden;border:1px solid #27272a;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="500" style="max-width:500px;width:100%;background:${C.card};border-radius:10px;overflow:hidden;border:1px solid ${C.border};">
 
-  <!-- Header -->
-  <tr><td style="padding:32px 32px 24px;border-bottom:1px solid #27272a;">
+  <!-- Greeting -->
+  <tr><td style="padding:26px 28px 14px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-      <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-        <p style="margin:0 0 2px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#71717a;font-family:'Courier New',monospace;">Weekly Digest</p>
-        <p style="margin:0;font-size:22px;font-weight:800;color:#fafafa;">Hey ${firstName} &#128075;</p>
-      </td>
-      <td width="40" align="right" valign="top">
-        <a href="${SITE_URL}" style="text-decoration:none;font-size:18px;font-weight:900;color:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">B</a>
+      <td><p style="margin:0;font-size:16px;font-weight:600;color:${C.text};font-family:${f};">Hey ${firstName}</p></td>
+      <td width="24" align="right" valign="top">
+        <a href="${SITE}" style="text-decoration:none;font-size:14px;font-weight:800;color:${C.textLo};font-family:${f};">B</a>
       </td>
     </tr></table>
   </td></tr>
 
-  <!-- Rating hero -->
-  <tr><td style="padding:24px 32px 20px;">
-    <p style="margin:0;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#a1a1aa;font-family:'Courier New',monospace;">Your Rating</p>
-    <table cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="font-family:'Courier New',monospace;font-size:42px;font-weight:800;color:#fafafa;line-height:1;padding-top:4px;">${data.currentElo}</td>
-      <td style="padding-left:10px;vertical-align:bottom;padding-bottom:6px;">
-        ${data.eloChange !== 0 ? `<span style="font-family:'Courier New',monospace;font-size:15px;font-weight:800;color:${eloColor};">${eloArrow} ${eloSign}${data.eloChange}</span><br/>` : ""}
-        <span style="font-size:11px;font-weight:700;color:${tierColor(data.currentElo)};font-family:'Courier New',monospace;">${tierLabel(data.currentElo)}</span>
-        ${data.globalRank !== null ? `<span style="font-size:11px;color:#71717a;margin-left:6px;font-family:'Courier New',monospace;">#${data.globalRank}</span>` : ""}
-      </td>
-    </tr></table>
+  <!-- Elo hero -->
+  <tr><td style="padding:0 28px 22px;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;">
+      <!-- Top: number + meta -->
+      <tr><td style="padding:22px 22px 14px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+          <td valign="top">
+            <p style="margin:0 0 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Current Elo</p>
+<p style="margin:0;font-size:44px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;letter-spacing:-1px;">${data.currentElo.toLocaleString()}${data.eloChange !== 0 ? `<span style="font-size:18px;font-weight:800;color:${data.eloChange > 0 ? C.greenDeep : C.redDeep};letter-spacing:0;margin-left:8px;">(${data.eloChange > 0 ? "+" : ""}${data.eloChange})</span>` : ""}</p>          </td>
+          <td valign="top" align="right" style="padding-top:6px;">
+            ${heroRight}
+          </td>
+        </tr></table>
+      </td></tr>
+      <!-- Calendar -->
+      <tr><td style="padding:2px 22px 18px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>${pills}</tr></table>
+      </td></tr>
+    </table>
   </td></tr>
 
-  <!-- Stats row -->
-  <tr><td style="padding:0 32px 24px;">
+  <!-- Stats (active users only) -->
+  ${
+    hasActivity
+      ? `<tr><td style="padding:0 28px 22px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-      <td width="25%" style="padding:12px 0;text-align:center;border:1px solid #27272a;border-radius:10px 0 0 10px;background:#0a0a0b;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:#a78bfa;font-family:'Courier New',monospace;">${data.blitzesThisWeek}</p>
-        <p style="margin:2px 0 0;font-size:9px;color:#71717a;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;font-family:'Courier New',monospace;">Blitzes</p>
+      <td width="33%" style="text-align:center;">
+        <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.blitzesThisWeek}</p>
+        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">blitzes</p>
       </td>
-      <td width="25%" style="padding:12px 0;text-align:center;border-top:1px solid #27272a;border-bottom:1px solid #27272a;background:#0a0a0b;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:#60a5fa;font-family:'Courier New',monospace;">${data.questionsAnswered}</p>
-        <p style="margin:2px 0 0;font-size:9px;color:#71717a;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;font-family:'Courier New',monospace;">Questions</p>
+      <td width="34%" style="text-align:center;">
+        <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.questionsAnswered}</p>
+        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">questions</p>
       </td>
-      <td width="25%" style="padding:12px 0;text-align:center;border:1px solid #27272a;background:#0a0a0b;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:#34d399;font-family:'Courier New',monospace;">${data.accuracy}%</p>
-        <p style="margin:2px 0 0;font-size:9px;color:#71717a;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;font-family:'Courier New',monospace;">Accuracy</p>
-      </td>
-      <td width="25%" style="padding:12px 0;text-align:center;border:1px solid #27272a;border-radius:0 10px 10px 0;background:#0a0a0b;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:#fb923c;font-family:'Courier New',monospace;">${data.currentStreak}</p>
-        <p style="margin:2px 0 0;font-size:9px;color:#71717a;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;font-family:'Courier New',monospace;">Streak</p>
+      <td width="33%" style="text-align:center;">
+        <p style="margin:0;font-size:22px;font-weight:800;color:${data.accuracy >= 70 ? C.green : data.accuracy >= 50 ? C.textHi : C.red};font-family:${m};line-height:1;">${data.accuracy}%</p>
+        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">accuracy</p>
       </td>
     </tr></table>
-  </td></tr>
+  </td></tr>`
+      : ""
+  }
 
-  ${streakSection}
-  ${inactiveSection}
-  ${challengeSection}
-  ${weakTopicSection}
-  ${newBlitzesSection}
-  ${potdSection}
-
-  <!-- CTA -->
-  <tr><td style="padding:8px 32px 32px;" align="center">
-    <a href="${SITE_URL}/home" style="display:inline-block;padding:14px 40px;background:#404040;border-radius:12px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Start a Blitz</a>
-  </td></tr>
+  ${streakCallout}
+  ${aheadRow}
+  ${inactiveRow}
+  ${friendBlock}
+  ${challengeRow}
+  ${potdRow}
+  ${blitzBlock}
 
   <!-- Footer -->
-  <tr><td style="padding:20px 32px;border-top:1px solid #1c1c1c;text-align:center;">
-    <p style="margin:0 0 6px;font-size:11px;color:#52525b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-      You&#8217;re receiving this because you have email notifications enabled.
-    </p>
-    <p style="margin:0;font-size:11px;color:#52525b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-      <a href="${SITE_URL}/settings" style="color:#71717a;text-decoration:underline;">Unsubscribe</a>
+  <tr><td style="padding:14px 28px;border-top:1px solid ${C.border};text-align:center;">
+    <p style="margin:0;font-size:11px;color:${C.textLo};font-family:${f};">
+      <a href="${SITE}/settings" style="color:${C.textMid};text-decoration:underline;">Unsubscribe</a>
       &nbsp;&middot;&nbsp;
-      <a href="${SITE_URL}" style="color:#71717a;text-decoration:underline;">BioBlitz</a>
+      <a href="${SITE}" style="color:${C.textMid};text-decoration:none;">BioBlitz</a>
     </p>
   </td></tr>
 

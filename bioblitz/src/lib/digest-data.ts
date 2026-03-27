@@ -1,5 +1,18 @@
 import { adminFirestore } from "@/lib/firebase-admin";
-//check that stats are being pulled correctly
+
+export interface FriendDigest {
+  displayName: string;
+  username: string;
+  bElo: number;
+}
+
+export interface UnplayedBlitz {
+  id: string;
+  title: string;
+  topic: string;
+  questionCount: number;
+}
+
 export interface WeeklyDigestData {
   displayName: string;
   username: string;
@@ -15,20 +28,21 @@ export interface WeeklyDigestData {
   correctAnswers: number;
   accuracy: number;
 
+  activeDays: boolean[];
+
   potdCompletedThisWeek: number;
   potdAvailableThisWeek: number;
 
   challengeWins: number;
   challengeLosses: number;
 
-  newBlitzes: {
-    id: string;
-    title: string;
-    topic: string;
-    questionCount: number;
-  }[];
+  friends: FriendDigest[];
+  friendAhead: { displayName: string; gap: number } | null;
 
-  weakestTopic: { name: string; accuracy: number } | null;
+  unplayedBlitzes: UnplayedBlitz[];
+
+  personalBest: { title: string; accuracy: number } | null;
+  weakestTopicName: string | null;
 }
 
 export async function gatherWeeklyDigest(
@@ -46,6 +60,8 @@ export async function gatherWeeklyDigest(
   const currentElo: number = u.bElo || 0;
   const currentStreak: number = u.streak || 0;
   const eloHistory: any[] = Array.isArray(u.eloHistory) ? u.eloHistory : [];
+  const playedGameIds: string[] = u.playedGameIds || [];
+  const playedSet = new Set(playedGameIds);
 
   if (!email) return null;
 
@@ -86,6 +102,41 @@ export async function gatherWeeklyDigest(
     questionsAnswered > 0
       ? Math.round((correctAnswers / questionsAnswered) * 100)
       : 0;
+
+  const activeDays: boolean[] = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ];
+  for (const sub of allSubs) {
+    const ts = toDate(sub.submittedAt);
+    if (!ts) continue;
+    const jsDay = ts.getDay();
+    const idx = jsDay === 0 ? 6 : jsDay - 1;
+    activeDays[idx] = true;
+  }
+
+  let personalBest: WeeklyDigestData["personalBest"] = null;
+  if (rankedSubs.length > 0) {
+    const best = rankedSubs.reduce((a, b) => {
+      const aAcc = (a.correctCount || 0) / (a.totalQuestions || 1);
+      const bAcc = (b.correctCount || 0) / (b.totalQuestions || 1);
+      return bAcc > aAcc ? b : a;
+    });
+    const bestAcc = Math.round(
+      ((best.correctCount || 0) / (best.totalQuestions || 1)) * 100,
+    );
+    if (bestAcc >= 70) {
+      personalBest = {
+        title: best.gameTitle || "a Blitz",
+        accuracy: bestAcc,
+      };
+    }
+  }
 
   let globalRank: number | null = null;
   try {
@@ -148,29 +199,66 @@ export async function gatherWeeklyDigest(
     ]);
   } catch {}
 
-  const newBlitzes: WeeklyDigestData["newBlitzes"] = [];
+  const friends: FriendDigest[] = [];
+  let friendAhead: WeeklyDigestData["friendAhead"] = null;
   try {
-    const setsSnap = await db
-      .collection("sets")
-      .where("status", "==", "completed")
-      .where("createdAt", ">=", weekAgo)
-      .orderBy("createdAt", "desc")
-      .limit(8)
+    const friendsSnap = await db
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .where("status", "==", "friends")
       .get();
 
-    for (const d of setsSnap.docs) {
-      const data = d.data();
-      if (data.hidden) continue;
-      newBlitzes.push({
-        id: d.id,
-        title: data.title || "Untitled",
-        topic: data.topic || "General",
-        questionCount: data.number_of_questions || data.questions?.length || 0,
+    const friendUids = friendsSnap.docs
+      .map((d) => (d.data() as any).uid)
+      .filter(Boolean);
+
+    const allUids = [uid, ...friendUids];
+
+    const profiles = await Promise.all(
+      allUids.map(async (fuid) => {
+        try {
+          const snap = await db.collection("users").doc(fuid).get();
+          if (!snap.exists) return null;
+          const d = snap.data() as any;
+          return {
+            uid: fuid,
+            displayName: d.displayName || "Unknown",
+            username: d.username || "",
+            bElo: d.bElo || 0,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    const validProfiles = profiles.filter(Boolean) as (FriendDigest & {
+      uid: string;
+    })[];
+    validProfiles.sort((a, b) => b.bElo - a.bElo);
+
+    for (const p of validProfiles) {
+      friends.push({
+        displayName: p.displayName,
+        username: p.username,
+        bElo: p.bElo,
       });
+    }
+
+    const myIndex = validProfiles.findIndex((p) => p.uid === uid);
+    if (myIndex > 0) {
+      const ahead = validProfiles[myIndex - 1];
+      friendAhead = {
+        displayName: ahead.displayName,
+        gap: ahead.bElo - currentElo,
+      };
     }
   } catch {}
 
-  let weakestTopic: WeeklyDigestData["weakestTopic"] = null;
+  let weakestTopicName: string | null = null;
+  const unplayedBlitzes: UnplayedBlitz[] = [];
+
   try {
     const allRankedSnap = await db
       .collection("gameSubmissions")
@@ -206,15 +294,42 @@ export async function gatherWeeklyDigest(
       stats.set(topic, cur);
     }
 
-    let worst: { name: string; accuracy: number } | null = null;
+    let worstAcc = Infinity;
     for (const [topic, s] of stats) {
       if (s.total < 5) continue;
       const acc = (s.correct / s.total) * 100;
-      if (!worst || acc < worst.accuracy) {
-        worst = { name: topic, accuracy: acc };
+      if (acc < worstAcc) {
+        worstAcc = acc;
+        weakestTopicName = topic;
       }
     }
-    weakestTopic = worst;
+
+    const setsSnap = await db
+      .collection("sets")
+      .where("status", "==", "completed")
+      .limit(200)
+      .get();
+
+    const candidates: UnplayedBlitz[] = [];
+    for (const d of setsSnap.docs) {
+      if (playedSet.has(d.id)) continue;
+      const data = d.data();
+      if (data.hidden) continue;
+      candidates.push({
+        id: d.id,
+        title: data.title || "Untitled",
+        topic: data.topic || "General",
+        questionCount: data.number_of_questions || data.questions?.length || 0,
+      });
+    }
+
+    candidates.sort((a, b) => {
+      const aWeak = a.topic === weakestTopicName ? 0 : 1;
+      const bWeak = b.topic === weakestTopicName ? 0 : 1;
+      return aWeak - bWeak;
+    });
+
+    unplayedBlitzes.push(...candidates.slice(0, 5));
   } catch {}
 
   return {
@@ -229,12 +344,16 @@ export async function gatherWeeklyDigest(
     questionsAnswered,
     correctAnswers,
     accuracy,
+    activeDays,
     potdCompletedThisWeek,
     potdAvailableThisWeek,
     challengeWins,
     challengeLosses,
-    newBlitzes,
-    weakestTopic,
+    friends,
+    friendAhead,
+    unplayedBlitzes,
+    personalBest,
+    weakestTopicName,
   };
 }
 
