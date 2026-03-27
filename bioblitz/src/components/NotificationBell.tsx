@@ -10,6 +10,8 @@ import {
   onSnapshot,
   limit,
   doc,
+  getDoc,
+  getDocs,
   writeBatch,
   getFirestore,
 } from "firebase/firestore";
@@ -37,7 +39,7 @@ export default function NotificationBell() {
       collection(db, "notifications"),
       where("recipientUid", "==", currentUser.uid),
       orderBy("createdAt", "desc"),
-      limit(20)
+      limit(20),
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -46,7 +48,7 @@ export default function NotificationBell() {
           ({
             id: doc.id,
             ...doc.data(),
-          } as AppNotification)
+          }) as AppNotification,
       );
 
       setNotifications(data);
@@ -84,9 +86,38 @@ export default function NotificationBell() {
     }
   };
 
-  const handleNotificationClick = (link: string) => {
+  const handleNotificationClick = async (link: string) => {
     setIsOpen(false);
-    if (link && link.trim() !== "") {
+    if (!link || link.trim() === "") return;
+
+    try {
+      const blitzMatch = link.match(/^\/home\/([^/]+)$/);
+      if (blitzMatch) {
+        const gameId = blitzMatch[1];
+        const snap = await getDoc(doc(db, "sets", gameId));
+        if (!snap.exists()) {
+          router.push("/not-found");
+          return;
+        }
+      }
+
+      const profileMatch = link.match(/^\/profile\/([^/]+)$/);
+      if (profileMatch) {
+        const username = profileMatch[1];
+        const q = query(
+          collection(db, "users"),
+          where("username", "==", username),
+          limit(1),
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          router.push("/not-found");
+          return;
+        }
+      }
+
+      router.push(link);
+    } catch {
       router.push(link);
     }
   };
@@ -127,9 +158,12 @@ export default function NotificationBell() {
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => notification.link && handleNotificationClick(notification.link)}
+                  onClick={() =>
+                    notification.link &&
+                    handleNotificationClick(notification.link)
+                  }
                   className={`
-                    p-4 border-b border-zinc-800/50 ${notification.link ? 'cursor-pointer' : 'cursor-default'} transition-colors flex gap-3
+                    p-4 border-b border-zinc-800/50 ${notification.link ? "cursor-pointer" : "cursor-default"} transition-colors flex gap-3
                     ${
                       notification.read
                         ? "bg-transparent hover:bg-zinc-900/50"
@@ -172,7 +206,7 @@ export default function NotificationBell() {
                       <span className="text-[10px] text-zinc-500 whitespace-nowrap ml-2">
                         {notification.createdAt
                           ? new Date(
-                              notification.createdAt.seconds * 1000
+                              notification.createdAt.seconds * 1000,
                             ).toLocaleDateString(undefined, {
                               month: "short",
                               day: "numeric",
