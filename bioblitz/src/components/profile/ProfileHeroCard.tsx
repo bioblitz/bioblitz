@@ -1,16 +1,5 @@
-import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer, ShieldUser, Star } from "lucide-react";
-
-function getEloRank(elo: number): { label: string; color: string; border: string; glow?: React.CSSProperties } {
-  if (elo >= 1600) return {
-    label: "Platinum",
-    color: "text-white",
-    border: "border-white/25",
-    glow: { textShadow: "0 0 6px rgba(255,255,255,0.7)" },
-  };
-  if (elo >= 1200) return { label: "Gold",   color: "text-[#c9922a]", border: "border-[#c9922a]/40" };
-  if (elo > 800)   return { label: "Silver", color: "text-[#7a7a7a]", border: "border-[#7a7a7a]/40" };
-  return                  { label: "Bronze", color: "text-orange-400", border: "border-orange-600/40" };
-}
+import { Pencil, X, Flag, Hammer, ShieldUser, MapPin, School, GraduationCap, Calendar, Flame, Star } from "lucide-react";
+import { getRatingTier } from "@/lib/rating";
 
 type FriendshipStatus = "none" | "sent" | "received" | "friends";
 
@@ -62,7 +51,7 @@ export default function ProfileHeroCard({
   onOpenReport,
 }: ProfileHeroCardProps) {
   return (
-    <div className="lg:col-span-2 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-xl">
+    <div className="bg-neutral-950 backdrop-blur-sm border border-neutral-800 rounded-xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-xl">
       <div className="relative group shrink-0">
         <input
           ref={fileInputRef}
@@ -73,7 +62,7 @@ export default function ProfileHeroCard({
           disabled={!isOwnProfile}
         />
         <div
-          className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-zinc-700 relative ${
+          className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-neutral-700 relative ${
             isOwnProfile ? "cursor-pointer" : ""
           }`}
           onClick={() => isOwnProfile && fileInputRef.current?.click()}
@@ -103,8 +92,106 @@ export default function ProfileHeroCard({
       </div>
 
       <div className="flex-1 text-center md:text-left space-y-4 w-full">
+        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+          <div>
+            {userProfile?.username && (
+              <h1 className={`text-4xl mt-0.5 font-mono font-bold ${getRatingTier(userProfile?.bElo ?? 500).textClass}`}>
+                {userProfile.username}
+              </h1>
+            )}
+            {isOwnProfile && (
+              <p className="text-neutral-500 text-sm mt-1 font-mono">{userProfile?.email}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {(userProfile?.roles?.includes("staff") || userProfile?.roles?.includes("admin")) && (
+              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-emerald-300/40 text-emerald-100">
+                <ShieldUser className="w-4 h-4 text-emerald-200"/>
+                Staff
+              </span>
+            )}
+            {userProfile?.roles?.includes("admin") && (
+              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-amber-300/40 text-amber-100">
+                <Hammer className="w-3 h-3 text-amber-200" />
+                Developer
+              </span>
+            )}
+            {isOwnProfile ? (
+              <button
+                onClick={onEditProfile}
+                className="px-4 py-2 bg-neutral-900 border border-neutral-700 hover:border-neutral-500/50 hover:bg-neutral-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
+              >
+                <Pencil className="w-3 h-3 group-hover:text-neutral-400" />
+                Edit Profile
+              </button>
+            ) : (
+              isAuthenticated && (
+                <button
+                  onClick={onOpenReport}
+                  className="px-4 py-2 bg-neutral-900/30 border border-neutral-800 hover:bg-red-900/10 hover:border-red-500/30 hover:text-red-400 text-neutral-500 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2"
+                  title="Report User"
+                >
+                  <Flag className="w-3 h-3" />
+                  Report
+                </button>
+              )
+            )}
+          </div>
+        </div>
+
+        {(isOwnProfile || userProfile?.bio) && (
+          <div className="bg-neutral-900/50 rounded-xl p-4 border border-neutral-800">
+            <p className="text-neutral-300 leading-relaxed italic">
+              {userProfile?.bio || "Add a biography!"}
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 pt-2">
+          {userProfile?.bElo != null && (() => {
+            const tier = getRatingTier(userProfile.bElo);
+            return (
+              <div className={`flex items-center gap-2 text-sm font-bold ${tier.textClass}`}>
+                {tier.label} ({userProfile.bElo})
+              </div>
+            );
+          })()}
+          {userProfile?.location && (
+            <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+              <MapPin className="w-4 h-4 text-neutral-500" />
+              {userProfile.location}
+            </div>
+          )}
+          {userProfile?.school && (
+            <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+              <School className="w-4 h-4 text-neutral-500" />
+              {userProfile.school}
+            </div>
+          )}
+          {userProfile?.grade && (
+            <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+              <GraduationCap className="w-4 h-4 text-neutral-500" />
+              {userProfile.grade}
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+            <Calendar className="w-4 h-4 text-neutral-500" />
+            Joined {" "}
+            {userProfile?.createdAt
+              ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString(undefined, {
+                  month: "long",
+                  year: "numeric",
+                })
+              : ""}
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+            <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
+            {userProfile?.streak || 0} day streak
+          </div>
+        </div>
+
         {!isOwnProfile && (
-          <div className="mt-4">
+          <div className="pt-4 border-t border-neutral-800/50 mt-4">
             {!isAuthenticated ? (
               <button
                 onClick={onOpenAuth}
@@ -123,7 +210,7 @@ export default function ProfileHeroCard({
                   </button>
                 )}
                 {friendshipStatus === "sent" && (
-                  <span className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 cursor-default">
+                  <span className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 cursor-default">
                     Request Sent
                   </span>
                 )}
@@ -137,7 +224,7 @@ export default function ProfileHeroCard({
                     </button>
                     <button
                       onClick={onDeclineFriendRequest}
-                      className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-white transition"
+                      className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 hover:text-white transition"
                     >
                       Decline
                     </button>
@@ -150,7 +237,7 @@ export default function ProfileHeroCard({
                     </span>
                     <button
                       onClick={onRemoveFriend}
-                      className="p-2 bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-red-400 hover:border-red-900/50 hover:bg-red-900/10 transition-colors"
+                      className="p-2 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 hover:text-red-400 hover:border-red-900/50 hover:bg-red-900/10 transition-colors"
                       title="Remove Friend"
                     >
                       <X className="w-5 h-5" />
@@ -161,111 +248,6 @@ export default function ProfileHeroCard({
             )}
           </div>
         )}
-
-        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-              {userProfile?.displayName || userProfile?.username}
-            </h1>
-            {userProfile?.username && (() => {
-              const rank = getEloRank(userProfile?.bElo ?? 0);
-              return (
-                <p className={`text-sm mt-0.5 font-mono font-semibold ${rank.color}`} style={rank.glow}>
-                  @{userProfile.username}
-                </p>
-              );
-            })()}
-            {isOwnProfile && (
-              <p className="text-zinc-500 text-sm mt-1 font-mono">{userProfile?.email}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {(userProfile?.roles?.includes("staff") || userProfile?.roles?.includes("admin")) && (
-              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-emerald-500/40 text-emerald-100">
-                <ShieldUser className="w-4 h-4 text-emerald-200"/>
-                Staff
-              </span>
-            )}
-            {userProfile?.roles?.includes("admin") && (
-              <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold tracking-widest border border-amber-500/40 text-amber-100">
-                <Hammer className="w-3 h-3 text-amber-200" />
-                Developer
-              </span>
-            )}
-            {isOwnProfile ? (
-              <button
-                onClick={onEditProfile}
-                className="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-neutral-500/50 hover:bg-zinc-800 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group"
-              >
-                <Pencil className="w-3 h-3 group-hover:text-neutral-400" />
-                Edit Profile
-              </button>
-            ) : (
-              isAuthenticated && (
-                <button
-                  onClick={onOpenReport}
-                  className="px-4 py-2 bg-zinc-900/30 border border-zinc-800 hover:bg-red-900/10 hover:border-red-500/30 hover:text-red-400 text-zinc-500 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2"
-                  title="Report User"
-                >
-                  <Flag className="w-3 h-3" />
-                  Report
-                </button>
-              )
-            )}
-          </div>
-        </div>
-
-        {(isOwnProfile || userProfile?.bio) && (
-          <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800">
-            <p className="text-zinc-300 leading-relaxed italic">
-              {userProfile?.bio || "Add a biography!"}
-            </p>
-          </div>
-        )}
-
-        <div className="flex flex-wrap justify-center md:justify-start gap-3">
-          {userProfile?.bElo != null && (() => {
-            const rank = getEloRank(userProfile.bElo);
-            return (
-              <div className={`flex items-center gap-2 text-xs font-semibold bg-zinc-900 px-3 py-1.5 rounded-full border ${rank.border} ${rank.color}`} style={rank.glow}>
-                <Star className="w-3 h-3" />
-                {userProfile.bElo}
-              </div>
-            );
-          })()}
-          {userProfile?.location && (
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <MapPin className="w-3 h-3 text-neutral-400" />
-              {userProfile.location}
-            </div>
-          )}
-          {userProfile?.school && (
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <School className="w-3 h-3 text-neutral-400" />
-              {userProfile.school}
-            </div>
-          )}
-          {userProfile?.grade && (
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-              <GraduationCap className="w-3 h-3 text-neutral-400" />
-              {userProfile.grade}
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-            <Calendar className="w-3 h-3 text-neutral-400" />
-            Joined{" "}
-            {userProfile?.createdAt
-              ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString(undefined, {
-                  month: "short",
-                  year: "numeric",
-                })
-              : "Unknown"}
-          </div>
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
-            <Flame className="w-3 h-3 text-orange-500 fill-orange-500" />
-            Streak: {userProfile?.streak || 0}
-          </div>
-        </div>
       </div>
     </div>
   );

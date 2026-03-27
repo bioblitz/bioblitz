@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { motion } from "framer-motion";
-import { Trophy, Medal, Crown, Flame, Zap } from "lucide-react";
+import { Trophy, Flame, Zap } from "lucide-react";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import type { LeaderboardUser } from "./page";
+import { getRatingTier } from "@/lib/rating";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,36 +35,26 @@ export default function LeaderboardClient({
 
   const getRankStyle = (index: number) => {
     switch (index) {
-      case 0: return "border-yellow-500/50 bg-yellow-500/10 text-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.2)]";
+      case 0: return "border-yellow-500/50 bg-yellow-500/10 text-yellow-500";
       case 1: return "border-zinc-400/50 bg-zinc-400/10 text-zinc-300";
       case 2: return "border-orange-700/50 bg-orange-700/10 text-orange-400";
-      default: return "border-zinc-800 bg-zinc-900/30 text-zinc-400 hover:bg-zinc-900/50";
+      default: return "border-zinc-800 bg-zinc-900/30 text-zinc-400";
     }
   };
 
   const getRankIcon = (index: number) => {
-    switch (index) {
-      case 0: return <Crown className="w-6 h-6 text-yellow-500 fill-yellow-500/20" />;
-      case 1: return <Medal className="w-6 h-6 text-zinc-300" />;
-      case 2: return <Medal className="w-6 h-6 text-orange-500" />;
-      default: return <span className="font-bold text-zinc-500 w-6 text-center tabular-nums">{index + 1}</span>;
-    }
+    return <span className="font-bold text-zinc-500 w-10 text-center tabular-nums text-lg">#{index + 1}</span>;
   };
 
-  // Tier thresholds per the Bioblitz rating spec (Section 11)
   const getEloColor = (elo: number) => {
-    if (elo >= 2250) return "bg-cyan-400/20 text-cyan-300 border-cyan-400/50";     // Diamond
-    if (elo >= 1750) return "bg-neutral-500/20 text-neutral-400 border-neutral-500/50"; // Platinum
-    if (elo >= 1250) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50"; // Gold
-    if (elo >= 750)  return "bg-zinc-300/20 text-zinc-300 border-zinc-400/50";       // Silver
-    return "bg-orange-700/20 text-orange-500 border-orange-700/50";                  // Bronze
+    const tier = getRatingTier(elo);
+    return `${tier.bgClass} ${tier.textClass} ${tier.borderClass}`;
   };
 
   return (
     <main className={`${inter.className} min-h-screen bg-neutral-900 text-white pt-24 px-4 pb-12`}>
       <div className="max-w-3xl mx-auto">
         
-        {/* Header Section */}
         <div className="text-center mb-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -74,13 +65,12 @@ export default function LeaderboardClient({
                 : "bg-orange-500/10 ring-orange-500/30 text-orange-400"
             }`}
           >
-            {activeTab === "elo" ? <Trophy className="w-8 h-8" /> : <Flame className="w-8 h-8" />}
+            {activeTab === "elo" ? <Trophy className="w-8 h-8 text-[#FFD700]" /> : <Flame className="w-8 h-8" />}
           </motion.div>
-          <h1 className="text-4xl font-bold mb-2 tracking-tight">Global Leaderboard</h1>
-          <p className="text-zinc-500">See who's dominating the biology world.</p>
+          <h1 className="text-4xl font-bold text-neutral-100 mb-2 tracking-tight">Leaderboard</h1>
+          <p className="text-neutral-400">See who's dominating the biology world.</p>
         </div>
 
-        {/* Tab Switcher */}
         <div className="flex justify-center mb-8">
             <div className="bg-zinc-900/50 border border-zinc-800 p-1 rounded-xl flex items-center gap-1">
                 <button
@@ -108,9 +98,8 @@ export default function LeaderboardClient({
             </div>
         </div>
 
-        {/* List Container - Fades in as a single unit */}
         <motion.div 
-            key={activeTab} // Triggers fade when switching tabs
+            key={activeTab} 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
@@ -119,7 +108,6 @@ export default function LeaderboardClient({
             {displayedUsers.map((user, index) => (
                 <div
                 key={user.uid}
-                // Standard div means no per-item animation
                 className={`
                     relative flex items-center p-3 sm:p-4 rounded-2xl border transition-all duration-200
                     ${getRankStyle(index)}
@@ -144,24 +132,24 @@ export default function LeaderboardClient({
                             }}
                           />
                           <div className="hidden absolute inset-0 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
-                            <span className="text-lg font-bold text-zinc-500">{user.displayName ? user.displayName[0].toUpperCase() : "?"}</span>
+                            <span className="text-lg font-bold text-zinc-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
                           </div>
                         </div>
                         ) : (
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
-                            <span className="text-lg font-bold text-zinc-500">{user.displayName ? user.displayName[0].toUpperCase() : "?"}</span>
+                            <span className="text-lg font-bold text-zinc-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
                         </div>
                         )}
                     </div>
 
                     <div className="flex-grow min-w-0 pr-4">
-                        <h3 className={`font-bold truncate text-sm sm:text-base ${user.uid === currentUserUid ? "text-neutral-400" : "text-white"}`}>
+                        <h3 className="font-bold truncate text-sm sm:text-base">
                         {user.username ? (
                           <Link href={`/profile/${user.username}`}>
-                              <span className="cursor-pointer hover:underline">{user.displayName}</span>
+                              <span className={`cursor-pointer hover:underline ${getRatingTier(user.bElo).textClass}`}>{user.username}</span>
                           </Link>
                         ) : (
-                          <span>{user.displayName}</span>
+                          <span className={getRatingTier(user.bElo).textClass}>{user.displayName}</span>
                         )}
                         </h3>
                         {user.school && <p className="text-xs text-zinc-500 truncate">{user.school}</p>}

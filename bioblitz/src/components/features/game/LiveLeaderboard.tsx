@@ -67,18 +67,12 @@ const AnswerIndicator = ({ answers }: { answers: AnswerStatus[] }) => {
 
 const RankDisplay = ({ rank }: { rank: number }) => {
   const rankColors: { [key: number]: string } = { 1: 'text-yellow-400', 2: 'text-gray-300', 3: 'text-yellow-600' };
-  const getOrdinal = (n: number) => {
-    const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  };
-  if (rank <= 3) {
-    return (
-      <div className={`flex items-center justify-center font-bold ${rankColors[rank]}`}>
-        <MedalIcon className="w-5 h-5 mr-1" /><span>{getOrdinal(rank)}</span>
-      </div>
-    );
-  }
-  return <span className="text-gray-400">{rank}</span>;
+  
+  return (
+    <div className={`flex items-center justify-center font-bold ${rankColors[rank] || 'text-gray-400'}`}>
+      <span>#{rank}</span>
+    </div>
+  );
 };
 
 const LeaderboardItem = ({ player, isCurrentUser }: { player: Player, isCurrentUser: boolean }) => {

@@ -36,6 +36,7 @@ import {
   ClipboardList,
   X,
 } from "lucide-react";
+import { getRatingTier } from "@/lib/rating";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -83,6 +84,7 @@ type LeaderboardEntry = {
   username?: string;
   handle?: string;
   photoURL?: string;
+  bElo?: number;
 };
 
 export default function GameRoomPage() {
@@ -94,7 +96,7 @@ export default function GameRoomPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [userProfileData, setUserProfileData] = useState({ handle: "", photoURL: "" });
+  const [userProfileData, setUserProfileData] = useState({ handle: "", photoURL: "", bElo: 500 });
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,17 +112,14 @@ export default function GameRoomPage() {
   const [finalResult, setFinalResult] = useState<GameResult | null>(null);
   const [ratingTimedOut, setRatingTimedOut] = useState(false);
 
-  // Carousel
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
   const [showReviewPanel, setShowReviewPanel] = useState(false);
 
-  // Per-question timing
   const questionTimings = useRef<number[]>([]);
   const questionStartTime = useRef<number>(Date.now());
   const currentQuestionRef = useRef(0);
 
-  // Anti-cheat
   const tabSwitchCount = useRef(0);
   const timeOffTab = useRef(0);
   const tabHiddenAt = useRef<number | null>(null);
@@ -132,7 +131,6 @@ export default function GameRoomPage() {
     return () => { isMounted.current = false; };
   }, []);
 
-  // Keep ref in sync for use inside effects/callbacks without stale closures
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
@@ -150,11 +148,9 @@ export default function GameRoomPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Keyboard navigation
   useEffect(() => {
     if (submitted) return;
     const handler = (e: KeyboardEvent) => {
-      // Don't intercept if user is typing in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -211,6 +207,7 @@ export default function GameRoomPage() {
               setUserProfileData({
                 handle: data.username || "",
                 photoURL: data.photoURL || currentUser.photoURL || "",
+                bElo: data.bElo || 500,
               });
             }
           } catch (e) {
@@ -444,10 +441,9 @@ export default function GameRoomPage() {
       }
     };
     fetchLeaderboard();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalResult?.correctCount, gameId, user?.uid]);
 
-  const [usersMap, setUsersMap] = useState<{ [uid: string]: { name: string; handle: string } }>({});
+  const [usersMap, setUsersMap] = useState<{ [uid: string]: { name: string; handle: string; bElo: number } }>({});
 
   useEffect(() => {
     if (leaderboard.length === 0) return;
@@ -456,11 +452,11 @@ export default function GameRoomPage() {
         const missing = leaderboard.filter((l) => !l.username).map((l) => l.userId);
         if (missing.length === 0) return;
         const snaps = await Promise.all([...new Set(missing)].map((uid) => getDoc(doc(firestore, "users", uid))));
-        const newMap: { [uid: string]: { name: string; handle: string } } = {};
+        const newMap: { [uid: string]: { name: string; handle: string; bElo: number } } = {};
         snaps.forEach((snap) => {
           if (snap.exists()) {
             const d = snap.data();
-            newMap[snap.id] = { name: d.displayName || "Unknown", handle: d.username || "" };
+            newMap[snap.id] = { name: d.displayName || "Unknown", handle: d.username || "", bElo: d.bElo || 500 };
           }
         });
         setUsersMap(newMap);
@@ -524,7 +520,6 @@ export default function GameRoomPage() {
       <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
 
-          {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
               <h1 className="text-[32px] font-[900] text-white mb-2" style={{ letterSpacing: "-0.02em" }}>
@@ -544,7 +539,6 @@ export default function GameRoomPage() {
             <div className="h-[3px] w-20 bg-neutral-600 rounded-full mx-auto md:mx-0" />
           </div>
 
-          {/* Post-submit tab bar */}
           {submitted && (
             <div className="mb-8 flex flex-wrap gap-2 justify-center md:justify-start">
               {(["result", "leaderboard"] as const).map((tab) => (
@@ -571,10 +565,8 @@ export default function GameRoomPage() {
 
           <div className="space-y-6 pb-32">
 
-            {/* ── Active quiz carousel ──────────────────────────────── */}
             {!submitted && question && (
               <>
-                {/* Progress bar + nav */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => currentQuestion > 0 && goTo(currentQuestion - 1)}
@@ -603,7 +595,6 @@ export default function GameRoomPage() {
                   </button>
                 </div>
 
-                {/* Question card */}
                 <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -685,7 +676,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {/* ── Results tab ───────────────────────────────────────── */}
             {submitted && activeTab === "result" && (
               <>
                 {!finalResult ? (
@@ -784,7 +774,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {/* ── Leaderboard tab ───────────────────────────────────── */}
             {submitted && activeTab === "leaderboard" && (
               <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-8">
                 <h2 className="text-[22px] font-[900] mb-6 text-center" style={{ letterSpacing: "-0.02em" }}>
@@ -803,6 +792,7 @@ export default function GameRoomPage() {
                       const isCurrentUser = entry.userId === user?.uid;
                       const displayName = entry.username || usersMap[entry.userId]?.name || "Unknown";
                       const handle = entry.handle || usersMap[entry.userId]?.handle;
+                      const bElo = entry.bElo || usersMap[entry.userId]?.bElo || 500;
                       return (
                         <div
                           key={entry.userId}
@@ -813,10 +803,7 @@ export default function GameRoomPage() {
                           }`}
                         >
                           <div className="w-6 flex justify-center">
-                            {idx === 0 ? <Crown className="w-5 h-5 text-yellow-500 fill-yellow-500/20" />
-                              : idx === 1 ? <Medal className="w-5 h-5 text-zinc-300" />
-                              : idx === 2 ? <Medal className="w-5 h-5 text-orange-500" />
-                              : <span className={`font-bold text-zinc-600 w-6 text-center text-[12px]`}>{idx + 1}</span>}
+                            <span className={`font-bold text-zinc-600 w-6 text-center text-[12px]`}>#{idx + 1}</span>
                           </div>
                           <img
                             src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
@@ -825,8 +812,8 @@ export default function GameRoomPage() {
                           />
                           <div className="truncate flex-1 text-left text-[13px] font-bold">
                             {handle
-                              ? <Link href={`/profile/${handle}`} className="hover:underline hover:text-white transition-colors">{displayName}</Link>
-                              : <span>{displayName}</span>}
+                              ? <Link href={`/profile/${handle}`} className={`hover:underline transition-colors ${getRatingTier(bElo).textClass}`}>{displayName}</Link>
+                              : <span className={getRatingTier(bElo).textClass}>{displayName}</span>}
                           </div>
                           <div className="text-right">
                             <span className={`font-[800] text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}>
@@ -844,16 +831,14 @@ export default function GameRoomPage() {
           </div>
         </div>
 
-        {/* Timer + review sidebar */}
         {!submitted && (
           <div className="hidden xl:flex fixed right-10 top-28 z-40 flex-col items-center gap-4">
-            {/* Circular timer */}
             {timeLeft !== null && timeLeft > 0 && (
               <div style={{ width: size, height: size, position: "relative" }}>
                 <svg height={size} width={size} className="transform -rotate-90">
                   <circle stroke="#18181b" fill="transparent" strokeWidth={strokeWidth} r={radius} cx={size / 2} cy={size / 2} />
                   <circle
-                    stroke="#8b5cf6"
+                    stroke="#ededed"
                     fill="transparent"
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
@@ -876,7 +861,6 @@ export default function GameRoomPage() {
               </div>
             )}
 
-            {/* Review toggle */}
             <div className="w-full bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden" style={{ width: size }}>
               <button
                 onClick={() => setShowReviewPanel((p) => !p)}
@@ -945,7 +929,6 @@ export default function GameRoomPage() {
       </div>
 
 
-      {/* ── Quit modal ─────────────────────────────────────────────── */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-[rgba(9,9,11,0.95)] border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">

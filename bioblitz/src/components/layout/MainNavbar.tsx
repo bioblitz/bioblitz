@@ -21,7 +21,6 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { BarChart2 } from "lucide-react";
-/**hi */
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -194,7 +193,7 @@ export default function MainNavbar() {
             aria-label="Toggle user menu"
           >
             <div className="text-left hidden lg:block">
-              <h2 className="font-bold text-white text-sm">
+              <h2 className="font-bold text-sm text-neutral-200">
                 {user.displayName || ""}
               </h2>
             </div>

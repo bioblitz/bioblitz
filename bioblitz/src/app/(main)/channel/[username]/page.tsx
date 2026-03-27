@@ -325,15 +325,6 @@ export default function ChannelPage() {
                       {channelOwnerProfile?.subscriberCount || 0} Subscribers
                     </button>
                   </div>
-                  {isOwner && (
-                    <button
-                      onClick={handleEditNameClick}
-                      className="p-1 hover:bg-zinc-800 rounded transition-colors"
-                      title="Edit channel name"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                  )}
                 </>
               )}
             </div>
@@ -348,7 +339,7 @@ export default function ChannelPage() {
               {isOwner && (
                 <button
                   onClick={handleCreateNewContest}
-                  className="px-4 py-2 bg-neutral-900-600 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
+                  className="px-4 py-2 bg-neutral-900 border border-neutral-700 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
                 >
                   <PlusIcon className="w-5 h-5" />
                   Create New Blitz

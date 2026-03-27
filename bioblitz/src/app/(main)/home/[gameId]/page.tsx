@@ -14,8 +14,6 @@ import {
   Calendar,
   Clock,
   Play,
-  Medal,
-  Crown,
   Users,
   CheckCircle2,
   ArrowUpRight,
@@ -48,6 +46,7 @@ import {
 
 import GameRating from "@/components/features/reviews/GameRating";
 import { getTopicColors, getTopicShortLabel } from "@/lib/utils";
+import { getRatingTier } from "@/lib/rating";
 
 interface GameSubmission {
   id: string;
@@ -61,6 +60,7 @@ interface GameSubmission {
   username?: string;
   handle?: string;
   photoURL?: string;
+  bElo?: number;
 }
 
 interface LeaderboardEntry {
@@ -76,6 +76,7 @@ interface LeaderboardEntry {
   timeTaken: number;
   tabSwitchCount?: number;
   timeOffTab?: number;
+  bElo?: number;
 }
 
 export default function GameDetailPage() {
@@ -251,37 +252,22 @@ export default function GameDetailPage() {
 
         const leaderboardData = await Promise.all(
           uniqueSubmissions.map(async (submission) => {
-            if (submission.username) {
-              return {
-                submissionId: submission.id,
-                userId: submission.userId,
-                username: submission.username,
-                handle: submission.handle,
-                photoURL: submission.photoURL,
-                correctCount: submission.correctCount ?? 0,
-                totalQuestions: submission.totalQuestions ?? 0,
-                questionResults: (submission as any).questionResults,
-                questionTimings: (submission as any).questionTimings,
-                timeTaken: submission.timeTaken,
-                tabSwitchCount: (submission as any).tabSwitchCount,
-                timeOffTab: (submission as any).timeOffTab,
-              };
-            }
-
-            let displayName = "Unknown User";
-            let handle = "";
-            let photoURL = "";
+            let displayName = submission.username || "Unknown User";
+            let handle = submission.handle || "";
+            let photoURL = submission.photoURL || "";
+            let bElo = submission.bElo || 500;
 
             try {
               const userDocRef = doc(firestore, "users", submission.userId);
               const userSnap = await getDoc(userDocRef);
 
-              if (!userSnap.exists()) return null;
-
-              const userData = userSnap.data();
-              displayName = userData.displayName || "Unknown User";
-              handle = userData.username || "";
-              photoURL = userData.photoURL || "";
+              if (userSnap.exists()) {
+                const userData = userSnap.data();
+                displayName = userData.displayName || displayName;
+                handle = userData.username || handle;
+                photoURL = userData.photoURL || photoURL;
+                bElo = userData.bElo || bElo;
+              }
             } catch (e) {
               console.error("Failed to fetch user profile", e);
             }
@@ -299,6 +285,7 @@ export default function GameDetailPage() {
               timeTaken: submission.timeTaken,
               tabSwitchCount: (submission as any).tabSwitchCount,
               timeOffTab: (submission as any).timeOffTab,
+              bElo: bElo,
             };
           }),
         );
@@ -434,13 +421,9 @@ export default function GameDetailPage() {
   };
 
   const getRankIcon = (index: number) => {
-    if (index === 0)
-      return <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500/20" />;
-    if (index === 1) return <Medal className="w-4 h-4 text-zinc-300" />;
-    if (index === 2) return <Medal className="w-4 h-4 text-orange-500" />;
     return (
-      <span className="text-zinc-500 font-mono text-xs w-4 text-center">
-        {index + 1}
+      <span className="text-zinc-500 font-mono text-xs w-6 text-center">
+        #{index + 1}
       </span>
     );
   };
@@ -889,13 +872,13 @@ export default function GameDetailPage() {
                           className={`text-sm font-bold ${
                             authResolved && user && entry.userId === user.uid
                               ? "text-neutral-300"
-                              : "text-zinc-200"
+                              : entry.bElo ? getRatingTier(entry.bElo).textClass : "text-zinc-200"
                           }`}
                         >
                           {entry.handle ? (
                             <Link
                               href={`/profile/${entry.handle}`}
-                              className="hover:underline hover:text-white transition-colors"
+                              className="hover:underline transition-colors"
                             >
                               {authResolved && user && entry.userId === user.uid
                                 ? "You"
