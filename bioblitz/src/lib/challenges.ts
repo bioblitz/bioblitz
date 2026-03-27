@@ -1,4 +1,3 @@
-// src/lib/challenges.ts
 import {
   collection,
   doc,
@@ -29,7 +28,7 @@ export interface Challenge {
   challengerId: string;
   challengerUsername: string;
   challengerPhotoURL: string;
-  challengerScore: number | null; // null until challenger plays
+  challengerScore: number | null;
   challengerTimeTaken: number | null;
   challengedId: string;
   challengedUsername: string;
@@ -44,7 +43,6 @@ export interface Challenge {
   winnerId: string | null;
 }
 
-/** Called when challenger declares a challenge BEFORE playing */
 export async function createChallenge({
   blitzId,
   blitzTitle,
@@ -93,7 +91,6 @@ export async function createChallenge({
   return ref.id;
 }
 
-/** Called when a submission is graded — checks for open challenge and resolves it */
 export async function tryResolveChallenge({
   blitzId,
   userId,
@@ -105,7 +102,6 @@ export async function tryResolveChallenge({
   score: number;
   timeTaken: number;
 }): Promise<void> {
-  // Check if this user is the CHALLENGER on a pending challenge
   const asChallenger = query(
     collection(db, "challenges"),
     where("blitzId", "==", blitzId),
@@ -120,7 +116,6 @@ export async function tryResolveChallenge({
       challengerScore: score,
       challengerTimeTaken: timeTaken,
     });
-    // If challenged has already played, resolve
     const data = d.data() as Challenge;
     if (data.challengedScore !== null) {
       await resolveChallenge(d.id, {
@@ -131,8 +126,6 @@ export async function tryResolveChallenge({
     }
     return;
   }
-
-  // Check if this user is the CHALLENGED on a pending challenge
   const asChallenged = query(
     collection(db, "challenges"),
     where("blitzId", "==", blitzId),
@@ -179,6 +172,35 @@ async function resolveChallenge(id: string, data: Challenge) {
     resolvedAt: serverTimestamp(),
     winnerId,
   });
+
+  const challengerWon = winnerId === data.challengerId;
+
+  // Notify challenger
+  await createNotification(
+    data.challengerId,
+    "challenge_completed",
+    challengerWon
+      ? `You beat @${data.challengedUsername}!`
+      : `@${data.challengedUsername} beat you`,
+    `${data.blitzTitle} · ${cs} vs ${ds}`,
+    `/challenges`,
+    data.challengedId,
+    data.challengedPhotoURL,
+    data.challengedUsername,
+  );
+
+  await createNotification(
+    data.challengedId,
+    "challenge_completed",
+    challengerWon
+      ? `@${data.challengerUsername} beat you`
+      : `You beat @${data.challengerUsername}!`,
+    `${data.blitzTitle} · ${ds} vs ${cs}`,
+    `/challenges`,
+    data.challengerId,
+    data.challengerPhotoURL,
+    data.challengerUsername,
+  );
 }
 
 export async function getUserChallenges(uid: string): Promise<Challenge[]> {
@@ -230,8 +252,6 @@ export async function getUserChallenges(uid: string): Promise<Challenge[]> {
   );
 }
 
-/** Get pending challenges where the user needs to respond (they are the challenged party
- *  and haven't played yet) */
 export async function getPendingForUser(uid: string): Promise<Challenge[]> {
   const snap = await getDocs(
     query(
@@ -245,7 +265,6 @@ export async function getPendingForUser(uid: string): Promise<Challenge[]> {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Challenge);
 }
 
-/** Check if user already has an open challenge on this blitz (either side) */
 export async function hasOpenChallenge(
   uid: string,
   blitzId: string,
@@ -280,4 +299,3 @@ export async function hasOpenChallenge(
   });
   return valid.length > 0;
 }
-
