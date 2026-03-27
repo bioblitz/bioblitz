@@ -32,6 +32,8 @@ export function useProfileData({
   const [setsPlayed, setSetsPlayed] = useState<SetPlayed[]>([]);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSets, setLoadingSets] = useState(true);
+  const [loadingElo, setLoadingElo] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -111,9 +113,23 @@ export function useProfileData({
     if (!profileUid) return;
 
     const fetchSetsPlayed = async () => {
+      setLoadingSets(true);
       try {
         const setsRef = collection(db, "users", profileUid, "setsPlayed");
-        const setsSnap = await getDocs(setsRef);
+        const historyRef = collection(db, "users", profileUid, "ratingHistory");
+        const [setsSnap, historySnap] = await Promise.all([
+          getDocs(setsRef),
+          getDocs(historyRef),
+        ]);
+
+        // Build contestId → delta map for O(1) joins
+        const deltaMap = new Map<string, number>();
+        historySnap.docs.forEach((d) => {
+          const data = d.data() as any;
+          if (data.contestId) {
+            deltaMap.set(data.contestId, data.delta ?? 0);
+          }
+        });
 
         const sortedDocs = setsSnap.docs.sort((a, b) => {
           const dataA = a.data();
@@ -199,9 +215,12 @@ export function useProfileData({
 
               return {
                 name: title,
-                score: playedData.score || 0,
+                correctCount: playedData.correctCount,
+                totalQuestions: playedData.totalQuestions,
+                timeTaken: playedData.timeTaken,
                 topic,
                 setId: resolvedSetId,
+                delta: deltaMap.get(resolvedSetId),
               } as SetPlayed;
             })
           )
@@ -210,6 +229,8 @@ export function useProfileData({
         setSetsPlayed(setsData);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoadingSets(false);
       }
     };
 
@@ -220,6 +241,7 @@ export function useProfileData({
     if (!profileUid || !userProfile) return;
 
     const fetchHistory = async () => {
+      setLoadingElo(true);
       try {
         const historyRef = collection(db, "users", profileUid, "ratingHistory");
         const q = query(historyRef, orderBy("timestamp", "desc"), limit(50));
@@ -273,6 +295,8 @@ export function useProfileData({
         setEloHistory(historyData);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoadingElo(false);
       }
     };
 
@@ -286,6 +310,8 @@ export function useProfileData({
     setsPlayed,
     eloHistory,
     loading,
+    loadingSets,
+    loadingElo,
     error,
   };
 }

@@ -1,5 +1,5 @@
 import "./globals.css";
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, Instrument_Serif } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { UsernameChecker } from "@/components/auth/UsernameChecker";
@@ -8,6 +8,13 @@ import ActivityTracker from "../components/ActivityTracker";
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
 });
 
 export const metadata = {
@@ -44,7 +51,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={dmSans.className}>
+    <html lang="en" className={`${dmSans.className} ${instrumentSerif.variable}`}>
       <body>
         <AuthProvider>
           <ActivityTracker />

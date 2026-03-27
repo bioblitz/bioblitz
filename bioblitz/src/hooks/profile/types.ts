@@ -28,9 +28,12 @@ export interface EloHistoryPoint {
 
 export interface SetPlayed {
   name: string;
-  score: number;
+  correctCount?: number;
+  totalQuestions?: number;
+  timeTaken?: number;
   topic: string;
   setId: string;
+  delta?: number;
 }
 
 export type FriendshipStatus = "none" | "sent" | "received" | "friends";

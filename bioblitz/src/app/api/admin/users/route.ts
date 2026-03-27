@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { applyTextPolicy } from "@/lib/textPolicy";
 
@@ -88,6 +89,37 @@ export async function GET(request: Request) {
     return NextResponse.json({ submissionsCount, totalUsers });
   }
 
+  // Username lookup — returns a single user's full profile
+  const usernameQuery = searchParams.get("username");
+  if (usernameQuery) {
+    const snap = await adminFirestore
+      .collection("users")
+      .where("username", "==", usernameQuery.trim().toLowerCase())
+      .limit(1)
+      .get();
+    if (snap.empty) {
+      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    }
+    const docSnap = snap.docs[0];
+    const data = docSnap.data() as any;
+    return NextResponse.json({
+      user: {
+        uid: docSnap.id,
+        displayName: data.displayName || "",
+        username: data.username || "",
+        email: data.email || "",
+        roles: normalizeRoles(data.roles),
+        bElo: data.bElo ?? 500,
+        bio: data.bio || "",
+        location: data.location || "",
+        grade: data.grade || "",
+        school: data.school || "",
+        contestsPlayed: data.contestsPlayed ?? 0,
+        createdAt: formatCreatedAt(data.createdAt),
+      },
+    });
+  }
+
   const usersSnap = await adminFirestore.collection("users").get();
   const users = usersSnap.docs.map((docSnap) => {
     const data = docSnap.data() as any;
@@ -125,6 +157,10 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "You cannot delete your own account." }, { status: 400 });
   }
 
+  // Fetch user doc before deletion to get subscriptions
+  const userDoc = await adminFirestore.collection("users").doc(uid).get();
+  const userData = userDoc.data() as any;
+
   try {
     await adminAuth.deleteUser(uid);
   } catch (err: any) {
@@ -133,7 +169,82 @@ export async function DELETE(request: Request) {
     }
   }
 
-  await adminFirestore.collection("users").doc(uid).delete();
+  // Run cleanup in parallel where possible
+  await Promise.all([
+    // 1. Delete user doc
+    adminFirestore.collection("users").doc(uid).delete(),
+
+    // 2. Delete notifications sent to this user
+    (async () => {
+      const notifSnap = await adminFirestore
+        .collection("notifications")
+        .where("recipientUid", "==", uid)
+        .get();
+      if (!notifSnap.empty) {
+        const batch = adminFirestore.batch();
+        notifSnap.docs.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+    })(),
+
+    // 3. Remove this user from other users' friends subcollections
+    (async () => {
+      const friendsSnap = await adminFirestore
+        .collectionGroup("friends")
+        .where("uid", "==", uid)
+        .get();
+      if (!friendsSnap.empty) {
+        const chunks: typeof friendsSnap.docs[] = [];
+        for (let i = 0; i < friendsSnap.docs.length; i += 500) {
+          chunks.push(friendsSnap.docs.slice(i, i + 500));
+        }
+        for (const chunk of chunks) {
+          const batch = adminFirestore.batch();
+          chunk.forEach((d) => batch.delete(d.ref));
+          await batch.commit();
+        }
+      }
+    })(),
+
+    // 4. Decrement subscriberCount on channels this user subscribed to
+    (async () => {
+      const subscriptions: string[] = Array.isArray(userData?.subscriptions)
+        ? userData.subscriptions
+        : [];
+      if (subscriptions.length === 0) return;
+      const batch = adminFirestore.batch();
+      subscriptions.forEach((channelUid) => {
+        const ref = adminFirestore.collection("users").doc(channelUid);
+        batch.update(ref, { subscriberCount: FieldValue.increment(-1) });
+      });
+      await batch.commit();
+    })(),
+
+    // 5. Remove this user's UID from others' subscriptions arrays (they subscribed to this channel)
+    (async () => {
+      const subscribersSnap = await adminFirestore
+        .collection("users")
+        .where("subscriptions", "array-contains", uid)
+        .get();
+      if (!subscribersSnap.empty) {
+        const chunks: typeof subscribersSnap.docs[] = [];
+        for (let i = 0; i < subscribersSnap.docs.length; i += 500) {
+          chunks.push(subscribersSnap.docs.slice(i, i + 500));
+        }
+        for (const chunk of chunks) {
+          const batch = adminFirestore.batch();
+          chunk.forEach((d) =>
+            batch.update(d.ref, { subscriptions: FieldValue.arrayRemove(uid) })
+          );
+          await batch.commit();
+        }
+      }
+    })(),
+
+    // 6. Delete search_index entry for this user
+    adminFirestore.collection("search_index").doc(uid).delete().catch(() => {}),
+  ]);
+
   return NextResponse.json({ message: "User deleted." });
 }
 
@@ -147,21 +258,18 @@ export async function PUT(request: Request) {
 
   const body = await request.json();
   const uid = String(body?.uid || "").trim();
-  const displayNameRaw = String(body?.displayName || "").trim();
-  const rawUsername = String(body?.username || "").trim();
-    const { value: displayName } = await applyTextPolicy(displayNameRaw);
-  const { value: censoredUsername, censored } = await applyUsernamePolicy(rawUsername);
-  if (censored) {
-    return NextResponse.json(
-      { error: "Inappropriate username, try again." },
-      { status: 400 }
-    );
-  }
-  const username = censoredUsername || "";
-
   if (!uid) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });
   }
+
+  const displayNameRaw = String(body?.displayName ?? "").trim();
+  const rawUsername = String(body?.username ?? "").trim();
+  const { value: displayName } = await applyTextPolicy(displayNameRaw);
+  const { value: censoredUsername, censored } = await applyUsernamePolicy(rawUsername);
+  if (censored) {
+    return NextResponse.json({ error: "Inappropriate username, try again." }, { status: 400 });
+  }
+  const username = censoredUsername || "";
 
   if (username) {
     const existing = await adminFirestore
@@ -169,22 +277,29 @@ export async function PUT(request: Request) {
       .where("username", "==", username)
       .limit(1)
       .get();
-
     if (!existing.empty && existing.docs[0].id !== uid) {
       return NextResponse.json({ error: "Username already in use." }, { status: 409 });
     }
   }
 
-  await adminFirestore
-    .collection("users")
-    .doc(uid)
-    .set(
-      {
-        displayName,
-        username: username || null,
-      },
-      { merge: true }
-    );
+  const update: Record<string, any> = {
+    displayName,
+    username: username || null,
+  };
 
+  if (body?.bio !== undefined) update.bio = String(body.bio).trim();
+  if (body?.location !== undefined) update.location = String(body.location).trim();
+  if (body?.grade !== undefined) update.grade = String(body.grade).trim();
+  if (body?.school !== undefined) update.school = String(body.school).trim();
+  if (body?.bElo !== undefined) {
+    const elo = Number(body.bElo);
+    if (!isNaN(elo)) update.bElo = Math.round(elo);
+  }
+  if (body?.contestsPlayed !== undefined) {
+    const cp = Number(body.contestsPlayed);
+    if (!isNaN(cp)) update.contestsPlayed = Math.max(0, Math.round(cp));
+  }
+
+  await adminFirestore.collection("users").doc(uid).set(update, { merge: true });
   return NextResponse.json({ message: "User updated." });
 }

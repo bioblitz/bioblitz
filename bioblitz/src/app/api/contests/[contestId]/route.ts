@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getContestById } from '@/lib/actions';
 import { adminAuth, adminFirestore } from '@/lib/firebase-admin';
 
 function normalizeRoles(raw: unknown): string[] {
@@ -39,22 +38,24 @@ async function resolveUserByUsername(usernameRaw: string): Promise<string> {
 export async function GET(request: Request, { params }: { params: Promise<{ contestId: string }> }) {
   try {
     const { contestId } = await params;
-    const contest = await getContestById(contestId);
-    if (!contest) return NextResponse.json(null, { status: 404 });
+    const docRef = adminFirestore.collection('sets').doc(contestId);
 
-    const questionsSnap = await adminFirestore
-      .collection('sets')
-      .doc(contestId)
-      .collection('questions')
-      .get();
+    const [contestSnap, questionsSnap] = await Promise.all([
+      docRef.get(),
+      docRef.collection('questions').get(),
+    ]);
+
+    if (!contestSnap.exists) return NextResponse.json(null, { status: 404 });
+
+    const contestData = { id: contestSnap.id, ...contestSnap.data() } as any;
 
     // Fall back to embedded questions array for blitzes created before subcollection format
     const questions = questionsSnap.docs.length > 0
       ? questionsSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      : ((contest as any).questions || []);
+      : (contestData.questions || []);
 
-    const { questions: _embedded, ...contestData } = contest as any;
-    return NextResponse.json({ ...contestData, questions });
+    const { questions: _embedded, ...rest } = contestData;
+    return NextResponse.json({ ...rest, questions });
   } catch (err) {
     console.error('Error fetching contest:', err);
     return NextResponse.json({ error: 'Failed to fetch contest' }, { status: 500 });
@@ -64,7 +65,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ cont
 export async function POST(request: Request, { params }: { params: Promise<{ contestId: string }> }) {
   try {
     const { contestId } = await params;
-    const body = await request.json();
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid or empty request body' }, { status: 400 });
+    }
     const { idToken } = body;
     const postAsUsername = String(body?.postAsUsername || '').trim();
 

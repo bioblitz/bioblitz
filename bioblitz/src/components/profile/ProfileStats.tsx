@@ -30,7 +30,7 @@ export default function ProfileStats({
 
       <div className="bg-gradient-to-br from-blue-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-blue-500/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-zinc-500 text-sm font-medium">Sets Played</p>
+          <p className="text-zinc-500 text-sm font-medium">Blitzes Completed</p>
           <Activity className="w-4 h-4 text-blue-500" />
         </div>
         <p className="text-4xl font-bold text-white">{setsPlayedCount}</p>

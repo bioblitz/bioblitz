@@ -37,7 +37,7 @@ export default function DomainMasterySection({
 
       {chartData.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-xs text-zinc-600 italic">
-          No sets played yet.
+          No blitzes played yet.
         </div>
       ) : (
         <div className="flex-1 w-full bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4">
@@ -86,7 +86,7 @@ export default function DomainMasterySection({
                             </span>
                           </div>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-zinc-400 text-[10px]">Sets Played</span>
+                            <span className="text-zinc-400 text-[10px]">Blitzes Completed</span>
                             <span className="text-white font-mono text-xs">{data.sets}</span>
                           </div>
                           <div className="flex items-center justify-between gap-4">

@@ -17,6 +17,21 @@ type AdminUser = {
   createdAt?: string | null;
 };
 
+type FullUser = {
+  uid: string;
+  displayName: string;
+  username: string;
+  email: string;
+  roles: string[];
+  bElo: number;
+  bio: string;
+  location: string;
+  grade: string;
+  school: string;
+  contestsPlayed: number;
+  createdAt?: string | null;
+};
+
 type SortColumn = "role" | "username" | "displayName";
 
 const rolePriority: Record<string, number> = {
@@ -49,6 +64,15 @@ export default function AdminPage() {
   const [submissionsCount, setSubmissionsCount] = useState(0);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(null);
+
+  // Find & edit user by username
+  const [findUsername, setFindUsername] = useState("");
+  const [findingUser, setFindingUser] = useState(false);
+  const [foundUser, setFoundUser] = useState<FullUser | null>(null);
+  const [editFields, setEditFields] = useState<Partial<FullUser>>({});
+  const [editUserStatus, setEditUserStatus] = useState<string | null>(null);
+  const [savingUser, setSavingUser] = useState(false);
+
   const [sortColumn, setSortColumn] = useState<SortColumn>("role");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [status, setStatus] = useState<string | null>(null);
@@ -249,6 +273,51 @@ export default function AdminPage() {
   };
 
 
+  const handleFindUser = async () => {
+    if (!user || !findUsername.trim()) return;
+    setFindingUser(true);
+    setFoundUser(null);
+    setEditFields({});
+    setEditUserStatus(null);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch(
+        `/api/admin/users?username=${encodeURIComponent(findUsername.trim().toLowerCase())}`,
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "User not found.");
+      setFoundUser(data.user);
+      setEditFields(data.user);
+    } catch (err: any) {
+      setEditUserStatus(err?.message || "User not found.");
+    } finally {
+      setFindingUser(false);
+    }
+  };
+
+  const handleSaveUserFields = async () => {
+    if (!user || !foundUser) return;
+    setSavingUser(true);
+    setEditUserStatus(null);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ uid: foundUser.uid, ...editFields }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to save.");
+      setEditUserStatus("Saved.");
+      setFoundUser({ ...foundUser, ...editFields } as FullUser);
+    } catch (err: any) {
+      setEditUserStatus(err?.message || "Failed to save.");
+    } finally {
+      setSavingUser(false);
+    }
+  };
+
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -351,6 +420,71 @@ export default function AdminPage() {
         </div>
 
         {status && <p className="text-sm text-zinc-400 mb-4">{status}</p>}
+
+        {/* Find & Edit User by Username */}
+        <div className="mb-8 border border-zinc-800 rounded-2xl bg-zinc-950/50 p-6">
+          <h2 className="text-base font-semibold text-zinc-200 mb-4">Edit User Fields</h2>
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="Username (without @)"
+              value={findUsername}
+              onChange={(e) => setFindUsername(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleFindUser()}
+              className="flex-1 bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
+            />
+            <button
+              onClick={handleFindUser}
+              disabled={findingUser || !findUsername.trim()}
+              className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors"
+            >
+              {findingUser ? "Finding…" : "Find"}
+            </button>
+          </div>
+
+          {editUserStatus && (
+            <p className="text-sm text-zinc-400 mb-3">{editUserStatus}</p>
+          )}
+
+          {foundUser && (
+            <div className="space-y-4">
+              <p className="text-xs text-zinc-500 font-mono">{foundUser.uid} · {foundUser.email}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(
+                  [
+                    { key: "displayName", label: "Display Name", type: "text" },
+                    { key: "username", label: "Username", type: "text" },
+                    { key: "bio", label: "Bio", type: "text" },
+                    { key: "location", label: "Location", type: "text" },
+                    { key: "grade", label: "Grade", type: "text" },
+                    { key: "school", label: "School", type: "text" },
+                    { key: "bElo", label: "Rating (bElo)", type: "number" },
+                    { key: "contestsPlayed", label: "Contests Played", type: "number" },
+                  ] as { key: keyof FullUser; label: string; type: string }[]
+                ).map(({ key, label, type }) => (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-zinc-500 font-medium">{label}</label>
+                    <input
+                      type={type}
+                      value={String(editFields[key] ?? "")}
+                      onChange={(e) =>
+                        setEditFields((prev) => ({ ...prev, [key]: e.target.value }))
+                      }
+                      className="bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
+                    />
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={handleSaveUserFields}
+                disabled={savingUser}
+                className="px-5 py-2 bg-neutral-600 hover:bg-neutral-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors"
+              >
+                {savingUser ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
+          )}
+        </div>
 
         {!showDb ? (
           <div className="py-20 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">

@@ -13,7 +13,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { createChallenge, hasOpenChallenge } from "@/lib/challenges";
-import { Swords, X, Search, Check, Loader2, ChevronRight } from "lucide-react";
+import { X, Search, Check, Loader2 } from "lucide-react";
 
 interface Friend {
   uid: string;
@@ -36,8 +36,8 @@ export default function ChallengeButton({
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [search, setSearch] = useState("");
-  const [sending, setSending] = useState<string | null>(null); // uid being sent to
-  const [sent, setSent] = useState<string | null>(null); // uid challenge was sent to
+  const [sending, setSending] = useState<string | null>(null);
+  const [sent, setSent] = useState<string | null>(null);
   const [alreadyChallenged, setAlreadyChallenged] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
 
@@ -97,6 +97,7 @@ export default function ChallengeButton({
       setLoadingFriends(false);
     }
   };
+
   const handleOpen = () => {
     setOpen(true);
     setSearch("");
@@ -137,17 +138,17 @@ export default function ChallengeButton({
       f.username.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (checkingStatus || !user) return null;
+  if (!user) return null;
 
   return (
     <>
       <button
         onClick={handleOpen}
-        disabled={alreadyChallenged}
+        disabled={checkingStatus || alreadyChallenged}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
           alreadyChallenged
-            ? "border-zinc-800 text-zinc-600 cursor-not-allowed"
-            : "border-blue-400/50 bg-blue-500/5 text-blue-300 hover:bg-blue-500/10 border-3 hover:border-blue-400/70"
+            ? "border-zinc-800 bg-zinc-900/50 text-zinc-600 cursor-not-allowed"
+            : "border-zinc-700 bg-zinc-800/60 text-white hover:bg-zinc-800 hover:border-zinc-600"
         }`}
       >
         {alreadyChallenged ? "Challenge sent" : "Challenge a Friend"}
@@ -242,7 +243,7 @@ export default function ChallengeButton({
                         className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                           isSent
                             ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 cursor-default"
-                            : "bg-blue-600 hover:bg-blue-600/60 text-white"
+                            : "bg-zinc-700 hover:bg-zinc-600 text-white border border-zinc-600"
                         }`}
                       >
                         {isSending ? (
@@ -272,7 +273,7 @@ export default function ChallengeButton({
                     setOpen(false);
                     onPlay?.();
                   }}
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-bold transition-colors"
                 >
                   Play Now →
                 </button>

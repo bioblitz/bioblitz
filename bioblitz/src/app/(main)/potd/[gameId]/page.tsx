@@ -10,9 +10,9 @@ export const revalidate = 0; // page itself not cached; archive is cached in get
 export default async function PotdGamePage({
   params,
 }: {
-  params: { gameId: string };
+  params: Promise<{ gameId: string }>;
 }) {
-  const { gameId } = params;
+  const { gameId } = await params;
 
   // 1) Fetch the specific puzzle (server/admin fetch)
   const docSnap = await adminFirestore.collection("potd").doc(gameId).get();

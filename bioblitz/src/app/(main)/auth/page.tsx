@@ -7,7 +7,7 @@ import { app } from "@/lib/firebase";
 import { createUserProfile } from "@/lib/user";
 import GoogleButton from "@/components/ui/GoogleButton";
 import { useAuth } from "@/context/AuthContext";
-import { Zap, Loader2, Trophy, Timer, BookOpen } from "lucide-react";
+import { Trophy, Timer, BookOpen } from "lucide-react";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false);
@@ -181,9 +181,9 @@ export default function AuthenticationPage() {
 
       {loading && (
         <div className="absolute inset-0 z-50 bg-neutral-900/70 backdrop-blur-sm flex flex-col items-center justify-center">
-          <div className="bg-neutral-900/80 p-6 rounded-2xl flex flex-col items-center border border-yellow-400/30">
-            <Loader2 className="w-10 h-10 text-yellow-300 animate-spin mb-4" />
-            <p className="text-white font-medium animate-pulse tracking-wider">
+          <div className="bg-neutral-900/80 p-6 rounded-2xl flex flex-col items-center border border-neutral-700">
+            <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin mb-4" />
+            <p className="text-neutral-400 font-medium tracking-wider">
               Authenticating...
             </p>
           </div>

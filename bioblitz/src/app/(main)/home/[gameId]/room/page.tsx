@@ -480,9 +480,9 @@ export default function GameRoomPage() {
   if (loading || authLoading) {
     return (
       <div className={`${dmSans.className} flex items-center justify-center h-screen bg-neutral-900 text-white`}>
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
-          <p className="text-zinc-500 font-medium tracking-wide animate-pulse">Loading Blitz...</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+          <span className="text-neutral-400 text-sm font-medium">Loading...</span>
         </div>
       </div>
     );
@@ -629,7 +629,7 @@ export default function GameRoomPage() {
                   </div>
 
                   <div
-                    className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium"
+                    className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                     dangerouslySetInnerHTML={{ __html: question.content }}
                   />
 

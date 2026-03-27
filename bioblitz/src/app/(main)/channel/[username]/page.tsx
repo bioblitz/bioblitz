@@ -202,8 +202,9 @@ export default function ChannelPage() {
             accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
           />
           {loading ? (
-            <div className="h-48 bg-zinc-800 flex items-center justify-center animate-pulse">
-              <p>Loading channel...</p>
+            <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+              <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+              <span className="text-neutral-400 text-sm font-medium">Loading...</span>
             </div>
           ) : (
             <div className="relative h-48 overflow-hidden">
@@ -258,7 +259,7 @@ export default function ChannelPage() {
           )}
 
           {!loading && !channelOwnerProfile && (
-            <div className="bg-neutral-900 min-h-screen flex items-center justify-center text-white">
+            <div className="flex items-center justify-center min-h-[50vh] text-white">
               <div className="text-center">
                 <h1 className="text-2xl font-bold mb-2">Channel not found</h1>
                 <p className="text-zinc-400 mb-4">
@@ -274,7 +275,7 @@ export default function ChannelPage() {
             </div>
           )}
 
-          <div className="p-4 flex justify-between items-center">
+          {!loading && <div className="p-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               {isEditingName ? (
                 <div className="flex items-center gap-2">
@@ -354,9 +355,9 @@ export default function ChannelPage() {
                 </button>
               )}
             </div>
-          </div>
+          </div>}
 
-          <div className="mt-8 px-2">
+          {!loading && <div className="mt-8 px-2">
             <h2 className="text-xl font-bold mb-4">Blitzes</h2>
             {(() => {
               const displayed = isOwner
@@ -399,7 +400,7 @@ export default function ChannelPage() {
                 <p className="text-zinc-400">No Blitzes created yet.</p>
               );
             })()}
-          </div>
+          </div>}
         </div>
       </div>
     </>

@@ -469,7 +469,9 @@ export const gradeTest = onDocumentCreated(
       const userHistoryData = {
         submission: snap.id,
         history: [snap.id],
-        score: finalScore,
+        correctCount,
+        totalQuestions,
+        timeTaken,
         title: gameTitle,
         playedAt: FieldValue.serverTimestamp(),
         lastPlayedAt: FieldValue.serverTimestamp(),
@@ -808,5 +810,74 @@ export const decayTrendingScores = onSchedule(
 
     await Promise.all(batches);
     console.log("Trending scores updated successfully.");
+  }
+);
+
+// ── POTD auto-publish ─────────────────────────────────────────────────────────
+// Runs at 00:05 America/Los_Angeles every day.
+// Finds items in potdQueue whose date matches today (PST) and status is
+// "queued" or "scheduled", copies them into the `potd` collection, then
+// marks them "published" in the queue.
+export const publishScheduledPotd = onSchedule(
+  {
+    schedule: "0 0 * * *",
+    timeZone: "America/Los_Angeles",
+  },
+  async () => {
+    // Today's date string in PST as YYYY-MM-DD
+    const todayPst = new Date().toLocaleDateString("en-CA", {
+      timeZone: "America/Los_Angeles",
+    }); // "en-CA" gives YYYY-MM-DD
+
+    console.log(`publishScheduledPotd: checking for date=${todayPst}`);
+
+    const queueSnap = await db
+      .collection("potdQueue")
+      .where("date", "==", todayPst)
+      .where("status", "in", ["queued", "scheduled"])
+      .get();
+
+    if (queueSnap.empty) {
+      console.log("No items to publish today.");
+      return;
+    }
+
+    const batch = db.batch();
+
+    queueSnap.docs.forEach((queueDoc) => {
+      const data = queueDoc.data();
+
+      // Build the potd document — same shape getCachedPuzzles expects
+      const potdRef = db.collection("potd").doc(queueDoc.id);
+      batch.set(potdRef, {
+        title: data.title || "",
+        question: data.question || "",
+        explanation: data.explanation || "",
+        topic: data.topic || "General",
+        date: todayPst,
+        multiSelect: data.multiSelect || false,
+        options: data.options || [],
+        correct: data.correct || [],
+        // Flat option fields (a/b/c/d/e) for getCachedPuzzles fallback
+        ...(data.a !== undefined && { a: data.a }),
+        ...(data.b !== undefined && { b: data.b }),
+        ...(data.c !== undefined && { c: data.c }),
+        ...(data.d !== undefined && { d: data.d }),
+        ...(data.e !== undefined && { e: data.e }),
+        imageUrl: data.imageUrl || "",
+        imageAlt: data.imageAlt || "",
+        publishedAt: FieldValue.serverTimestamp(),
+        publishedBy: "scheduler",
+      });
+
+      // Mark the queue item as published
+      batch.update(queueDoc.ref, {
+        status: "published",
+        publishedAt: FieldValue.serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+    console.log(`Published ${queueSnap.size} POTD item(s) for ${todayPst}.`);
   }
 );

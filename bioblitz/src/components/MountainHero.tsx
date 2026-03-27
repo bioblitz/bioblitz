@@ -98,7 +98,7 @@ export default function MountainHero() {
         <h1
           className="text-white mb-0 tracking-tight leading-[0.95]"
           style={{
-            fontFamily: "'Instrument Serif', serif",
+            fontFamily: "var(--font-instrument-serif), serif",
             fontSize: "clamp(52px, 8vw, 96px)",
             fontWeight: 400,
           }}
@@ -220,8 +220,7 @@ export default function MountainHero() {
       </a>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-        .blurred-border {
+.blurred-border {
           border-radius: inherit;
           border: 1px solid rgba(139, 92, 246, 0.7);
           box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);

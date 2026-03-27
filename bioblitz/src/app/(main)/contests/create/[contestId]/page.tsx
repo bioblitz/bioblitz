@@ -9,12 +9,11 @@ import React, {
   startTransition,
   useRef,
 } from "react";
-import { useFormStatus } from "react-dom";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay } from "@/types";
-import { Plus, Trash2, Eye, EyeOff, Check } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff, Check, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
@@ -72,15 +71,17 @@ const initialState = {
   message: "",
 };
 
-function SubmitButton({ isPublished }: { isPublished: boolean }) {
-  const { pending } = useFormStatus();
+function SubmitButton({ isPublished, publishing }: { isPublished: boolean; publishing: boolean }) {
   return (
     <button
       type="submit"
-      disabled={pending}
-      className="bg-neutral-600 hover:bg-neutral-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors"
+      disabled={publishing}
+      className="bg-neutral-600 hover:bg-neutral-500 disabled:opacity-50 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
     >
-      {pending
+      {publishing && (
+        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      )}
+      {publishing
         ? isPublished
           ? "Updating..."
           : "Publishing..."
@@ -135,6 +136,13 @@ export default function EditContestPage() {
   const [isAiGenerated, setIsAiGenerated] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [currentEditorIndex, setCurrentEditorIndex] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [fetchingContest, setFetchingContest] = useState(!!routeContestId);
+  const isFetchingRef = useRef(!!routeContestId);
+  const navigateToNewRef = useRef(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const lastSavedSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -160,6 +168,8 @@ export default function EditContestPage() {
   useEffect(() => {
     if (!routeContestId) return;
     async function fetchContest() {
+      setFetchingContest(true);
+      isFetchingRef.current = true;
       try {
         const res = await fetch(`/api/contests/${routeContestId}`);
         if (res.ok) {
@@ -206,6 +216,9 @@ export default function EditContestPage() {
         }
       } catch (err) {
         console.error("Failed to fetch contest:", err);
+      } finally {
+        setFetchingContest(false);
+        isFetchingRef.current = false;
       }
     }
     fetchContest();
@@ -213,9 +226,21 @@ export default function EditContestPage() {
 
   const addQuestion = () => {
     const newQuestion = initialQuestion();
-    setQuestions([...questions, newQuestion]);
+    navigateToNewRef.current = true;
+    setQuestions((prev) => [...prev, newQuestion]);
     setActiveQuestionId(newQuestion.id);
   };
+
+  useEffect(() => {
+    if (navigateToNewRef.current && !fetchingContest) {
+      navigateToNewRef.current = false;
+      setCurrentEditorIndex(questions.length - 1);
+      if (carouselRef.current) {
+        const top = carouselRef.current.getBoundingClientRect().top + window.scrollY - 96;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    }
+  }, [questions, fetchingContest]);
 
   const removeQuestion = (id: string) => {
     const newQuestions = questions.filter((q) => q.id !== id);
@@ -223,6 +248,9 @@ export default function EditContestPage() {
     if (activeQuestionId === id) {
       setActiveQuestionId(newQuestions[0]?.id || null);
     }
+    setCurrentEditorIndex((prev) =>
+      Math.min(prev, Math.max(0, newQuestions.length - 1)),
+    );
   };
 
   const handleQuestionChange = (
@@ -424,6 +452,7 @@ export default function EditContestPage() {
     if (!contestId) return;
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isFetchingRef.current) return;
       try {
         const payload = {
           idToken: idToken,
@@ -528,9 +557,11 @@ export default function EditContestPage() {
     setErrors(newErrors);
 
     if (isValid) {
+      setPublishing(true);
       const token = await auth.currentUser?.getIdToken(true);
       if (!token) {
         setErrors({ general: ["You must be logged in to submit the Blitz."] });
+        setPublishing(false);
         return;
       }
       setIdToken(token);
@@ -575,6 +606,7 @@ export default function EditContestPage() {
         formAction(formData);
       });
       flashSaved();
+      setPublishing(false);
     }
   };
 
@@ -583,8 +615,12 @@ export default function EditContestPage() {
   const inputClass =
     "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
 
+  const [currentPreview, currentCorrectKey] = transformForPreview(
+    questions[currentEditorIndex],
+  );
+
   return (
-    <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16">
+    <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16 pl-14">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
           <div>
@@ -592,7 +628,7 @@ export default function EditContestPage() {
               Blitz Editor
             </h1>
             <p className="text-zinc-500 text-sm mt-0.5">
-              Build your question set and preview it live.
+              Build your blitz and preview it live.
             </p>
             {postAsUsername && (
               <p className="text-xs text-neutral-300 mt-1">
@@ -636,10 +672,26 @@ export default function EditContestPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="space-y-8">
               <section>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
-                  Blitz Details
-                </h2>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen((v) => !v)}
+                  className="flex items-center gap-2 mb-3 group w-full text-left"
+                >
+                  <h2 className="text-xs font-semibold text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                    Blitz Details
+                  </h2>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-all ${detailsOpen ? "" : "-rotate-90"}`}
+                  />
+                </button>
+                {detailsOpen && <div className="relative">
+                  {fetchingContest && (
+                    <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[120px] z-10">
+                      <div className="w-7 h-7 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+                      <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+                    </div>
+                  )}
+                <div className={`bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4${fetchingContest ? " invisible pointer-events-none" : ""}`}>
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                       Title
@@ -762,50 +814,102 @@ export default function EditContestPage() {
                     </div>
                   </div>
                 </div>
+                </div>}
               </section>
 
-              <section>
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
-                  Questions
+              <section ref={carouselRef}>
+                <h2 className="text-xs font-semibold text-zinc-500 mb-3">
+                  Questions ({questions.length})
                 </h2>
                 <div className="space-y-4">
-                  {questions.map((question, index) => (
-                    <div
-                      key={question.id}
-                      className="rounded-xl border border-zinc-800 overflow-hidden"
+                  {/* Carousel nav */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentEditorIndex((i) => Math.max(0, i - 1))
+                      }
+                      disabled={currentEditorIndex === 0}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                     >
-                      <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
-                        <span className="text-sm font-semibold text-zinc-300">
-                          Question {index + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeQuestion(question.id);
-                          }}
-                          className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {errors[question.id] && (
-                        <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
-                          {errors[question.id].map((err, i) => (
-                            <p key={i} className="text-xs text-red-400">
-                              {err}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                      <QuestionEditorForm
-                        question={question}
-                        onQuestionChange={(updated) =>
-                          handleQuestionChange(question.id, updated)
-                        }
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      Prev
+                    </button>
+                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-neutral-500 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${((currentEditorIndex + 1) / questions.length) * 100}%`,
+                        }}
                       />
                     </div>
-                  ))}
+                    <span className="text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0">
+                      {currentEditorIndex + 1} / {questions.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentEditorIndex((i) =>
+                          Math.min(questions.length - 1, i + 1),
+                        )
+                      }
+                      disabled={currentEditorIndex === questions.length - 1}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    >
+                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Current question editor */}
+                  <div className="relative">
+                    {questions[currentEditorIndex] && (
+                      <div className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}>
+                        <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
+                          <span className="text-sm font-semibold text-zinc-300">
+                            Question {currentEditorIndex + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeQuestion(questions[currentEditorIndex].id)
+                            }
+                            disabled={questions.length === 1}
+                            className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded disabled:opacity-30"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {errors[questions[currentEditorIndex].id] && (
+                          <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
+                            {errors[questions[currentEditorIndex].id].map(
+                              (err, i) => (
+                                <p key={i} className="text-xs text-red-400">
+                                  {err}
+                                </p>
+                              ),
+                            )}
+                          </div>
+                        )}
+                        <QuestionEditorForm
+                          question={questions[currentEditorIndex]}
+                          onQuestionChange={(updated) =>
+                            handleQuestionChange(
+                              questions[currentEditorIndex].id,
+                              updated,
+                            )
+                          }
+                        />
+                      </div>
+                    )}
+                    {fetchingContest && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[200px]">
+                        <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+                        <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     type="button"
                     onClick={addQuestion}
@@ -828,28 +932,26 @@ export default function EditContestPage() {
                     <Check className="w-3.5 h-3.5" />
                     Saved
                   </span>
-                  <SubmitButton isPublished={isPublished} />
+                  <SubmitButton isPublished={isPublished} publishing={publishing} />
                 </div>
               </div>
             </div>
 
-            <div>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+            <div className="sticky top-20">
+              <h2 className="text-xs font-semibold text-zinc-500 mb-3">
                 Live Preview
               </h2>
-              <div className="space-y-6">
-                {questions.map((q, index) => {
-                  const [qPreview, qSelectedAnswerKey] = transformForPreview(q);
-                  return (
-                    <ContestQuestionView
-                      key={q.id}
-                      questionNumber={index + 1}
-                      question={qPreview}
-                      selectedAnswer={qSelectedAnswerKey}
-                    />
-                  );
-                })}
-              </div>
+              {fetchingContest ? (
+                <div className="flex items-center justify-center py-16 bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl gap-3">
+                  <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+                </div>
+              ) : (
+                <ContestQuestionView
+                  questionNumber={currentEditorIndex + 1}
+                  question={currentPreview}
+                  correctAnswerKey={currentCorrectKey}
+                />
+              )}
             </div>
           </div>
         </form>

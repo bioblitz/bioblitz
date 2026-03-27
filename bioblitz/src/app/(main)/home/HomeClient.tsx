@@ -400,8 +400,8 @@ export default function HomeClient() {
 
         {authLoading || pages.length === 0 || !playedGamesLoaded ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <div className="w-10 h-10 border-[3px] border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
-            <span className="text-yellow-400 text-sm font-medium">Loading...</span>
+            <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+            <span className="text-neutral-400 text-sm font-medium">Loading...</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

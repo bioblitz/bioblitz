@@ -280,3 +280,4 @@ export async function hasOpenChallenge(
   });
   return valid.length > 0;
 }
+

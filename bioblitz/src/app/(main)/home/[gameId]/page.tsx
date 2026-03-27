@@ -16,7 +16,6 @@ import {
   Play,
   Medal,
   Crown,
-  Star,
   Users,
   CheckCircle2,
   ArrowUpRight,
@@ -27,8 +26,11 @@ import {
   ShieldAlert,
   LayoutGrid,
   Info,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, firestore } from "@/lib/firebase";
@@ -98,9 +100,11 @@ export default function GameDetailPage() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
-  const [showRatingDropdown, setShowRatingDropdown] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   const [activeSession, setActiveSession] = useState<{
@@ -119,6 +123,7 @@ export default function GameDetailPage() {
             ? claims.roles.map((r: any) => String(r).toLowerCase())
             : [];
           setIsAdmin(claims.admin === true || roles.includes("admin"));
+          setIsStaff(roles.includes("staff"));
         });
       } else {
         setLoadingAttempts(false);
@@ -128,6 +133,17 @@ export default function GameDetailPage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showMenu]);
 
   useEffect(() => {
     const loadGameData = async () => {
@@ -331,14 +347,24 @@ export default function GameDetailPage() {
     setDeleting(true);
     try {
       const token = await user.getIdToken();
-      const res = await fetch("/api/admin/contests", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ gameId }),
-      });
+      const isOwner = game.creator === user.uid;
+      let res: Response;
+      if (isOwner) {
+        res = await fetch(`/api/contests/${gameId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken: token }),
+        });
+      } else {
+        res = await fetch("/api/admin/contests", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ gameId }),
+        });
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       router.push("/home");
@@ -437,8 +463,9 @@ export default function GameDetailPage() {
 
   if (loadingGame) {
     return (
-      <div className="flex items-center justify-center h-screen bg-neutral-900 text-white">
-        <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
+      <div className="flex flex-col items-center justify-center h-screen bg-neutral-900 gap-4">
+        <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+        <span className="text-neutral-400 text-sm font-medium">Loading...</span>
       </div>
     );
   }
@@ -505,19 +532,44 @@ export default function GameDetailPage() {
                 <h1 className="text-3xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
                   {game.title}
                 </h1>
-                {isAdmin && (
-                  <button
-                    onClick={handleDeleteContest}
-                    disabled={deleting}
-                    className="p-2 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-all"
-                    title="Delete contest"
-                  >
-                    {deleting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <X className="w-5 h-5" />
+                {(isAdmin || isStaff || game.creator === user?.uid) && (
+                  <div className="relative" ref={menuRef}>
+                    <button
+                      onClick={() => setShowMenu((v) => !v)}
+                      className="p-2 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </button>
+                    {showMenu && (
+                      <div className="absolute left-0 top-full mt-1 w-44 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <button
+                          onClick={() => {
+                            setShowMenu(false);
+                            router.push(`/contests/create/${gameId}`);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit Blitz
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false);
+                            handleDeleteContest();
+                          }}
+                          disabled={deleting}
+                          className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left disabled:opacity-50"
+                        >
+                          {deleting ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                          Delete Blitz
+                        </button>
+                      </div>
                     )}
-                  </button>
+                  </div>
                 )}
               </div>
 
@@ -554,30 +606,12 @@ export default function GameDetailPage() {
                   {getTopicShortLabel(game.topic || "General")}
                 </span>
 
-                {game.rating && game.rating > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
-                    <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                    <span>{game.rating.toFixed(1)}/5.0</span>
-                    <span className="text-yellow-200/80 normal-case font-semibold">
-                      {typeof game.ratingCount === "number"
-                        ? game.ratingCount
-                        : 0}{" "}
-                      review
-                      {(typeof game.ratingCount === "number"
-                        ? game.ratingCount
-                        : 0) === 1
-                        ? ""
-                        : "s"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowRatingDropdown(true)}
-                      className="ml-1 text-yellow-100 hover:text-white underline underline-offset-4"
-                    >
-                      Leave a review
-                    </button>
-                  </div>
-                )}
+                <GameRating
+                  gameId={gameId}
+                  hasPlayed={hasPlayed}
+                  averageRating={game.rating}
+                  ratingCount={game.ratingCount}
+                />
               </div>
             </div>
 
@@ -670,19 +704,11 @@ export default function GameDetailPage() {
                   </div>
                 </button>
                 {user && isFirstAttempt && (
-                  <div
-                    className="flex items-center justify-center rounded-xl px-4 transition-all"
-                    style={{
-                      background: "black",
-                      boxShadow: "0 0 12px rgba(59,130,246,0.15)",
-                    }}
-                  >
-                    <ChallengeButton
-                      blitzId={gameId}
-                      blitzTitle={game.title}
-                      onPlay={handleJoinGame}
-                    />
-                  </div>
+                  <ChallengeButton
+                    blitzId={gameId}
+                    blitzTitle={game.title}
+                    onPlay={handleJoinGame}
+                  />
                 )}
               </div>
               <div className="mt-2 flex items-center gap-3">
@@ -1102,29 +1128,6 @@ export default function GameDetailPage() {
         </div>
       )}
 
-      <div className="fixed right-6 bottom-8 z-40 flex flex-col items-end gap-2">
-        {showRatingDropdown && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-2xl mb-1">
-            <p className="text-xs text-zinc-500 uppercase font-bold mb-3">
-              Rate this Blitz
-            </p>
-            <GameRating gameId={gameId} hasPlayed={hasPlayed} />
-          </div>
-        )}
-        <button
-          onClick={() => setShowRatingDropdown((v) => !v)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm shadow-lg border transition-all ${
-            showRatingDropdown
-              ? "bg-yellow-500 text-black border-yellow-400"
-              : "bg-zinc-900 text-yellow-400 border-zinc-700 hover:border-yellow-500/50 hover:bg-zinc-800"
-          }`}
-        >
-          <Star
-            className={`w-4 h-4 ${showRatingDropdown ? "fill-black" : "fill-yellow-400"}`}
-          />
-          Rate
-        </button>
-      </div>
     </div>
   );
 }

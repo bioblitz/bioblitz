@@ -19,7 +19,7 @@ import {
 } from "firebase/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
-import RecentSetsCarousel from "@/components/profile/RecentSetsCarousel";
+import SetsPlayedGrid from "@/components/profile/SetsPlayedGrid";
 import ProfileHeroCard from "@/components/profile/ProfileHeroCard";
 import EditProfileModal from "@/components/profile/EditProfileModal";
 import ReportModal from "@/components/profile/ReportModal";
@@ -56,7 +56,6 @@ export default function ProfilePage() {
   }, [usernameParamRaw]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -84,6 +83,8 @@ export default function ProfilePage() {
     setsPlayed,
     eloHistory,
     loading,
+    loadingSets,
+    loadingElo,
     error,
   } = useProfileData({ db, usernameParamRaw, usernameParamNormalized, authLoading });
 
@@ -215,17 +216,6 @@ export default function ProfilePage() {
     }
   };
 
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const { current } = scrollRef;
-      const scrollAmount = 300;
-      if (direction === "left") {
-        current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-      } else {
-        current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-      }
-    }
-  };
 
   const profilePathFor = (u: Pick<UserProfile, "uid" | "username">) => {
     const uname = (u.username || "").trim();
@@ -242,8 +232,8 @@ export default function ProfilePage() {
   if (authLoading || loading)
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-neutral-900 gap-4">
-        <div className="w-10 h-10 border-[3px] border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
-        <span className="text-yellow-400 text-sm font-medium">Loading...</span>
+        <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+        <span className="text-neutral-400 text-sm font-medium">Loading...</span>
       </div>
     );
 
@@ -300,7 +290,7 @@ export default function ProfilePage() {
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
-                {tab === "rating" ? "Rating Graph" : tab === "friends" ? "Friends" : "Sets Played"}
+                {tab === "rating" ? "Rating Graph" : tab === "friends" ? "Friends" : "Blitzes Completed"}
               </button>
             ))}
           </div>
@@ -308,15 +298,27 @@ export default function ProfilePage() {
           {/* Tab content */}
           <div className="p-6">
             {activeTab === "rating" && (
-              <EloChart eloHistory={eloHistory} />
+              loadingElo ? (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-4 w-32 bg-zinc-800 rounded-full" />
+                  <div className="h-48 w-full bg-zinc-800/60 rounded-2xl" />
+                  <div className="flex gap-2 justify-end">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-3 w-10 bg-zinc-800 rounded-full" />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EloChart eloHistory={eloHistory} />
+              )
             )}
 
             {activeTab === "friends" && (
               <div className="flex gap-6 min-h-80">
                 {/* Left: friends list */}
                 <div className="w-1/2 flex flex-col gap-3">
-                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                    {friends.length} {friends.length === 1 ? "Friend" : "Friends"}
+                  <p className="text-xs font-semibold text-zinc-400">
+                    {friends.length} {friends.length === 1 ? "friend" : "friends"}
                   </p>
                   <div className="flex-1 overflow-y-auto space-y-1 [scrollbar-width:thin] [scrollbar-color:#52525b_transparent]">
                     {loadingFriends ? (
@@ -363,7 +365,7 @@ export default function ProfilePage() {
                   {authUser?.uid === profileUid && (
                     <>
                       <div className="flex flex-col gap-2">
-                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Add Friend</p>
+                        <p className="text-xs font-semibold text-zinc-400">Add friend</p>
                         <div className="relative">
                           <input
                             type="text"
@@ -413,7 +415,7 @@ export default function ProfilePage() {
 
                       {incomingRequests.length > 0 && (
                         <div className="flex flex-col gap-2">
-                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-zinc-400">
                             Requests ({incomingRequests.length})
                           </p>
                           <div className="space-y-1.5 overflow-y-auto max-h-48 [scrollbar-width:thin] [scrollbar-color:#52525b_transparent]">
@@ -455,12 +457,21 @@ export default function ProfilePage() {
             )}
 
             {activeTab === "sets" && (
-              <RecentSetsCarousel
-                setsPlayed={setsPlayed}
-                scrollRef={scrollRef}
-                onScrollLeft={() => scroll("left")}
-                onScrollRight={() => scroll("right")}
-              />
+              loadingSets ? (
+                <div className="space-y-4 animate-pulse">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="h-4 w-36 bg-zinc-800 rounded-full" />
+                    <div className="h-3 w-12 bg-zinc-800 rounded-full" />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[...Array(30)].map((_, i) => (
+                      <div key={i} className="w-8 h-8 rounded-lg bg-zinc-800" />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <SetsPlayedGrid setsPlayed={setsPlayed} />
+              )
             )}
           </div>
         </motion.div>

@@ -20,7 +20,7 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
       <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Recent Sets</h3>
         <div className="h-32 flex items-center justify-center text-zinc-600">
-          <p>No sets played yet</p>
+          <p>No blitzes completed yet</p>
         </div>
       </div>
     );

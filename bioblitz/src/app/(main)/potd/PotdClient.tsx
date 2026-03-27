@@ -2,23 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   Flame,
   CheckCircle2,
   XCircle,
-  SlidersHorizontal,
-  ChevronUp,
   Search,
-  ListChecks,
-  History,
-  Trophy,
-  MousePointerClick,
   Loader2,
   Lightbulb,
-  ArrowDown,
   RotateCcw,
   Eye,
+  ChevronRight,
 } from "lucide-react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
@@ -46,13 +41,14 @@ export default function PotdClient({
 }: {
   initialPuzzles?: DailyPuzzle[];
 }) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">(
     "All"
   );
-  const [showArchive, setShowArchive] = useState(false);
+  const [activeTab, setActiveTab] = useState<"today" | "archive">("today");
 
   const [puzzles] = useState<DailyPuzzle[]>(initialPuzzles);
 
@@ -245,6 +241,18 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   const todaysPuzzle = puzzles.find((p) => isToday(p.date));
   const archivePuzzles = puzzles.filter((p) => !isToday(p.date));
+  const prevPuzzle = useMemo(() => {
+    if (archivePuzzles.length === 0) return null;
+    return [...archivePuzzles].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0];
+  }, [archivePuzzles]);
+  const todayFormatted = new Date().toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
   const fallbackPuzzle = useMemo(() => {
     if (archivePuzzles.length === 0) return null;
     const pstDate = new Date().toLocaleDateString("en-US", {
@@ -303,7 +311,18 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                 Daily Problem
               </h1>
             </div>
-            <p className="text-zinc-500 ml-1">Keep your streak alive!</p>
+            <div className="flex items-center gap-2 ml-1">
+              <span className="text-zinc-500 text-sm">{todayFormatted}</span>
+              {prevPuzzle && (
+                <button
+                  onClick={() => router.push(`/potd/${prevPuzzle.id}`)}
+                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                  title="Previous problem"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
           {isStaffUser && (
             <Link
@@ -323,8 +342,25 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-12">
-            <section className="relative">
+          <div className="space-y-0">
+            {/* Tab bar */}
+            <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 mb-8">
+              {(["today", "archive"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
+                    activeTab === tab
+                      ? "bg-zinc-800 text-white shadow-sm shadow-white/5"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {tab === "today" ? "Today's Problem" : "Archive"}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "today" && <section className="relative">
               {activePuzzle ? (
                 !isFallback && isTodayCompleted && !viewAnyway ? (
                   <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm shadow-xl p-12 text-center animate-in fade-in duration-500">
@@ -340,10 +376,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                       <div className="flex flex-col sm:flex-row gap-4">
                         <button
-                          onClick={() => setShowArchive(true)}
+                          onClick={() => setActiveTab("archive")}
                           className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                         >
-                          <History className="w-5 h-5" />
                           Practice Past Problems
                         </button>
                         <button
@@ -541,37 +576,10 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                   </p>
                 </div>
               )}
-            </section>
+            </section>}
 
-            <div className="flex flex-col items-center justify-center pt-8 pb-12 border-t border-white/5">
-              <button
-                onClick={() => setShowArchive(!showArchive)}
-                className={`
-                            flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-medium transition-all duration-300
-                            ${
-                              showArchive
-                                ? "bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700"
-                                : "bg-transparent text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-900"
-                            }
-                        `}
-              >
-                {showArchive ? (
-                  <>
-                    <ChevronUp className="w-4 h-4" />
-                    Hide Past Problems
-                  </>
-                ) : (
-                  <>
-                    <History className="w-4 h-4" />
-                    View Problem Archive
-                    <ArrowDown className="w-4 h-4 ml-1 opacity-50" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            {showArchive && (
-              <section className="animate-in slide-in-from-top-4 fade-in duration-300 pb-20">
+            {activeTab === "archive" && (
+              <section className="pb-20">
                 <div className="flex flex-col gap-6 mb-8">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="relative flex-grow">

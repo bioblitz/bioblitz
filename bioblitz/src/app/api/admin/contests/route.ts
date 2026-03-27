@@ -113,11 +113,13 @@ export async function DELETE(request: Request) {
       }
     }
 
-    // 6. Remove gameId from users' playedGameIds arrays
+    // 6. Remove gameId from users' playedGameIds arrays + collect affected UIDs
     const usersWithGameSnap = await adminFirestore
       .collection("users")
       .where("playedGameIds", "array-contains", gameId)
       .get();
+
+    const affectedUids: string[] = [];
 
     if (!usersWithGameSnap.empty) {
       const chunks = [];
@@ -127,6 +129,7 @@ export async function DELETE(request: Request) {
       for (const chunk of chunks) {
         const batch = adminFirestore.batch();
         chunk.forEach((userDoc) => {
+          affectedUids.push(userDoc.id);
           const data = userDoc.data();
           const playedIds = Array.isArray(data.playedGameIds)
             ? data.playedGameIds
@@ -135,6 +138,44 @@ export async function DELETE(request: Request) {
             playedGameIds: playedIds.filter((id: string) => id !== gameId),
           });
         });
+        await batch.commit();
+      }
+    }
+
+    // 7. Delete setsPlayed/{gameId} doc for each affected user
+    if (affectedUids.length > 0) {
+      const chunks = [];
+      for (let i = 0; i < affectedUids.length; i += 500) {
+        chunks.push(affectedUids.slice(i, i + 500));
+      }
+      for (const chunk of chunks) {
+        const batch = adminFirestore.batch();
+        chunk.forEach((uid) => {
+          const ref = adminFirestore
+            .collection("users")
+            .doc(uid)
+            .collection("setsPlayed")
+            .doc(gameId);
+          batch.delete(ref);
+        });
+        await batch.commit();
+      }
+    }
+
+    // 8. Delete ratingHistory entries where contestId == gameId
+    const ratingHistorySnap = await adminFirestore
+      .collectionGroup("ratingHistory")
+      .where("contestId", "==", gameId)
+      .get();
+
+    if (!ratingHistorySnap.empty) {
+      const chunks = [];
+      for (let i = 0; i < ratingHistorySnap.docs.length; i += 500) {
+        chunks.push(ratingHistorySnap.docs.slice(i, i + 500));
+      }
+      for (const chunk of chunks) {
+        const batch = adminFirestore.batch();
+        chunk.forEach((doc) => batch.delete(doc.ref));
         await batch.commit();
       }
     }
