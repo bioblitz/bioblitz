@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { Clock, Star, Users, Zap, Trophy } from "lucide-react";
+import { Clock, Star, Users, Zap, Trophy, BarChart3 } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { getTopicShortLabel } from "@/lib/utils";
 import { getRatingTier } from "@/lib/rating";
@@ -108,32 +108,18 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
             <div className="absolute inset-0 bg-neutral-900" />
           )}
           <div className="absolute inset-0 bg-neutral-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <p className="text-white text-sm font-semibold text-center px-4">
+            <p className="text-white text-sm text-center px-4">
               {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
             </p>
           </div>
           {isCompleted && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-20 gap-2">
-              <span className="text-black text-[10px] font-bold uppercase tracking-widest bg-yellow-300 px-3 py-1 rounded-full border border-white/10">
-                Completed
-              </span>
-              {(userSubmission?.rank || contestElo > 0) && (
-                <div className="flex items-center gap-2 bg-black/80 px-3 py-1.5 rounded-xl border border-white/5 shadow-2xl">
-                  {userSubmission?.rank && (
-                    <div className="flex items-center gap-1">
-                      <Trophy className="w-3 h-3 text-yellow-500" />
-                      <span className="text-[11px] font-bold text-white">#{userSubmission.rank}</span>
-                    </div>
-                  )}
-                  {userSubmission?.rank && contestElo > 0 && <div className="w-px h-2.5 bg-white/20" />}
-                  {contestElo > 0 && (
-                    <span className={`text-[11px] font-bold ${tier?.textClass}`}>
-                      {contestElo}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+            <div className="absolute inset-0 bg-neutral-950/40 backdrop-blur-[0.25px] z-20">
+              <div className="absolute top-0 left-0 flex overflow-hidden w-24 h-24">
+                <span className="absolute -left-6 top-4 w-28 text-black text-[10px] font-semibold uppercase bg-yellow-300 -rotate-45 px-5 justify-center py-1 border border-white/10">
+                  Completed
+                </span>
+              </div>
+              </div>
           )}
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10">
@@ -146,14 +132,19 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
             <div className="absolute top-2 left-2 z-10">
               <span className="flex items-center gap-0.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 <Zap className="w-2.5 h-2.5" />
-                2×
+                2x
               </span>
             </div>
           )}
-          <div className="absolute bottom-2 right-2 z-10">
-            <div className="flex items-center gap-1 bg-neutral-900/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
+          <div className="absolute bottom-2 right-2 z-10 flex rounded bg-neutral-800/80 backdrop-blur-md">
+            {contestElo > 0 && (
+              <div className="flex rounded px-1.5 backdrop-blur-sm py-1">
+                <span className={`text-xs font-bold ${tier.textClass}`}>{contestElo}</span>
+              </div>
+            )}
+            <div className="flex gap-1 text-white px-1.5 py-1 rounded-md">
               <Clock className="w-3.5 h-3.5" />
-              <span className="text-xs font-semibold">{timeInMinutes} min</span>
+              <span className="text-xs">{timeInMinutes} min</span>
             </div>
           </div>
         </div>
@@ -191,8 +182,10 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               <div className="flex items-center gap-3 text-xs mt-auto">
                 {contest.rating && contest.rating > 0 && (
                   <div className="flex items-center gap-1 text-yellow-400">
-                    <Star className="w-3 h-3 fill-yellow-400" />
-                    <span className="font-medium">{contest.rating.toFixed(1)}/5</span>
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-yellow-400" />
+                      <span className="font-medium">{contest.rating.toFixed(1)}/5</span>
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-neutral-400">
