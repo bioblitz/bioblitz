@@ -84,6 +84,8 @@ export default function GameDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [inspectEntry, setInspectEntry] = useState<LeaderboardEntry | null>(null);
   const [erasing, setErasing] = useState(false);
+  const [eloPenalty, setEloPenalty] = useState(100);
+  const [eraseAttempt, setEraseAttempt] = useState(true);
   const [game, setGame] = useState<gameRoom | undefined>(undefined);
 
   const [loadingGame, setLoadingGame] = useState(true);
@@ -375,24 +377,31 @@ export default function GameDetailPage() {
 
   const handleEraseSubmission = async (entry: LeaderboardEntry) => {
     if (!user) return;
-    if (!confirm(`Erase ${entry.username}'s attempt and deduct 100 ELO? This cannot be undone.`)) return;
+    if (!eraseAttempt && eloPenalty === 0) return;
     setErasing(true);
     try {
       const idToken = await user.getIdToken();
       const res = await fetch("/api/admin/submission/erase", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ submissionId: entry.submissionId, userId: entry.userId }),
+        body: JSON.stringify({
+          submissionId: entry.submissionId,
+          userId: entry.userId,
+          eloPenalty,
+          eraseAttempt,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
-        alert(data?.error || "Failed to erase submission.");
+        alert(data?.error || "Failed.");
         return;
       }
-      setLeaderboard((prev) => prev.filter((e) => e.submissionId !== entry.submissionId));
+      if (eraseAttempt) {
+        setLeaderboard((prev) => prev.filter((e) => e.submissionId !== entry.submissionId));
+      }
       setInspectEntry(null);
     } catch {
-      alert("Failed to erase submission.");
+      alert("Failed.");
     } finally {
       setErasing(false);
     }
@@ -438,7 +447,7 @@ export default function GameDetailPage() {
 
   const timeLimitMinutes = Math.max(
     1,
-    Math.floor((parseInt(String(game.timeLimit || "0"), 10) || 0) / 60),
+    parseInt(String(game.timeLimit || "0"), 10) || 0,
   );
 
   const registrantAvatars = leaderboard.slice(0, 3);
@@ -679,8 +688,8 @@ export default function GameDetailPage() {
               <div className="mt-2 flex items-center gap-3">
                 <div className="text-sm text-neutral-300 flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  {game.totalPlays || 0} registrant
-                  {game.totalPlays === 1 ? "" : "s"}
+                  {game.firstAttemptCount ?? 0} registrant
+                  {(game.firstAttemptCount ?? 0) === 1 ? "" : "s"}
                 </div>
                 <div className="flex items-center -space-x-2">
                   {loadingLeaderboard
@@ -894,7 +903,7 @@ export default function GameDetailPage() {
                         }
                         className={`p-1.5 rounded-lg transition-colors ${
                           expandedEntries.has(entry.submissionId)
-                            ? "text-violet-400 bg-violet-500/10"
+                            ? "text-yellow-300 bg-yellow-300/10"
                             : "text-zinc-100 hover:text-white hover:bg-zinc-800"
                         }`}
                         title="View question breakdown"
@@ -903,7 +912,7 @@ export default function GameDetailPage() {
                       </button>
                       {isAdmin && (
                         <button
-                          onClick={() => setInspectEntry(entry)}
+                          onClick={() => { setInspectEntry(entry); setEloPenalty(100); setEraseAttempt(true); }}
                           className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                           title="Inspect attempt"
                         >
@@ -955,12 +964,12 @@ export default function GameDetailPage() {
                           <div className="w-px h-3 bg-zinc-700" />
                           <div className="flex items-center gap-1.5 text-[10px] font-mono">
                             <span className="text-zinc-100">time off tab</span>
-                            <span className={`font-semibold ${entry.timeOffTab == null ? "text-zinc-500" : entry.timeOffTab > 10000 ? "text-amber-400" : "text-zinc-100"}`}>
+                            <span className={`font-semibold ${entry.timeOffTab == null ? "text-zinc-500" : entry.timeOffTab > 10 ? "text-amber-400" : "text-zinc-100"}`}>
                               {entry.timeOffTab == null
                                 ? "N/A"
-                                : entry.timeOffTab >= 60000
-                                  ? `${Math.floor(entry.timeOffTab / 60000)}m ${Math.floor((entry.timeOffTab % 60000) / 1000)}s`
-                                  : `${(entry.timeOffTab / 1000).toFixed(1)}s`}
+                                : entry.timeOffTab >= 60
+                                  ? `${Math.floor(entry.timeOffTab / 60)}m ${entry.timeOffTab % 60}s`
+                                  : `${entry.timeOffTab}s`}
                             </span>
                           </div>
                         </div>
@@ -985,7 +994,7 @@ export default function GameDetailPage() {
               <span className="text-zinc-200 font-semibold">{inspectEntry.username}</span>
               {" "}— {inspectEntry.correctCount}/{inspectEntry.totalQuestions} in {formatTimePlayed(inspectEntry.timeTaken)}
             </p>
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-5">
               <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-3">
                 <span className="text-sm text-zinc-400">Tab switches</span>
                 <span className={`font-mono font-bold text-sm ${(inspectEntry.tabSwitchCount ?? 0) > 2 ? "text-red-400" : "text-zinc-200"}`}>
@@ -999,6 +1008,29 @@ export default function GameDetailPage() {
                 </span>
               </div>
             </div>
+
+            <div className="space-y-3 mb-5 border-t border-zinc-800 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-zinc-400">Elo deduction</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={eloPenalty}
+                  onChange={(e) => setEloPenalty(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white text-right font-mono focus:outline-none focus:border-zinc-500"
+                />
+              </div>
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={eraseAttempt}
+                  onChange={(e) => setEraseAttempt(e.target.checked)}
+                  className="w-4 h-4 rounded accent-red-500 cursor-pointer"
+                />
+                <span className="text-sm text-zinc-300">Erase attempt</span>
+              </label>
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setInspectEntry(null)}
@@ -1008,10 +1040,10 @@ export default function GameDetailPage() {
               </button>
               <button
                 onClick={() => handleEraseSubmission(inspectEntry)}
-                disabled={erasing}
+                disabled={erasing || (!eraseAttempt && eloPenalty === 0)}
                 className="flex-1 py-2.5 rounded-xl bg-red-700 hover:bg-red-600 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
               >
-                {erasing ? "Erasing..." : "Erase + −100 ELO"}
+                {erasing ? "Applying..." : "Apply"}
               </button>
             </div>
           </div>

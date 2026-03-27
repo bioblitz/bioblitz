@@ -25,6 +25,8 @@ export type gameRoom = {
   hidden?: boolean;
   bannerUrl?: string;
   totalPlays?: number;
+  firstAttemptCount?: number;
+  ratingActivated?: boolean;
   creation: number | null;
   lastPlayedAt?: number | null;
   lastRatingUpdate?: number | null;

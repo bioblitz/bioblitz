@@ -30,7 +30,7 @@ export default function EloChart({ eloHistory }: EloChartProps) {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-yellow-300" />
+            <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.5)]" />
             <span className="text-[10px] font-medium text-zinc-400 tracking-wider">Elo</span>
           </div>
         </div>
@@ -39,18 +39,24 @@ export default function EloChart({ eloHistory }: EloChartProps) {
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={eloHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="eloGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity={0.18} />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} stroke="#5f5f7c" strokeDasharray="4 4" opacity={0.5} />
-            <XAxis 
-              dataKey="date" 
+            <XAxis
+              dataKey="date"
               hide={eloHistory.length > 20}
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#71717a', fontSize: 10 }}
               minTickGap={20}
             />
-            <YAxis 
-              hide 
-              domain={[Math.floor(minElo - padding), Math.ceil(maxElo + padding)]} 
+            <YAxis
+              hide
+              domain={[Math.floor(minElo - padding), Math.ceil(maxElo + padding)]}
             />
             <Tooltip
               content={({ active, payload }) => {
@@ -76,8 +82,8 @@ export default function EloChart({ eloHistory }: EloChartProps) {
             <Area
               type="monotone"
               dataKey="elo"
-              stroke="#eff969"
-              strokeWidth={3}
+              stroke="#ffffff"
+              strokeWidth={2.5}
               fillOpacity={1}
               fill="url(#eloGradient)"
               animationDuration={1500}

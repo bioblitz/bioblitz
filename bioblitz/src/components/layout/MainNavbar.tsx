@@ -351,8 +351,8 @@ export default function MainNavbar() {
       </nav>
 
       <aside
-        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none ${
-          railOpen ? "bg-neutral-900/90" : "bg-transparent"
+        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none transition-all duration-200 ${
+          railOpen ? "bg-neutral-900/95 border-r border-zinc-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.5)]" : "bg-transparent"
         }`}
         onMouseLeave={() => {
           setRailOpen(false);
@@ -360,7 +360,7 @@ export default function MainNavbar() {
         }}
       >
         <div
-          className="w-16 flex flex-col items-center justify-center py-6 gap-3 ml-2 pointer-events-auto"
+          className="w-16 flex flex-col items-center justify-center py-6 gap-1 ml-2 pointer-events-auto"
           onMouseEnter={() => {
             if (!suppressRailHover) setRailOpen(true);
           }}
@@ -371,7 +371,11 @@ export default function MainNavbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+                className={`group/railitem relative w-12 h-10 rounded-lg flex items-center justify-center transition-all duration-150 overflow-visible ${
+                  isActive
+                    ? "text-yellow-300 bg-yellow-300/10"
+                    : "text-white/50 hover:text-white hover:bg-white/8"
+                }`}
                 title={item.name}
                 aria-label={item.name}
                 onClick={() => {
@@ -379,19 +383,11 @@ export default function MainNavbar() {
                   setSuppressRailHover(true);
                 }}
               >
-                <span
-                  className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
-                    suppressRailHover
-                      ? ""
-                      : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                  }`}
-                />
-                <item.icon
-                  size={26}
-                  className={isActive ? "text-white fill-white" : ""}
-                />
+                <item.icon size={20} />
                 <span
                   className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    isActive ? "text-yellow-300" : "text-zinc-200"
+                  } ${
                     railOpen
                       ? "opacity-100 translate-x-0"
                       : "opacity-0 translate-x-1"
@@ -405,7 +401,11 @@ export default function MainNavbar() {
           {isStaff && (
             <Link
               href="/staff"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+              className={`group/railitem relative w-12 h-10 rounded-lg flex items-center justify-center transition-all duration-150 overflow-visible ${
+                pathname === "/staff"
+                  ? "text-yellow-300 bg-yellow-300/10"
+                  : "text-white/50 hover:text-white hover:bg-white/8"
+              }`}
               title="Staff"
               aria-label="Staff"
               onClick={() => {
@@ -413,16 +413,11 @@ export default function MainNavbar() {
                 setSuppressRailHover(true);
               }}
             >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <ShieldUser size={26} />
+              <ShieldUser size={20} />
               <span
                 className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  pathname === "/staff" ? "text-yellow-300" : "text-zinc-200"
+                } ${
                   railOpen
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 translate-x-1"
@@ -435,7 +430,11 @@ export default function MainNavbar() {
           {isAdmin && (
             <Link
               href="/admin"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
+              className={`group/railitem relative w-12 h-10 rounded-lg flex items-center justify-center transition-all duration-150 overflow-visible ${
+                pathname === "/admin"
+                  ? "text-yellow-300 bg-yellow-300/10"
+                  : "text-white/50 hover:text-white hover:bg-white/8"
+              }`}
               title="Admin"
               aria-label="Admin"
               onClick={() => {
@@ -443,16 +442,11 @@ export default function MainNavbar() {
                 setSuppressRailHover(true);
               }}
             >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <Hammer size={26} />
+              <Hammer size={20} />
               <span
                 className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  pathname === "/admin" ? "text-yellow-300" : "text-zinc-200"
+                } ${
                   railOpen
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 translate-x-1"

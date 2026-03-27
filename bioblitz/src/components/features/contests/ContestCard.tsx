@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
-import { Clock, Star, Users, CheckCircle2 } from "lucide-react";
+import { Clock, Star, Users, CheckCircle2, Zap } from "lucide-react";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { getTopicShortLabel } from "@/lib/utils";
 interface ContestCardProps {
@@ -92,6 +92,14 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               <CheckCircle2 className="w-5 h-5 text-green-400" />
             </div>
           )}
+          {!contest.ratingActivated && (
+            <div className="absolute top-2 left-2 z-10">
+              <span className="flex items-center gap-0.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                <Zap className="w-2.5 h-2.5" />
+                2×
+              </span>
+            </div>
+          )}
           <div className="absolute bottom-2 right-2 z-10">
             <div className="flex items-center gap-1 bg-neutral-900/80 backdrop-blur-sm border border-white/10 text-white px-2 py-1 rounded-md shadow-lg">
               <Clock className="w-3.5 h-3.5" />
@@ -139,7 +147,7 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
                 )}
                 <div className="flex items-center gap-1 text-neutral-400">
                   <Users className="w-3 h-3" />
-                  <span className="font-medium">{contest.totalPlays || 0} plays</span>
+                  <span className="font-medium">{contest.firstAttemptCount ?? 0} plays</span>
                 </div>
               </div>
             </div>

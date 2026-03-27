@@ -1,4 +1,16 @@
-import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer, ShieldUser } from "lucide-react";
+import { Pencil, MapPin, School, GraduationCap, Calendar, Flame, X, Flag, Hammer, ShieldUser, Star } from "lucide-react";
+
+function getEloRank(elo: number): { label: string; color: string; border: string; glow?: React.CSSProperties } {
+  if (elo >= 1600) return {
+    label: "Platinum",
+    color: "text-white",
+    border: "border-white/25",
+    glow: { textShadow: "0 0 6px rgba(255,255,255,0.7)" },
+  };
+  if (elo >= 1200) return { label: "Gold",   color: "text-[#c9922a]", border: "border-[#c9922a]/40" };
+  if (elo > 800)   return { label: "Silver", color: "text-[#7a7a7a]", border: "border-[#7a7a7a]/40" };
+  return                  { label: "Bronze", color: "text-orange-400", border: "border-orange-600/40" };
+}
 
 type FriendshipStatus = "none" | "sent" | "received" | "friends";
 
@@ -155,6 +167,14 @@ export default function ProfileHeroCard({
             <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
               {userProfile?.displayName || userProfile?.username}
             </h1>
+            {userProfile?.username && (() => {
+              const rank = getEloRank(userProfile?.bElo ?? 0);
+              return (
+                <p className={`text-sm mt-0.5 font-mono font-semibold ${rank.color}`} style={rank.glow}>
+                  @{userProfile.username}
+                </p>
+              );
+            })()}
             {isOwnProfile && (
               <p className="text-zinc-500 text-sm mt-1 font-mono">{userProfile?.email}</p>
             )}
@@ -204,6 +224,15 @@ export default function ProfileHeroCard({
         )}
 
         <div className="flex flex-wrap justify-center md:justify-start gap-3">
+          {userProfile?.bElo != null && (() => {
+            const rank = getEloRank(userProfile.bElo);
+            return (
+              <div className={`flex items-center gap-2 text-xs font-semibold bg-zinc-900 px-3 py-1.5 rounded-full border ${rank.border} ${rank.color}`} style={rank.glow}>
+                <Star className="w-3 h-3" />
+                {userProfile.bElo}
+              </div>
+            );
+          })()}
           {userProfile?.location && (
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
               <MapPin className="w-3 h-3 text-neutral-400" />

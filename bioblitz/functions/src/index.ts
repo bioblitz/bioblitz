@@ -70,6 +70,7 @@ interface ParticipantEntry {
   score: number;
   correctCount: number;
   totalQuestions: number;
+  eloAtSubmission?: number;
 }
 
 
@@ -91,6 +92,7 @@ async function activateContest(
       score: doc.data().score ?? 0,
       correctCount: doc.data().correctCount ?? 0,
       totalQuestions: doc.data().totalQuestions ?? 1,
+      eloAtSubmission: doc.data().eloAtSubmission,
     }));
 
   if (!submissions.find((s) => s.submissionId === currentSub.submissionId)) {
@@ -121,7 +123,7 @@ async function activateContest(
   });
 
   const Rbar =
-    submissions.reduce((sum, s) => sum + (userMap[s.userId]?.bElo ?? 500), 0) /
+    submissions.reduce((sum, s) => sum + (s.eloAtSubmission ?? userMap[s.userId]?.bElo ?? 500), 0) /
     P;
   const sbar =
     submissions.reduce(
@@ -161,7 +163,7 @@ async function activateContest(
     const user = userMap[sub.userId];
     if (!user) continue;
 
-    const Rp = user.bElo;
+    const Rp = sub.eloAtSubmission ?? user.bElo;
     const piHat = computeExpectedPercentile(Rp, Rc);
     const Kp = computeKFactor(Rp, Rc);
     const pi = piMap[sub.submissionId];
@@ -209,11 +211,11 @@ async function activateContest(
     currentBatch.set(notifRef, {
       recipientUid: sub.userId,
       type: "system",
-      title: "Your Rating is Live! 🎉",
-      message: `"${setTitle}" just hit 25 players. Your rating updated: ${Rp} → ${newElo} (${sign}${deltaFinal}). You earned the early-entry 2× bonus!`,
+      title: "Early entry bonus applied! 🥳",
+      message: `"${setTitle}" just hit 25 players. Your rating changed by (${sign}${deltaFinal}) elo!`,
       link: `/home/${gameId}`,
       senderUid: null,
-      senderPhotoURL: null,
+      senderPhotoURL: "https://firebasestorage.googleapis.com/v0/b/bioblitz-mitosisphere.firebasestorage.app/o/favicon.ico?alt=media&token=e2adaeaf-580e-4aac-9aae-9596c13924df",
       read: false,
       createdAt: FieldValue.serverTimestamp(),
     });
@@ -461,6 +463,9 @@ export const gradeTest = onDocumentCreated(
 
       const isEarlyEntry = !txResult.alreadyActivated;
 
+      const userSnapForElo = await userRef.get();
+      const eloAtSubmission: number = userSnapForElo.data()?.bElo ?? 500;
+
       const userHistoryData = {
         submission: snap.id,
         history: [snap.id],
@@ -480,6 +485,7 @@ export const gradeTest = onDocumentCreated(
           status: "graded",
           isFirstAttempt: true,
           earlyEntry: isEarlyEntry,
+          eloAtSubmission,
           gradedAt: FieldValue.serverTimestamp(),
         }),
         userHistoryDocRef.set(userHistoryData),

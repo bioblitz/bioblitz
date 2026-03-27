@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   query,
   Timestamp,
   where,
@@ -15,6 +16,13 @@ import {
 } from "firebase/firestore";
 import { createNotification } from "@/lib/notifications";
 import { FriendshipStatus, UserProfile } from "./types";
+
+export interface SearchUser {
+  uid: string;
+  displayName: string;
+  username: string;
+  photoURL: string;
+}
 
 interface UseFriendActionsParams {
   auth: Auth;
@@ -35,6 +43,9 @@ export function useFriendActions({
   const [incomingRequests, setIncomingRequests] = useState<UserProfile[]>([]);
   const [friendUsernameInput, setFriendUsernameInput] = useState("");
   const [loadingFriends, setLoadingFriends] = useState(true);
+  const [userSearchResults, setUserSearchResults] = useState<SearchUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [addFriendSuccess, setAddFriendSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profileUid) return;
@@ -128,6 +139,82 @@ export function useFriendActions({
     checkRelationshipStatus();
     fetchFriendsAndRequests();
   }, [auth.currentUser, db, profileUid]);
+
+  useEffect(() => {
+    const term = friendUsernameInput.trim().toLowerCase();
+    if (!term) {
+      setUserSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("username", ">=", term),
+          where("username", "<=", term + "\uf8ff"),
+          limit(6)
+        );
+        const snap = await getDocs(q);
+        const currentUid = auth.currentUser?.uid;
+        setUserSearchResults(
+          snap.docs
+            .filter((d) => d.id !== currentUid)
+            .map((d) => ({
+              uid: d.id,
+              displayName: d.data().displayName || "",
+              username: d.data().username || "",
+              photoURL: d.data().photoURL || "",
+            }))
+        );
+      } catch (err) {
+        console.error("User search failed:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [friendUsernameInput, db, auth.currentUser]);
+
+  const addFriendByUid = async (target: SearchUser) => {
+    if (!auth.currentUser) return;
+
+    try {
+      const myFriendDocRef = doc(db, "users", auth.currentUser.uid, "friends", target.uid);
+      const myFriendSnap = await getDoc(myFriendDocRef);
+
+      if (myFriendSnap.exists()) {
+        const status = (myFriendSnap.data() as any).status;
+        if (status === "friends") { setAddFriendSuccess("Already friends."); return; }
+        if (status === "sent") { setAddFriendSuccess("Request already sent."); return; }
+        if (status === "received") { setAddFriendSuccess("They already sent you a request!"); return; }
+      }
+
+      const batch = writeBatch(db);
+      batch.set(doc(db, "users", auth.currentUser.uid, "friends", target.uid), {
+        uid: target.uid,
+        status: "sent",
+        createdAt: Timestamp.now(),
+        displayName: target.displayName,
+        photoURL: target.photoURL,
+      });
+      batch.set(doc(db, "users", target.uid, "friends", auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
+        status: "received",
+        createdAt: Timestamp.now(),
+        displayName: auth.currentUser.displayName || "Unknown",
+        photoURL: auth.currentUser.photoURL || "",
+      });
+      await batch.commit();
+
+      setFriendUsernameInput("");
+      setUserSearchResults([]);
+      setAddFriendSuccess(`Request sent to @${target.username}!`);
+      setTimeout(() => setAddFriendSuccess(null), 3000);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const addFriendByUsername = async () => {
     if (!auth.currentUser || !friendUsernameInput) return;
@@ -371,6 +458,10 @@ export function useFriendActions({
     friendUsernameInput,
     setFriendUsernameInput,
     loadingFriends,
+    userSearchResults,
+    isSearching,
+    addFriendSuccess,
+    addFriendByUid,
     addFriendByUsername,
     removeFriend,
     sendFriendRequest,

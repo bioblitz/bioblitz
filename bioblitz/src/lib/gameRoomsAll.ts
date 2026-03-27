@@ -81,6 +81,8 @@ const transformDoc = async (
     creatorBanner,
     rating: data.averageRating || data.rating,
     totalPlays: data.totalPlays || 0,
+    firstAttemptCount: data.firstAttemptCount || 0,
+    ratingActivated: data.ratingActivated || false,
     bannerUrl: data.bannerUrl,
     questions: [],
     creation: data.creation?.toDate?.()?.getTime() || null,
@@ -186,6 +188,8 @@ export const allGames = async (topic?: string): Promise<gameRoom[]> => {
           data.reviewCount ??
           null,
         totalPlays: data.totalPlays || 0,
+        firstAttemptCount: data.firstAttemptCount || 0,
+        ratingActivated: data.ratingActivated || false,
         bannerUrl: data.bannerUrl,
         questions: [],
         creation: data.creation?.toDate?.()?.getTime() || null,

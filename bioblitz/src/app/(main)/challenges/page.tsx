@@ -674,7 +674,6 @@ export default function ChallengesPage() {
                   key="active"
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
                   className="space-y-5"
                 >
@@ -752,7 +751,6 @@ export default function ChallengesPage() {
                   key="history"
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
                   className="space-y-2.5"
                 >

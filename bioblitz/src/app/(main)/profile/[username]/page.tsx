@@ -25,7 +25,7 @@ import EditProfileModal from "@/components/profile/EditProfileModal";
 import ReportModal from "@/components/profile/ReportModal";
 import { EloChart } from "@/components/profile";
 import { useProfileData } from "@/hooks/profile/useProfileData";
-import { useFriendActions } from "@/hooks/profile/useFriendActions";
+import { useFriendActions, SearchUser } from "@/hooks/profile/useFriendActions";
 import { useProfileReport } from "@/hooks/profile/useProfileReport";
 import { UserProfile } from "@/hooks/profile/types";
 import { useAuth } from "@/context/AuthContext";
@@ -62,7 +62,7 @@ export default function ProfilePage() {
   const db = getFirestore(app);
   const storage = getStorage(app);
   const router = useRouter();
-  const { updateUsername, loading: authLoading } = useAuth();
+  const { updateUsername, loading: authLoading, user: authUser } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"rating" | "friends" | "sets">("rating");
   const [editing, setEditing] = useState(false);
@@ -94,7 +94,10 @@ export default function ProfilePage() {
     friendUsernameInput,
     setFriendUsernameInput,
     loadingFriends,
-    addFriendByUsername,
+    userSearchResults,
+    isSearching,
+    addFriendSuccess,
+    addFriendByUid,
     removeFriend,
     sendFriendRequest,
     acceptFriendRequest,
@@ -264,8 +267,8 @@ export default function ProfilePage() {
         >
           <ProfileHeroCard
             userProfile={userProfile}
-            isOwnProfile={auth.currentUser?.uid === profileUid}
-            isAuthenticated={!!auth.currentUser}
+            isOwnProfile={authUser?.uid === profileUid}
+            isAuthenticated={!!authUser}
             friendshipStatus={friendshipStatus}
             fileInputRef={fileInputRef}
             onFileChange={handleFileChange}
@@ -286,15 +289,15 @@ export default function ProfilePage() {
           className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl shadow-xl overflow-hidden"
         >
           {/* Tab bar */}
-          <div className="flex border-b border-zinc-800 px-6 pt-5 gap-6">
+          <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 px-3 pt-3">
             {(["rating", "friends", "sets"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === tab
-                    ? "border-violet-500 text-white"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300"
+                    ? "bg-zinc-800 text-white shadow-sm shadow-white/5"
+                    : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
                 {tab === "rating" ? "Rating Graph" : tab === "friends" ? "Friends" : "Sets Played"}
@@ -357,25 +360,55 @@ export default function ProfilePage() {
 
                 {/* Right: add friend + requests */}
                 <div className="w-1/2 flex flex-col gap-5">
-                  {auth.currentUser?.uid === profileUid && (
+                  {authUser?.uid === profileUid && (
                     <>
                       <div className="flex flex-col gap-2">
                         <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Add Friend</p>
-                        <div className="flex gap-2">
+                        <div className="relative">
                           <input
                             type="text"
-                            placeholder="Enter username…"
+                            placeholder="Search by username…"
                             value={friendUsernameInput}
                             onChange={(e) => setFriendUsernameInput(e.target.value)}
-                            className="flex-1 bg-indigo-500/10 text-white text-sm p-2.5 rounded-xl border border-indigo-500/30 focus:border-indigo-500 focus:outline-none placeholder:text-indigo-200/40 transition-colors"
+                            onKeyDown={(e) => { if (e.key === "Escape") { setFriendUsernameInput(""); } }}
+                            className="w-full bg-zinc-900 text-white text-sm p-2.5 rounded-xl border border-zinc-700 focus:border-zinc-500 focus:outline-none placeholder:text-zinc-600 transition-colors"
                           />
-                          <button
-                            onClick={addFriendByUsername}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-xl font-semibold transition-colors shrink-0"
-                          >
-                            Add
-                          </button>
+                          {isSearching && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin" />
+                          )}
+                          {friendUsernameInput.trim() && !isSearching && userSearchResults.length === 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 shadow-lg">
+                              <p className="text-zinc-500 text-xs">No users found</p>
+                            </div>
+                          )}
+                          {userSearchResults.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg">
+                              {userSearchResults.map((u: SearchUser) => (
+                                <button
+                                  key={u.uid}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => addFriendByUid(u)}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-800 transition-colors text-left"
+                                >
+                                  {u.photoURL ? (
+                                    <img src={u.photoURL} alt={u.displayName} className="w-7 h-7 rounded-full object-cover shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }} />
+                                  ) : (
+                                    <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0">
+                                      {u.displayName?.[0]?.toUpperCase()}
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium text-white truncate">{u.displayName}</p>
+                                    <p className="text-xs text-zinc-500 truncate">@{u.username}</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
+                        {addFriendSuccess && (
+                          <p className="text-xs text-zinc-400">{addFriendSuccess}</p>
+                        )}
                       </div>
 
                       {incomingRequests.length > 0 && (
@@ -414,7 +447,7 @@ export default function ProfilePage() {
                       )}
                     </>
                   )}
-                  {auth.currentUser?.uid !== profileUid && (
+                  {authUser?.uid !== profileUid && (
                     <p className="text-zinc-500 text-sm pt-4">Only visible to the profile owner.</p>
                   )}
                 </div>
