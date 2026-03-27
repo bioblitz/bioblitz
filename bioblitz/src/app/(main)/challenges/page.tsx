@@ -532,9 +532,20 @@ export default function ChallengesPage() {
 
   const loadChallenges = async (userId: string) => {
     const all = await getUserChallenges(userId);
-    setChallenges(all);
-  };
 
+    const valid = await Promise.all(
+      all.map(async (c) => {
+        try {
+          const blitzSnap = await getDoc(doc(db, "sets", c.blitzId));
+          return blitzSnap.exists() ? c : null;
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    setChallenges(valid.filter(Boolean) as Challenge[]);
+  };
   const pending = useMemo(
     () => challenges.filter((c) => c.status === "pending"),
     [challenges],
@@ -581,7 +592,9 @@ export default function ChallengesPage() {
   }
 
   return (
-    <div className={`${dmSans.className} min-h-screen bg-neutral-900 text-white`}>
+    <div
+      className={`${dmSans.className} min-h-screen bg-neutral-900 text-white`}
+    >
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02]"
         style={{
