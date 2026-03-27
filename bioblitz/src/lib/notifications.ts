@@ -8,7 +8,11 @@ import { app } from "@/lib/firebase";
 
 const db = getFirestore(app);
 
-export type NotificationType = "friend_request" | "friend_accept" | "system";
+export type NotificationType =
+  | "friend_request"
+  | "friend_accept"
+  | "challenge_completed"
+  | "system";
 
 export interface AppNotification {
   id: string;
@@ -31,7 +35,7 @@ export const createNotification = async (
   link: string,
   senderUid?: string,
   senderPhotoURL?: string,
-  senderName?: string
+  senderName?: string,
 ) => {
   try {
     await addDoc(collection(db, "notifications"), {

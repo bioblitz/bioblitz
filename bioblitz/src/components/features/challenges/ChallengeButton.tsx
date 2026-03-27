@@ -66,6 +66,8 @@ export default function ChallengeButton({
           where("status", "==", "friends"),
         ),
       );
+      const blitzSnap = await getDoc(doc(db, "sets", blitzId));
+      const blitzCreatorId = blitzSnap.data()?.creator;
       const profiles = await Promise.all(
         friendsSnap.docs.map(async (d) => {
           const friendUid = (d.data() as any).uid;
@@ -82,6 +84,7 @@ export default function ChallengeButton({
             ),
           );
           if (!submissionSnap.empty) return null;
+          if (friendUid === blitzCreatorId) return null;
 
           return {
             uid: friendUid,

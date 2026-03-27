@@ -1,6 +1,10 @@
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { onDocumentCreated, onDocumentWritten, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import {
+  onDocumentCreated,
+  onDocumentWritten,
+  onDocumentUpdated,
+} from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
@@ -11,7 +15,7 @@ function computeExpectedPercentile(Rp: number, Rc: number): number {
   const logistic = 1 / (1 + Math.pow(10, (Rc - Rp) / 400));
   // Rating-dependent downward shift so lower-rated players need a lower percentile to gain.
   // At par (500) break-even ≈ 20th percentile; at 1000 ≈ 40th; above 1500 ≈ standard 50th.
-  const shift = 0.30 * Math.exp(-0.0022 * (Rp - 500));
+  const shift = 0.3 * Math.exp(-0.0022 * (Rp - 500));
   return Math.max(0, Math.min(1, logistic - shift));
 }
 
@@ -26,7 +30,8 @@ function computeExperienceMultiplier(n: number): number {
 
 function computeInactivityMultiplier(lastContestAt: Date | null): number {
   if (!lastContestAt) return 1.0;
-  const daysSince = (Date.now() - lastContestAt.getTime()) / (1000 * 60 * 60 * 24);
+  const daysSince =
+    (Date.now() - lastContestAt.getTime()) / (1000 * 60 * 60 * 24);
   return Math.min(1.0 + 0.01 * daysSince, 2.0);
 }
 
@@ -35,7 +40,6 @@ function applyIntegerRounding(deltaRaw: number): number {
   if (deltaRaw < 0 && deltaRaw > -1) return Math.floor(deltaRaw);
   return Math.round(deltaRaw);
 }
-
 
 function computeFinalDelta(
   Rp: number,
@@ -46,13 +50,13 @@ function computeFinalDelta(
   contestsPlayed: number,
   lastContestAt: Date | null,
   isEarlyEntry: boolean,
-  isFirst: boolean
+  isFirst: boolean,
 ): number {
-  const piHatShifted = piHat * (1-Math.exp(-Rp / 1000))
+  const piHatShifted = piHat * (1 - Math.exp(-Rp / 1000));
   const deltaBase = Kp * (pi - piHatShifted);
   const deltaFloor = Math.max(0, (Rc - Rp) / 10000);
 
-  const Mexp   = computeExperienceMultiplier(contestsPlayed);
+  const Mexp = computeExperienceMultiplier(contestsPlayed);
   const Minact = computeInactivityMultiplier(lastContestAt);
   const Mearly = isEarlyEntry ? 2.0 : 1.0;
 
@@ -63,7 +67,6 @@ function computeFinalDelta(
   return applyIntegerRounding(deltaRaw);
 }
 
-
 interface ParticipantEntry {
   submissionId: string;
   userId: string;
@@ -73,11 +76,10 @@ interface ParticipantEntry {
   eloAtSubmission?: number;
 }
 
-
 async function activateContest(
   gameId: string,
   setTitle: string,
-  currentSub: ParticipantEntry
+  currentSub: ParticipantEntry,
 ): Promise<void> {
   const submissionsSnap = await db
     .collection("gameSubmissions")
@@ -104,7 +106,7 @@ async function activateContest(
 
   const userIds = [...new Set(submissions.map((s) => s.userId))];
   const userDocs = await Promise.all(
-    userIds.map((uid) => db.collection("users").doc(uid).get())
+    userIds.map((uid) => db.collection("users").doc(uid).get()),
   );
 
   const userMap: Record<
@@ -123,12 +125,14 @@ async function activateContest(
   });
 
   const Rbar =
-    submissions.reduce((sum, s) => sum + (s.eloAtSubmission ?? userMap[s.userId]?.bElo ?? 500), 0) /
-    P;
+    submissions.reduce(
+      (sum, s) => sum + (s.eloAtSubmission ?? userMap[s.userId]?.bElo ?? 500),
+      0,
+    ) / P;
   const sbar =
     submissions.reduce(
       (sum, s) => sum + s.correctCount / Math.max(s.totalQuestions, 1),
-      0
+      0,
     ) / P;
   const delta = Math.max(0.01, Math.min(1.0, sbar));
   const Rc = Rbar * delta;
@@ -146,7 +150,7 @@ async function activateContest(
     piMap[s.submissionId] = P > 1 ? beaten / (P - 1) : 1.0;
   });
 
-  const BATCH_SIZE = 499; 
+  const BATCH_SIZE = 499;
   let currentBatch = db.batch();
   let ops = 0;
   const batches: FirebaseFirestore.WriteBatch[] = [];
@@ -178,7 +182,7 @@ async function activateContest(
       user.contestsPlayed,
       user.lastContestAt,
       true,
-      isFirst
+      isFirst,
     );
     const newElo = Rp + deltaFinal;
 
@@ -201,7 +205,9 @@ async function activateContest(
     ops++;
     flush();
 
-    const submissionRef = db.collection("gameSubmissions").doc(sub.submissionId);
+    const submissionRef = db
+      .collection("gameSubmissions")
+      .doc(sub.submissionId);
     currentBatch.update(submissionRef, { ratingDelta: deltaFinal, newElo });
     ops++;
     flush();
@@ -215,7 +221,8 @@ async function activateContest(
       message: `"${setTitle}" just hit 25 players. Your rating changed by (${sign}${deltaFinal}) elo!`,
       link: `/home/${gameId}`,
       senderUid: null,
-      senderPhotoURL: "https://firebasestorage.googleapis.com/v0/b/bioblitz-mitosisphere.firebasestorage.app/o/favicon.ico?alt=media&token=e2adaeaf-580e-4aac-9aae-9596c13924df",
+      senderPhotoURL:
+        "https://firebasestorage.googleapis.com/v0/b/bioblitz-mitosisphere.firebasestorage.app/o/favicon.ico?alt=media&token=e2adaeaf-580e-4aac-9aae-9596c13924df",
       read: false,
       createdAt: FieldValue.serverTimestamp(),
     });
@@ -231,16 +238,15 @@ async function activateContest(
   await Promise.all(batches.map((b) => b.commit()));
 
   console.log(
-    `Contest ${gameId} activated: Rc=${Rc.toFixed(1)}, δ=${delta.toFixed(3)}, ${submissions.length} participants rated.`
+    `Contest ${gameId} activated: Rc=${Rc.toFixed(1)}, δ=${delta.toFixed(3)}, ${submissions.length} participants rated.`,
   );
 }
-
 
 async function rateParticipant(
   userId: string,
   submissionId: string,
   gameId: string,
-  score: number
+  score: number,
 ): Promise<void> {
   const submissionsSnap = await db
     .collection("gameSubmissions")
@@ -267,15 +273,17 @@ async function rateParticipant(
   if (typeof Rc !== "number") {
     const userIds = [...new Set(submissions.map((s) => s.userId))];
     const userDocs = await Promise.all(
-      userIds.map((uid) => db.collection("users").doc(uid).get())
+      userIds.map((uid) => db.collection("users").doc(uid).get()),
     );
     const ratingSum = userDocs.reduce(
       (sum, d) => sum + (d.exists ? (d.data()!.bElo ?? 500) : 500),
-      0
+      0,
     );
     const Rbar = ratingSum / userIds.length;
     Rc = Rbar * 0.5;
-    console.warn(`contestRating missing for ${gameId}, using fallback Rc=${Rc.toFixed(1)}`);
+    console.warn(
+      `contestRating missing for ${gameId}, using fallback Rc=${Rc.toFixed(1)}`,
+    );
   }
 
   const sorted = [...submissions].sort((a, b) => b.score - a.score);
@@ -302,7 +310,7 @@ async function rateParticipant(
     n,
     lastContestAt,
     false,
-    isFirst
+    isFirst,
   );
   const newElo = Rp + deltaFinal;
 
@@ -327,10 +335,9 @@ async function rateParticipant(
 
   const sign = deltaFinal >= 0 ? "+" : "";
   console.log(
-    `Rated ${userId} in contest ${gameId}: rank ${myRank}/${P}, Rp=${Rp} → ${newElo} (${sign}${deltaFinal})`
+    `Rated ${userId} in contest ${gameId}: rank ${myRank}/${P}, Rp=${Rp} → ${newElo} (${sign}${deltaFinal})`,
   );
 }
-
 
 export const gradeTest = onDocumentCreated(
   "gameSubmissions/{submissionId}",
@@ -396,7 +403,9 @@ export const gradeTest = onDocumentCreated(
       let correctCount = 0;
       const questionResults: boolean[] = [];
       for (let i = 0; i < totalQuestions; i++) {
-        const isCorrect = !!(userAnswers[i] && userAnswers[i] === correctAnswersMap[i]);
+        const isCorrect = !!(
+          userAnswers[i] && userAnswers[i] === correctAnswersMap[i]
+        );
         questionResults.push(isCorrect);
         if (isCorrect) correctCount++;
       }
@@ -405,7 +414,8 @@ export const gradeTest = onDocumentCreated(
       const safeTimeTotal =
         typeof timeTotal === "number" && timeTotal > 0 ? timeTotal : 60;
       const timeLeft = Math.max(0, safeTimeTotal - timeTaken);
-      const timeBonus = (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
+      const timeBonus =
+        (1 / totalQuestions) * 1000 * (timeLeft / safeTimeTotal);
       const finalScore = Math.floor(accuracyScore + timeBonus);
 
       // ── Check replay ──────────────────────────────────────────────────────
@@ -420,7 +430,9 @@ export const gradeTest = onDocumentCreated(
       });
 
       if (existingHistory.exists) {
-        console.log(`User ${userId} has played set ${gameId} before. Marking as Replay.`);
+        console.log(
+          `User ${userId} has played set ${gameId} before. Marking as Replay.`,
+        );
         await Promise.all([
           snap.ref.update({
             status: "graded_replay",
@@ -477,6 +489,10 @@ export const gradeTest = onDocumentCreated(
         lastPlayedAt: FieldValue.serverTimestamp(),
       };
 
+      const blitzCreatorId = gameDoc.data()?.creator;
+      const isOwner = blitzCreatorId === userId;
+      const rankedValue = submissionData.ranked === true && !isOwner;
+
       await Promise.all([
         snap.ref.update({
           score: finalScore,
@@ -486,6 +502,7 @@ export const gradeTest = onDocumentCreated(
           correctAnswers: correctAnswersMap,
           status: "graded",
           isFirstAttempt: true,
+          ranked: rankedValue,
           earlyEntry: isEarlyEntry,
           eloAtSubmission,
           gradedAt: FieldValue.serverTimestamp(),
@@ -494,44 +511,58 @@ export const gradeTest = onDocumentCreated(
         userRef.update({ playedGameIds: FieldValue.arrayUnion(gameId) }),
         gameSetUpdate,
       ]);
-
       if (txResult.justActivated) {
-        await activateContest(gameId, gameTitle, {
-          submissionId: snap.id,
-          userId,
-          score: finalScore,
-          correctCount,
-          totalQuestions,
-        });
+        if (!isOwner) {
+          await activateContest(gameId, gameTitle, {
+            submissionId: snap.id,
+            userId,
+            score: finalScore,
+            correctCount,
+            totalQuestions,
+          });
+        } else {
+          console.log(
+            `Owner ${userId} triggered activation for ${gameId} but was excluded from rating.`,
+          );
+        }
       } else if (txResult.alreadyActivated) {
-        await rateParticipant(userId, snap.id, gameId, finalScore);
+        if (!isOwner) {
+          await rateParticipant(userId, snap.id, gameId, finalScore);
+        } else {
+          console.log(
+            `Owner ${userId} played their own contest ${gameId} — no Elo applied.`,
+          );
+        }
       } else {
         console.log(
-          `Contest ${gameId}: pre-activation (earlyEntry). No rating change for ${userId}.`
+          `Contest ${gameId}: pre-activation (earlyEntry). No rating change for ${userId}.`,
         );
       }
-
       return;
     } catch (error) {
       console.error(`Error grading ${snap.id}:`, error);
       return snap.ref.update({
         status: "error_unexpected",
-        errorMessage:
-          error instanceof Error ? error.message : "Unknown error",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
-
 
 export const getPublicQuestions = onCall(async (request) => {
   if (!request.auth) {
-    throw new HttpsError("unauthenticated", "You must be logged in to start a game.");
+    throw new HttpsError(
+      "unauthenticated",
+      "You must be logged in to start a game.",
+    );
   }
 
   const gameId = request.data.gameId;
   if (!gameId || typeof gameId !== "string") {
-    throw new HttpsError("invalid-argument", "A valid 'gameId' must be provided.");
+    throw new HttpsError(
+      "invalid-argument",
+      "A valid 'gameId' must be provided.",
+    );
   }
 
   try {
@@ -571,7 +602,10 @@ export const getPublicQuestions = onCall(async (request) => {
       }
     }
 
-    const questionsColRef = db.collection("sets").doc(gameId).collection("questions");
+    const questionsColRef = db
+      .collection("sets")
+      .doc(gameId)
+      .collection("questions");
     const questionsSnap = await questionsColRef.get();
 
     if (questionsSnap.empty) {
@@ -586,7 +620,10 @@ export const getPublicQuestions = onCall(async (request) => {
     return { questions: publicQuestions };
   } catch (error) {
     console.error("Error fetching public questions:", error);
-    throw new HttpsError("internal", "An error occurred while fetching the game.");
+    throw new HttpsError(
+      "internal",
+      "An error occurred while fetching the game.",
+    );
   }
 });
 
@@ -648,7 +685,7 @@ export const aggregateGameRating = onDocumentWritten(
             averageRating: roundedAverage,
             lastRatingUpdate: FieldValue.serverTimestamp(),
           },
-          { merge: true }
+          { merge: true },
         );
       });
 
@@ -656,7 +693,7 @@ export const aggregateGameRating = onDocumentWritten(
     } catch (error) {
       console.error("Failed to aggregate rating:", error);
     }
-  }
+  },
 );
 
 export const onUserProfileUpdate = onDocumentUpdated(
@@ -707,9 +744,9 @@ export const onUserProfileUpdate = onDocumentUpdated(
     await Promise.all(batches);
 
     console.log(
-      `Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`
+      `Successfully updated ${snapshot.size} submissions for user ${event.params.userId} across ${batches.length} batches.`,
     );
-  }
+  },
 );
 
 export const resetStreaksDaily = onSchedule(
@@ -731,7 +768,7 @@ export const resetStreaksDaily = onSchedule(
       .where(
         "lastStreakDate",
         "<",
-        admin.firestore.Timestamp.fromDate(cutoffDate)
+        admin.firestore.Timestamp.fromDate(cutoffDate),
       )
       .get();
 
@@ -762,7 +799,7 @@ export const resetStreaksDaily = onSchedule(
 
     await Promise.all(batches);
     console.log(`Successfully reset streaks for ${usersSnapshot.size} users.`);
-  }
+  },
 );
 
 export const decayTrendingScores = onSchedule(
@@ -810,7 +847,7 @@ export const decayTrendingScores = onSchedule(
 
     await Promise.all(batches);
     console.log("Trending scores updated successfully.");
-  }
+  },
 );
 
 // ── POTD auto-publish ─────────────────────────────────────────────────────────
@@ -879,5 +916,5 @@ export const publishScheduledPotd = onSchedule(
 
     await batch.commit();
     console.log(`Published ${queueSnap.size} POTD item(s) for ${todayPst}.`);
-  }
+  },
 );
