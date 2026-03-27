@@ -13,7 +13,16 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
 import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
 import { EditableQuestion, IQuestionForDisplay } from "@/types";
-import { Plus, Trash2, Eye, EyeOff, Check, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
@@ -71,7 +80,13 @@ const initialState = {
   message: "",
 };
 
-function SubmitButton({ isPublished, publishing }: { isPublished: boolean; publishing: boolean }) {
+function SubmitButton({
+  isPublished,
+  publishing,
+}: {
+  isPublished: boolean;
+  publishing: boolean;
+}) {
   return (
     <button
       type="submit"
@@ -236,7 +251,8 @@ export default function EditContestPage() {
       navigateToNewRef.current = false;
       setCurrentEditorIndex(questions.length - 1);
       if (carouselRef.current) {
-        const top = carouselRef.current.getBoundingClientRect().top + window.scrollY - 96;
+        const top =
+          carouselRef.current.getBoundingClientRect().top + window.scrollY - 96;
         window.scrollTo({ top, behavior: "smooth" });
       }
     }
@@ -263,6 +279,10 @@ export default function EditContestPage() {
     setQuestions(newQuestions);
   };
 
+  function cleanHtml(html: string): string {
+    return html.replace(/&nbsp;/g, " ");
+  }
+
   const convertToQuestions = (editableQuestions: EditableQuestion[]) => {
     const choiceKeys = ["a", "b", "c", "d", "e"] as const;
     return editableQuestions.map((eq) => {
@@ -272,7 +292,7 @@ export default function EditContestPage() {
       const correctLetter = correctIndex >= 0 ? choiceKeys[correctIndex] : "";
       const q: Record<string, string> = {
         id: eq.id,
-        content: eq.content,
+        content: cleanHtml(eq.content),
         correct: correctLetter,
         imgURL: eq.imageUrl || "",
         solution: eq.solution || "",
@@ -599,8 +619,7 @@ export default function EditContestPage() {
           questions: convertToQuestions(questions),
           bannerUrl,
         });
-      } catch (e) {
-      }
+      } catch (e) {}
 
       startTransition(() => {
         formAction(formData);
@@ -684,137 +703,145 @@ export default function EditContestPage() {
                     className={`w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-all ${detailsOpen ? "" : "-rotate-90"}`}
                   />
                 </button>
-                {detailsOpen && <div className="relative">
-                  {fetchingContest && (
-                    <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[120px] z-10">
-                      <div className="w-7 h-7 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-                      <span className="text-neutral-400 text-sm font-medium">Loading...</span>
-                    </div>
-                  )}
-                <div className={`bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4${fetchingContest ? " invisible pointer-events-none" : ""}`}>
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      Description
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="e.g. First 10 questions from the 2013 USABO Opens"
-                      className={`${inputClass} resize-none`}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                        Time Limit (seconds)
-                      </label>
-                      <input
-                        type="number"
-                        value={timeLimit}
-                        onChange={(e) => setTimeLimit(Number(e.target.value))}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                        Topic
-                      </label>
-                      <select
-                        value={selectedTopic}
-                        onChange={(e) => setSelectedTopic(e.target.value)}
-                        className={inputClass}
-                      >
-                        {TOPICS.map((topic) => (
-                          <option key={topic} value={topic}>
-                            {topic}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  {selectedTopic === "Other" && (
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                        Custom Topic
-                      </label>
-                      <input
-                        type="text"
-                        value={customTopic}
-                        onChange={(e) => setCustomTopic(e.target.value)}
-                        className={inputClass}
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      Banner Image
-                    </label>
-                    <div className="flex items-center gap-3">
-                      {bannerUrl ? (
-                        <img
-                          src={bannerUrl}
-                          alt="Banner"
-                          className="h-14 w-28 rounded-lg object-cover border border-zinc-700"
+                {detailsOpen && (
+                  <div className="relative">
+                    {fetchingContest && (
+                      <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[120px] z-10">
+                        <div className="w-7 h-7 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+                        <span className="text-neutral-400 text-sm font-medium">
+                          Loading...
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4${fetchingContest ? " invisible pointer-events-none" : ""}`}
+                    >
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          Title
+                        </label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          className={inputClass}
                         />
-                      ) : (
-                        <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">
-                          No banner
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="e.g. First 10 questions from the 2013 USABO Opens"
+                          className={`${inputClass} resize-none`}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                            Time Limit (seconds)
+                          </label>
+                          <input
+                            type="number"
+                            value={timeLimit}
+                            onChange={(e) =>
+                              setTimeLimit(Number(e.target.value))
+                            }
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                            Topic
+                          </label>
+                          <select
+                            value={selectedTopic}
+                            onChange={(e) => setSelectedTopic(e.target.value)}
+                            className={inputClass}
+                          >
+                            {TOPICS.map((topic) => (
+                              <option key={topic} value={topic}>
+                                {topic}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {selectedTopic === "Other" && (
+                        <div>
+                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                            Custom Topic
+                          </label>
+                          <input
+                            type="text"
+                            value={customTopic}
+                            onChange={(e) => setCustomTopic(e.target.value)}
+                            className={inputClass}
+                          />
                         </div>
                       )}
-                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
-                        {uploadingBanner ? "Uploading..." : "Upload"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleBannerUpload}
-                          className="sr-only"
-                          disabled={uploadingBanner}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setIsAiGenerated((v) => !v)}
-                        className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                          isAiGenerated
-                            ? "border-neutral-600/60 bg-neutral-900/20 text-neutral-300"
-                            : "border-zinc-700 bg-zinc-800 text-zinc-500"
-                        }`}
-                      >
-                        {isAiGenerated ? (
-                          <span>AI</span>
-                        ) : (
-                          <span className="relative">
-                            AI
-                            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                              <span className="block w-full h-px bg-zinc-500 rotate-[-20deg]" />
-                            </span>
-                          </span>
-                        )}
-                      </button>
-                      <div className="relative group">
-                        <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">
-                          ?
-                        </div>
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
-                          Toggle if any part of your blitz is AI-generated
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          Banner Image
+                        </label>
+                        <div className="flex items-center gap-3">
+                          {bannerUrl ? (
+                            <img
+                              src={bannerUrl}
+                              alt="Banner"
+                              className="h-14 w-28 rounded-lg object-cover border border-zinc-700"
+                            />
+                          ) : (
+                            <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">
+                              No banner
+                            </div>
+                          )}
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
+                            {uploadingBanner ? "Uploading..." : "Upload"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleBannerUpload}
+                              className="sr-only"
+                              disabled={uploadingBanner}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setIsAiGenerated((v) => !v)}
+                            className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                              isAiGenerated
+                                ? "border-neutral-600/60 bg-neutral-900/20 text-neutral-300"
+                                : "border-zinc-700 bg-zinc-800 text-zinc-500"
+                            }`}
+                          >
+                            {isAiGenerated ? (
+                              <span>AI</span>
+                            ) : (
+                              <span className="relative">
+                                AI
+                                <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <span className="block w-full h-px bg-zinc-500 rotate-[-20deg]" />
+                                </span>
+                              </span>
+                            )}
+                          </button>
+                          <div className="relative group">
+                            <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">
+                              ?
+                            </div>
+                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
+                              Toggle if any part of your blitz is AI-generated
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                </div>}
+                )}
               </section>
 
               <section ref={carouselRef}>
@@ -864,7 +891,9 @@ export default function EditContestPage() {
                   {/* Current question editor */}
                   <div className="relative">
                     {questions[currentEditorIndex] && (
-                      <div className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}>
+                      <div
+                        className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}
+                      >
                         <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
                           <span className="text-sm font-semibold text-zinc-300">
                             Question {currentEditorIndex + 1}
@@ -905,7 +934,9 @@ export default function EditContestPage() {
                     {fetchingContest && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[200px]">
                         <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-                        <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+                        <span className="text-neutral-400 text-sm font-medium">
+                          Loading...
+                        </span>
                       </div>
                     )}
                   </div>
@@ -932,7 +963,10 @@ export default function EditContestPage() {
                     <Check className="w-3.5 h-3.5" />
                     Saved
                   </span>
-                  <SubmitButton isPublished={isPublished} publishing={publishing} />
+                  <SubmitButton
+                    isPublished={isPublished}
+                    publishing={publishing}
+                  />
                 </div>
               </div>
             </div>
