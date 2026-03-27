@@ -84,7 +84,9 @@ export default function GameDetailPage() {
   const gameId = params?.gameId as string;
 
   const [user, setUser] = useState<User | null>(null);
-  const [inspectEntry, setInspectEntry] = useState<LeaderboardEntry | null>(null);
+  const [inspectEntry, setInspectEntry] = useState<LeaderboardEntry | null>(
+    null,
+  );
   const [erasing, setErasing] = useState(false);
   const [eloPenalty, setEloPenalty] = useState(100);
   const [eraseAttempt, setEraseAttempt] = useState(true);
@@ -104,12 +106,18 @@ export default function GameDetailPage() {
   const [isStaff, setIsStaff] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
   const menuRef = useRef<HTMLDivElement>(null);
-  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [activeSession, setActiveSession] = useState<{
     timeLeft: number;
   } | null>(null);
+
+  const isOwner =
+    authResolved && user && game ? game.creator === user.uid : false;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -304,8 +312,14 @@ export default function GameDetailPage() {
         );
 
         setLeaderboard(
-          (leaderboardData.filter((entry) => entry !== null) as LeaderboardEntry[])
-            .sort((a, b) => (b.correctCount - a.correctCount) || (a.timeTaken - b.timeTaken)),
+          (
+            leaderboardData.filter(
+              (entry) => entry !== null,
+            ) as LeaderboardEntry[]
+          ).sort(
+            (a, b) =>
+              b.correctCount - a.correctCount || a.timeTaken - b.timeTaken,
+          ),
         );
       } catch (err) {
         console.error("Error loading leaderboard:", err);
@@ -332,7 +346,7 @@ export default function GameDetailPage() {
 
   const proceedToGame = () => {
     setShowStartConfirmation(false);
-    router.push(`/home/${gameId}/room?ranked=${isFirstAttempt}`);
+    router.push(`/home/${gameId}/room?ranked=${isFirstAttempt && !isOwner}`);
   };
 
   const handleDeleteContest = async () => {
@@ -409,7 +423,10 @@ export default function GameDetailPage() {
       const idToken = await user.getIdToken();
       const res = await fetch("/api/admin/submission/erase", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           submissionId: entry.submissionId,
           userId: entry.userId,
@@ -423,7 +440,9 @@ export default function GameDetailPage() {
         return;
       }
       if (eraseAttempt) {
-        setLeaderboard((prev) => prev.filter((e) => e.submissionId !== entry.submissionId));
+        setLeaderboard((prev) =>
+          prev.filter((e) => e.submissionId !== entry.submissionId),
+        );
       }
       setInspectEntry(null);
     } catch {
@@ -575,9 +594,12 @@ export default function GameDetailPage() {
 
               <div className="flex items-center gap-6 mt-3 text-md text-neutral-400">
                 <div className="flex items-center gap-2">
-                 <span>Hosted by: {" "}</span>
+                  <span>Hosted by: </span>
                   {game.creatorUsername ? (
-                    <Link href={`/profile/${game.creatorUsername}`} className="flex items-center gap-2 text-zinc-200 hover:underline transition-colors">
+                    <Link
+                      href={`/profile/${game.creatorUsername}`}
+                      className="flex items-center gap-2 text-zinc-200 hover:underline transition-colors"
+                    >
                       {game.creatorPfp ? (
                         <img
                           src={game.creatorPfp}
@@ -591,7 +613,6 @@ export default function GameDetailPage() {
                         </div>
                       )}
                       <span>{game.creatorUsername}</span>
-
                     </Link>
                   ) : (
                     <span className="text-zinc-200">Unknown</span>
@@ -666,7 +687,7 @@ export default function GameDetailPage() {
                       ? "bg-zinc-500 cursor-wait opacity-70"
                       : activeSession !== null
                         ? "bg-zinc-500 opacity-50 cursor-not-allowed"
-                        : isFirstAttempt
+                        : isFirstAttempt && !isOwner
                           ? "border-neutral-100 border hover:bg-neutral-800"
                           : "bg-white text-black hover:bg-zinc-200"
                   }`}
@@ -678,6 +699,15 @@ export default function GameDetailPage() {
                       </span>
                     ) : !user ? (
                       <span className="text-lg font-bold">Sign in to Play</span>
+                    ) : isOwner ? (
+                      <div className="flex flex-col items-start">
+                        <span className="text-lg font-bold leading-none text-black">
+                          Your Blitz
+                        </span>
+                        <span className="text-xs font-medium opacity-60 text-black">
+                          Playing won't affect your Elo
+                        </span>
+                      </div>
                     ) : activeSession ? (
                       <span className="text-zinc-500 font-bold">
                         Finish your current attempt first
@@ -703,7 +733,7 @@ export default function GameDetailPage() {
                     )}
                   </div>
                 </button>
-                {user && isFirstAttempt && (
+                {user && isFirstAttempt && !isOwner && (
                   <ChallengeButton
                     blitzId={gameId}
                     blitzTitle={game.title}
@@ -923,7 +953,9 @@ export default function GameDetailPage() {
                         onClick={() =>
                           setExpandedEntries((prev) => {
                             const next = new Set(prev);
-                            next.has(entry.submissionId) ? next.delete(entry.submissionId) : next.add(entry.submissionId);
+                            next.has(entry.submissionId)
+                              ? next.delete(entry.submissionId)
+                              : next.add(entry.submissionId);
                             return next;
                           })
                         }
@@ -938,7 +970,11 @@ export default function GameDetailPage() {
                       </button>
                       {isAdmin && (
                         <button
-                          onClick={() => { setInspectEntry(entry); setEloPenalty(100); setEraseAttempt(true); }}
+                          onClick={() => {
+                            setInspectEntry(entry);
+                            setEloPenalty(100);
+                            setEraseAttempt(true);
+                          }}
                           className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                           title="Inspect attempt"
                         >
@@ -965,12 +1001,18 @@ export default function GameDetailPage() {
                                 {qi + 1}
                               </div>
                               <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-zinc-900 border border-zinc-700 text-zinc-100 text-[9px] font-mono px-1.5 py-0.5 rounded pointer-events-none z-10">
-                                {entry.questionTimings?.[qi] != null ? formatQuestionTime(entry.questionTimings[qi]) : "N/A"}
+                                {entry.questionTimings?.[qi] != null
+                                  ? formatQuestionTime(
+                                      entry.questionTimings[qi],
+                                    )
+                                  : "N/A"}
                               </div>
                             </div>
                           ))
                         ) : (
-                          <span className="text-zinc-500 text-[11px]">no breakdown data</span>
+                          <span className="text-zinc-500 text-[11px]">
+                            no breakdown data
+                          </span>
                         )}
                       </div>
 
@@ -983,14 +1025,20 @@ export default function GameDetailPage() {
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5 text-[10px] font-mono">
                             <span className="text-zinc-100">tab switches</span>
-                            <span className={`font-semibold ${entry.tabSwitchCount == null ? "text-zinc-500" : entry.tabSwitchCount > 3 ? "text-amber-400" : "text-zinc-100"}`}>
-                              {entry.tabSwitchCount == null ? "N/A" : entry.tabSwitchCount}
+                            <span
+                              className={`font-semibold ${entry.tabSwitchCount == null ? "text-zinc-500" : entry.tabSwitchCount > 3 ? "text-amber-400" : "text-zinc-100"}`}
+                            >
+                              {entry.tabSwitchCount == null
+                                ? "N/A"
+                                : entry.tabSwitchCount}
                             </span>
                           </div>
                           <div className="w-px h-3 bg-zinc-700" />
                           <div className="flex items-center gap-1.5 text-[10px] font-mono">
                             <span className="text-zinc-100">time off tab</span>
-                            <span className={`font-semibold ${entry.timeOffTab == null ? "text-zinc-500" : entry.timeOffTab > 10 ? "text-amber-400" : "text-zinc-100"}`}>
+                            <span
+                              className={`font-semibold ${entry.timeOffTab == null ? "text-zinc-500" : entry.timeOffTab > 10 ? "text-amber-400" : "text-zinc-100"}`}
+                            >
                               {entry.timeOffTab == null
                                 ? "N/A"
                                 : entry.timeOffTab >= 60
@@ -1017,19 +1065,26 @@ export default function GameDetailPage() {
               <h2 className="text-lg font-bold text-white">Inspect Attempt</h2>
             </div>
             <p className="text-sm text-zinc-400 mb-4">
-              <span className="text-zinc-200 font-semibold">{inspectEntry.username}</span>
-              {" "}— {inspectEntry.correctCount}/{inspectEntry.totalQuestions} in {formatTimePlayed(inspectEntry.timeTaken)}
+              <span className="text-zinc-200 font-semibold">
+                {inspectEntry.username}
+              </span>{" "}
+              — {inspectEntry.correctCount}/{inspectEntry.totalQuestions} in{" "}
+              {formatTimePlayed(inspectEntry.timeTaken)}
             </p>
             <div className="space-y-3 mb-5">
               <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-3">
                 <span className="text-sm text-zinc-400">Tab switches</span>
-                <span className={`font-mono font-bold text-sm ${(inspectEntry.tabSwitchCount ?? 0) > 2 ? "text-red-400" : "text-zinc-200"}`}>
+                <span
+                  className={`font-mono font-bold text-sm ${(inspectEntry.tabSwitchCount ?? 0) > 2 ? "text-red-400" : "text-zinc-200"}`}
+                >
                   {inspectEntry.tabSwitchCount ?? 0}
                 </span>
               </div>
               <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-3">
                 <span className="text-sm text-zinc-400">Time off tab</span>
-                <span className={`font-mono font-bold text-sm ${(inspectEntry.timeOffTab ?? 0) > 10 ? "text-red-400" : "text-zinc-200"}`}>
+                <span
+                  className={`font-mono font-bold text-sm ${(inspectEntry.timeOffTab ?? 0) > 10 ? "text-red-400" : "text-zinc-200"}`}
+                >
                   {inspectEntry.timeOffTab ?? 0}s
                 </span>
               </div>
@@ -1042,7 +1097,9 @@ export default function GameDetailPage() {
                   type="number"
                   min={0}
                   value={eloPenalty}
-                  onChange={(e) => setEloPenalty(Math.max(0, parseInt(e.target.value) || 0))}
+                  onChange={(e) =>
+                    setEloPenalty(Math.max(0, parseInt(e.target.value) || 0))
+                  }
                   className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white text-right font-mono focus:outline-none focus:border-zinc-500"
                 />
               </div>
@@ -1127,7 +1184,6 @@ export default function GameDetailPage() {
           </motion.div>
         </div>
       )}
-
     </div>
   );
 }
