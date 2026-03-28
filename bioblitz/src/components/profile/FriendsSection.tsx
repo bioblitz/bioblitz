@@ -52,7 +52,7 @@ export default function FriendsSection({
                       href={`/profile/${req.username}`}
                       className="text-white hover:text-neutral-400 transition-colors"
                     >
-                      {req.displayName}
+                      {req.username || req.displayName}
                     </Link>
                   </div>
                 ))}
@@ -95,9 +95,8 @@ export default function FriendsSection({
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-medium truncate">
-                      {friend.displayName}
+                      {friend.username || friend.displayName}
                     </p>
-                    <p className="text-xs text-zinc-500">@{friend.username}</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-neutral-400 transition-colors" />
                 </Link>

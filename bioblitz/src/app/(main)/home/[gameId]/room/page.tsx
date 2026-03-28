@@ -511,7 +511,7 @@ export default function GameRoomPage() {
           if (snap.exists()) {
             const d = snap.data();
             newMap[snap.id] = {
-              name: d.displayName || "Unknown",
+              name: d.username || "Unknown",
               handle: d.username || "",
               bElo: d.bElo || 500,
             };
@@ -980,8 +980,6 @@ export default function GameRoomPage() {
                         entry.username ||
                         usersMap[entry.userId]?.name ||
                         "Unknown";
-                      const handle =
-                        entry.handle || usersMap[entry.userId]?.handle;
                       const bElo =
                         entry.bElo || usersMap[entry.userId]?.bElo || 500;
                       return (
@@ -1006,16 +1004,16 @@ export default function GameRoomPage() {
                             className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900"
                           />
                           <div className="truncate flex-1 text-left text-[13px] font-bold">
-                            {handle ? (
+                            {displayName ? (
                               <Link
-                                href={`/profile/${handle}`}
+                                href={`/profile/${displayName}`}
                                 className={`hover:underline transition-colors ${getRatingTier(bElo).textClass}`}
                               >
                                 {displayName}
                               </Link>
                             ) : (
                               <span className={getRatingTier(bElo).textClass}>
-                                {displayName}
+                                Unknown
                               </span>
                             )}
                           </div>

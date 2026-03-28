@@ -67,11 +67,8 @@ export default function ProfileHeader({
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-white mb-1">
-                  {userProfile.displayName}
+                  {userProfile.username || userProfile.displayName}
                 </h1>
-                <p className="text-neutral-400 text-lg">
-                  @{userProfile.username}
-                </p>
               </div>
               <div className="flex gap-2">
                 {isOwnProfile && (

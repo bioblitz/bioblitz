@@ -146,10 +146,7 @@ export default function SubscribersModal({
                   {/* Name Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-zinc-200 font-medium truncate group-hover:text-white transition-colors text-sm">
-                      {sub.displayName || sub.username || "Unknown User"}
-                    </p>
-                    <p className="text-xs text-zinc-500 truncate group-hover:text-zinc-400">
-                      @{sub.username || "user"}
+                      {sub.username || "Unknown"}
                     </p>
                   </div>
 

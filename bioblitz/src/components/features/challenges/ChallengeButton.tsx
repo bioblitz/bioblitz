@@ -234,10 +234,10 @@ export default function ChallengeButton({
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-medium truncate">
-                          {friend.displayName}
+                          {friend.username || friend.displayName}
                         </p>
                         <p className="text-zinc-500 text-xs">
-                          @{friend.username} · {friend.bElo} Elo
+                          {friend.bElo} Elo
                         </p>
                       </div>
                       <button

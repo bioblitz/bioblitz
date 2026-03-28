@@ -77,7 +77,7 @@ export default function ProfileFriendsPanel({
                     {friend.displayName?.[0]}
                   </div>
                 )}
-                <span className="text-sm text-white">{friend.displayName}</span>
+                <span className="text-sm text-white">{friend.username || friend.displayName}</span>
               </Link>
             ))}
           </div>
@@ -119,7 +119,7 @@ export default function ProfileFriendsPanel({
                         {request.displayName?.[0]}
                       </div>
                     )}
-                    <span className="text-sm text-white">{request.displayName}</span>
+                    <span className="text-sm text-white">{request.username || request.displayName}</span>
                   </div>
                   <div className="flex gap-2">
                     <button

@@ -149,7 +149,7 @@ export default function LeaderboardClient({
                               <span className={`cursor-pointer hover:underline ${getRatingTier(user.bElo).textClass}`}>{user.username}</span>
                           </Link>
                         ) : (
-                          <span className={getRatingTier(user.bElo).textClass}>{user.displayName}</span>
+                          <span className={getRatingTier(user.bElo).textClass}>Unknown</span>
                         )}
                         </h3>
                         {user.school && <p className="text-xs text-zinc-500 truncate">{user.school}</p>}

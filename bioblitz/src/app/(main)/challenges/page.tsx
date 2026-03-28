@@ -117,7 +117,7 @@ function FriendRanking({
 
               <div className="truncate flex-1 text-left text-[13px] font-bold">
                 <span className={getRatingTier(friend.bElo).textClass}>
-                  {isMe ? "You" : friend.displayName}
+                  {isMe ? "You" : (friend.username || friend.displayName)}
                 </span>
               </div>
 

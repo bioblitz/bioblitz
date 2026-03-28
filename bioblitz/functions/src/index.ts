@@ -497,7 +497,7 @@ export const gradeTest = onDocumentCreated(
       const isOwner = blitzCreatorId === userId;
       const rankedValue = submissionData.ranked === true && !isOwner;
 
-      await Promise.all([
+      const ops: Promise<any>[] = [
         snap.ref.update({
           score: finalScore,
           correctCount,
@@ -511,10 +511,13 @@ export const gradeTest = onDocumentCreated(
           eloAtSubmission,
           gradedAt: FieldValue.serverTimestamp(),
         }),
-        userHistoryDocRef.set(userHistoryData),
         userRef.update({ playedGameIds: FieldValue.arrayUnion(gameId) }),
         gameSetUpdate,
-      ]);
+      ];
+      if (rankedValue) {
+        ops.push(userHistoryDocRef.set(userHistoryData));
+      }
+      await Promise.all(ops);
       if (txResult.justActivated) {
         if (!isOwner) {
           await activateContest(gameId, gameTitle, {
@@ -708,6 +711,45 @@ export const onUserProfileUpdate = onDocumentUpdated(
 
     if (!newData || !oldData) return;
 
+    // ── Streak update: only triggered by POTD completion ─────────────────────
+    const oldPotdIds: string[] = oldData.completedPotdIds || [];
+    const newPotdIds: string[] = newData.completedPotdIds || [];
+    const oldSet = new Set(oldPotdIds);
+    const newlyCompleted = newPotdIds.filter((id) => !oldSet.has(id));
+
+    if (newlyCompleted.length > 0) {
+      const todayPst = new Date().toLocaleDateString("en-CA", {
+        timeZone: "America/Los_Angeles",
+      });
+
+      for (const potdId of newlyCompleted) {
+        const potdSnap = await db.collection("potd").doc(potdId).get();
+        if (!potdSnap.exists || potdSnap.data()?.date !== todayPst) continue;
+
+        // Guard against double-increment if already updated today
+        const lastStreakDate = newData.lastStreakDate as
+          | admin.firestore.Timestamp
+          | undefined;
+        if (lastStreakDate) {
+          const lastDatePst = lastStreakDate
+            .toDate()
+            .toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+          if (lastDatePst === todayPst) break;
+        }
+
+        await db
+          .collection("users")
+          .doc(event.params.userId)
+          .update({
+            streak: FieldValue.increment(1),
+            lastStreakDate: FieldValue.serverTimestamp(),
+          });
+        console.log(`Streak incremented for user ${event.params.userId} (POTD ${potdId})`);
+        break;
+      }
+    }
+
+    // ── Profile sync to gameSubmissions ──────────────────────────────────────
     const nameChanged = newData.displayName !== oldData.displayName;
     const handleChanged = newData.username !== oldData.username;
     const photoChanged = newData.photoURL !== oldData.photoURL;

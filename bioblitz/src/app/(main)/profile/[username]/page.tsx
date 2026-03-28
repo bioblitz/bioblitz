@@ -348,8 +348,7 @@ export default function ProfilePage() {
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{friend.displayName}</p>
-                            {friend.username && <p className="text-xs text-zinc-500 truncate">@{friend.username}</p>}
+                            <p className="text-sm font-medium text-white truncate">{friend.username || friend.displayName}</p>
                           </div>
                         </Link>
                       ))
@@ -400,8 +399,7 @@ export default function ProfilePage() {
                                     </div>
                                   )}
                                   <div className="min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{u.displayName}</p>
-                                    <p className="text-xs text-zinc-500 truncate">@{u.username}</p>
+                                    <p className="text-sm font-medium text-white truncate">{u.username || u.displayName}</p>
                                   </div>
                                 </button>
                               ))}
@@ -430,7 +428,7 @@ export default function ProfilePage() {
                                       {req.displayName?.[0]}
                                     </div>
                                   )}
-                                  <span className="text-sm text-white truncate">{req.displayName}</span>
+                                  <span className="text-sm text-white truncate">{req.username || req.displayName}</span>
                                 </div>
                                 <div className="flex gap-1.5 shrink-0">
                                   <button onClick={() => handleAcceptIncomingRequest(req)}

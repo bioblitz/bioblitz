@@ -260,8 +260,7 @@ export default function GameDetailPage() {
 
         const leaderboardData = await Promise.all(
           uniqueSubmissions.map(async (submission) => {
-            let displayName = submission.username || "Unknown User";
-            let handle = submission.handle || "";
+            let username = submission.handle || submission.username || "Unknown";
             let photoURL = submission.photoURL || "";
             let bElo = submission.bElo || 500;
 
@@ -271,8 +270,7 @@ export default function GameDetailPage() {
 
               if (userSnap.exists()) {
                 const userData = userSnap.data();
-                displayName = userData.displayName || displayName;
-                handle = userData.username || handle;
+                username = userData.username || username;
                 photoURL = userData.photoURL || photoURL;
                 bElo = userData.bElo || bElo;
               }
@@ -283,8 +281,8 @@ export default function GameDetailPage() {
             return {
               submissionId: submission.id,
               userId: submission.userId,
-              username: displayName,
-              handle: handle,
+              username,
+              handle: username,
               photoURL: photoURL,
               correctCount: submission.correctCount ?? 0,
               totalQuestions: submission.totalQuestions ?? 0,
@@ -905,9 +903,9 @@ export default function GameDetailPage() {
                               : entry.bElo ? getRatingTier(entry.bElo).textClass : "text-zinc-200"
                           }`}
                         >
-                          {entry.handle ? (
+                          {entry.username ? (
                             <Link
-                              href={`/profile/${entry.handle}`}
+                              href={`/profile/${entry.username}`}
                               className="hover:underline transition-colors"
                             >
                               {authResolved && user && entry.userId === user.uid
@@ -918,7 +916,7 @@ export default function GameDetailPage() {
                             <span>
                               {authResolved && user && entry.userId === user.uid
                                 ? "You"
-                                : entry.username}
+                                : "Unknown"}
                             </span>
                           )}
                         </div>
