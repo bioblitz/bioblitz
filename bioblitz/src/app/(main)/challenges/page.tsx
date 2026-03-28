@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import { getRatingTier } from "@/lib/rating";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -55,58 +56,6 @@ interface FriendElo {
   streak: number;
 }
 
-const RANK_COLORS = [
-  {
-    bar: "#f59e0b",
-    text: "text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-  },
-  {
-    bar: "#a855f7",
-    text: "text-black-400",
-    glow: "shadow-black-500/40",
-    bg: "bg-neutral-900-500/10",
-    border: "border-black-500/30",
-  }, // purple
-  {
-    bar: "#ec4899",
-    text: "text-pink-400",
-    bg: "bg-pink-500/10",
-    border: "border-pink-500/30",
-  },
-  {
-    bar: "#22c55e",
-    text: "text-green-400",
-    bg: "bg-green-500/10",
-    border: "border-green-500/30",
-  },
-  {
-    bar: "#3b82f6",
-    text: "text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-  },
-  {
-    bar: "#f97316",
-    text: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/30",
-  },
-  {
-    bar: "#06b6d4",
-    text: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/30",
-  },
-  {
-    bar: "#ef4444",
-    text: "text-red-400",
-    bg: "bg-red-500/10",
-    border: "border-red-500/30",
-  },
-];
-
 function FriendRanking({
   friends,
   currentUid,
@@ -115,153 +64,78 @@ function FriendRanking({
   currentUid: string;
 }) {
   const sorted = [...friends].sort((a, b) => b.bElo - a.bElo);
-  const maxElo = sorted[0]?.bElo || 1;
-  const myRank = sorted.findIndex((f) => f.uid === currentUid);
+
+  if (sorted.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center mx-3 mb-3">
+        <p className="text-zinc-600 text-xs leading-relaxed">
+          Add friends from your profile to see rankings.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-2">
-      {myRank >= 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="rounded-xl border border-neutral-500/30 bg-neutral-500/[0.05] px-4 py-3 flex items-center justify-between mx-3 mt-3"
-        >
-          <div>
-            <p
-              className={`${mono} text-[10px] font-[800] uppercase text-neutral-400/60`}
-              style={{ letterSpacing: "0.12em" }}
+    <div className="p-3 flex flex-col space-y-2">
+      {sorted.map((friend, i) => {
+        const isMe = friend.uid === currentUid;
+        return (
+          <Link href={`/profile/${friend.username}`} key={friend.uid}>
+            <div
+              className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                isMe
+                  ? "bg-neutral-500/[0.08] border border-neutral-500/30 text-white font-semibold"
+                  : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border border-transparent hover:border-zinc-800"
+              }`}
             >
-              Your rank
-            </p>
-            <p
-              className={`${mono} text-[32px] font-[800] text-white tabular-nums leading-none`}
-            >
-              #{myRank + 1}
-            </p>
-          </div>
-          <div className="text-right">
-            <p
-              className={`${mono} text-[20px] font-[800] text-neutral-400 tabular-nums`}
-            >
-              {sorted[myRank]?.bElo}
-            </p>
-            <p className={`${mono} text-[10px] text-zinc-600`}>Elo</p>
-          </div>
-        </motion.div>
-      )}
+              <div className="w-6 flex justify-center">
+                {i === 0 ? (
+                  <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+                ) : i === 1 ? (
+                  <Medal className="w-3.5 h-3.5 text-zinc-300" />
+                ) : i === 2 ? (
+                  <Medal className="w-3.5 h-3.5 text-orange-500" />
+                ) : (
+                  <span className="font-bold text-zinc-600 w-6 text-center text-[12px]">
+                    #{i + 1}
+                  </span>
+                )}
+              </div>
 
-      {sorted.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center mx-3 mb-3">
-          <p className="text-zinc-600 text-xs leading-relaxed">
-            Add friends from your profile to see rankings.
-          </p>
-        </div>
-      ) : (
-        <div className="px-3 pb-3 pt-1 space-y-1">
-          {sorted.map((friend, i) => {
-            const isMe = friend.uid === currentUid;
-            const c = RANK_COLORS[i % RANK_COLORS.length];
-            const barWidth = Math.max(
-              15,
-              Math.round((friend.bElo / maxElo) * 100),
-            );
+              {friend.photoURL ? (
+                <img
+                  src={friend.photoURL}
+                  alt={friend.displayName}
+                  className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900 object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
+                  {friend.displayName[0]?.toUpperCase()}
+                </div>
+              )}
 
-            return (
-              <motion.div
-                key={friend.uid}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.06, duration: 0.3, ease: "easeOut" }}
-              >
-                <Link href={`/profile/${friend.username}`}>
-                  <div
-                    className={`relative group rounded-xl overflow-hidden cursor-pointer transition-all ${
-                      isMe ? "bg-neutral-500/[0.04]" : "hover:bg-neutral-600/60"
-                    }`}
-                  >
-                    <div
-                      className="absolute left-0 top-0 bottom-0 opacity-[0.07] transition-all duration-500 rounded-xl"
-                      style={{ width: `${barWidth}%`, backgroundColor: c.bar }}
-                    />
+              <div className="truncate flex-1 text-left text-[13px] font-bold">
+                <span className={getRatingTier(friend.bElo).textClass}>
+                  {isMe ? "You" : friend.displayName}
+                </span>
+              </div>
 
-                    <div className="relative flex items-center gap-2.5 px-3 py-2.5">
-                      <div className="w-5 flex justify-center flex-shrink-0">
-                        {i === 0 ? (
-                          <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
-                        ) : i === 1 ? (
-                          <Medal className="w-3.5 h-3.5 text-zinc-300" />
-                        ) : i === 2 ? (
-                          <Medal className="w-3.5 h-3.5 text-orange-500" />
-                        ) : (
-                          <span
-                            className={`${mono} text-zinc-600 text-[11px] font-bold`}
-                          >
-                            {i + 1}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="relative flex-shrink-0">
-                        {friend.photoURL ? (
-                          <img
-                            src={friend.photoURL}
-                            alt={friend.displayName}
-                            className="w-8 h-8 rounded-full object-cover"
-                            style={{ border: `2px solid ${c.bar}40` }}
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <div
-                            className={`${mono} w-8 h-8 rounded-full flex items-center justify-center text-xs font-[800]`}
-                            style={{
-                              backgroundColor: `${c.bar}20`,
-                              color: c.bar,
-                              border: `2px solid ${c.bar}40`,
-                            }}
-                          >
-                            {friend.displayName[0]?.toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-xs font-bold truncate group-hover:text-white transition-colors ${isMe ? "text-neutral-400" : "text-zinc-200"}`}
-                        >
-                          {isMe ? "You" : friend.displayName}
-                        </p>
-                        {friend.streak > 0 && (
-                          <p className="text-[10px] text-zinc-600 flex items-center gap-0.5 mt-0.5">
-                            <Flame className="w-2.5 h-2.5 text-orange-500 fill-orange-500" />
-                            {friend.streak}d
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <div
-                          className="w-[6px] h-[6px] rounded-full"
-                          style={{ backgroundColor: c.bar }}
-                        />
-                        <span
-                          className={`${mono} text-[13px] font-[800] tabular-nums`}
-                          style={{ color: c.bar }}
-                        >
-                          {friend.bElo}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
+              <div className="text-right">
+                <span
+                  className={`font-[800] text-[16px] tabular-nums ${isMe ? "text-neutral-400" : "text-zinc-300"}`}
+                >
+                  {friend.bElo}
+                </span>
+                <p className="text-[11px] text-zinc-500">Elo</p>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
-
 function ChallengeCard({
   challenge,
   currentUid,

@@ -96,11 +96,17 @@ export default function GameRoomPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [userProfileData, setUserProfileData] = useState({ handle: "", photoURL: "", bElo: 500 });
+  const [userProfileData, setUserProfileData] = useState({
+    handle: "",
+    photoURL: "",
+    bElo: 500,
+  });
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>({});
+  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
+    {},
+  );
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [gameTitle, setGameTitle] = useState("");
@@ -113,7 +119,9 @@ export default function GameRoomPage() {
   const [ratingTimedOut, setRatingTimedOut] = useState(false);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(
+    new Set(),
+  );
   const [showReviewPanel, setShowReviewPanel] = useState(false);
 
   const questionTimings = useRef<number[]>([]);
@@ -128,7 +136,9 @@ export default function GameRoomPage() {
 
   useEffect(() => {
     isMounted.current = true;
-    return () => { isMounted.current = false; };
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -151,7 +161,11 @@ export default function GameRoomPage() {
   useEffect(() => {
     if (submitted) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         if (currentQuestionRef.current < questions.length - 1) {
@@ -178,12 +192,15 @@ export default function GameRoomPage() {
         tabSwitchCount.current += 1;
         tabHiddenAt.current = Date.now();
       } else if (tabHiddenAt.current !== null) {
-        timeOffTab.current += Math.floor((Date.now() - tabHiddenAt.current) / 1000);
+        timeOffTab.current += Math.floor(
+          (Date.now() - tabHiddenAt.current) / 1000,
+        );
         tabHiddenAt.current = null;
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [submitted]);
 
   useEffect(() => {
@@ -243,7 +260,9 @@ export default function GameRoomPage() {
             const key = `startTime-${user.uid}-${gameId}`;
             const savedStart = localStorage.getItem(key);
             if (savedStart) {
-              const elapsed = Math.floor((Date.now() - parseInt(savedStart)) / 1000);
+              const elapsed = Math.floor(
+                (Date.now() - parseInt(savedStart)) / 1000,
+              );
               setTimeLeft(Math.max(0, data.timeLimit - elapsed));
             } else {
               localStorage.setItem(key, Date.now().toString());
@@ -253,16 +272,23 @@ export default function GameRoomPage() {
             const answerKey = `answers-${user.uid}-${gameId}`;
             const savedAnswers = localStorage.getItem(answerKey);
             if (savedAnswers) {
-              try { setUserAnswers(JSON.parse(savedAnswers)); }
-              catch (e) { console.error("Failed to parse saved answers", e); }
+              try {
+                setUserAnswers(JSON.parse(savedAnswers));
+              } catch (e) {
+                console.error("Failed to parse saved answers", e);
+              }
             }
           }
         }
 
         const functions = getFunctions();
-        const getPublicQuestions = httpsCallable(functions, "getPublicQuestions");
+        const getPublicQuestions = httpsCallable(
+          functions,
+          "getPublicQuestions",
+        );
         const result = await getPublicQuestions({ gameId });
-        const loadedQuestions = (result.data as { questions: Question[] }).questions;
+        const loadedQuestions = (result.data as { questions: Question[] })
+          .questions;
         if (isMounted.current) {
           setQuestions(loadedQuestions);
           questionTimings.current = new Array(loadedQuestions.length).fill(0);
@@ -300,7 +326,9 @@ export default function GameRoomPage() {
     const timeTaken = timeTotal - (timeLeft ?? 0);
 
     if (tabHiddenAt.current !== null) {
-      timeOffTab.current += Math.floor((Date.now() - tabHiddenAt.current) / 1000);
+      timeOffTab.current += Math.floor(
+        (Date.now() - tabHiddenAt.current) / 1000,
+      );
       tabHiddenAt.current = null;
     }
 
@@ -322,11 +350,18 @@ export default function GameRoomPage() {
     try {
       let submissionRef;
       if (isRanked) {
-        const rankedRef = doc(firestore, "gameSubmissions", `${user.uid}_${gameId}`);
+        const rankedRef = doc(
+          firestore,
+          "gameSubmissions",
+          `${user.uid}_${gameId}`,
+        );
         await setDoc(rankedRef, { ...commonData, ranked: true });
         submissionRef = rankedRef;
       } else {
-        submissionRef = await addDoc(collection(firestore, "gameSubmissions"), { ...commonData, ranked: false });
+        submissionRef = await addDoc(collection(firestore, "gameSubmissions"), {
+          ...commonData,
+          ranked: false,
+        });
       }
       if (isMounted.current) setSubmissionId(submissionRef.id);
       localStorage.removeItem(`startTime-${user.uid}-${gameId}`);
@@ -344,33 +379,39 @@ export default function GameRoomPage() {
       handleSubmit(true);
       return;
     }
-    const interval = setInterval(() => setTimeLeft((p) => (p !== null ? p - 1 : null)), 1000);
+    const interval = setInterval(
+      () => setTimeLeft((p) => (p !== null ? p - 1 : null)),
+      1000,
+    );
     return () => clearInterval(interval);
   }, [timeLeft, submitted]);
 
   useEffect(() => {
     if (!submissionId) return;
-    const unsub = onSnapshot(doc(firestore, "gameSubmissions", submissionId), (snap) => {
-      const data = snap.data();
-      if (data?.score !== undefined) {
-        if (isMounted.current) {
-          setFinalResult({
+    const unsub = onSnapshot(
+      doc(firestore, "gameSubmissions", submissionId),
+      (snap) => {
+        const data = snap.data();
+        if (data?.score !== undefined) {
+          if (isMounted.current) {
+            setFinalResult({
+              score: data.score,
+              correctCount: data.correctCount,
+              totalQuestions: data.totalQuestions,
+              correctAnswers: data.correctAnswers,
+              ratingDelta: data.ratingDelta ?? null,
+              newElo: data.newElo ?? null,
+            });
+          }
+          tryResolveChallenge({
+            blitzId: gameId as string,
+            userId: user?.uid ?? "",
             score: data.score,
-            correctCount: data.correctCount,
-            totalQuestions: data.totalQuestions,
-            correctAnswers: data.correctAnswers,
-            ratingDelta: data.ratingDelta ?? null,
-            newElo: data.newElo ?? null,
-          });
+            timeTaken: timeTotal - (timeLeft ?? 0),
+          }).catch(() => {});
         }
-        tryResolveChallenge({
-          blitzId: gameId as string,
-          userId: user?.uid ?? "",
-          score: data.score,
-          timeTaken: timeTotal - (timeLeft ?? 0),
-        }).catch(() => {});
-      }
-    });
+      },
+    );
     return () => unsub();
   }, [submissionId]);
 
@@ -422,7 +463,8 @@ export default function GameRoomPage() {
           if (!firstByUser[data.userId]) firstByUser[data.userId] = data;
         });
         const sorted = (Object.values(firstByUser) as LeaderboardEntry[]).sort(
-          (a, b) => (b.correctCount - a.correctCount) || (a.timeTaken - b.timeTaken),
+          (a, b) =>
+            b.correctCount - a.correctCount || a.timeTaken - b.timeTaken,
         );
         setLeaderboard(sorted);
         const rank = sorted.findIndex((e) => e.userId === user.uid);
@@ -430,7 +472,9 @@ export default function GameRoomPage() {
           setUserRank(rank + 1);
         } else {
           const better = sorted.filter(
-            (e) => e.correctCount > myCorrect || (e.correctCount === myCorrect && e.timeTaken < myTimeTaken),
+            (e) =>
+              e.correctCount > myCorrect ||
+              (e.correctCount === myCorrect && e.timeTaken < myTimeTaken),
           ).length;
           setUserRank(better + 1);
         }
@@ -443,20 +487,34 @@ export default function GameRoomPage() {
     fetchLeaderboard();
   }, [finalResult?.correctCount, gameId, user?.uid]);
 
-  const [usersMap, setUsersMap] = useState<{ [uid: string]: { name: string; handle: string; bElo: number } }>({});
+  const [usersMap, setUsersMap] = useState<{
+    [uid: string]: { name: string; handle: string; bElo: number };
+  }>({});
 
   useEffect(() => {
     if (leaderboard.length === 0) return;
     const fetchSpecificUsers = async () => {
       try {
-        const missing = leaderboard.filter((l) => !l.username).map((l) => l.userId);
+        const missing = leaderboard
+          .filter((l) => !l.username)
+          .map((l) => l.userId);
         if (missing.length === 0) return;
-        const snaps = await Promise.all([...new Set(missing)].map((uid) => getDoc(doc(firestore, "users", uid))));
-        const newMap: { [uid: string]: { name: string; handle: string; bElo: number } } = {};
+        const snaps = await Promise.all(
+          [...new Set(missing)].map((uid) =>
+            getDoc(doc(firestore, "users", uid)),
+          ),
+        );
+        const newMap: {
+          [uid: string]: { name: string; handle: string; bElo: number };
+        } = {};
         snaps.forEach((snap) => {
           if (snap.exists()) {
             const d = snap.data();
-            newMap[snap.id] = { name: d.displayName || "Unknown", handle: d.username || "", bElo: d.bElo || 500 };
+            newMap[snap.id] = {
+              name: d.displayName || "Unknown",
+              handle: d.username || "",
+              bElo: d.bElo || 500,
+            };
           }
         });
         setUsersMap(newMap);
@@ -469,16 +527,23 @@ export default function GameRoomPage() {
 
   useEffect(() => {
     if (user && gameId && Object.keys(userAnswers).length > 0 && !submitted) {
-      localStorage.setItem(`answers-${user.uid}-${gameId}`, JSON.stringify(userAnswers));
+      localStorage.setItem(
+        `answers-${user.uid}-${gameId}`,
+        JSON.stringify(userAnswers),
+      );
     }
   }, [userAnswers, user, gameId, submitted]);
 
   if (loading || authLoading) {
     return (
-      <div className={`${dmSans.className} flex items-center justify-center h-screen bg-neutral-900 text-white`}>
+      <div
+        className={`${dmSans.className} flex items-center justify-center h-screen bg-neutral-900 text-white`}
+      >
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-          <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+          <span className="text-neutral-400 text-sm font-medium">
+            Loading...
+          </span>
         </div>
       </div>
     );
@@ -511,24 +576,35 @@ export default function GameRoomPage() {
         <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-neutral-900/80 border border-neutral-500/40 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 flex items-center justify-between space-x-4 w-[90%] max-w-xl backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <AlertCircle className="text-neutral-300 w-6 h-6" />
-            <span className="text-lg font-bold">Time's up! Submitting results...</span>
+            <span className="text-lg font-bold">
+              Time's up! Submitting results...
+            </span>
           </div>
-          <button onClick={() => setShowTimeUpAlert(false)} className="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
+          <button
+            onClick={() => setShowTimeUpAlert(false)}
+            className="text-white/70 hover:text-white text-2xl leading-none"
+          >
+            &times;
+          </button>
         </div>
       )}
 
       <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
-
           <div className="mb-8 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
-              <h1 className="text-[32px] font-[900] text-white mb-2" style={{ letterSpacing: "-0.02em" }}>
+              <h1
+                className="text-[32px] font-[900] text-white mb-2"
+                style={{ letterSpacing: "-0.02em" }}
+              >
                 {gameTitle}
               </h1>
               {!submitted && (
                 <span
                   className={`text-[10px] px-2.5 py-1 rounded-lg font-[800] mb-2 ${
-                    isRanked ? "bg-neutral-600 text-white" : "bg-zinc-800 text-zinc-400"
+                    isRanked
+                      ? "bg-neutral-600 text-white"
+                      : "bg-zinc-800 text-zinc-400"
                   }`}
                   style={{ letterSpacing: "0.08em" }}
                 >
@@ -564,12 +640,13 @@ export default function GameRoomPage() {
           )}
 
           <div className="space-y-6 pb-32">
-
             {!submitted && question && (
               <>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => currentQuestion > 0 && goTo(currentQuestion - 1)}
+                    onClick={() =>
+                      currentQuestion > 0 && goTo(currentQuestion - 1)
+                    }
                     disabled={currentQuestion === 0}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                   >
@@ -579,14 +656,21 @@ export default function GameRoomPage() {
                   <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-neutral-500 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                      style={{
+                        width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+                      }}
                     />
                   </div>
-                  <span className={`text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0`}>
+                  <span
+                    className={`text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0`}
+                  >
                     {currentQuestion + 1} / {questions.length}
                   </span>
                   <button
-                    onClick={() => currentQuestion < questions.length - 1 && goTo(currentQuestion + 1)}
+                    onClick={() =>
+                      currentQuestion < questions.length - 1 &&
+                      goTo(currentQuestion + 1)
+                    }
                     disabled={currentQuestion === questions.length - 1}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                   >
@@ -604,19 +688,12 @@ export default function GameRoomPage() {
                       >
                         Question {currentQuestion + 1}
                       </span>
-                      <ReportButton gameId={gameId as string} questionIndex={currentQuestion} gameTitle={gameTitle} />
+                      <ReportButton
+                        gameId={gameId as string}
+                        questionIndex={currentQuestion}
+                        gameTitle={gameTitle}
+                      />
                     </div>
-                    <button
-                      onClick={() => toggleFlag(currentQuestion)}
-                      title={flaggedQuestions.has(currentQuestion) ? "Remove flag" : "Flag for review"}
-                      className={`p-2 rounded-lg border transition-all ${
-                        flaggedQuestions.has(currentQuestion)
-                          ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
-                          : "text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 border-transparent"
-                      }`}
-                    >
-                      <Flag className="w-4 h-4" />
-                    </button>
                   </div>
 
                   <div
@@ -626,7 +703,11 @@ export default function GameRoomPage() {
 
                   {question.imgURL && (
                     <div className="mb-6 rounded-xl overflow-hidden border border-zinc-800 bg-neutral-900">
-                      <img src={question.imgURL} alt={`Question ${currentQuestion + 1}`} className="w-full max-h-[400px] object-contain" />
+                      <img
+                        src={question.imgURL}
+                        alt={`Question ${currentQuestion + 1}`}
+                        className="w-full max-h-[400px] object-contain"
+                      />
                     </div>
                   )}
 
@@ -645,18 +726,22 @@ export default function GameRoomPage() {
                         >
                           <span
                             className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-[800] text-[12px] uppercase transition-colors ${
-                              isSelected ? "bg-white/20 text-white" : "bg-neutral-900/30 text-zinc-500 group-hover:text-white"
+                              isSelected
+                                ? "bg-white/20 text-white"
+                                : "bg-neutral-900/30 text-zinc-500 group-hover:text-white"
                             }`}
                           >
                             {key}
                           </span>
-                          <span className="text-[16px]" dangerouslySetInnerHTML={{ __html: text }} />
+                          <span
+                            className="text-[16px]"
+                            dangerouslySetInnerHTML={{ __html: text }}
+                          />
                         </button>
                       );
                     })}
                   </div>
                 </div>
-
 
                 {/* Submit / Quit */}
                 <div className="mt-2 flex flex-col md:flex-row justify-center gap-4">
@@ -681,49 +766,91 @@ export default function GameRoomPage() {
                 {!finalResult ? (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
                     <Loader2 className="w-10 h-10 text-neutral-500 animate-spin mb-4" />
-                    <p className="text-[18px] font-bold text-zinc-400 animate-pulse">Calculating score...</p>
+                    <p className="text-[18px] font-bold text-zinc-400 animate-pulse">
+                      Calculating score...
+                    </p>
                   </div>
                 ) : (
                   <>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                       <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Correct</h2>
+                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                          Correct
+                        </h2>
                         <p className="text-[28px] font-[900] text-white">
-                          <span className="text-neutral-400">{finalResult.correctCount}</span>
-                          <span className={`text-zinc-600 text-[18px]`}> / {finalResult.totalQuestions}</span>
+                          <span className="text-neutral-400">
+                            {finalResult.correctCount}
+                          </span>
+                          <span className={`text-zinc-600 text-[18px]`}>
+                            {" "}
+                            / {finalResult.totalQuestions}
+                          </span>
                         </p>
                       </div>
                       <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Time</h2>
-                        <p className={`text-[24px] font-[800] text-white`}>{formatTime(timeTotal - (timeLeft ?? 0))}</p>
+                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                          Time
+                        </h2>
+                        <p className={`text-[24px] font-[800] text-white`}>
+                          {formatTime(timeTotal - (timeLeft ?? 0))}
+                        </p>
                       </div>
                       <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
-                        <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">Rank</h2>
+                        <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">
+                          Rank
+                        </h2>
                         {loadingLeaderboard ? (
                           <Loader2 className="w-5 h-5 text-neutral-400 animate-spin mx-auto mt-1" />
                         ) : userRank !== null ? (
-                          <p className={`relative text-[32px] font-[800] text-neutral-400`}>
-                            {userRank === 1 ? "🥇" : userRank === 2 ? "🥈" : userRank === 3 ? "🥉" : `#${userRank}`}
+                          <p
+                            className={`relative text-[32px] font-[800] text-neutral-400`}
+                          >
+                            {userRank === 1
+                              ? "🥇"
+                              : userRank === 2
+                                ? "🥈"
+                                : userRank === 3
+                                  ? "🥉"
+                                  : `#${userRank}`}
                           </p>
                         ) : (
-                          <p className={`relative text-[20px] font-[800] text-zinc-500`}>—</p>
+                          <p
+                            className={`relative text-[20px] font-[800] text-zinc-500`}
+                          >
+                            —
+                          </p>
                         )}
                       </div>
                       <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Rating</h2>
+                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                          Rating
+                        </h2>
                         {!isRanked ? (
-                          <p className={`text-[14px] font-[700] text-zinc-500`}>Practice</p>
+                          <p className={`text-[14px] font-[700] text-zinc-500`}>
+                            Practice
+                          </p>
                         ) : finalResult.ratingDelta !== null ? (
-                          <p className={`text-[28px] font-[800] ${finalResult.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                            {finalResult.ratingDelta >= 0 ? "+" : ""}{finalResult.ratingDelta}
+                          <p
+                            className={`text-[28px] font-[800] ${finalResult.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                          >
+                            {finalResult.ratingDelta >= 0 ? "+" : ""}
+                            {finalResult.ratingDelta}
                           </p>
                         ) : ratingTimedOut ? (
-                          <p className={`text-[12px] font-[700] text-zinc-500 leading-snug`}>Pending<br />activation</p>
+                          <p
+                            className={`text-[12px] font-[700] text-zinc-500 leading-snug`}
+                          >
+                            Pending
+                            <br />
+                            activation
+                          </p>
                         ) : (
                           <div className="flex flex-col items-center gap-1 mt-1">
                             <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
-                            <p className={`text-[10px] text-zinc-500`}>Calculating…</p>
+                            <p className={`text-[10px] text-zinc-500`}>
+                              Calculating…
+                            </p>
                           </div>
                         )}
                       </div>
@@ -737,31 +864,83 @@ export default function GameRoomPage() {
                       const correctAnswer = finalResult.correctAnswers[idx];
 
                       return (
-                        <div key={idx} className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
+                        <div
+                          key={idx}
+                          className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8"
+                        >
                           <div className="flex items-center gap-3 mb-4">
-                            <span className={`bg-zinc-800 text-zinc-400 text-[11px] font-[800] px-3 py-1 rounded-lg`} style={{ letterSpacing: "0.06em" }}>
+                            <span
+                              className={`bg-zinc-800 text-zinc-400 text-[11px] font-[800] px-3 py-1 rounded-lg`}
+                              style={{ letterSpacing: "0.06em" }}
+                            >
                               Question {idx + 1}
                             </span>
-                            <BookmarkButton gameId={gameId as string} questionIndex={idx} gameTitle={gameTitle} correctAnswer={correctAnswer} userAnswer={userAnswer} />
-                            <ReportButton gameId={gameId as string} questionIndex={idx} gameTitle={gameTitle} />
+                            <BookmarkButton
+                              gameId={gameId as string}
+                              questionIndex={idx}
+                              gameTitle={gameTitle}
+                              correctAnswer={correctAnswer}
+                              userAnswer={userAnswer}
+                            />
+                            <ReportButton
+                              gameId={gameId as string}
+                              questionIndex={idx}
+                              gameTitle={gameTitle}
+                            />
                           </div>
-                          <div className="mb-6 text-[18px] text-zinc-100" dangerouslySetInnerHTML={{ __html: q.content }} />
+                          <div
+                            className="mb-6 text-[18px] text-zinc-100"
+                            dangerouslySetInnerHTML={{ __html: q.content }}
+                          />
                           {q.imgURL && (
-                            <img src={q.imgURL} alt={`Question ${idx + 1}`} className="mb-6 rounded-xl max-h-[300px] w-auto border border-zinc-800" />
+                            <img
+                              src={q.imgURL}
+                              alt={`Question ${idx + 1}`}
+                              className="mb-6 rounded-xl max-h-[300px] w-auto border border-zinc-800"
+                            />
                           )}
                           <div className="flex flex-col space-y-2.5">
                             {qChoices.map(({ key, text }) => {
                               const isUserAnswer = userAnswer === key;
                               const isCorrect = correctAnswer === key;
-                              let bgClass = "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
-                              if (isCorrect) bgClass = "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
-                              else if (isUserAnswer) bgClass = "bg-red-500/10 border-red-500/50 text-red-300";
+                              let bgClass =
+                                "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
+                              if (isCorrect)
+                                bgClass =
+                                  "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
+                              else if (isUserAnswer)
+                                bgClass =
+                                  "bg-red-500/10 border-red-500/50 text-red-300";
                               return (
-                                <div key={key} className={`flex items-center px-5 py-4 rounded-xl border ${bgClass}`}>
-                                  <span className={`font-[800] mr-4 uppercase w-6 text-[12px]`}>{key}</span>
-                                  <span className="font-medium text-[15px]" dangerouslySetInnerHTML={{ __html: text }} />
-                                  {isCorrect && <span className={`ml-auto text-emerald-400 font-[800] text-[11px] uppercase`} style={{ letterSpacing: "0.06em" }}>CORRECT</span>}
-                                  {isUserAnswer && !isCorrect && <span className={`ml-auto text-red-400 font-[800] text-[11px] uppercase`} style={{ letterSpacing: "0.06em" }}>YOUR ANSWER</span>}
+                                <div
+                                  key={key}
+                                  className={`flex items-center px-5 py-4 rounded-xl border ${bgClass}`}
+                                >
+                                  <span
+                                    className={`font-[800] mr-4 uppercase w-6 text-[12px]`}
+                                  >
+                                    {key}
+                                  </span>
+                                  <span
+                                    className="font-medium text-[15px]"
+                                    dangerouslySetInnerHTML={{ __html: text }}
+                                  />
+                                  {isCorrect && (
+                                    <span
+                                      className={`ml-auto text-emerald-400 font-[800] text-[11px] uppercase`}
+                                      style={{ letterSpacing: "0.06em" }}
+                                    >
+                                      CORRECT
+                                    </span>
+                                  )}
+                                  {isUserAnswer && !isCorrect && (
+                                    <span
+                                      className={`ml-auto text-red-400 font-[800] text-[11px] uppercase`}
+                                      style={{ letterSpacing: "0.06em" }}
+                                    >
+                                      YOUR ANSWER
+                                    </span>
+                                  )}
                                 </div>
                               );
                             })}
@@ -776,23 +955,35 @@ export default function GameRoomPage() {
 
             {submitted && activeTab === "leaderboard" && (
               <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-8">
-                <h2 className="text-[22px] font-[900] mb-6 text-center" style={{ letterSpacing: "-0.02em" }}>
+                <h2
+                  className="text-[22px] font-[900] mb-6 text-center"
+                  style={{ letterSpacing: "-0.02em" }}
+                >
                   Blitz Leaderboard
                 </h2>
                 {loadingLeaderboard ? (
                   <div className="flex flex-col items-center">
                     <Loader2 className="w-8 h-8 text-neutral-500 animate-spin mb-2" />
-                    <span className="text-zinc-500 text-[13px]">Loading leaderboard...</span>
+                    <span className="text-zinc-500 text-[13px]">
+                      Loading leaderboard...
+                    </span>
                   </div>
                 ) : leaderboard.length === 0 ? (
-                  <p className="text-zinc-600 text-center text-[14px]">No submissions yet.</p>
+                  <p className="text-zinc-600 text-center text-[14px]">
+                    No submissions yet.
+                  </p>
                 ) : (
                   <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {leaderboard.map((entry, idx) => {
                       const isCurrentUser = entry.userId === user?.uid;
-                      const displayName = entry.username || usersMap[entry.userId]?.name || "Unknown";
-                      const handle = entry.handle || usersMap[entry.userId]?.handle;
-                      const bElo = entry.bElo || usersMap[entry.userId]?.bElo || 500;
+                      const displayName =
+                        entry.username ||
+                        usersMap[entry.userId]?.name ||
+                        "Unknown";
+                      const handle =
+                        entry.handle || usersMap[entry.userId]?.handle;
+                      const bElo =
+                        entry.bElo || usersMap[entry.userId]?.bElo || 500;
                       return (
                         <div
                           key={entry.userId}
@@ -803,7 +994,11 @@ export default function GameRoomPage() {
                           }`}
                         >
                           <div className="w-6 flex justify-center">
-                            <span className={`font-bold text-zinc-600 w-6 text-center text-[12px]`}>#{idx + 1}</span>
+                            <span
+                              className={`font-bold text-zinc-600 w-6 text-center text-[12px]`}
+                            >
+                              #{idx + 1}
+                            </span>
                           </div>
                           <img
                             src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
@@ -811,15 +1006,29 @@ export default function GameRoomPage() {
                             className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900"
                           />
                           <div className="truncate flex-1 text-left text-[13px] font-bold">
-                            {handle
-                              ? <Link href={`/profile/${handle}`} className={`hover:underline transition-colors ${getRatingTier(bElo).textClass}`}>{displayName}</Link>
-                              : <span className={getRatingTier(bElo).textClass}>{displayName}</span>}
+                            {handle ? (
+                              <Link
+                                href={`/profile/${handle}`}
+                                className={`hover:underline transition-colors ${getRatingTier(bElo).textClass}`}
+                              >
+                                {displayName}
+                              </Link>
+                            ) : (
+                              <span className={getRatingTier(bElo).textClass}>
+                                {displayName}
+                              </span>
+                            )}
                           </div>
                           <div className="text-right">
-                            <span className={`font-[800] text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}>
-                              {entry.correctCount ?? "?"}/{entry.totalQuestions ?? "?"}
+                            <span
+                              className={`font-[800] text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}
+                            >
+                              {entry.correctCount ?? "?"}/
+                              {entry.totalQuestions ?? "?"}
                             </span>
-                            <p className={`text-[11px] text-zinc-500`}>{formatTime(entry.timeTaken)}</p>
+                            <p className={`text-[11px] text-zinc-500`}>
+                              {formatTime(entry.timeTaken)}
+                            </p>
                           </div>
                         </div>
                       );
@@ -835,15 +1044,28 @@ export default function GameRoomPage() {
           <div className="hidden xl:flex fixed right-10 top-28 z-40 flex-col items-center gap-4">
             {timeLeft !== null && timeLeft > 0 && (
               <div style={{ width: size, height: size, position: "relative" }}>
-                <svg height={size} width={size} className="transform -rotate-90">
-                  <circle stroke="#18181b" fill="transparent" strokeWidth={strokeWidth} r={radius} cx={size / 2} cy={size / 2} />
+                <svg
+                  height={size}
+                  width={size}
+                  className="transform -rotate-90"
+                >
+                  <circle
+                    stroke="#18181b"
+                    fill="transparent"
+                    strokeWidth={strokeWidth}
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                  />
                   <circle
                     stroke="#ededed"
                     fill="transparent"
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * radius}
-                    strokeDashoffset={2 * Math.PI * radius * (1 - timeLeft / timeTotal)}
+                    strokeDashoffset={
+                      2 * Math.PI * radius * (1 - timeLeft / timeTotal)
+                    }
                     r={radius}
                     cx={size / 2}
                     cy={size / 2}
@@ -851,17 +1073,25 @@ export default function GameRoomPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-[36px] font-[800] text-white tabular-nums`}>
+                  <span
+                    className={`text-[36px] font-[800] text-white tabular-nums`}
+                  >
                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                   </span>
-                  <span className={`text-zinc-500 text-[10px] font-bold mt-1`} style={{ letterSpacing: "0.06em" }}>
+                  <span
+                    className={`text-zinc-500 text-[10px] font-bold mt-1`}
+                    style={{ letterSpacing: "0.06em" }}
+                  >
                     Remaining
                   </span>
                 </div>
               </div>
             )}
 
-            <div className="w-full bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden" style={{ width: size }}>
+            <div
+              className="w-full bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden"
+              style={{ width: size }}
+            >
               <button
                 onClick={() => setShowReviewPanel((p) => !p)}
                 className="w-full flex items-center justify-between px-4 py-3 text-zinc-300 hover:text-white transition-colors"
@@ -872,9 +1102,13 @@ export default function GameRoomPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {unansweredCount > 0 && (
-                    <span className="bg-zinc-700 text-zinc-300 text-[10px] font-[800] px-1.5 py-0.5 rounded-full">{unansweredCount}</span>
+                    <span className="bg-zinc-700 text-zinc-300 text-[10px] font-[800] px-1.5 py-0.5 rounded-full">
+                      {unansweredCount}
+                    </span>
                   )}
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${showReviewPanel ? "rotate-90" : ""}`} />
+                  <ChevronRight
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${showReviewPanel ? "rotate-90" : ""}`}
+                  />
                 </div>
               </button>
 
@@ -891,13 +1125,15 @@ export default function GameRoomPage() {
                           onClick={() => goTo(i)}
                           title={`Question ${i + 1}`}
                           className={`h-8 rounded-lg text-[11px] font-[800] transition-all border ${
-                            isCurrent ? "ring-2 ring-neutral-400 ring-offset-1 ring-offset-zinc-950" : ""
+                            isCurrent
+                              ? "ring-2 ring-neutral-400 ring-offset-1 ring-offset-zinc-950"
+                              : ""
                           } ${
                             isFlagged
                               ? "bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25"
                               : isAnswered
-                              ? "bg-neutral-600/70 border-neutral-500/40 text-zinc-200 hover:bg-neutral-500/70"
-                              : "bg-zinc-800/80 border-zinc-700 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
+                                ? "bg-neutral-600/70 border-neutral-500/40 text-zinc-200 hover:bg-neutral-500/70"
+                                : "bg-zinc-800/80 border-zinc-700 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
                           }`}
                         >
                           {i + 1}
@@ -908,16 +1144,22 @@ export default function GameRoomPage() {
                   <div className="flex flex-col gap-1.5 mt-3 text-[10px]">
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-sm bg-neutral-600/70 border border-neutral-500/40 shrink-0" />
-                      <span className="text-zinc-500">{answeredCount} answered</span>
+                      <span className="text-zinc-500">
+                        {answeredCount} answered
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-sm bg-zinc-800/80 border border-zinc-700 shrink-0" />
-                      <span className="text-zinc-500">{unansweredCount} unanswered</span>
+                      <span className="text-zinc-500">
+                        {unansweredCount} unanswered
+                      </span>
                     </div>
                     {flaggedQuestions.size > 0 && (
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-sm bg-amber-500/15 border border-amber-500/40 shrink-0" />
-                        <span className="text-zinc-500">{flaggedQuestions.size} flagged</span>
+                        <span className="text-zinc-500">
+                          {flaggedQuestions.size} flagged
+                        </span>
                       </div>
                     )}
                   </div>
@@ -928,17 +1170,25 @@ export default function GameRoomPage() {
         )}
       </div>
 
-
       {showConfirmModal && (
         <div className="fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="bg-[rgba(9,9,11,0.95)] border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">
-            <h2 className="text-[22px] font-[900] mb-2 text-white" style={{ letterSpacing: "-0.02em" }}>Quit the Blitz?</h2>
+            <h2
+              className="text-[22px] font-[900] mb-2 text-white"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              Quit the Blitz?
+            </h2>
             <p className="text-zinc-500 text-[14px] mb-8">
-              Your current answers will be submitted and you will return to the home screen.
+              Your current answers will be submitted and you will return to the
+              home screen.
             </p>
             <div className="flex justify-center gap-3">
               <button
-                onClick={async () => { await handleSubmit(true); router.push("/home"); }}
+                onClick={async () => {
+                  await handleSubmit(true);
+                  router.push("/home");
+                }}
                 className="flex-1 px-6 py-3 bg-red-500/10 text-red-400 border border-red-500/30 font-bold rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
               >
                 Quit

@@ -89,7 +89,9 @@ export default function PotdGameClient({
   const [activeTab, setActiveTab] = useState<"problem" | "archive">("problem");
   const [searchQuery, setSearchQuery] = useState("");
   const [topic, setTopic] = useState("All Topics");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">(
+    "All",
+  );
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -117,10 +119,14 @@ export default function PotdGameClient({
   useEffect(() => {
     setLoadingUser(true);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("auth state:", currentUser?.uid, currentUser?.email);
+
       setUser(currentUser);
       if (currentUser) {
         fetchUserData(currentUser.uid).finally(() => setLoadingUser(false));
       } else {
+        console.log("no user signed in");
+
         setPlayedGameIds(new Set());
         setLoadingUser(false);
       }
@@ -132,15 +138,35 @@ export default function PotdGameClient({
     try {
       const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
+      console.log("userSnap exists:", userSnap.exists());
+
       if (userSnap.exists()) {
         const data = userSnap.data();
         const completedArr = data.completedPotdIds || [];
+        console.log("completedPotdIds:", completedArr);
+        console.log("puzzle.id:", puzzle.id);
+        console.log("includes puzzle.id:", completedArr.includes(puzzle.id));
+
         const roles = Array.isArray(data.roles)
           ? data.roles.map((role: unknown) => String(role).toLowerCase())
           : [];
         setPlayedGameIds(new Set(completedArr));
         setIsCompleted(completedArr.includes(puzzle.id));
         setIsStaffUser(roles.includes("admin") || roles.includes("staff"));
+
+        if (completedArr.includes(puzzle.id)) {
+          const setPlayedRef = doc(db, "users", uid, "setsPlayed", puzzle.id);
+          const setPlayedSnap = await getDoc(setPlayedRef);
+          console.log("setPlayedSnap exists:", setPlayedSnap.exists());
+          console.log("setPlayedSnap data:", setPlayedSnap.data());
+
+          if (setPlayedSnap.exists()) {
+            const playData = setPlayedSnap.data();
+            setSelectedOptions(playData.answers || []);
+            setIsCorrect(playData.correct ?? false);
+            setIsSubmitted(true);
+          }
+        }
       }
     } catch (error) {
       console.error("Error checking status:", error);
@@ -156,7 +182,8 @@ export default function PotdGameClient({
 
     const sortedSelected = [...selectedOptions].sort();
     const sortedCorrect = [...puzzle.correctAnswer].sort();
-    const correct = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+    const correct =
+      JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
     setIsCorrect(correct);
     setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
 
@@ -176,7 +203,7 @@ export default function PotdGameClient({
       await setDoc(
         userRef,
         { completedPotdIds: arrayUnion(puzzle.id) },
-        { merge: true }
+        { merge: true },
       );
 
       try {
@@ -188,7 +215,7 @@ export default function PotdGameClient({
             correctCount: correct ? increment(1) : increment(0),
             lastPlayedAt: serverTimestamp(),
           },
-          { merge: true }
+          { merge: true },
         );
       } catch (error) {
         console.warn("Failed to update POTD activity:", error);
@@ -221,12 +248,18 @@ export default function PotdGameClient({
   };
 
   const sortedArchive = useMemo(
-    () => [...archivePuzzles].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-    [archivePuzzles]
+    () =>
+      [...archivePuzzles].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      ),
+    [archivePuzzles],
   );
   const currentIndex = sortedArchive.findIndex((p) => p.id === puzzle.id);
   const prevPuzzle = currentIndex > 0 ? sortedArchive[currentIndex - 1] : null;
-  const nextPuzzleEntry = currentIndex < sortedArchive.length - 1 ? sortedArchive[currentIndex + 1] : null;
+  const nextPuzzleEntry =
+    currentIndex < sortedArchive.length - 1
+      ? sortedArchive[currentIndex + 1]
+      : null;
   const nextIsToday = nextPuzzleEntry ? isToday(nextPuzzleEntry.date) : false;
 
   const filteredArchive = archivePuzzles.filter((p) => {
@@ -312,7 +345,6 @@ export default function PotdGameClient({
           </div>
         ) : (
           <div className="space-y-0">
-            {/* Tab bar */}
             <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 mb-8">
               {(["problem", "archive"] as const).map((tab) => (
                 <button
@@ -362,10 +394,13 @@ export default function PotdGameClient({
                     <div className="grid grid-cols-1 gap-3 w-full max-w-2xl mx-auto">
                       {puzzle.options.map((option) => {
                         const isSelected = selectedOptions.includes(option.key);
-                        const isCorrectKey = puzzle.correctAnswer.includes(option.key);
+                        const isCorrectKey = puzzle.correctAnswer.includes(
+                          option.key,
+                        );
                         const showResults = isSubmitted;
 
-                        let borderClass = "border-zinc-800 hover:border-zinc-700";
+                        let borderClass =
+                          "border-zinc-800 hover:border-zinc-700";
                         let bgClass = "bg-zinc-900/50 hover:bg-zinc-800";
                         let textClass = "text-zinc-300";
 
@@ -409,7 +444,9 @@ export default function PotdGameClient({
                               {option.key.toUpperCase()}
                             </div>
 
-                            <span className={`text-base text-center font-medium ${textClass}`}>
+                            <span
+                              className={`text-base text-center font-medium ${textClass}`}
+                            >
                               {option.text}
                             </span>
 
@@ -538,11 +575,14 @@ export default function PotdGameClient({
                               <div className="flex items-center text-sm text-zinc-400 mt-auto">
                                 <Calendar className="w-3 h-3 mr-2" />
                                 <span className="truncate">
-                                  {new Date(p.date).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
+                                  {new Date(p.date).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    },
+                                  )}
                                 </span>
                               </div>
                             </div>

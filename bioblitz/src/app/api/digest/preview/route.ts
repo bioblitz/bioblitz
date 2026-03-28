@@ -3,14 +3,6 @@ import { adminAuth } from "@/lib/firebase-admin";
 import { gatherWeeklyDigest } from "@/lib/digest-data";
 import { generateDigestHtml } from "@/lib/digest-email";
 
-/**
- * GET /api/digest/preview
- *
- * Returns the rendered HTML of the weekly digest for the authenticated user.
- * Used by /weekly_email_preview to preview the email in an iframe.
- *
- * Auth: Bearer <idToken>
- */
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("Authorization");

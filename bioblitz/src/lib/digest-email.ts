@@ -1,8 +1,3 @@
-/**
- * Weekly digest email — table-based HTML.
- * Dark, typographic, no icons, no gradients.
- */
-
 import type { WeeklyDigestData } from "./digest-data";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.co";
@@ -35,14 +30,6 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function tierColor(elo: number): string {
-  if (elo >= 2250) return "#67e8f9";
-  if (elo >= 1750) return "#a3a3a3";
-  if (elo >= 1250) return "#fbbf24";
-  if (elo >= 750) return "#d4d4d8";
-  return "#ea580c";
-}
-
 function topicColor(topic: string): string {
   const map: Record<string, string> = {
     "Anatomy & Physiology": "#60a5fa",
@@ -63,13 +50,14 @@ const m = "'Courier New',Courier,monospace";
 
 export function generateDigestHtml(data: WeeklyDigestData): string {
   const firstName = esc(data.displayName.split(" ")[0] || "there");
-  const hasActivity =
-    data.blitzesThisWeek > 0 || data.potdCompletedThisWeek > 0;
+  const hasActivity = data.blitzesThisWeek > 0;
   const hasChallenges = data.challengeWins + data.challengeLosses > 0;
 
   const eloCol =
     data.eloChange > 0 ? C.green : data.eloChange < 0 ? C.red : C.textMid;
   const eloSign = data.eloChange > 0 ? "+" : "";
+  const eloArrow =
+    data.eloChange > 0 ? "&#9651;" : data.eloChange < 0 ? "&#9661;" : "";
 
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   let pills = "";
@@ -82,22 +70,22 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   }
 
   let heroRight = "";
-  if (data.currentStreak >= 2) {
+  if (data.currentStreak >= 1) {
     heroRight += `<p style="margin:0 0 6px;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
       <span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span> day streak
     </p>`;
   }
-  if (data.eloChange !== 0) {
-    heroRight += `<p style="margin:0;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
-      <span style="font-weight:800;color:${eloCol};font-family:${m};">${eloSign}${data.eloChange}</span> this week
+  if (data.globalRank !== null) {
+    heroRight += `<p style="margin:0;font-size:12px;color:${C.textLo};font-family:${m};text-align:right;line-height:1.3;">
+      Rank <span style="font-weight:800;color:${C.textMid};">#${data.globalRank}</span>
     </p>`;
   }
 
   const aheadRow =
     data.friendAhead && data.friendAhead.gap > 0
       ? `<tr><td style="padding:0 28px 22px;">
-      <p style="margin:0;font-size:13px;color:${C.textMid};font-family:${f};line-height:1.4;">
-        You're <span style="font-weight:800;color:${C.amber};font-family:${m};">${data.friendAhead.gap}</span> Elo behind <span style="font-weight:700;color:${C.text};">${esc(data.friendAhead.displayName)}</span>
+      <p style="margin:0;padding:12px 16px;background:${C.card};border:1px solid ${C.border};border-radius:10px;font-size:13px;color:${C.textMid};font-family:${f};line-height:1.4;">
+        You're <span style="font-weight:800;color:${C.amber};font-family:${m};">${data.friendAhead.gap}</span> Elo behind <span style="font-weight:700;color:${C.text};">${esc(data.friendAhead.displayName)}</span> — close the gap this week.
       </p>
     </td></tr>`
       : "";
@@ -131,25 +119,6 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
       </tr></table>
     </td></tr>`
     : "";
-
-  const potdRow =
-    data.potdAvailableThisWeek > 0
-      ? `<tr><td style="padding:0 28px 22px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-        <td style="padding:12px 16px;background:${C.surface};border:1px solid ${C.border};border-radius:8px;">
-          <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-            <td>
-              <p style="margin:0;font-size:13px;font-weight:600;color:${C.text};font-family:${f};">Daily Problems</p>
-              <p style="margin:2px 0 0;font-size:11px;color:${C.textLo};font-family:${f};">${data.potdCompletedThisWeek} of ${data.potdAvailableThisWeek} this week</p>
-            </td>
-            <td width="80" align="right">
-              <a href="${SITE}/potd" style="font-size:12px;color:${C.textMid};text-decoration:none;font-family:${f};">Solve &#8594;</a>
-            </td>
-          </tr></table>
-        </td>
-      </tr></table>
-    </td></tr>`
-      : "";
 
   let fRows = "";
   const fs = data.friends.slice(0, 5);
@@ -231,9 +200,12 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   <!-- Greeting -->
   <tr><td style="padding:26px 28px 14px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-      <td><p style="margin:0;font-size:16px;font-weight:600;color:${C.text};font-family:${f};">Hey ${firstName}</p></td>
+      <td>
+        <p style="margin:0 0 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.textLo};font-family:${m};">Weekly Digest</p>
+        <p style="margin:0;font-size:15px;font-weight:600;color:${C.text};font-family:${f};">Hey ${firstName}</p>
+      </td>
       <td width="24" align="right" valign="top">
-        <a href="${SITE}" style="text-decoration:none;font-size:14px;font-weight:800;color:${C.textLo};font-family:${f};">B</a>
+        <a href="${SITE}" style="text-decoration:none;font-size:14px;font-weight:800;color:${C.textLo};font-family:${m};">B</a>
       </td>
     </tr></table>
   </td></tr>
@@ -241,18 +213,17 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   <!-- Elo hero -->
   <tr><td style="padding:0 28px 22px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;">
-      <!-- Top: number + meta -->
       <tr><td style="padding:22px 22px 14px;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
           <td valign="top">
-            <p style="margin:0 0 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Current Elo</p>
-<p style="margin:0;font-size:44px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;letter-spacing:-1px;">${data.currentElo.toLocaleString()}${data.eloChange !== 0 ? `<span style="font-size:18px;font-weight:800;color:${data.eloChange > 0 ? C.greenDeep : C.redDeep};letter-spacing:0;margin-left:8px;">(${data.eloChange > 0 ? "+" : ""}${data.eloChange})</span>` : ""}</p>          </td>
+            <p style="margin:0 0 6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Current Elo</p>
+            <p style="margin:0;font-size:44px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;letter-spacing:-1px;">${data.currentElo.toLocaleString()}${data.eloChange !== 0 ? `<span style="font-size:16px;font-weight:800;color:${eloCol};letter-spacing:0;margin-left:10px;">${eloArrow} ${eloSign}${Math.abs(data.eloChange)}</span>` : ""}</p>
+          </td>
           <td valign="top" align="right" style="padding-top:6px;">
             ${heroRight}
           </td>
         </tr></table>
       </td></tr>
-      <!-- Calendar -->
       <tr><td style="padding:2px 22px 18px;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>${pills}</tr></table>
       </td></tr>
@@ -286,7 +257,6 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   ${inactiveRow}
   ${friendBlock}
   ${challengeRow}
-  ${potdRow}
   ${blitzBlock}
 
   <!-- Footer -->

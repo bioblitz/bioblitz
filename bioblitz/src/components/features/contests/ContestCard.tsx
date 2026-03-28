@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { gameRoom } from "@/types";
@@ -15,8 +16,14 @@ interface ContestCardProps {
   isCompleted?: boolean;
 }
 
-const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted }) => {
-  const [userSubmission, setUserSubmission] = useState<{ rank?: number } | null>(null);
+const ContestCard: React.FC<ContestCardProps> = ({
+  contest,
+  href,
+  isCompleted,
+}) => {
+  const [userSubmission, setUserSubmission] = useState<{
+    rank?: number;
+  } | null>(null);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
@@ -24,7 +31,11 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
     if (isCompleted && auth.currentUser) {
       const fetchSubmission = async () => {
         try {
-          const subRef = doc(db, "gameSubmissions", `${auth.currentUser?.uid}_${contest.id}`);
+          const subRef = doc(
+            db,
+            "gameSubmissions",
+            `${auth.currentUser?.uid}_${contest.id}`,
+          );
           const subSnap = await getDoc(subRef);
           if (subSnap.exists()) {
             const data = subSnap.data();
@@ -40,10 +51,10 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
     }
   }, [isCompleted, contest.id, auth.currentUser?.uid]);
 
-  const timeInMinutes = contest.timeLimit 
-    ? (typeof contest.timeLimit === 'string' && contest.timeLimit.includes('min') 
-        ? parseInt(contest.timeLimit) 
-        : Math.floor(parseInt(contest.timeLimit) / 60))
+  const timeInMinutes = contest.timeLimit
+    ? typeof contest.timeLimit === "string" && contest.timeLimit.includes("min")
+      ? parseInt(contest.timeLimit)
+      : Math.floor(parseInt(contest.timeLimit) / 60)
     : 0;
   const questionCount = parseInt(contest.number_of_questions) || 0;
 
@@ -92,24 +103,25 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${contest.bannerUrl})` }}
             />
-            ) : contest.creatorPfp ? (
-              <>
-                <div className="absolute inset-0 bg-neutral-900" />
-                <div className="relative h-full flex items-center justify-center">
-                  <img
-                    src={contest.creatorPfp}
-                    alt="Channel owner"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              </>         
-               ) : (
+          ) : contest.creatorPfp ? (
+            <>
+              <div className="absolute inset-0 bg-neutral-900" />
+              <div className="relative h-full flex items-center justify-center">
+                <img
+                  src={contest.creatorPfp}
+                  alt="Channel owner"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </>
+          ) : (
             <div className="absolute inset-0 bg-neutral-900" />
           )}
           <div className="absolute inset-0 bg-neutral-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <p className="text-white text-sm text-center px-4">
-              {questionCount} problem{questionCount !== 1 ? 's' : ''} in {timeInMinutes} minute{timeInMinutes !== 1 ? 's' : ''}
+              {questionCount} problem{questionCount !== 1 ? "s" : ""} in{" "}
+              {timeInMinutes} minute{timeInMinutes !== 1 ? "s" : ""}
             </p>
           </div>
           {isCompleted && (
@@ -119,11 +131,13 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
                   Completed
                 </span>
               </div>
-              </div>
+            </div>
           )}
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10">
-              <span className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}>
+              <span
+                className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}
+              >
                 {getTopicShortLabel(contest.topic)}
               </span>
             </div>
@@ -139,7 +153,9 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
           <div className="absolute bottom-2 right-2 z-10 flex rounded bg-neutral-800/80 backdrop-blur-md">
             {contestElo > 0 && (
               <div className="flex rounded px-1.5 backdrop-blur-sm py-1">
-                <span className={`text-xs font-bold ${tier.textClass}`}>{contestElo}</span>
+                <span className={`text-xs font-bold ${tier.textClass}`}>
+                  {contestElo}
+                </span>
               </div>
             )}
             <div className="flex gap-1 text-white px-1.5 py-1 rounded-md">
@@ -184,13 +200,17 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest, href, isCompleted })
                   <div className="flex items-center gap-1 text-yellow-400">
                     <span className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400" />
-                      <span className="font-medium">{contest.rating.toFixed(1)}/5</span>
+                      <span className="font-medium">
+                        {contest.rating.toFixed(1)}/5
+                      </span>
                     </span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-neutral-400">
                   <Users className="w-3 h-3" />
-                  <span className="font-medium">{contest.firstAttemptCount ?? 0} plays</span>
+                  <span className="font-medium">
+                    {contest.firstAttemptCount ?? 0} plays
+                  </span>
                 </div>
               </div>
             </div>

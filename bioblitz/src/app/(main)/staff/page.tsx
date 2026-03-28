@@ -39,7 +39,9 @@ export default function StaffPage() {
       <div className="min-h-screen bg-neutral-900 text-zinc-100">
         <div className="max-w-5xl mx-auto px-4 py-20">
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-zinc-400">You do not have permission to view this page.</p>
+          <p className="text-zinc-400">
+            You do not have permission to view this page.
+          </p>
           <div className="mt-6">
             <Link
               href="/home"
@@ -57,16 +59,22 @@ export default function StaffPage() {
     <div className="min-h-screen bg-neutral-900 text-zinc-100">
       <div className="max-w-5xl mx-auto px-4 py-20">
         <h1 className="text-3xl font-bold text-zinc-100">Staff Page</h1>
-        <p className="text-zinc-400 mt-2">
-          Staff and admins only.
-        </p>
-        <div className="mt-6">
+        <p className="text-zinc-400 mt-2">Staff and admins only.</p>
+        <div className="mt-6 flex flex-col gap-3">
           <button
             type="button"
             onClick={() => router.push("/contests/create?postAs=mitosisphere")}
-            className="px-4 py-2 rounded-lg bg-neutral-900 border border-yellow-300 text-white text-sm font-semibold hover:bg-neutral-800 transition-colors"
+            className="px-4 py-2 rounded-lg bg-neutral-900 border border-yellow-300 text-white text-sm font-semibold hover:bg-neutral-800 transition-colors w-fit"
           >
             Create contest as mitosisphere
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push("/reported")}
+            className="px-4 py-2 rounded-lg bg-neutral-900 border border-red-400 text-red-400 text-sm font-semibold hover:bg-neutral-800 transition-colors w-fit"
+          >
+            View reported questions
           </button>
         </div>
       </div>
