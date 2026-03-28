@@ -3,13 +3,14 @@ import { initializeApp, getApps, App, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { cookies } from "next/headers";
-import path from "path";
 
-const serviceAccountPath = path.resolve(process.cwd(), "firebase-service-account.json");
-
-export const app = !getApps().length 
+export const app = !getApps().length
   ? initializeApp({
-      credential: cert(serviceAccountPath), 
+      credential: cert({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     })
   : (getApps()[0] as App);
