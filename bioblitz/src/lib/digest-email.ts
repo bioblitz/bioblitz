@@ -1,13 +1,10 @@
 import type { WeeklyDigestData } from "./digest-data";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "bioblitz.net";
-
 const now = new Date();
 const weekStart = new Date(now);
 weekStart.setDate(now.getDate() - 6);
-
 const fmt = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
-
 const dateRange = `${fmt(weekStart)}–${fmt(now)}`;
 const year = now.getFullYear();
 
@@ -52,7 +49,6 @@ function topicColor(topic: string): string {
   };
   return map[topic] || "#8a8a8a";
 }
-
 const f =
   "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 const m = "'Courier New',Courier,monospace";
@@ -84,7 +80,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   let heroRight = "";
   if (data.currentStreak >= 1) {
     heroRight += `<p style="margin:0 0 6px;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="${C.orangeLight}" style="display:inline;vertical-align:middle;margin-right:3px;margin-bottom:2px;" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span><span style="color:${C.textMid};font-weight:400;"> day streak</span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${C.orangeLight}" style="display:inline;vertical-align:middle;margin-right:3px;margin-bottom:2px;" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span><span style="color:${C.textMid};font-weight:400;"> day streak</span>
   </p>`;
   }
   if (data.globalRank !== null) {
@@ -119,16 +115,37 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   const challengeRow = hasChallenges
     ? `<tr><td style="padding:0 28px 22px;">
       <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Challenges</p>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:0px solid ${C.border};border-radius:8px 0 0 8px;">
-          <p style="margin:0;font-size:26px;font-weight:800;color:${C.green};font-family:${m};line-height:1;">${data.challengeWins}</p>
-          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">WON</p>
-        </td>
-        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:0px solid ${C.border};border-left:0;border-radius:0 8px 8px 0;">
-          <p style="margin:0;font-size:26px;font-weight:800;color:${C.textLo};font-family:${m};line-height:1;">${data.challengeLosses}</p>
-          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">LOST</p>
-        </td>
-      </tr></table>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border-radius:8px;overflow:hidden;">
+        ${data.challengeDetails
+          .map((c, i) => {
+            const bb =
+              i < data.challengeDetails.length - 1
+                ? `border-bottom:1px solid ${C.border};`
+                : "";
+            const initial = esc((c.opponentName[0] || "?").toUpperCase());
+            const avatarBg = c.won ? "#166534" : "#3f3f46";
+            const avatarText = c.won ? "#4ade80" : "#a1a1aa";
+            const resultColor = c.won ? C.green : C.textLo;
+            const resultLabel = c.won ? "Won" : "Lost";
+            const resultBg = c.won ? "#14532d" : "#27272a";
+
+            return `<tr><td style="padding:12px 16px;${bb}">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+              <td width="36" valign="middle" style="padding-right:12px;">
+                <div style="width:32px;height:32px;border-radius:6px;background:${avatarBg};display:inline-block;text-align:center;line-height:32px;font-family:${m};font-size:13px;font-weight:800;color:${avatarText};">${initial}</div>
+              </td>
+              <td valign="middle">
+                <p style="margin:0;font-size:13px;font-weight:700;color:${C.textHi};font-family:${f};">${c.won ? "Beat" : "Lost to"} @${esc(c.opponentName)}</p>
+                <p style="margin:2px 0 0;font-size:11px;color:${C.textMid};font-family:${f};">${esc(c.blitzTitle)} &middot; ${c.myScore} vs ${c.theirScore}</p>
+              </td>
+              <td width="48" align="right" valign="middle">
+                <div style="display:inline-block;padding:4px 10px;background:${resultBg};border-radius:6px;font-family:${m};font-size:11px;font-weight:800;color:${resultColor};">${resultLabel}</div>
+              </td>
+            </tr></table>
+          </td></tr>`;
+          })
+          .join("")}
+      </table>
     </td></tr>`
     : "";
 
@@ -152,9 +169,8 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
       </tr></table>
     </td></tr>`;
   }
-
   const friendBlock =
-    data.friends.length > 1
+    data.friends.length > 1 && data.challengeDetails.length === 0
       ? `<tr><td style="padding:0 28px 22px;">
       <p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Friends Leaderboard</p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:0px solid ${C.border};border-radius:8px;">${fRows}</table>
@@ -189,7 +205,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   const blitzBlock =
     data.unplayedBlitzes.length > 0
       ? `<tr><td style="padding:0 28px 24px;">
-      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Blitzes for you</p>
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Blitzes for you</p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%">${bRows}</table>
     </td></tr>`
       : "";
@@ -220,7 +236,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   Hi ${firstName},
 </p>
 
-<p style="margin:2px 0 0;font-size:13px;color:${C.textMid};font-family:${f};line-height:1.3;">
+<p style="margin:2px 0 0;font-size:15px;color:${C.textMid};font-family:${f};line-height:1.3;">
   Here’s your week on BioBlitz.
 </p>      </td>
       <td width="24" align="right" valign="top">
@@ -282,15 +298,16 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
       : ""
   }
 
-  ${streakCallout}
-  ${divider}
-  ${inactiveRow}
-  ${divider}
-  ${friendBlock}
-  ${divider}
-  ${challengeRow}
-  ${divider}
-  ${blitzBlock}
+  ${hasActivity ? divider : ""}
+${streakCallout}
+${hasActivity && data.currentStreak >= 7 ? divider : ""}
+${inactiveRow}
+${!hasActivity ? divider : ""}
+${data.challengeDetails.length === 0 && data.friends.length > 1 ? friendBlock : ""}
+${data.challengeDetails.length === 0 && data.friends.length > 1 ? divider : ""}
+${challengeRow}
+${hasChallenges ? divider : ""}
+${blitzBlock}
 
 
   <!-- Footer -->
@@ -304,7 +321,6 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
         </td>
       </tr></table>
     </td></tr>
- 
 
 
 </table>

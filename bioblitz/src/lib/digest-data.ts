@@ -13,6 +13,14 @@ export interface UnplayedBlitz {
   questionCount: number;
 }
 
+export interface ChallengeDigest {
+  opponentName: string;
+  blitzTitle: string;
+  myScore: number;
+  theirScore: number;
+  won: boolean;
+}
+
 export interface WeeklyDigestData {
   displayName: string;
   username: string;
@@ -35,6 +43,7 @@ export interface WeeklyDigestData {
 
   challengeWins: number;
   challengeLosses: number;
+  challengeDetails: ChallengeDigest[];
 
   friends: FriendDigest[];
   friendAhead: { displayName: string; gap: number } | null;
@@ -60,8 +69,6 @@ export async function gatherWeeklyDigest(
   const currentElo: number = u.bElo || 0;
   const currentStreak: number = u.streak || 0;
   const eloHistory: any[] = Array.isArray(u.eloHistory) ? u.eloHistory : [];
-  const playedGameIds: string[] = u.playedGameIds || [];
-  const playedSet = new Set(playedGameIds);
 
   if (!email) return null;
 
@@ -176,6 +183,7 @@ export async function gatherWeeklyDigest(
 
   let challengeWins = 0;
   let challengeLosses = 0;
+  const challengeDetails: ChallengeDigest[] = [];
   try {
     const countChallenges = async (field: string) => {
       const snap = await db
@@ -187,9 +195,25 @@ export async function gatherWeeklyDigest(
         .get();
 
       for (const d of snap.docs) {
-        const data = d.data();
-        if (data.winnerId === uid) challengeWins++;
+        const c = d.data();
+        const won = c.winnerId === uid;
+        if (won) challengeWins++;
         else challengeLosses++;
+
+        const isChallenger = c.challengerId === uid;
+        const myScore = isChallenger ? c.challengerScore : c.challengedScore;
+        const theirScore = isChallenger ? c.challengedScore : c.challengerScore;
+        const opponentName = isChallenger
+          ? c.challengedUsername
+          : c.challengerUsername;
+
+        challengeDetails.push({
+          opponentName: opponentName || "Unknown",
+          blitzTitle: c.blitzTitle || "Unknown Blitz",
+          myScore: myScore ?? 0,
+          theirScore: theirScore ?? 0,
+          won,
+        });
       }
     };
 
@@ -197,10 +221,13 @@ export async function gatherWeeklyDigest(
       countChallenges("challengerId"),
       countChallenges("challengedId"),
     ]);
+
+    // sort wins first, cap at 4
+    challengeDetails.sort((a, b) => (b.won ? 1 : 0) - (a.won ? 1 : 0));
+    challengeDetails.splice(4);
   } catch (e) {
     console.error("digest: challenges error", e);
   }
-
   const friends: FriendDigest[] = [];
   let friendAhead: WeeklyDigestData["friendAhead"] = null;
   try {
@@ -308,24 +335,38 @@ export async function gatherWeeklyDigest(
       }
     }
 
-    const setsSnap = await db
-      .collection("sets")
-      .where("status", "==", "completed")
-      .limit(200)
+    const playedSnap = await db
+      .collection("gameSubmissions")
+      .where("userId", "==", uid)
       .get();
+
+    const playedSet = new Set(playedSnap.docs.map((d) => d.data().gameId));
+
+    const setsSnap = await db.collection("sets").limit(200).get();
 
     const candidates: UnplayedBlitz[] = [];
     for (const d of setsSnap.docs) {
       if (playedSet.has(d.id)) continue;
       const data = d.data();
-      if (data.hidden) continue;
+      if (data.hidden === true) continue;
+      if (!data.title) continue;
+      if ((data.firstAttemptCount || 0) < 1) continue;
+      if (!data.topic) continue;
+      const qCount = data.questionCount || data.number_of_questions || 0;
+      if (qCount < 1) continue;
+      if (!data.activatedAt && !data.ratingActivated && !data.firstAttemptCount)
+        continue;
       candidates.push({
         id: d.id,
-        title: data.title || "Untitled",
-        topic: data.topic || "General",
-        questionCount: data.number_of_questions || data.questions?.length || 0,
+        title: data.title,
+        topic: data.topic,
+        questionCount: qCount,
       });
     }
+    console.log("setsSnap size:", setsSnap.size);
+    console.log("playedSet size:", playedSet.size);
+    console.log("candidates:", candidates.length);
+    console.log("unplayedBlitzes:", unplayedBlitzes.length);
 
     candidates.sort((a, b) => {
       const aWeak = a.topic === weakestTopicName ? 0 : 1;
@@ -345,7 +386,7 @@ export async function gatherWeeklyDigest(
       hasAheadSection,
     ].filter(Boolean).length;
 
-    const blitzSlots = Math.min(5, Math.max(2, 6 - usedSlots));
+    const blitzSlots = Math.max(0, 4 - challengeDetails.length);
 
     unplayedBlitzes.push(...candidates.slice(0, blitzSlots));
   } catch (e) {
@@ -360,6 +401,7 @@ export async function gatherWeeklyDigest(
     eloChange,
     globalRank,
     currentStreak,
+    challengeDetails,
     blitzesThisWeek,
     questionsAnswered,
     correctAnswers,
