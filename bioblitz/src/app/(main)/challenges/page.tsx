@@ -89,17 +89,9 @@ function FriendRanking({
               }`}
             >
               <div className="w-6 flex justify-center">
-                {i === 0 ? (
-                  <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
-                ) : i === 1 ? (
-                  <Medal className="w-3.5 h-3.5 text-zinc-300" />
-                ) : i === 2 ? (
-                  <Medal className="w-3.5 h-3.5 text-orange-500" />
-                ) : (
-                  <span className="font-bold text-zinc-600 w-6 text-center text-[12px]">
-                    #{i + 1}
-                  </span>
-                )}
+                <span className="text-zinc-500 font-mono text-s w-6 text-center">
+                  #{i + 1}
+                </span>
               </div>
 
               {friend.photoURL ? (

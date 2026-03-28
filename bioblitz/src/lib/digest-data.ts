@@ -131,10 +131,7 @@ export async function gatherWeeklyDigest(
       ((best.correctCount || 0) / (best.totalQuestions || 1)) * 100,
     );
     if (bestAcc >= 70) {
-      personalBest = {
-        title: best.gameTitle || "a Blitz",
-        accuracy: bestAcc,
-      };
+      personalBest = { title: best.gameTitle || "a Blitz", accuracy: bestAcc };
     }
   }
 
@@ -143,7 +140,7 @@ export async function gatherWeeklyDigest(
     const rankSnap = await db
       .collection("users")
       .orderBy("bElo", "desc")
-      .limit(500)
+      .limit(1500)
       .get();
 
     let rank = 0;
@@ -154,7 +151,9 @@ export async function gatherWeeklyDigest(
         break;
       }
     }
-  } catch {}
+  } catch (e) {
+    console.error("digest: globalRank error", e);
+  }
 
   let potdCompletedThisWeek = 0;
   let potdAvailableThisWeek = 0;
@@ -166,13 +165,14 @@ export async function gatherWeeklyDigest(
       .get();
 
     potdAvailableThisWeek = potdSnap.size;
-
     const completedIds: string[] = u.completedPotdIds || [];
     const weekPotdIds = new Set(potdSnap.docs.map((d) => d.id));
     potdCompletedThisWeek = completedIds.filter((id) =>
       weekPotdIds.has(id),
     ).length;
-  } catch {}
+  } catch (e) {
+    console.error("digest: potd error", e);
+  }
 
   let challengeWins = 0;
   let challengeLosses = 0;
@@ -182,12 +182,12 @@ export async function gatherWeeklyDigest(
         .collection("challenges")
         .where(field, "==", uid)
         .where("status", "==", "completed")
+        .where("affectsElo", "==", true)
+        .where("resolvedAt", ">=", weekAgo)
         .get();
 
       for (const d of snap.docs) {
         const data = d.data();
-        const completedAt = toDate(data.completedAt);
-        if (!completedAt || completedAt < weekAgo) continue;
         if (data.winnerId === uid) challengeWins++;
         else challengeLosses++;
       }
@@ -197,7 +197,9 @@ export async function gatherWeeklyDigest(
       countChallenges("challengerId"),
       countChallenges("challengedId"),
     ]);
-  } catch {}
+  } catch (e) {
+    console.error("digest: challenges error", e);
+  }
 
   const friends: FriendDigest[] = [];
   let friendAhead: WeeklyDigestData["friendAhead"] = null;
@@ -254,7 +256,9 @@ export async function gatherWeeklyDigest(
         gap: ahead.bElo - currentElo,
       };
     }
-  } catch {}
+  } catch (e) {
+    console.error("digest: friends error", e);
+  }
 
   let weakestTopicName: string | null = null;
   const unplayedBlitzes: UnplayedBlitz[] = [];
@@ -329,8 +333,24 @@ export async function gatherWeeklyDigest(
       return aWeak - bWeak;
     });
 
-    unplayedBlitzes.push(...candidates.slice(0, 5));
-  } catch {}
+    const hasChallengesSection = challengeWins + challengeLosses >= 2;
+    const hasFriendsSection = friends.length >= 2;
+    const hasStreakSection = blitzesThisWeek > 0 && currentStreak >= 7;
+    const hasAheadSection = !!friendAhead && friendAhead.gap > 0;
+
+    const usedSlots = [
+      hasChallengesSection,
+      hasFriendsSection,
+      hasStreakSection,
+      hasAheadSection,
+    ].filter(Boolean).length;
+
+    const blitzSlots = Math.min(5, Math.max(2, 6 - usedSlots));
+
+    unplayedBlitzes.push(...candidates.slice(0, blitzSlots));
+  } catch (e) {
+    console.error("digest: blitzes error", e);
+  }
 
   return {
     displayName,

@@ -1,6 +1,14 @@
 import type { WeeklyDigestData } from "./digest-data";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.co";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "bioblitz.net";
+
+const now = new Date();
+const weekStart = new Date(now);
+weekStart.setDate(now.getDate() - 6);
+
+const fmt = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
+
+const dateRange = `${fmt(weekStart)}–${fmt(now)}`;
 
 const C = {
   bg: "#0a0a0a",
@@ -18,8 +26,8 @@ const C = {
   amber: "#fbbf24",
   orange: "#ea580c",
   orangeLight: "#f97316",
-  pillActive: "#9a3412",
-  pillOff: "#1c1917",
+  pillActive: "#e5e5e5",
+  pillOff: "#2a2826",
 };
 
 function esc(s: string): string {
@@ -65,7 +73,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
     const on = data.activeDays[i];
     pills += `<td align="center" style="padding:0 1px;">
       <div style="width:100%;max-width:56px;height:7px;border-radius:4px;background:${on ? C.pillActive : C.pillOff};"></div>
-      <p style="margin:4px 0 0;font-size:10px;color:${on ? C.orangeLight : C.textLo};font-family:${m};font-weight:600;line-height:1;">${days[i]}</p>
+      <p style="margin:4px 0 0;font-size:10px;color:${on ? C.pillActive : C.textLo};font-family:${m};font-weight:600;line-height:1;">${days[i]}</p>
     </td>`;
   }
 
@@ -201,11 +209,10 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   <tr><td style="padding:26px 28px 14px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
       <td>
-        <p style="margin:0 0 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.textLo};font-family:${m};">Weekly Digest</p>
-        <p style="margin:0;font-size:15px;font-weight:600;color:${C.text};font-family:${f};">Hey ${firstName}</p>
+<p style="margin:0 0 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.textLo};font-family:${m};">Weekly Digest ${dateRange}</p>
+        <p style="margin:0;font-size:15px;font-weight:600;color:${C.text};font-family:${f};">Hi ${firstName}! Here's your weekly digest:</p>
       </td>
       <td width="24" align="right" valign="top">
-        <a href="${SITE}" style="text-decoration:none;font-size:14px;font-weight:800;color:${C.textLo};font-family:${m};">B</a>
       </td>
     </tr></table>
   </td></tr>
@@ -245,7 +252,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
       </td>
       <td width="33%" style="text-align:center;">
         <p style="margin:0;font-size:22px;font-weight:800;color:${data.accuracy >= 70 ? C.green : data.accuracy >= 50 ? C.textHi : C.red};font-family:${m};line-height:1;">${data.accuracy}%</p>
-        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">accuracy</p>
+        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};"> average accuracy</p>
       </td>
     </tr></table>
   </td></tr>`
@@ -253,7 +260,6 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   }
 
   ${streakCallout}
-  ${aheadRow}
   ${inactiveRow}
   ${friendBlock}
   ${challengeRow}

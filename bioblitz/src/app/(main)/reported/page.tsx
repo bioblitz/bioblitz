@@ -220,7 +220,7 @@ export default function ReportedQuestionsPage() {
 
                 <div className="flex items-center gap-3 mt-0.5">
                   <Link
-                    href={`/play/${r.gameId}`}
+                    href={`/home/${r.gameId}`}
                     target="_blank"
                     className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
                   >
