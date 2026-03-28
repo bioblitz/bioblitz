@@ -1,14 +1,10 @@
 import { motion } from "framer-motion";
-import { X, Save, Pencil, MapPin, School, GraduationCap, UserIcon } from "lucide-react";
+import { X, Save } from "lucide-react";
 
 interface EditProfileModalProps {
   isOpen: boolean;
   tempProfile: {
     bio: string;
-    location: string;
-    grade: string;
-    school: string;
-    displayName: string;
     username: string;
   };
   editError: string | null;
@@ -44,34 +40,11 @@ export default function EditProfileModal({
         </button>
 
         <div className="relative">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-full bg-neutral-500/10 flex items-center justify-center shrink-0">
-              <Pencil className="w-6 h-6 text-neutral-500" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
-              <p className="text-zinc-500 text-sm">Update your profile information</p>
-            </div>
-          </div>
+          <h2 className="text-2xl font-bold text-white mb-6">Edit Profile</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                Display Name
-              </label>
-              <div className="relative">
-                <UserIcon className="absolute left-3 top-3 w-5 h-5 text-zinc-600" />
-                <input
-                  type="text"
-                  value={tempProfile.displayName}
-                  onChange={(e) => onChange("displayName", e.target.value)}
-                  className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+              <label className="text-xs text-zinc-500 mb-2 block">
                 Username
               </label>
               <div className="relative">
@@ -86,7 +59,7 @@ export default function EditProfileModal({
             </div>
 
             <div>
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+              <label className="text-xs text-zinc-500 mb-2 block">
                 Bio
               </label>
               <textarea
@@ -96,53 +69,6 @@ export default function EditProfileModal({
                 className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors resize-none placeholder:text-zinc-600"
                 placeholder="Tell us about yourself..."
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                  Location
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 w-5 h-5 text-zinc-600" />
-                  <input
-                    type="text"
-                    value={tempProfile.location}
-                    onChange={(e) => onChange("location", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                  Grade
-                </label>
-                <div className="relative">
-                  <GraduationCap className="absolute left-3 top-3 w-5 h-5 text-zinc-600" />
-                  <input
-                    type="text"
-                    value={tempProfile.grade}
-                    onChange={(e) => onChange("grade", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                  School
-                </label>
-                <div className="relative">
-                  <School className="absolute left-3 top-3 w-5 h-5 text-zinc-600" />
-                  <input
-                    type="text"
-                    value={tempProfile.school}
-                    onChange={(e) => onChange("school", e.target.value)}
-                    className="w-full bg-zinc-900 text-white p-2.5 pl-10 rounded-xl border border-zinc-800 focus:border-neutral-500 focus:outline-none transition-colors placeholder:text-zinc-600"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 

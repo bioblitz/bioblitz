@@ -193,7 +193,7 @@ export default function ChannelPage() {
       )}
 
       <div className="bg-neutral-900 min-h-screen justify-center pt-20 py-10 text-white">
-        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl w-full mx-auto pl-16 pr-4 sm:pr-6 lg:pr-8">
           <input
             type="file"
             ref={fileInputRef}

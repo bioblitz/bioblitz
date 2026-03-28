@@ -182,7 +182,7 @@ export default function HomeClient() {
 
   return (
     <div className="min-h-screen bg-neutral-900">
-      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
+      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-16 pt-24 pb-12">
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>

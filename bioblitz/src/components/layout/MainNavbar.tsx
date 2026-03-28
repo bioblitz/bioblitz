@@ -28,8 +28,7 @@ export default function MainNavbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [railOpen, setRailOpen] = useState(false);
-  const [suppressRailHover, setSuppressRailHover] = useState(false);
+
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -204,6 +203,7 @@ export default function MainNavbar() {
                   src={user.photoURL}
                   alt={user.displayName}
                   className="h-10 w-10 rounded-full object-cover border border-zinc-700"
+                  referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.currentTarget;
                     target.onerror = null;
@@ -349,53 +349,23 @@ export default function MainNavbar() {
         </div>
       </nav>
 
-      <aside
-        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none ${
-          railOpen ? "bg-neutral-900/90" : "bg-transparent"
-        }`}
-        onMouseLeave={() => {
-          setRailOpen(false);
-          setSuppressRailHover(false);
-        }}
-      >
-        <div
-          className="w-16 flex flex-col items-center justify-center py-6 gap-0 ml-2 pointer-events-auto"
-          onMouseEnter={() => {
-            if (!suppressRailHover) setRailOpen(true);
-          }}
-        >
+      <aside className="fixed left-0 top-16 h-[calc(100%-4rem)] w-16 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none">
+        <div className="w-14 flex flex-col items-center justify-center py-6 gap-0 ml-1 pointer-events-auto">
           {sideItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-                title={item.name}
+                className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200"
                 aria-label={item.name}
-                onClick={() => {
-                  setRailOpen(false);
-                  setSuppressRailHover(true);
-                }}
               >
-                <span
-                  className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
-                    suppressRailHover
-                      ? ""
-                      : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                  }`}
-                />
+                <span className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-200" />
                 <item.icon
-                  size={26}
+                  size={30}
                   className={isActive ? "text-white fill-white" : ""}
                 />
-                <span
-                  className={`absolute left-14 h-full flex items-center text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    railOpen
-                      ? "opacity-100 translate-x-0"
-                      : "opacity-0 translate-x-1"
-                  }`}
-                >
+                <span className="absolute left-full ml-3 px-2 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-150 pointer-events-none">
                   {item.name}
                 </span>
               </Link>
@@ -404,29 +374,12 @@ export default function MainNavbar() {
           {isStaff && (
             <Link
               href="/staff"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-              title="Staff"
+              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200"
               aria-label="Staff"
-              onClick={() => {
-                setRailOpen(false);
-                setSuppressRailHover(true);
-              }}
             >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <ShieldUser size={26} />
-              <span
-                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-1"
-                }`}
-              >
+              <span className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-200" />
+              <ShieldUser size={30} />
+              <span className="absolute left-full ml-3 px-2 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-150 pointer-events-none">
                 Staff
               </span>
             </Link>
@@ -434,29 +387,12 @@ export default function MainNavbar() {
           {isAdmin && (
             <Link
               href="/admin"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-              title="Admin"
+              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200"
               aria-label="Admin"
-              onClick={() => {
-                setRailOpen(false);
-                setSuppressRailHover(true);
-              }}
             >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <Hammer size={26} />
-              <span
-                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-1"
-                }`}
-              >
+              <span className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-200" />
+              <Hammer size={30} />
+              <span className="absolute left-full ml-3 px-2 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover/railitem:opacity-100 transition-opacity duration-150 pointer-events-none">
                 Admin
               </span>
             </Link>

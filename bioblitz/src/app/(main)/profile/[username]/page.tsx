@@ -69,10 +69,6 @@ export default function ProfilePage() {
 
   const [tempProfile, setTempProfile] = useState({
     bio: "",
-    location: "",
-    grade: "",
-    school: "",
-    displayName: "",
     username: "",
   });
 
@@ -127,10 +123,6 @@ export default function ProfilePage() {
     if (userProfile) {
       setTempProfile({
         bio: userProfile.bio || "",
-        location: userProfile.location || "",
-        grade: userProfile.grade || "",
-        school: userProfile.school || "",
-        displayName: userProfile.displayName || "",
         username: userProfile.username || "",
       });
     }
@@ -169,13 +161,6 @@ export default function ProfilePage() {
     }
 
     const { value: censoredBio } = await applyTextPolicy(tempProfile.bio || "");
-    const { value: censoredLocation } = await applyTextPolicy(
-      tempProfile.location || ""
-    );
-    const { value: censoredSchool } = await applyTextPolicy(tempProfile.school || "");
-    const { value: censoredDisplayName } = await applyTextPolicy(
-      tempProfile.displayName || ""
-    );
 
     if (cleanedUsername !== (userProfile?.username || "").trim().toLowerCase()) {
       if (cleanedUsername.length < 3) {
@@ -193,11 +178,7 @@ export default function ProfilePage() {
       const userRef = doc(db, "users", auth.currentUser.uid);
 
       const payload = {
-        ...tempProfile,
         bio: censoredBio,
-        location: censoredLocation,
-        school: censoredSchool,
-        displayName: censoredDisplayName,
         username: cleanedUsername,
       };
 
@@ -246,7 +227,7 @@ export default function ProfilePage() {
 
   return (
     <main
-      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 pt-24 pb-12 pl-16 pr-4 sm:pr-6 lg:pr-8 relative overflow-hidden`}
     >
       <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900/10 blur-[100px] pointer-events-none" />
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">

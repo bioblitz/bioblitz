@@ -92,19 +92,19 @@ export function useFriendActions({
         );
         const friendsSnap = await getDocs(friendsQuery);
 
-        const friendsData = await Promise.all(
-          friendsSnap.docs.map(async (friendDoc) => {
-            const uid = (friendDoc.data() as any).uid;
-            if (!uid) return null;
-            const userSnap = await getDoc(doc(db, "users", uid));
-            if (userSnap.exists()) {
-              const data = userSnap.data() as UserProfile;
-              return { ...data, uid: userSnap.id };
-            }
-            return null;
+        const friendsData = friendsSnap.docs
+          .map((friendDoc) => {
+            const d = friendDoc.data() as any;
+            if (!d.uid) return null;
+            return {
+              uid: d.uid,
+              displayName: d.displayName || "",
+              username: d.username || "",
+              photoURL: d.photoURL || "",
+            } as UserProfile;
           })
-        );
-        setFriends(friendsData.filter((u): u is UserProfile => u !== null));
+          .filter((u): u is UserProfile => u !== null);
+        setFriends(friendsData);
 
         if (currentUser.uid === profileUid) {
           const requestsQuery = query(
@@ -113,21 +113,19 @@ export function useFriendActions({
           );
           const requestsSnap = await getDocs(requestsQuery);
 
-          const requestsData = await Promise.all(
-            requestsSnap.docs.map(async (reqDoc) => {
-              const uid = (reqDoc.data() as any).uid;
-              if (!uid) return null;
-              const userSnap = await getDoc(doc(db, "users", uid));
-              if (userSnap.exists()) {
-                const data = userSnap.data() as UserProfile;
-                return { ...data, uid: userSnap.id };
-              }
-              return null;
+          const requestsData = requestsSnap.docs
+            .map((reqDoc) => {
+              const d = reqDoc.data() as any;
+              if (!d.uid) return null;
+              return {
+                uid: d.uid,
+                displayName: d.displayName || "",
+                username: d.username || "",
+                photoURL: d.photoURL || "",
+              } as UserProfile;
             })
-          );
-          setIncomingRequests(
-            requestsData.filter((u): u is UserProfile => u !== null)
-          );
+            .filter((u): u is UserProfile => u !== null);
+          setIncomingRequests(requestsData);
         }
       } catch (err) {
         console.error("Error fetching friends/requests:", err);
@@ -180,8 +178,10 @@ export function useFriendActions({
     if (!auth.currentUser) return;
 
     try {
-      const myFriendDocRef = doc(db, "users", auth.currentUser.uid, "friends", target.uid);
-      const myFriendSnap = await getDoc(myFriendDocRef);
+      const [myFriendSnap, myUserSnap] = await Promise.all([
+        getDoc(doc(db, "users", auth.currentUser.uid, "friends", target.uid)),
+        getDoc(doc(db, "users", auth.currentUser.uid)),
+      ]);
 
       if (myFriendSnap.exists()) {
         const status = (myFriendSnap.data() as any).status;
@@ -190,12 +190,15 @@ export function useFriendActions({
         if (status === "received") { setAddFriendSuccess("They already sent you a request!"); return; }
       }
 
+      const myUsername = (myUserSnap.data() as any)?.username || "";
+
       const batch = writeBatch(db);
       batch.set(doc(db, "users", auth.currentUser.uid, "friends", target.uid), {
         uid: target.uid,
         status: "sent",
         createdAt: Timestamp.now(),
         displayName: target.displayName,
+        username: target.username,
         photoURL: target.photoURL,
       });
       batch.set(doc(db, "users", target.uid, "friends", auth.currentUser.uid), {
@@ -203,6 +206,7 @@ export function useFriendActions({
         status: "received",
         createdAt: Timestamp.now(),
         displayName: auth.currentUser.displayName || "Unknown",
+        username: myUsername,
         photoURL: auth.currentUser.photoURL || "",
       });
       await batch.commit();
@@ -264,6 +268,9 @@ export function useFriendActions({
         }
       }
 
+      const myUserSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+      const myUsername = (myUserSnap.data() as any)?.username || "";
+
       const batch = writeBatch(db);
 
       const myRef = doc(db, "users", auth.currentUser.uid, "friends", targetUid);
@@ -272,6 +279,7 @@ export function useFriendActions({
         status: "sent",
         createdAt: Timestamp.now(),
         displayName: targetUserData.displayName || "",
+        username: targetUserData.username || "",
         photoURL: targetUserData.photoURL || "",
       });
 
@@ -287,6 +295,7 @@ export function useFriendActions({
         status: "received",
         createdAt: Timestamp.now(),
         displayName: auth.currentUser.displayName || "Unknown",
+        username: myUsername,
         photoURL: auth.currentUser.photoURL || "",
       });
 
@@ -337,6 +346,7 @@ export function useFriendActions({
         status: "sent",
         createdAt: Timestamp.now(),
         displayName: userProfile.displayName,
+        username: userProfile.username || "",
         photoURL: userProfile.photoURL,
       });
 
@@ -346,6 +356,7 @@ export function useFriendActions({
         status: "received",
         createdAt: Timestamp.now(),
         displayName: auth.currentUser.displayName || "Unknown",
+        username: myData?.username || "",
         photoURL: auth.currentUser.photoURL || "",
       });
 

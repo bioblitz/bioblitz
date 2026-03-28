@@ -52,7 +52,7 @@ export default function LeaderboardClient({
   };
 
   return (
-    <main className={`${inter.className} min-h-screen bg-neutral-900 text-white pt-24 px-4 pb-12`}>
+    <main className={`${inter.className} min-h-screen bg-neutral-900 text-white pt-24 pl-16 pr-4 pb-12`}>
       <div className="max-w-3xl mx-auto">
         
         <div className="text-center mb-10">

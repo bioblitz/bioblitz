@@ -81,7 +81,7 @@ const LeaderboardItem = ({ player, isCurrentUser }: { player: Player, isCurrentU
     <li className={`flex items-center p-3 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg border-l-4 ${highlightClass}`}>
       <div className="w-16 text-center text-lg font-bold">{<RankDisplay rank={player.rank} />}</div>
       <div className="flex items-center ml-2 flex-1">
-        <img className="h-10 w-10 rounded-full flex-shrink-0 bg-gray-700" src={player.avatar} alt={`${player.name}'s avatar`} onError={(e) => { e.currentTarget.src = `https://placehold.co/40x40/475569/ffffff?text=${player.name.charAt(0)}` }}/>
+        <img className="h-10 w-10 rounded-full flex-shrink-0 bg-gray-700" src={player.avatar} alt={`${player.name}'s avatar`} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = `https://placehold.co/40x40/475569/ffffff?text=${player.name.charAt(0)}` }}/>
         <div className="ml-4">
           <p className="font-semibold text-gray-100">{player.name} <span className="text-gray-400 text-sm">({player.location})</span></p>
           <AnswerIndicator answers={player.answers} />

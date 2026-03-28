@@ -187,33 +187,6 @@ export function useProfileData({
                 }
               }
 
-              if (!foundOriginal && playedData.title) {
-                try {
-                  const q = query(
-                    collection(db, "sets"),
-                    where("title", "==", playedData.title),
-                    limit(1)
-                  );
-                  const querySnap = await getDocs(q);
-
-                  if (!querySnap.empty) {
-                    const matchedDoc = querySnap.docs[0];
-                    const originalData = matchedDoc.data();
-                    topic =
-                      originalData.topic ||
-                      originalData.Topic ||
-                      originalData.category ||
-                      topic;
-                    title = originalData.title || title;
-                    contestRatingFromSet = originalData.contestRating || 0;
-                    foundOriginal = true;
-                    resolvedSetId = matchedDoc.id;
-                  }
-                } catch (e) {
-                  console.error("Title lookup failed", e);
-                }
-              }
-
               if (!foundOriginal) {
                 return null;
               }

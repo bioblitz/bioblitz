@@ -722,21 +722,28 @@ export const onUserProfileUpdate = onDocumentUpdated(
         timeZone: "America/Los_Angeles",
       });
 
-      for (const potdId of newlyCompleted) {
-        const potdSnap = await db.collection("potd").doc(potdId).get();
-        if (!potdSnap.exists || potdSnap.data()?.date !== todayPst) continue;
-
-        // Guard against double-increment if already updated today
-        const lastStreakDate = newData.lastStreakDate as
-          | admin.firestore.Timestamp
-          | undefined;
-        if (lastStreakDate) {
-          const lastDatePst = lastStreakDate
-            .toDate()
-            .toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
-          if (lastDatePst === todayPst) break;
+      // Guard against double-increment if already updated today
+      const lastStreakDate = newData.lastStreakDate as
+        | admin.firestore.Timestamp
+        | undefined;
+      if (lastStreakDate) {
+        const lastDatePst = lastStreakDate
+          .toDate()
+          .toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+        if (lastDatePst === todayPst) {
+          // Already incremented streak today — skip
+        } else {
+          await db
+            .collection("users")
+            .doc(event.params.userId)
+            .update({
+              streak: FieldValue.increment(1),
+              lastStreakDate: FieldValue.serverTimestamp(),
+            });
+          console.log(`Streak incremented for user ${event.params.userId} (POTD ${newlyCompleted[0]})`);
         }
-
+      } else {
+        // No prior streak date — first time ever
         await db
           .collection("users")
           .doc(event.params.userId)
@@ -744,8 +751,7 @@ export const onUserProfileUpdate = onDocumentUpdated(
             streak: FieldValue.increment(1),
             lastStreakDate: FieldValue.serverTimestamp(),
           });
-        console.log(`Streak incremented for user ${event.params.userId} (POTD ${potdId})`);
-        break;
+        console.log(`Streak incremented for user ${event.params.userId} (POTD ${newlyCompleted[0]})`);
       }
     }
 

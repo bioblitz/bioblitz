@@ -10,7 +10,7 @@ import {
   XCircle,
   Search,
   Loader2,
-  Lightbulb,
+
   RotateCcw,
   Eye,
   ChevronRight,
@@ -296,7 +296,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   return (
     <div className="min-h-screen bg-neutral-900">
-      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-0 sm:pl-12 lg:pl-33.5 pt-24 pb-12">
+      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-16 pt-24 pb-12">
         <div className="flex flex-row items-end justify-between gap-6 mb-8">
           <div className="flex flex-col items-start gap-2">
             <div className="flex items-center gap-3">
@@ -391,7 +391,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
                       {isFallback && (
-                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300">
+                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300">
                           Sampled from archive
                         </span>
                       )}
@@ -495,10 +495,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         ((viewAnyway || isFallback) && isActiveCompleted)) && (
                         <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
                           <div className="bg-zinc-900 rounded p-6 text-left">
-                            <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm font-bold uppercase tracking-wider">
-                              <Lightbulb className="w-4 h-4 text-yellow-500" />
-                              Explanation
-                            </div>
+                            <p className="text-zinc-400 text-sm mb-3">Explanation</p>
                             <p className="text-zinc-300 leading-relaxed">
                               {activePuzzle.explanation}
                             </p>

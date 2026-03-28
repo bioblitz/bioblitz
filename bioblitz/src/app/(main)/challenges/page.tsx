@@ -469,7 +469,7 @@ export default function ChallengesPage() {
         }}
       />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 relative z-10">
+      <main className="max-w-6xl mx-auto pl-16 pr-4 sm:pr-6 lg:pr-8 pt-24 pb-16 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}

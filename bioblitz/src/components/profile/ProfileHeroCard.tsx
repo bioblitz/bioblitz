@@ -72,6 +72,7 @@ export default function ProfileHeroCard({
               src={userProfile.photoURL}
               alt="Profile"
               className="w-full h-full object-cover group-hover:opacity-50 transition-all duration-300"
+              referrerPolicy="no-referrer"
               onError={(e) => {
                 const target = e.currentTarget;
                 target.onerror = null;
@@ -141,7 +142,7 @@ export default function ProfileHeroCard({
 
         {(isOwnProfile || userProfile?.bio) && (
           <div className="bg-neutral-900/50 rounded-xl p-4 border border-neutral-800">
-            <p className="text-neutral-300 leading-relaxed italic">
+            <p className="text-neutral-300 leading-relaxed italic whitespace-pre-wrap">
               {userProfile?.bio || "Add a biography!"}
             </p>
           </div>

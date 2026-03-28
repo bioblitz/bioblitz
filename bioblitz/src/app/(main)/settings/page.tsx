@@ -151,6 +151,12 @@ export default function SettingsPage() {
         }
       }
 
+      // Remove search index entries for this user and their channel
+      await Promise.all([
+        deleteDoc(doc(db, "search_index", `user_${uid}`)),
+        deleteDoc(doc(db, "search_index", `channel_${uid}`)),
+      ].map((p) => p.catch(() => {})));
+
       console.log("User data deleted successfully!");
     } catch (error) {
       console.error("Error deleting user data:", error);
@@ -299,7 +305,7 @@ export default function SettingsPage() {
   }
   return (
       <main
-      className={`${inter.className} min-h-screen bg-neutral-900 text-white p-8 overflow-y-auto pt-24`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-white p-8 pl-16 overflow-y-auto pt-24`}
     >
       {toastMessage && (
         <motion.div

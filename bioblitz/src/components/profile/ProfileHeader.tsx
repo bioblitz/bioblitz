@@ -92,7 +92,7 @@ export default function ProfileHeader({
             </div>
 
             {userProfile.bio && (
-              <p className="text-zinc-400 mt-4 max-w-2xl leading-relaxed">
+              <p className="text-zinc-400 mt-4 max-w-2xl leading-relaxed whitespace-pre-wrap">
                 {userProfile.bio}
               </p>
             )}

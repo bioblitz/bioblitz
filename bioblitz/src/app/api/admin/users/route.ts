@@ -241,8 +241,9 @@ export async function DELETE(request: Request) {
       }
     })(),
 
-    // 6. Delete search_index entry for this user
-    adminFirestore.collection("search_index").doc(uid).delete().catch(() => {}),
+    // 6. Delete search_index entries for this user and their channel
+    adminFirestore.collection("search_index").doc(`user_${uid}`).delete().catch(() => {}),
+    adminFirestore.collection("search_index").doc(`channel_${uid}`).delete().catch(() => {}),
   ]);
 
   return NextResponse.json({ message: "User deleted." });

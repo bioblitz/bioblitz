@@ -66,6 +66,7 @@ export default function ProfileFriendsPanel({
                     src={friend.photoURL}
                     alt={friend.displayName}
                     className="w-8 h-8 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
                     onError={(e) => {
                       const target = e.currentTarget;
                       target.onerror = null;
@@ -108,6 +109,7 @@ export default function ProfileFriendsPanel({
                         src={request.photoURL}
                         alt={request.displayName}
                         className="w-8 h-8 rounded-full object-cover"
+                        referrerPolicy="no-referrer"
                         onError={(e) => {
                           const target = e.currentTarget;
                           target.onerror = null;
