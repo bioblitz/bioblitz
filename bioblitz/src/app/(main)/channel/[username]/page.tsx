@@ -1,5 +1,5 @@
 "use client";
-
+//cool
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -360,7 +360,7 @@ export default function ChannelPage() {
                     return !isHidden && (isCompleted || !hasStatus);
                   });
               return displayed.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {displayed.map((game) => (
                     <div key={game.id} className="relative group">
                       <ContestCard contest={game} href={`/home/${game.id}`} />

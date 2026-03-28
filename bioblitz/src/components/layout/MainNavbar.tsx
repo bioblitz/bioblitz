@@ -194,7 +194,7 @@ export default function MainNavbar() {
           >
             <div className="text-left hidden lg:block">
               <h2 className="font-bold text-sm text-neutral-200">
-                {user.username || user.displayName || ""}
+                {user.displayName || user.username || ""}
               </h2>
             </div>
 
