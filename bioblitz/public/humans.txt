@@ -1,13 +1,13 @@
 /* TEAM */
 Developer: Elijah Feldman, Dipisha Subedi, Aarnav Suwal
 Site: https://bioblitz.net
-Location: Earth
+Location: Virginia
 
 /* THANKS */
 Next.js, React, Firebase, Tailwind CSS
 
 /* SITE */
-Last update: 2026/01/31
+Last update: 2026/03/28
 Standards: HTML5, CSS3, ES6+
 Components: Next.js 15, React 19, TypeScript
 Software: VS Code, Firebase, Vercel

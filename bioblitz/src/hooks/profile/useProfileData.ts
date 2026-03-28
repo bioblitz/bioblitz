@@ -172,15 +172,19 @@ export function useProfileData({
 
                   if (originalSetSnap.exists()) {
                     const originalData = originalSetSnap.data();
-                    topic =
-                      originalData.topic ||
-                      originalData.Topic ||
-                      originalData.category ||
-                      topic;
-                    title = originalData.title || title;
-                    contestRatingFromSet = originalData.contestRating || 0;
-                    foundOriginal = true;
-                    resolvedSetId = originalSetId;
+                    if (originalData.hidden || originalData.status === "incomplete") {
+                      foundOriginal = false;
+                    } else {
+                      topic =
+                        originalData.topic ||
+                        originalData.Topic ||
+                        originalData.category ||
+                        topic;
+                      title = originalData.title || title;
+                      contestRatingFromSet = originalData.contestRating || 0;
+                      foundOriginal = true;
+                      resolvedSetId = originalSetId;
+                    }
                   }
                 } catch (e) {
                   console.error("ID lookup failed", e);

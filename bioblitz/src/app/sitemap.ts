@@ -1,40 +1,43 @@
-import { MetadataRoute } from 'next'
- 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}` 
-    : 'http://localhost:3000'
-  
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/home`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
+import { MetadataRoute } from "next";
+import {
+  getStaticRoutes,
+  getUsernames,
+  getContestIds,
+  SITE_URL,
+} from "./sitemap.config";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+
+  const staticRoutes = getStaticRoutes(now);
+
+  const [usernames, contests] = await Promise.all([
+    getUsernames(),
+    getContestIds(),
+  ]);
+
+  const channelRoutes: MetadataRoute.Sitemap = usernames.map((username) => ({
+    url: `${SITE_URL}/channel/${username}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  const profileRoutes: MetadataRoute.Sitemap = usernames.map((username) => ({
+    url: `${SITE_URL}/profile/${username}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  const contestRoutes: MetadataRoute.Sitemap = contests.map(
+    ({ id, updatedAt }) => ({
+      url: `${SITE_URL}/contests/${id}`,
+      lastModified: updatedAt ?? now,
+      changeFrequency: "daily",
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/terms-and-conditions`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-  ]
+    })
+  );
+
+  return [...staticRoutes, ...channelRoutes, ...profileRoutes, ...contestRoutes];
 }
