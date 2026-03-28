@@ -1,14 +1,12 @@
 import type { WeeklyDigestData } from "./digest-data";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "bioblitz.net";
-
 const now = new Date();
 const weekStart = new Date(now);
 weekStart.setDate(now.getDate() - 6);
-
 const fmt = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
-
 const dateRange = `${fmt(weekStart)}–${fmt(now)}`;
+const year = now.getFullYear();
 
 const C = {
   bg: "#0a0a0a",
@@ -51,7 +49,6 @@ function topicColor(topic: string): string {
   };
   return map[topic] || "#8a8a8a";
 }
-
 const f =
   "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 const m = "'Courier New',Courier,monospace";
@@ -67,6 +64,9 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   const eloArrow =
     data.eloChange > 0 ? "&#9651;" : data.eloChange < 0 ? "&#9661;" : "";
 
+  const divider = `<tr><td style="padding:0 28px;"><div style="height:1px;background:${C.border};"></div></td></tr>
+<tr><td style="height:22px;"></td></tr>`;
+
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   let pills = "";
   for (let i = 0; i < 7; i++) {
@@ -80,12 +80,12 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   let heroRight = "";
   if (data.currentStreak >= 1) {
     heroRight += `<p style="margin:0 0 6px;font-size:13px;color:${C.textMid};font-family:${f};text-align:right;line-height:1.3;">
-      <span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span> day streak
-    </p>`;
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${C.orangeLight}" style="display:inline;vertical-align:middle;margin-right:3px;margin-bottom:2px;" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span style="font-weight:800;color:${C.orangeLight};font-family:${m};">${data.currentStreak}</span><span style="color:${C.textMid};font-weight:400;"> day streak</span>
+  </p>`;
   }
   if (data.globalRank !== null) {
     heroRight += `<p style="margin:0;font-size:12px;color:${C.textLo};font-family:${m};text-align:right;line-height:1.3;">
-      Rank <span style="font-weight:800;color:${C.textMid};">#${data.globalRank}</span>
+     Global Rank <span style="font-weight:800;color:${C.textMid};">#${data.globalRank}</span>
     </p>`;
   }
 
@@ -115,16 +115,37 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   const challengeRow = hasChallenges
     ? `<tr><td style="padding:0 28px 22px;">
       <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Challenges</p>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:1px solid ${C.border};border-radius:8px 0 0 8px;">
-          <p style="margin:0;font-size:26px;font-weight:800;color:${C.green};font-family:${m};line-height:1;">${data.challengeWins}</p>
-          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">WON</p>
-        </td>
-        <td width="50%" style="text-align:center;padding:12px 0;background:${C.surface};border:1px solid ${C.border};border-left:0;border-radius:0 8px 8px 0;">
-          <p style="margin:0;font-size:26px;font-weight:800;color:${C.textLo};font-family:${m};line-height:1;">${data.challengeLosses}</p>
-          <p style="margin:4px 0 0;font-size:10px;color:${C.textLo};font-family:${m};letter-spacing:0.06em;">LOST</p>
-        </td>
-      </tr></table>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border-radius:8px;overflow:hidden;">
+        ${data.challengeDetails
+          .map((c, i) => {
+            const bb =
+              i < data.challengeDetails.length - 1
+                ? `border-bottom:1px solid ${C.border};`
+                : "";
+            const initial = esc((c.opponentName[0] || "?").toUpperCase());
+            const avatarBg = c.won ? "#166534" : "#3f3f46";
+            const avatarText = c.won ? "#4ade80" : "#a1a1aa";
+            const resultColor = c.won ? C.green : C.textLo;
+            const resultLabel = c.won ? "Won" : "Lost";
+            const resultBg = c.won ? "#14532d" : "#27272a";
+
+            return `<tr><td style="padding:12px 16px;${bb}">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+              <td width="36" valign="middle" style="padding-right:12px;">
+                <div style="width:32px;height:32px;border-radius:6px;background:${avatarBg};display:inline-block;text-align:center;line-height:32px;font-family:${m};font-size:13px;font-weight:800;color:${avatarText};">${initial}</div>
+              </td>
+              <td valign="middle">
+                <p style="margin:0;font-size:13px;font-weight:700;color:${C.textHi};font-family:${f};">${c.won ? "Beat" : "Lost to"} @${esc(c.opponentName)}</p>
+                <p style="margin:2px 0 0;font-size:11px;color:${C.textMid};font-family:${f};">${esc(c.blitzTitle)} &middot; ${c.myScore} vs ${c.theirScore}</p>
+              </td>
+              <td width="48" align="right" valign="middle">
+                <div style="display:inline-block;padding:4px 10px;background:${resultBg};border-radius:6px;font-family:${m};font-size:11px;font-weight:800;color:${resultColor};">${resultLabel}</div>
+              </td>
+            </tr></table>
+          </td></tr>`;
+          })
+          .join("")}
+      </table>
     </td></tr>`
     : "";
 
@@ -148,12 +169,11 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
       </tr></table>
     </td></tr>`;
   }
-
   const friendBlock =
-    data.friends.length > 1
+    data.friends.length > 1 && data.challengeDetails.length === 0
       ? `<tr><td style="padding:0 28px 22px;">
-      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Friends</p>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;">${fRows}</table>
+      <p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Friends Leaderboard</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:0px solid ${C.border};border-radius:8px;">${fRows}</table>
     </td></tr>`
       : "";
 
@@ -185,7 +205,7 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   const blitzBlock =
     data.unplayedBlitzes.length > 0
       ? `<tr><td style="padding:0 28px 24px;">
-      <p style="margin:0 0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Blitzes for you</p>
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Blitzes for you</p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%">${bRows}</table>
     </td></tr>`
       : "";
@@ -203,15 +223,22 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.bg};">
 <tr><td align="center" style="padding:20px 16px 40px;">
 
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="500" style="max-width:500px;width:100%;background:${C.card};border-radius:10px;overflow:hidden;border:1px solid ${C.border};">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="500" style="max-width:500px;width:100%;background:${C.card};border-radius:10px;overflow:hidden;border:0px solid ${C.border};">
 
   <!-- Greeting -->
   <tr><td style="padding:26px 28px 14px;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
       <td>
-<p style="margin:0 0 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.textLo};font-family:${m};">Weekly Digest ${dateRange}</p>
-        <p style="margin:0;font-size:15px;font-weight:600;color:${C.text};font-family:${f};">Hi ${firstName}! Here's your weekly digest:</p>
-      </td>
+<p style="margin:0 0 2px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.textLo};font-family:${m};">Weekly Digest ${dateRange}</p>
+
+
+<p style="margin:0;font-size:20px;font-weight:600;color:${C.text};font-family:${f};line-height:1.3;">
+  Hi ${firstName},
+</p>
+
+<p style="margin:2px 0 0;font-size:15px;color:${C.textMid};font-family:${f};line-height:1.3;">
+  Here’s your week on BioBlitz.
+</p>      </td>
       <td width="24" align="right" valign="top">
       </td>
     </tr></table>
@@ -219,12 +246,12 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
 
   <!-- Elo hero -->
   <tr><td style="padding:0 28px 22px;">
-    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border:0px solid ${C.border};border-radius:8px;">
       <tr><td style="padding:22px 22px 14px;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
           <td valign="top">
-            <p style="margin:0 0 6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Current Elo</p>
-            <p style="margin:0;font-size:44px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;letter-spacing:-1px;">${data.currentElo.toLocaleString()}${data.eloChange !== 0 ? `<span style="font-size:16px;font-weight:800;color:${eloCol};letter-spacing:0;margin-left:10px;">${eloArrow} ${eloSign}${Math.abs(data.eloChange)}</span>` : ""}</p>
+            <p style="margin:0 0 6px;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:${C.textLo};font-family:${m};">Current Elo</p>
+            <p style="margin:0;font-size:65px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;letter-spacing:-1px;">${data.currentElo.toLocaleString()}${data.eloChange !== 0 ? `<span style="font-size:16px;font-weight:800;color:${eloCol};letter-spacing:0;margin-left:10px;">${eloArrow} ${eloSign}${Math.abs(data.eloChange)}</span>` : ""}</p>
           </td>
           <td valign="top" align="right" style="padding-top:6px;">
             ${heroRight}
@@ -241,38 +268,60 @@ export function generateDigestHtml(data: WeeklyDigestData): string {
   ${
     hasActivity
       ? `<tr><td style="padding:0 28px 22px;">
-    <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-      <td width="33%" style="text-align:center;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.blitzesThisWeek}</p>
-        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">blitzes</p>
-      </td>
-      <td width="34%" style="text-align:center;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.questionsAnswered}</p>
-        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">questions</p>
-      </td>
-      <td width="33%" style="text-align:center;">
-        <p style="margin:0;font-size:22px;font-weight:800;color:${data.accuracy >= 70 ? C.green : data.accuracy >= 50 ? C.textHi : C.red};font-family:${m};line-height:1;">${data.accuracy}%</p>
-        <p style="margin:4px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};"> average accuracy</p>
-      </td>
-    </tr></table>
-  </td></tr>`
+  <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+    <td width="33%" style="padding-right:15px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border-radius:8px;">
+        <tr><td style="padding:14px 12px;text-align:center;">
+          <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.blitzesThisWeek}</p>
+          <p style="margin:6px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">blitzes</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="padding-right:15px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border-radius:8px;">
+        <tr><td style="padding:14px 12px;text-align:center;">
+          <p style="margin:0;font-size:22px;font-weight:800;color:${C.textHi};font-family:${m};line-height:1;">${data.questionsAnswered}</p>
+          <p style="margin:6px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">questions</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="33%">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.surface};border-radius:8px;">
+        <tr><td style="padding:14px 12px;text-align:center;">
+          <p style="margin:0;font-size:22px;font-weight:800;color:${data.accuracy >= 70 ? C.green : data.accuracy >= 50 ? C.textHi : C.red};font-family:${m};line-height:1;">${data.accuracy}%</p>
+          <p style="margin:6px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${C.textLo};font-family:${m};">accuracy</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr></table>
+</td></tr>`
       : ""
   }
 
-  ${streakCallout}
-  ${inactiveRow}
-  ${friendBlock}
-  ${challengeRow}
-  ${blitzBlock}
+  ${hasActivity ? divider : ""}
+${streakCallout}
+${hasActivity && data.currentStreak >= 7 ? divider : ""}
+${inactiveRow}
+${!hasActivity ? divider : ""}
+${data.challengeDetails.length === 0 && data.friends.length > 1 ? friendBlock : ""}
+${data.challengeDetails.length === 0 && data.friends.length > 1 ? divider : ""}
+${challengeRow}
+${hasChallenges ? divider : ""}
+${blitzBlock}
+
 
   <!-- Footer -->
-  <tr><td style="padding:14px 28px;border-top:1px solid ${C.border};text-align:center;">
-    <p style="margin:0;font-size:11px;color:${C.textLo};font-family:${f};">
-      <a href="${SITE}/settings" style="color:${C.textMid};text-decoration:underline;">Unsubscribe</a>
-      &nbsp;&middot;&nbsp;
-      <a href="${SITE}" style="color:${C.textMid};text-decoration:none;">BioBlitz</a>
-    </p>
-  </td></tr>
+     <tr><td style="padding:18px 28px;border-top:1px solid ${C.border};">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td valign="middle">
+          <p style="margin:0;font-size:11px;color:${C.textLo};font-family:${f};">&copy; ${year} BioBlitz. All rights reserved.</p>
+        </td>
+        <td align="right" valign="middle">
+          <a href="${SITE}/settings" style="font-size:11px;color:${C.textMid};text-decoration:underline;font-family:${f};">Unsubscribe</a>
+        </td>
+      </tr></table>
+    </td></tr>
+
 
 </table>
 </td></tr>
