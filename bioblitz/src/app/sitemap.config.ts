@@ -1,9 +1,9 @@
 import { MetadataRoute } from "next";
-import { adminFirestore } from "@/lib/firebase-admin"; // ← adjust to your admin SDK export
+import { adminFirestore } from "@/lib/firebase-admin";
 
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://yourdomain.com";
+  process.env.VERCEL_URL ?? "https://bioblitz.net";
 
 
 export function getStaticRoutes(now: Date): MetadataRoute.Sitemap {
