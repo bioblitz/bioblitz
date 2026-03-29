@@ -3,7 +3,7 @@ import { adminFirestore } from "@/lib/firebase-admin";
 
 
 export const SITE_URL =
-  process.env.VERCEL_URL ?? "https://bioblitz.net";
+   "https://bioblitz.net";
 
 
 export function getStaticRoutes(now: Date): MetadataRoute.Sitemap {

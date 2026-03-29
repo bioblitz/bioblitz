@@ -180,7 +180,7 @@ export default async function mainPage({
               See where you rank.
             </h2>
             <p className="text-slate-800 mb-8 text-lg">
-              Your first Blitz is free. No account required to start.
+              Take blitzes, grow your channel, and compete
             </p>
             <Link href="/home">
               <button className="bg-neutral-900 text-white font-bold py-3 px-10 rounded-full hover:bg-neutral-900 transition-colors shadow-lg shadow-white/10">
