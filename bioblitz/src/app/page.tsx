@@ -127,39 +127,7 @@ export default async function mainPage({
           }
         `}</style>
 
-        <section id="reviews" className="w-full py-16 px-6 border-t border-slate-900 bg-neutral-900">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold text-white-100">From the community</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-xl">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-lg border flex items-center justify-center text-sm font-bold">A</div>
-                  <div>
-                    <div className="text-white text-sm">Alex C.</div>
-                    <div className="text-slate-500 text-xs">USABO Finalist '24</div>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  "The problem quality is legitimately good. I stopped just re-reading Campbell's and started actually understanding the material. Hit Gold Tier last week."
-                </p>
-              </div>
-              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-lg">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm border font-bold">S</div>
-                  <div>
-                    <div className="text-white text-sm">Sarah J.</div>
-                    <div className="text-slate-500 text-xs">Pre-Med @ JHU</div>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  "Used this for MCAT prep and honestly the USABO-level questions made everything else feel manageable. The timed format forces you to actually know it, not just recognize it."
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        
 
         <section className="w-full py-16 px-45">
           <div className="max-w-2xl left">
@@ -168,15 +136,15 @@ export default async function mainPage({
               {[
                 {
                   q: "What is the difference between a Ranked and Practice Blitz?",
-                  a: "Your first attempt at any Blitz is automatically \"Ranked\" and affects your global Elo rating based on speed and accuracy. Any subsequent attempts on that same problem set are \"Practice\" modes—great for reviewing mistakes, but they won't alter your leaderboard standing.",
+                  a: "Your first attempt will count towards your rating, while the subsequent attempts are just for practice.",
                 },
                 {
                   q: "How do I build my Streak?",
-                  a: "Streaks are exclusively tied to the Problem of the Day (POTD). Completing standard Blitzes contributes to your Elo, but to keep your fire burning, you must solve the official daily problem every 24 hours. Miss a day, and the streak resets.",
+                  a: "Streaks are exclusively tied to the Problem of the Day (POTD). Completing standard Blitzes contributes to your Elo, but to keep your streak alive, you must solve the official daily problem every 24 hours. Miss a day, and the streak resets.",
                 },
                 {
                   q: "How is my Elo rating calculated?",
-                  a: "Your rating is dynamic. It updates after every full Blitz submission based on your performance relative to the set's difficulty. High accuracy, paired with fast completion on harder sets, leads to the greatest rating gains.",
+                  a: "Your rating is dynamic. It updates after every full Blitz submission based on your performance relative to the set's difficulty. Perform well on blitzes to increase your rating.",
                 },
                 {
                   q: "Is the content aligned with USABO & Campbell?",
@@ -184,7 +152,7 @@ export default async function mainPage({
                 },
                 {
                   q: "Is this useful for AP Biology or MCAT?",
-                  a: "Absolutely. While BioBlitz is optimized for Olympiad-level difficulty, it serves as \"weight training\" for AP Bio and MCAT aspirants. If you can handle a USABO Blitz, standard exams will feel significantly easier.",
+                  a: "Absolutely. While BioBlitz is optimized for the United States Biology Olympiad exam, it is equally useful for other biology tests, such as for AP Biology exams and the MCAT.",
                 },
               ].map((item, i) => (
                 <details key={i} className="group transition-all duration-300">
