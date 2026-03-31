@@ -1,42 +1,80 @@
-import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
-import { gatherWeeklyDigest } from "@/lib/digest-data";
-import { generateDigestHtml } from "@/lib/digest-email";
+import { NextResponse } from "next/server";
+import { adminFirestore } from "@/lib/firebase-admin";
+import { gatherNewsletterData } from "@/lib/newsletter/weekly-newsletter-data";
+import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-page";
+import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
 
-export async function GET(req: NextRequest) {
-  try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new NextResponse("Missing or malformed Authorization header", {
-        status: 401,
-      });
-    }
+// GET /api/weekly-newsletter/preview?uid=xxx&issue=14&blitzOfWeek=abc&studyTipTitle=...&studyTipBody=...&mode=email|page
+export async function GET(request: Request) {
+  const authHeader = request.headers.get("authorization") || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
 
-    const token = authHeader.split("Bearer ")[1];
+  if (!expectedToken || token !== expectedToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    let uid: string;
-    try {
-      const decoded = await adminAuth.verifyIdToken(token);
-      uid = decoded.uid;
-    } catch {
-      return new NextResponse("Invalid or expired token", { status: 401 });
-    }
+  const { searchParams } = new URL(request.url);
+  const uid = searchParams.get("uid") || "";
+  const issue = parseInt(searchParams.get("issue") || "1");
+  const blitzOfWeekId = searchParams.get("blitzOfWeek") || undefined;
+  const studyTipTitle = searchParams.get("studyTipTitle") || undefined;
+  const studyTipBody = searchParams.get("studyTipBody") || undefined;
+  const mode = searchParams.get("mode") || "page"; // "page" | "email"
 
-    const data = await gatherWeeklyDigest(uid);
-    if (!data) {
-      return new NextResponse("User not found or has no email", {
-        status: 404,
-      });
-    }
+  if (!uid) {
+    return NextResponse.json({ error: "uid required" }, { status: 400 });
+  }
 
-    const html = generateDigestHtml(data);
-    return new NextResponse(html, {
+  const data = await gatherNewsletterData(
+    uid,
+    issue,
+    blitzOfWeekId,
+    studyTipTitle,
+    studyTipBody,
+  );
+
+  if (!data) {
+    return NextResponse.json(
+      { error: "No data for this user" },
+      { status: 404 },
+    );
+  }
+
+  if (mode === "email") {
+    const html = generateNewsletterNotificationEmail(data.username, issue, uid);
+    return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
-  } catch (error: any) {
-    console.error("[digest/preview] Error:", error);
-    return new NextResponse(error?.message || "Internal server error", {
-      status: 500,
-    });
   }
+
+  const html = generateNewsletterPageHtml(data);
+  return new Response(html, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+}
+
+// POST /api/weekly-newsletter/preview — save issue config to Firestore
+export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization") || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
+
+  if (!expectedToken || token !== expectedToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { issue, blitzOfWeekId, studyTipTitle, studyTipBody } = body;
+
+  if (!issue) {
+    return NextResponse.json({ error: "issue required" }, { status: 400 });
+  }
+
+  await adminFirestore
+    .collection("newsletterConfig")
+    .doc(`issue-${issue}`)
+    .set({ blitzOfWeekId, studyTipTitle, studyTipBody }, { merge: true });
+
+  return NextResponse.json({ message: `Issue ${issue} config saved.` });
 }
