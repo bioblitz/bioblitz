@@ -3,6 +3,7 @@ import { adminFirestore } from "@/lib/firebase-admin";
 import { gatherNewsletterData } from "@/lib/newsletter/weekly-newsletter-data";
 import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-page";
 import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
+// all you need to go to view your newsletter (or anyone's really) is their uid and the issue number, only admin can do this though so it's not a security risk
 
 // GET /api/weekly-newsletter/preview?uid=xxx&issue=14&blitzOfWeek=abc&studyTipTitle=...&studyTipBody=...&mode=email|page
 export async function GET(request: Request) {
@@ -10,8 +11,12 @@ export async function GET(request: Request) {
   const token = authHeader.replace("Bearer ", "").trim();
   const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
 
-  if (!expectedToken || token !== expectedToken) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (process.env.NODE_ENV === "development") {
+    // skip auth check
+  } else {
+    if (!expectedToken || token !== expectedToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   const { searchParams } = new URL(request.url);
@@ -71,10 +76,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "issue required" }, { status: 400 });
   }
 
+  const configData: Record<string, any> = {};
+  if (blitzOfWeekId) configData.blitzOfWeekId = blitzOfWeekId;
+  if (studyTipTitle) configData.studyTipTitle = studyTipTitle;
+  if (studyTipBody) configData.studyTipBody = studyTipBody;
   await adminFirestore
     .collection("newsletterConfig")
     .doc(`issue-${issue}`)
-    .set({ blitzOfWeekId, studyTipTitle, studyTipBody }, { merge: true });
+    .set(configData, { merge: true });
 
   return NextResponse.json({ message: `Issue ${issue} config saved.` });
 }

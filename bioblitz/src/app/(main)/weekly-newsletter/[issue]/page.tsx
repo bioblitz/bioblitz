@@ -14,15 +14,12 @@ export default async function WeeklyNewsletterPage({
   searchParams,
 }: Props) {
   const { issue } = await params;
-  const { uid: queryUid, token: queryToken } = await searchParams;
+  const { uid: queryUid } = await searchParams;
 
   const issueNumber = parseInt(issue) || 1;
 
-  // Try to get uid from session cookie OR query param (for email link)
   let uid: string | null = null;
-  // TEMP OVERRIDE FOR TESTING
 
-  // Check session cookie first
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
@@ -32,16 +29,40 @@ export default async function WeeklyNewsletterPage({
     }
   } catch (_) {}
 
-  // Fall back to query param uid (from email link)
-  if (!uid && queryUid) {
-    uid = queryUid;
-  }
+  if (!uid && queryUid) uid = queryUid;
 
-  if (!uid) {
-    redirect("/login");
-  }
+  if (!uid) redirect("/auth");
 
-  // Fetch blitzOfWeek from Firestore config doc for this issue (optional)
+  try {
+    const snapshotSnap = await adminFirestore
+      .collection("newsletterSnapshots")
+      .doc(`issue-${issueNumber}`)
+      .collection("users")
+      .doc(uid)
+      .get();
+
+    if (snapshotSnap.exists) {
+      const html = snapshotSnap.data()?.html as string;
+      if (html) {
+        return (
+          <iframe
+            srcDoc={html}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              border: "none",
+              zIndex: 9999,
+            }}
+            sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation"
+          />
+        );
+      }
+    }
+  } catch (_) {}
+
   let blitzOfWeekId: string | undefined;
   let studyTipTitle: string | undefined;
   let studyTipBody: string | undefined;

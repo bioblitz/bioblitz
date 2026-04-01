@@ -15,14 +15,12 @@ export function generateNewsletterNotificationEmail(
 ): string {
   const year = new Date().getFullYear();
   const newsletterUrl = `${SITE}/weekly-newsletter/${issueNumber}`;
-
   const unsubscribeUrl = unsubscribeUid
-    ? `${SITE}/unsubscribe?uid=${unsubscribeUid}`
+    ? `${SITE}/settings?unsubscribe=${unsubscribeUid}`
     : `${SITE}/settings`;
 
   const f =
     "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-  const m = "Consolas,Menlo,Monaco,'Courier New',monospace";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -34,82 +32,55 @@ export function generateNewsletterNotificationEmail(
 </head>
 <body style="margin:0;padding:0;background:#09090b;-webkit-text-size-adjust:100%;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#09090b;">
-<tr><td align="center" style="padding:40px 16px 60px;">
+<tr><td align="center" style="padding:48px 16px 64px;">
 
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="480" style="max-width:480px;width:100%;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="440" style="max-width:440px;width:100%;">
 
     <!-- Logo -->
-    <tr><td align="center" style="padding-bottom:40px;">
+    <tr><td align="center" style="padding-bottom:36px;">
       <table cellpadding="0" cellspacing="0" border="0"><tr>
         <td style="vertical-align:middle;padding-right:10px;">
-          <div style="width:36px;height:36px;background:#f5c518;border-radius:50%;text-align:center;line-height:36px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:middle;">
+          <div style="width:32px;height:32px;background:#f5c518;border-radius:50%;text-align:center;line-height:32px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:middle;">
               <path d="M13 2L4.5 14H12L11 22L19.5 10H12L13 2Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>
           </div>
         </td>
-        <td style="font-family:${f};font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;vertical-align:middle;">BioBlitz</td>
+        <td style="font-family:${f};font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;vertical-align:middle;">BioBlitz</td>
       </tr></table>
     </td></tr>
 
     <!-- Card -->
-    <tr><td style="background:#0f0f12;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px 36px;">
-
-      <!-- Issue tag -->
-      <p style="margin:0 0 20px;font-family:${m};font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#f5c518;">Issue #${issueNumber} · Weekly Digest</p>
+    <tr><td style="background:#0f0f12;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:40px 36px;">
 
       <!-- Greeting -->
-      <p style="margin:0 0 8px;font-size:26px;font-weight:700;color:#ffffff;font-family:${f};line-height:1.2;letter-spacing:-0.01em;">Good morning, ${esc(username)}.</p>
-      <p style="margin:0 0 28px;font-size:15px;color:#888888;font-family:${f};line-height:1.6;">Your BioBlitz weekly news report is here — leaderboards, new blitzes, challenges, and more.</p>
-
-      <!-- Divider -->
-      <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:28px;"></div>
-
-      <!-- What's inside -->
-      <p style="margin:0 0 14px;font-family:${m};font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#555555;">This week's digest includes</p>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:32px;">
-        ${[
-          ["⚡", "Blitz of the Week"],
-          ["🏆", "Weekly Leaderboard"],
-          ["⚔️", "Your Challenges"],
-          ["🔥", "Trending Sets"],
-          ["💡", "Study Tip"],
-        ]
-          .map(
-            ([icon, label]) => `
-        <tr>
-          <td style="padding:5px 0;font-family:${f};font-size:13px;color:#888888;">
-            <span style="margin-right:10px;">${icon}</span>${label}
-          </td>
-        </tr>`,
-          )
-          .join("")}
-      </table>
+      <p style="margin:0 0 12px;font-size:24px;font-weight:700;color:#ffffff;font-family:${f};line-height:1.25;letter-spacing:-0.01em;">Good morning, ${esc(username)}.</p>
+      <p style="margin:0 0 32px;font-size:15px;color:#777777;font-family:${f};line-height:1.7;">Your BioBlitz weekly news report is here. Click below to view it.</p>
 
       <!-- CTA -->
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr><td align="center">
-          <a href="${newsletterUrl}" style="display:inline-block;padding:14px 32px;background:#f5c518;border-radius:8px;font-family:${f};font-size:15px;font-weight:700;color:#000000;text-decoration:none;letter-spacing:-0.01em;">View This Week's Digest →</a>
+          <a href="${newsletterUrl}" style="display:inline-block;padding:13px 30px;background:#f5c518;border-radius:8px;font-family:${f};font-size:14px;font-weight:700;color:#000000;text-decoration:none;letter-spacing:-0.01em;">View This Week's Digest →</a>
         </td></tr>
       </table>
 
       <!-- Divider -->
-      <div style="height:1px;background:rgba(255,255,255,0.06);margin:32px 0 24px;"></div>
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:32px 0 28px;"></div>
 
       <!-- Sign-off -->
-      <p style="margin:0;font-size:13px;color:#555555;font-family:${f};line-height:1.6;">
+      <p style="margin:0;font-size:13px;color:#555555;font-family:${f};line-height:1.7;">
         Sincerely,<br/>
-        <span style="color:#888888;font-weight:600;">The BioBlitz Team</span>
+        <span style="color:#777777;font-weight:600;">The BioBlitz Team</span>
       </p>
 
     </td></tr>
 
     <!-- Footer -->
-    <tr><td align="center" style="padding-top:28px;">
-      <p style="margin:0 0 8px;font-size:11px;color:#333333;font-family:${f};">&copy; ${year} BioBlitz. All rights reserved.</p>
-      <p style="margin:0;font-size:11px;color:#333333;font-family:${f};">
+    <tr><td align="center" style="padding-top:24px;">
+      <p style="margin:0 0 6px;font-size:11px;color:#2a2a2a;font-family:${f};">&copy; ${year} BioBlitz. All rights reserved.</p>
+      <p style="margin:0;font-size:11px;color:#2a2a2a;font-family:${f};">
         You're receiving this because you opted into BioBlitz weekly digests.<br/>
-        <a href="${unsubscribeUrl}" style="color:#555555;text-decoration:underline;">Unsubscribe</a>
+        <a href="${unsubscribeUrl}" style="color:#3a3a3a;text-decoration:underline;">Unsubscribe</a>
       </p>
     </td></tr>
 

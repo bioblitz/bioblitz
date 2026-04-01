@@ -1,11 +1,12 @@
 import { adminFirestore } from "@/lib/firebase-admin";
 
+//interfaces for various types of data
 export interface NewsletterSet {
   id: string;
   title: string;
   topic: string;
   questionCount: number;
-  timeLimit: number; // minutes
+  timeLimit: number;
   creatorUsername: string;
   firstAttemptCount: number;
   averageRating: number;
@@ -18,8 +19,8 @@ export interface NewsletterChallenge {
   blitzTitle: string;
   topic: string;
   questionCount: number;
-  isOpen: boolean; // true = pending, false = completed this week
-  won?: boolean; // only for completed
+  isOpen: boolean;
+  won?: boolean;
   myScore?: number;
   theirScore?: number;
   createdAt: Date;
@@ -45,36 +46,27 @@ export interface NewsletterPotd {
 }
 
 export interface NewsletterData {
-  // User
   username: string;
   email: string;
 
-  // Platform stats
   blitzesTakenThisWeek: number;
   activePlayersThisWeek: number;
   newSetsThisWeek: number;
 
-  // Blitz of the week (manual)
   blitzOfWeek: NewsletterSet | null;
 
-  // POTD
   potd: NewsletterPotd | null;
 
-  // Leaderboards
   eloLeaderboard: NewsletterLeaderboardUser[];
   streakLeaderboard: NewsletterLeaderboardUser[];
 
-  // Challenges
   challenges: NewsletterChallenge[];
   hasChallenges: boolean;
 
-  // Trending / unplayed sets (4 cards)
   trendingSets: NewsletterSet[];
 
-  // Study tip (manual)
   studyTip: { title: string; body: string } | null;
 
-  // Issue metadata
   issueNumber: number;
   dateRange: string;
 }
@@ -107,21 +99,17 @@ export async function gatherNewsletterData(
   const completedPotdIds: string[] = u.completedPotdIds || [];
 
   if (!email) return null;
-  if (u.emailNotifications === false) return null;
+  if (u.emailNotifications === false) return null; //we need to actually implement this, currently settings affects emailNotifications correctly but we need to update routes too
 
   const now = new Date();
   const weekAgo = new Date(now);
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  // Date range string e.g. "Mar 24 – Mar 30, 2026"
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const dateRange = `${fmtDate(weekAgo)} – ${fmtDate(now)}, ${now.getFullYear()}`;
 
-  // ── Platform stats ──────────────────────────────────────────────────────────
-
-  // Blitzes taken this week: sum firstAttemptCount from ranked submissions this week
-  let blitzesTakenThisWeek = 0;
+  let blitzesTakenThisWeek = 0; //filters through gameSubmissions to get these stats, one issue is for each query, if the count is greater than 2000 it will not count beyond that bc of Firestore query limit
   try {
     const subsSnap = await db
       .collection("gameSubmissions")
@@ -135,10 +123,8 @@ export async function gatherNewsletterData(
     console.error("newsletter: blitzesTaken error", e);
   }
 
-  // Active players: users with a ranked submission OR POTD completion this week
   let activePlayersThisWeek = 0;
   try {
-    // Get unique userIds from submissions this week
     const subsSnap = await db
       .collection("gameSubmissions")
       .where("status", "==", "graded")
@@ -152,7 +138,6 @@ export async function gatherNewsletterData(
       if (userId) activeUids.add(userId);
     }
 
-    // Also count users who completed POTD this week
     const potdDates: string[] = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(now);
@@ -160,10 +145,7 @@ export async function gatherNewsletterData(
       potdDates.push(`${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`);
     }
 
-    // Sample users who have completedPotdIds containing any of this week's dates
-    // (Firestore doesn't support array-contains-any with multiple values efficiently,
-    //  so we check one date at a time for the most recent 3 days as a proxy)
-    for (const dateStr of potdDates.slice(0, 3)) {
+    for (const dateStr of potdDates.slice(0, 7)) {
       const potdUsersSnap = await db
         .collection("users")
         .where("completedPotdIds", "array-contains", dateStr)
@@ -172,12 +154,11 @@ export async function gatherNewsletterData(
       for (const d of potdUsersSnap.docs) activeUids.add(d.id);
     }
 
-    activePlayersThisWeek = activeUids.size;
+    activePlayersThisWeek = activeUids.size; //total number of unique users who either played a blitz or completed the potd in the past week
   } catch (e) {
     console.error("newsletter: activePlayers error", e);
   }
 
-  // New sets this week: activatedAt >= weekAgo
   let newSetsThisWeek = 0;
   try {
     const newSetsSnap = await db
@@ -189,8 +170,7 @@ export async function gatherNewsletterData(
     console.error("newsletter: newSets error", e);
   }
 
-  // ── Blitz of the week (manual) ──────────────────────────────────────────────
-  let blitzOfWeek: NewsletterSet | null = null;
+  let blitzOfWeek: NewsletterSet | null = null; //fetch data for the biitz of the week if it's set, this is manually set in the newsletterConfig collection in Firestore
   if (blitzOfWeekId) {
     try {
       const snap = await db.collection("sets").doc(blitzOfWeekId).get();
@@ -200,7 +180,8 @@ export async function gatherNewsletterData(
           id: snap.id,
           title: d.title || "",
           topic: d.topic || "",
-          questionCount: d.questionCount || 0,
+          questionCount:
+            d.questionCount || parseInt(d.number_of_questions) || 0,
           timeLimit: Math.round((parseInt(d.timeLimit) || 0) / 60),
           creatorUsername: d.creatorUsername || "",
           firstAttemptCount: d.firstAttemptCount || 0,
@@ -213,8 +194,7 @@ export async function gatherNewsletterData(
     }
   }
 
-  // ── POTD ────────────────────────────────────────────────────────────────────
-  let potd: NewsletterPotd | null = null;
+  let potd: NewsletterPotd | null = null; //rn if there's no potd for today, then it will show yesterday's problem, and if that doesn't exist then the potd section will just be hidden
   try {
     const toDocDate = (d: Date) =>
       `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -241,7 +221,6 @@ export async function gatherNewsletterData(
     console.error("newsletter: potd error", e);
   }
 
-  // ── Leaderboards ────────────────────────────────────────────────────────────
   let eloLeaderboard: NewsletterLeaderboardUser[] = [];
   let streakLeaderboard: NewsletterLeaderboardUser[] = [];
 
@@ -266,11 +245,9 @@ export async function gatherNewsletterData(
     console.error("newsletter: leaderboard error", e);
   }
 
-  // ── Challenges ──────────────────────────────────────────────────────────────
   const challenges: NewsletterChallenge[] = [];
 
   try {
-    // Open challenges (pending, not expired)
     const openSnap = await db
       .collection("challenges")
       .where("challengedId", "==", uid)
@@ -279,7 +256,6 @@ export async function gatherNewsletterData(
 
     for (const d of openSnap.docs) {
       const c = d.data();
-      // Skip expired
       if (c.expiresAt && toDate(c.expiresAt) && toDate(c.expiresAt)! < now)
         continue;
       challenges.push({
@@ -293,7 +269,6 @@ export async function gatherNewsletterData(
       });
     }
 
-    // Also completed challenges this week
     const completedSnap = await db
       .collection("challenges")
       .where("challengerId", "==", uid)
@@ -331,7 +306,6 @@ export async function gatherNewsletterData(
       });
     }
 
-    // Sort: open first, then by date desc, cap at 5
     challenges.sort((a, b) => {
       if (a.isOpen && !b.isOpen) return -1;
       if (!a.isOpen && b.isOpen) return 1;
@@ -342,11 +316,9 @@ export async function gatherNewsletterData(
     console.error("newsletter: challenges error", e);
   }
 
-  // ── Trending / unplayed sets ────────────────────────────────────────────────
   const trendingSets: NewsletterSet[] = [];
 
   try {
-    // Try new sets this week first
     const newSetsSnap = await db
       .collection("sets")
       .where("activatedAt", ">=", weekAgo)
@@ -359,9 +331,9 @@ export async function gatherNewsletterData(
       id,
       title: d.title || "",
       topic: d.topic || "",
-      questionCount: d.questionCount || 0,
+      questionCount: d.questionCount || parseInt(d.number_of_questions) || 0,
       timeLimit: Math.round((parseInt(d.timeLimit) || 0) / 60),
-      creatorUsername: d.creatorUsername || "",
+      creatorUsername: d.creatorUsername || d.source || "",
       firstAttemptCount: d.firstAttemptCount || 0,
       averageRating: d.averageRating || 0,
       trendingScore: d.trendingScore || 0,
@@ -372,6 +344,7 @@ export async function gatherNewsletterData(
         (d) =>
           !playedSet.has(d.id) &&
           d.data().hidden !== true &&
+          d.data().status !== "incomplete" &&
           d.data().creator !== uid &&
           d.data().title,
       )
@@ -379,7 +352,6 @@ export async function gatherNewsletterData(
 
     trendingSets.push(...newUnplayed.slice(0, 4));
 
-    // Pad with unplayed trending sets if not enough new ones
     if (trendingSets.length < 4) {
       const fallbackSnap = await db
         .collection("sets")
@@ -395,6 +367,7 @@ export async function gatherNewsletterData(
             !playedSet.has(d.id) &&
             !existingIds.has(d.id) &&
             d.data().hidden !== true &&
+            d.data().status !== "incomplete" &&
             d.data().creator !== uid &&
             d.data().title,
         )
@@ -406,7 +379,6 @@ export async function gatherNewsletterData(
     console.error("newsletter: trendingSets error", e);
   }
 
-  // ── Study tip ───────────────────────────────────────────────────────────────
   const studyTip =
     studyTipTitle && studyTipBody
       ? { title: studyTipTitle, body: studyTipBody }

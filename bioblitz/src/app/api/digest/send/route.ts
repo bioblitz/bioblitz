@@ -1,21 +1,25 @@
 import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase-admin";
+import { gatherNewsletterData } from "@/lib/newsletter/weekly-newsletter-data";
+import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-page";
 import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
+import nodemailer from "nodemailer";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SAFETY GUARD — set to false only when you're ready to send to everyone
-// While true, emails only go to ALLOWED_TEST_UIDS
-// ─────────────────────────────────────────────────────────────────────────────
 const TEST_MODE = true;
-const ALLOWED_TEST_UIDS = [
-  "jCiJOnMGpMZEggNJTN9RR5QhmLN2", // your uid
-];
+const ALLOWED_TEST_UIDS = ["jCiJOnMGpMZEggNJTN9RR5QhmLN2"];
+const BATCH_SIZE = 50;
 
-const ZEPTO_API_KEY = process.env.ZEPTO_MAIL_API_KEY || "";
-const FROM_ADDRESS =
-  process.env.ZEPTO_FROM_ADDRESS || "newsletter@bioblitz.net";
+const FROM_ADDRESS = process.env.SMTP_FROM_ADDRESS || "newsletter@bioblitz.net";
 const FROM_NAME = "BioBlitz";
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.net";
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.zeptomail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || "",
+    pass: process.env.SMTP_PASS || "",
+  },
+});
 
 interface SendResult {
   uid: string;
@@ -30,29 +34,14 @@ async function sendEmail(
   subject: string,
   html: string,
 ): Promise<void> {
-  const res = await fetch("https://api.zeptomail.com/v1.1/email", {
-    method: "POST",
-    headers: {
-      Authorization: ZEPTO_API_KEY,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      from: { address: FROM_ADDRESS, name: FROM_NAME },
-      to: [{ email_address: { address: to, name: toName } }],
-      subject,
-      htmlbody: html,
-    }),
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${FROM_ADDRESS}>`,
+    to: `"${toName}" <${to}>`,
+    subject,
+    html,
   });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`ZeptoMail error ${res.status}: ${body}`);
-  }
 }
 
-// POST /api/weekly-newsletter/send
-// Body: { issue: number }
 export async function POST(request: Request) {
   const authHeader = request.headers.get("authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
@@ -64,59 +53,117 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const issue: number = body.issue;
+  const startAfterUid: string | undefined = body.startAfter;
 
   if (!issue) {
     return NextResponse.json({ error: "issue required" }, { status: 400 });
   }
 
-  if (!ZEPTO_API_KEY) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return NextResponse.json(
-      { error: "ZEPTO_MAIL_API_KEY not set" },
+      { error: "SMTP credentials not set" },
       { status: 500 },
     );
   }
 
-  // Fetch all users who have email notifications enabled
-  const usersSnap = await adminFirestore
+  let blitzOfWeekId: string | undefined;
+  let studyTipTitle: string | undefined;
+  let studyTipBody: string | undefined;
+
+  try {
+    const configSnap = await adminFirestore
+      .collection("newsletterConfig")
+      .doc(`issue-${issue}`)
+      .get();
+    if (configSnap.exists) {
+      const cfg = configSnap.data()!;
+      blitzOfWeekId = cfg.blitzOfWeekId;
+      studyTipTitle = cfg.studyTipTitle;
+      studyTipBody = cfg.studyTipBody;
+    }
+  } catch (e) {
+    console.error("newsletter: config load error", e);
+  }
+
+  let usersQuery = adminFirestore
     .collection("users")
     .where("emailNotifications", "!=", false)
-    .get();
+    .orderBy("emailNotifications")
+    .orderBy("__name__")
+    .limit(BATCH_SIZE);
+
+  if (startAfterUid) {
+    const startAfterDoc = await adminFirestore
+      .collection("users")
+      .doc(startAfterUid)
+      .get();
+    if (startAfterDoc.exists) {
+      usersQuery = usersQuery.startAfter(startAfterDoc);
+    }
+  }
+
+  const usersSnap = await usersQuery.get();
 
   const results: SendResult[] = [];
   let sentCount = 0;
   let skippedCount = 0;
   let errorCount = 0;
+  let lastUid: string | null = null;
 
   for (const doc of usersSnap.docs) {
     const u = doc.data();
     const uid = doc.id;
+    lastUid = uid;
     const email: string = u.email || "";
     const username: string = u.username || "there";
 
     if (!email) {
-      results.push({ uid, email: "", status: "skipped" });
       skippedCount++;
       continue;
     }
 
-    // ── SAFETY GUARD ────────────────────────────────────────────────────────
     if (TEST_MODE && !ALLOWED_TEST_UIDS.includes(uid)) {
       skippedCount++;
       continue;
     }
-    // ────────────────────────────────────────────────────────────────────────
+
+    if (u.marketingConsent === false) {
+      skippedCount++;
+      continue;
+    }
 
     try {
-      const html = generateNewsletterNotificationEmail(username, issue, uid);
-      const subject = `BioBlitz Weekly Digest · Issue #${issue} is here`;
+      const data = await gatherNewsletterData(
+        uid,
+        issue,
+        blitzOfWeekId,
+        studyTipTitle,
+        studyTipBody,
+      );
 
-      await sendEmail(email, username, subject, html);
+      if (data) {
+        const pageHtml = generateNewsletterPageHtml(data);
+        await adminFirestore
+          .collection("newsletterSnapshots")
+          .doc(`issue-${issue}`)
+          .collection("users")
+          .doc(uid)
+          .set({ html: pageHtml, savedAt: new Date() });
+      }
+
+      const notificationHtml = generateNewsletterNotificationEmail(
+        username,
+        issue,
+        uid,
+      );
+      const subject = `Your BioBlitz Weekly Digest · Issue #${issue} is here`;
+
+      await sendEmail(email, username, subject, notificationHtml);
 
       results.push({ uid, email, status: "sent" });
       sentCount++;
 
-      // Small delay to avoid rate limits
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 150));
     } catch (e: any) {
       results.push({ uid, email, status: "error", error: e.message });
       errorCount++;
@@ -124,12 +171,16 @@ export async function POST(request: Request) {
     }
   }
 
+  const hasMore = usersSnap.docs.length === BATCH_SIZE;
+
   return NextResponse.json({
     testMode: TEST_MODE,
     issue,
     sent: sentCount,
     skipped: skippedCount,
     errors: errorCount,
-    results: TEST_MODE ? results : undefined, // only return full results in test mode
+    hasMore,
+    netxtStartAfter: hasMore ? lastUid : null,
+    results: TEST_MODE ? results : undefined,
   });
 }
