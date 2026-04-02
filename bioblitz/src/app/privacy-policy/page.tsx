@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/site-url";
 
 export const metadata = {
   title: "Privacy Policy | BioBlitz",
   description: "Privacy Policy for BioBlitz services.",
+  alternates: {
+    canonical: `${SITE_URL}/privacy-policy`,
+  },
 };
 
 export default function PrivacyPolicyPage() {

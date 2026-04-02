@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/site-url";
 
 export const metadata = {
   title: "Terms of Service | BioBlitz",
   description: "Terms and conditions for using BioBlitz.",
+  alternates: {
+    canonical: `${SITE_URL}/terms-and-conditions`,
+  },
 };
 
 export default function TermsOfServicePage() {

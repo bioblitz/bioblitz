@@ -3,6 +3,16 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getCompletedContests } from "@/lib/actions";
 import ContestCard from "@/components/features/contests/ContestCard";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  title: "Blitzes | BioBlitz",
+  description: "Browse and take biology contests on BioBlitz.",
+  alternates: {
+    canonical: `${SITE_URL}/contests`,
+  },
+};
 
 
 export default async function ContestsPage() {

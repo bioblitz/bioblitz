@@ -2,12 +2,30 @@
 import { getContestById } from "@/lib/actions";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
 
 type ContestPageParams = {
   params: {
     contestId: string;
   };
 };
+
+export async function generateMetadata({
+  params,
+}: ContestPageParams): Promise<Metadata> {
+  const contest = await getContestById(params.contestId);
+  if (!contest) {
+    return { title: "Blitz Not Found | BioBlitz" };
+  }
+  return {
+    title: `${contest.title} | BioBlitz`,
+    description: contest.description ?? "A competitive biology blitz on BioBlitz.",
+    alternates: {
+      canonical: `${SITE_URL}/contests/${params.contestId}`,
+    },
+  };
+}
 
 export default async function ContestPage({ params }: ContestPageParams) {
   await params;
