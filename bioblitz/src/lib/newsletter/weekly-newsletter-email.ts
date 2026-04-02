@@ -8,85 +8,214 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function formatSendDate(): string {
+  const d = new Date();
+  const months = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+  ];
+  return ` ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
 export function generateNewsletterNotificationEmail(
   username: string,
   issueNumber: number,
   unsubscribeUid?: string,
 ): string {
-  const year = new Date().getFullYear();
   const newsletterUrl = `${SITE}/weekly-newsletter/${issueNumber}`;
   const unsubscribeUrl = unsubscribeUid
     ? `${SITE}/settings?unsubscribe=${unsubscribeUid}`
     : `${SITE}/settings`;
 
+  const displayName = username || "there";
+  const sendDate = formatSendDate();
+
   const f =
     "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+  const mono = "'Courier New',Courier,monospace";
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>BioBlitz Weekly · Issue #${issueNumber}</title>
+<meta name="x-apple-disable-message-reformatting"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
+<title>BioBlitz Weekly &middot; Issue #${issueNumber}</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<![endif]-->
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+  img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none;}
+  body{margin:0!important;padding:0!important;width:100%!important;background-color:#09090b;}
+  :root{color-scheme:dark;supported-color-schemes:dark;}
+  u+.body{background-color:#09090b!important;}
+  .ii a[href]{color:inherit!important;}
+  @media only screen and (max-width:600px){
+    .email-container{width:100%!important;padding:16px!important;}
+    .card{padding:32px 24px!important;}
+    .heading{font-size:28px!important;}
+    .cta-btn{padding:14px 28px!important;}
+  }
+</style>
 </head>
-<body style="margin:0;padding:0;background:#09090b;-webkit-text-size-adjust:100%;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#09090b;">
-<tr><td align="center" style="padding:48px 16px 64px;">
 
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="440" style="max-width:440px;width:100%;">
+<body class="body" style="margin:0;padding:0;background-color:#09090b;-webkit-font-smoothing:antialiased;">
 
-    <!-- Logo -->
-    <tr><td align="center" style="padding-bottom:36px;">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td style="vertical-align:middle;padding-right:10px;">
-          <div style="width:32px;height:32px;background:#f5c518;border-radius:50%;text-align:center;line-height:32px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:middle;">
-              <path d="M13 2L4.5 14H12L11 22L19.5 10H12L13 2Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </td>
-        <td style="font-family:${f};font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;vertical-align:middle;">BioBlitz</td>
-      </tr></table>
-    </td></tr>
+<!-- Preview text -->
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#09090b;">
+  Your weekly BioBlitz briefing just dropped — new stats, top players &amp; personalized recommendations inside.
+  &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
+  &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
+</div>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#09090b;">
+<tr>
+<td align="center" style="padding:40px 16px;">
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" class="email-container" style="max-width:520px;width:100%;">
 
     <!-- Card -->
-    <tr><td style="background:#0f0f12;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:40px 36px;">
+    <tr>
+    <td class="card" align="center" style="background-color:#09090b;
+;border:1px solid rgba(250,204,21,0.25);border-radius:24px;padding:48px 40px 18px;">
 
-      <!-- Greeting -->
-      <p style="margin:0 0 12px;font-size:24px;font-weight:700;color:#ffffff;font-family:${f};line-height:1.25;letter-spacing:-0.01em;">Good morning, ${esc(username)}.</p>
-      <p style="margin:0 0 32px;font-size:15px;color:#777777;font-family:${f};line-height:1.7;">Your BioBlitz weekly news report is here. Click below to view it.</p>
+      <!-- Date badge -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="background-color:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.22);border-radius:100px;padding:6px 18px;font-family:Verdana,Geneva,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1px;color:#facc15;text-transform:uppercase;">
+            ${sendDate}
+          </td>
+        </tr>
+      </table>
 
-      <!-- CTA -->
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr><td align="center">
-          <a href="${newsletterUrl}" style="display:inline-block;padding:13px 30px;background:#f5c518;border-radius:8px;font-family:${f};font-size:14px;font-weight:700;color:#000000;text-decoration:none;letter-spacing:-0.01em;">View This Week's Digest →</a>
-        </td></tr>
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:28px;line-height:28px;font-size:1px;">&nbsp;</td></tr>
+      </table>
+
+      <!-- Mail emoji -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center">
+            <img src="${SITE}/images/mail.png" width="80" height="80" alt="" style="display:block;" />
+          </td>
+        </tr>
+      </table>
+
+
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:12px;line-height:12px;font-size:1px;">&nbsp;</td></tr>
+      </table>
+
+
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:24px;line-height:24px;font-size:1px;">&nbsp;</td></tr>
+      </table>
+
+      <!-- Heading -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td align="center" class="heading" style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:bold;line-height:1.2;color:#ffffff;">
+            Hi @${esc(displayName)}!
+            </td>
+
+        </tr>
+      </table>
+
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:12px;line-height:12px;font-size:1px;">&nbsp;</td></tr>
+      </table>
+
+      <!-- Subtext -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td align="center" style="font-family:Verdana,Geneva,sans-serif;font-size:16px;line-height:1.65;color:#a1a1aa;padding:0 12px;">
+            Your weekly BioBlitz newsletter is here! Click below for new stats, top players, personalized Blitz recommendations, and&nbsp;more.
+          </td>
+        </tr>
+      </table>
+
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:15px;line-height:15px;font-size:1px;">&nbsp;</td></tr>
+      </table>
+
+      <!-- CTA Button -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+        <tr>
+          <td align="center" style="border-radius:14px;background-color:#facc15;">
+            <a href="${newsletterUrl}" target="_blank" class="cta-btn" style="display:inline-block;font-family:${f};font-size:16px;font-weight:800;color:#09090b;text-decoration:none;padding:16px 36px;border-radius:14px;">
+              View Newsletter&nbsp;&nbsp;&#8594;
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:20px;line-height:20px;font-size:1px;">&nbsp;</td></tr>
       </table>
 
       <!-- Divider -->
-      <div style="height:1px;background:rgba(255,255,255,0.05);margin:32px 0 28px;"></div>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td style="border-top:1px solid rgba(250,204,21,0.08);height:1px;line-height:1px;font-size:1px;">&nbsp;</td>
+        </tr>
+      </table>
 
-      <!-- Sign-off -->
-      <p style="margin:0;font-size:13px;color:#555555;font-family:${f};line-height:1.7;">
-        Sincerely,<br/>
-        <span style="color:#777777;font-weight:600;">The BioBlitz Team</span>
-      </p>
+      <!-- Spacer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr><td style="height:8px;line-height:8px;font-size:1px;">&nbsp;</td></tr>
+      </table>
 
-    </td></tr>
+     <!-- Footer logo: favicon + BioBlitz wordmark -->
+<!-- Footer logo: favicon + BioBlitz wordmark -->
+      <!-- Footer: icon + copyright -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td align="center" style="padding-bottom:12px;">
+            <div style="width:36px;height:36px;background-color:rgba(245,197,24,0.15);border-radius:9999px;text-align:center;line-height:36px;">
+              <img src="${SITE}/icons/favicon.ico" width="20" height="20" alt="BioBlitz" style="display:inline-block;vertical-align:middle;"/>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="font-family:${f};font-size:13px;color:#52525b;line-height:1.6;">
+            &copy; ${new Date().getFullYear()} BioBlitz. All rights reserved.
+          </td>
+        </tr>
+      </table>
+     
 
-    <!-- Footer -->
-    <tr><td align="center" style="padding-top:24px;">
-      <p style="margin:0 0 6px;font-size:11px;color:#2a2a2a;font-family:${f};">&copy; ${year} BioBlitz. All rights reserved.</p>
-      <p style="margin:0;font-size:11px;color:#2a2a2a;font-family:${f};">
-        You're receiving this because you opted into BioBlitz weekly digests.<br/>
-        <a href="${unsubscribeUrl}" style="color:#3a3a3a;text-decoration:underline;">Unsubscribe</a>
-      </p>
-    </td></tr>
+    </td>
+    </tr>
+
+   
 
   </table>
-</td></tr>
+
+</td>
+</tr>
 </table>
+
 </body>
 </html>`;
 }
