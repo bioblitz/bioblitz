@@ -3,6 +3,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 import MountainHero from "@/components/MountainHero";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: SITE_URL,
+  },
+};
 
 export default async function mainPage({
   searchParams,
@@ -22,12 +30,13 @@ export default async function mainPage({
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-neutral-900 text-slate-200 selection:text-white overflow-x-hidden">
-
-
       <main className="relative z-10 flex-grow flex flex-col w-full">
         <MountainHero />
 
-        <section id="demo" className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20">
+        <section
+          id="demo"
+          className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20"
+        >
           <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
             <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
@@ -68,35 +77,77 @@ export default async function mainPage({
                     </p>
                     <div className="flex flex-col space-y-3">
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">A</span>
-                        <span className="text-lg">ATP, CO2, and Acetyl-CoA</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          A
+                        </span>
+                        <span className="text-lg">
+                          ATP, CO2, and Acetyl-CoA
+                        </span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-emerald-600 text-white border-emerald-300  scale-[1.01] cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-white/20 text-white">B</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-white/20 text-white">
+                          B
+                        </span>
                         <span className="text-lg">ATP, CO2, and Ethanol</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">C</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          C
+                        </span>
                         <span className="text-lg">ATP, NADH, and Pyruvate</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">D</span>
-                        <span className="text-lg">ATP, Pyruvate, and Acetyl-CoA</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          D
+                        </span>
+                        <span className="text-lg">
+                          ATP, Pyruvate, and Acetyl-CoA
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="hidden xl:block sticky top-8">
                     <div className="flex flex-col items-center">
-                      <div style={{ width: size, height: size, position: "relative" }}>
-                        <svg height={size} width={size} className="transform -rotate-90">
-                          <circle stroke="#27272a" fill="transparent" strokeWidth={strokeWidth} r={radius} cx={size / 2} cy={size / 2} />
-                          <circle stroke="#e5e5e5" fill="transparent" strokeWidth={strokeWidth} strokeLinecap="round"
-                            strokeDasharray={circumference} strokeDashoffset={dashOffset} r={radius} cx={size / 2} cy={size / 2} />
+                      <div
+                        style={{
+                          width: size,
+                          height: size,
+                          position: "relative",
+                        }}
+                      >
+                        <svg
+                          height={size}
+                          width={size}
+                          className="transform -rotate-90"
+                        >
+                          <circle
+                            stroke="#27272a"
+                            fill="transparent"
+                            strokeWidth={strokeWidth}
+                            r={radius}
+                            cx={size / 2}
+                            cy={size / 2}
+                          />
+                          <circle
+                            stroke="#e5e5e5"
+                            fill="transparent"
+                            strokeWidth={strokeWidth}
+                            strokeLinecap="round"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={dashOffset}
+                            r={radius}
+                            cx={size / 2}
+                            cy={size / 2}
+                          />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-4xl font-bold text-white tabular-nums">00:{timeLeft}</span>
-                          <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">Remaining</span>
+                          <span className="text-4xl font-bold text-white tabular-nums">
+                            00:{timeLeft}
+                          </span>
+                          <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">
+                            Remaining
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -106,7 +157,6 @@ export default async function mainPage({
             </div>
           </div>
         </section>
-
 
         <style>{`
           .demo-pop {
@@ -127,56 +177,24 @@ export default async function mainPage({
           }
         `}</style>
 
-        <section id="reviews" className="w-full py-16 px-6 border-t border-slate-900 bg-neutral-900">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold text-white-100">From the community</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-xl">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-lg border flex items-center justify-center text-sm font-bold">A</div>
-                  <div>
-                    <div className="text-white text-sm">Alex C.</div>
-                    <div className="text-slate-500 text-xs">USABO Finalist '24</div>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  "The problem quality is legitimately good. I stopped just re-reading Campbell's and started actually understanding the material. Hit Gold Tier last week."
-                </p>
-              </div>
-              <div className="p-6 bg-neutral-900 border border-slate-800 rounded-lg">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm border font-bold">S</div>
-                  <div>
-                    <div className="text-white text-sm">Sarah J.</div>
-                    <div className="text-slate-500 text-xs">Pre-Med @ JHU</div>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  "Used this for MCAT prep and honestly the USABO-level questions made everything else feel manageable. The timed format forces you to actually know it, not just recognize it."
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="w-full py-16 px-45">
           <div className="max-w-2xl left">
-            <h2 className="text-2xl font-semibold text-neutral-200 mb-8">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-semibold text-neutral-200 mb-8">
+              Frequently Asked Questions
+            </h2>
             <div className="space-y-4">
               {[
                 {
                   q: "What is the difference between a Ranked and Practice Blitz?",
-                  a: "Your first attempt at any Blitz is automatically \"Ranked\" and affects your global Elo rating based on speed and accuracy. Any subsequent attempts on that same problem set are \"Practice\" modes—great for reviewing mistakes, but they won't alter your leaderboard standing.",
+                  a: "Your first attempt will count towards your rating, while the subsequent attempts are just for practice.",
                 },
                 {
                   q: "How do I build my Streak?",
-                  a: "Streaks are exclusively tied to the Problem of the Day (POTD). Completing standard Blitzes contributes to your Elo, but to keep your fire burning, you must solve the official daily problem every 24 hours. Miss a day, and the streak resets.",
+                  a: "Streaks are exclusively tied to the Problem of the Day (POTD). Completing standard Blitzes contributes to your Elo, but to keep your streak alive, you must solve the official daily problem every 24 hours. Miss a day, and the streak resets.",
                 },
                 {
                   q: "How is my Elo rating calculated?",
-                  a: "Your rating is dynamic. It updates after every full Blitz submission based on your performance relative to the set's difficulty. High accuracy, paired with fast completion on harder sets, leads to the greatest rating gains.",
+                  a: "Your rating is dynamic. It updates after every full Blitz submission based on your performance relative to the set's difficulty. Perform well on blitzes to increase your rating.",
                 },
                 {
                   q: "Is the content aligned with USABO & Campbell?",
@@ -184,14 +202,24 @@ export default async function mainPage({
                 },
                 {
                   q: "Is this useful for AP Biology or MCAT?",
-                  a: "Absolutely. While BioBlitz is optimized for Olympiad-level difficulty, it serves as \"weight training\" for AP Bio and MCAT aspirants. If you can handle a USABO Blitz, standard exams will feel significantly easier.",
+                  a: "Absolutely. While BioBlitz is optimized for the United States Biology Olympiad exam, it is equally useful for other biology tests, such as for AP Biology exams and the MCAT.",
                 },
               ].map((item, i) => (
                 <details key={i} className="group transition-all duration-300">
                   <summary className="flex cursor-pointer justify-between p-6 font-medium text-slate-200">
                     <span>{item.q}</span>
                     <span className="transition-transform duration-300 group-open:rotate-180 ml-4 flex-shrink-0">
-                      <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24">
+                      <svg
+                        fill="none"
+                        height="24"
+                        shapeRendering="geometricPrecision"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        width="24"
+                      >
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </span>
@@ -212,7 +240,7 @@ export default async function mainPage({
               See where you rank.
             </h2>
             <p className="text-slate-800 mb-8 text-lg">
-              Your first Blitz is free. No account required to start.
+              Take blitzes, grow your channel, and compete
             </p>
             <Link href="/home">
               <button className="bg-neutral-900 text-white font-bold py-3 px-10 rounded-full hover:bg-neutral-900 transition-colors shadow-lg shadow-white/10">
@@ -224,12 +252,23 @@ export default async function mainPage({
 
         <footer className="w-full text-center py-8 text-neutral-400 text-sm border-t border-slate-900 bg-neutral-900">
           <div className="flex justify-center gap-6 mb-4">
-            <Link href="/privacy-policy" className=" transition-colors">Privacy</Link>
-            <Link href="/terms-and-conditions" className=" transition-colors">Terms and Conditions</Link>
-            <Link href="/about" className=" transition-colors">About</Link>
+            <Link href="/privacy-policy" className=" transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms-and-conditions" className=" transition-colors">
+              Terms and Conditions
+            </Link>
+            <Link href="/about" className=" transition-colors">
+              About
+            </Link>
           </div>
           © {new Date().getFullYear()} BioBlitz. Powered by{" "}
-          <Link href="https://mitosisphere.org" target="_blank" rel="noopener noreferrer" className=" transition-colors font-medium">
+          <Link
+            href="https://mitosisphere.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className=" transition-colors font-medium"
+          >
             Mitosisphere
           </Link>
           .

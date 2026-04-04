@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/site-url";
 
 export const metadata = {
   title: "Privacy Policy | BioBlitz",
   description: "Privacy Policy for BioBlitz services.",
+  alternates: {
+    canonical: `${SITE_URL}/privacy-policy`,
+  },
 };
 
 export default function PrivacyPolicyPage() {
@@ -215,7 +219,6 @@ export default function PrivacyPolicyPage() {
             <a href="mailto:admin@bioblitz.net"> admin@bioblitz.net</a>.
           </section>
         </div>
-
       </div>
 
       <footer className="w-full text-center py-8 text-slate-600 text-sm border-t border-slate-900 bg-[#020204]">
