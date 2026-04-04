@@ -18,18 +18,25 @@ export default async function WeeklyNewsletterPage({
 
   const issueNumber = parseInt(issue) || 1;
 
+  console.log("newsletter page:", { queryUid, issueNumber });
+
   let uid: string | null = null;
 
-  try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session")?.value;
-    if (sessionCookie) {
-      const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-      uid = decoded.uid;
-    }
-  } catch (_) {}
-
-  if (!uid && queryUid) uid = queryUid;
+  if (queryUid) {
+    uid = queryUid;
+  } else {
+    try {
+      const cookieStore = await cookies();
+      const sessionCookie = cookieStore.get("session")?.value;
+      if (sessionCookie) {
+        const decoded = await adminAuth.verifySessionCookie(
+          sessionCookie,
+          true,
+        );
+        uid = decoded.uid;
+      }
+    } catch (_) {}
+  }
 
   if (!uid) redirect("/auth");
 
@@ -98,10 +105,18 @@ export default async function WeeklyNewsletterPage({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          flexDirection: "column",
+          gap: "8px",
         }}
       >
         <p style={{ color: "#555", fontFamily: "monospace" }}>
           Newsletter not available.
+        </p>
+        <p style={{ color: "#333", fontFamily: "monospace", fontSize: "12px" }}>
+          uid used: {uid}
+        </p>
+        <p style={{ color: "#333", fontFamily: "monospace", fontSize: "12px" }}>
+          queryUid: {queryUid || "none"}
         </p>
       </div>
     );

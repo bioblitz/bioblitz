@@ -6,20 +6,17 @@ import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-new
 import nodemailer from "nodemailer";
 
 const TEST_MODE = true;
-const ALLOWED_TEST_UIDS = ["jCiJOnMGpMZEggNJTN9RR5QhmLN2"];
+const ALLOWED_TEST_UIDS = [
+  "jCiJOnMGpMZEggNJTN9RR5QhmLN2", // dipishasubedi@gmail.com
+  "61B9a6VKyGSGqinMvxPI1L2L5Y23", // aarnavsuwal@gmail.com
+  "RP8SEvXvxyYrLZYv2a40kLunmyD3", // elifeldman769@gmail.com
+  "VsiffsXavFRKs1HBFdLHMlzb3rX2", // elijah.feldman.sunshine.123@gmail.com
+  "KjmC2i3d3GUPpDQ4uSXVRNrml7z1", // dipishasubedi340@gmail.com
+];
 const BATCH_SIZE = 50;
 
 const FROM_ADDRESS = process.env.SMTP_FROM_ADDRESS || "newsletter@bioblitz.net";
 const FROM_NAME = "BioBlitz";
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.zeptomail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || "",
-    pass: process.env.SMTP_PASS || "",
-  },
-});
 
 interface SendResult {
   uid: string;
@@ -34,6 +31,15 @@ async function sendEmail(
   subject: string,
   html: string,
 ): Promise<void> {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.zeptomail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER || "",
+      pass: process.env.SMTP_PASS || "",
+    },
+  });
   await transporter.sendMail({
     from: `"${FROM_NAME}" <${FROM_ADDRESS}>`,
     to: `"${toName}" <${to}>`,
@@ -43,6 +49,8 @@ async function sendEmail(
 }
 
 export async function POST(request: Request) {
+  console.log("digest/send POST hit");
+
   const authHeader = request.headers.get("authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
   const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
@@ -65,6 +73,13 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  console.log("SMTP debug:", {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER,
+    passLength: process.env.SMTP_PASS?.length,
+  });
 
   let blitzOfWeekId: string | undefined;
   let studyTipTitle: string | undefined;
