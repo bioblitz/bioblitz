@@ -1,4 +1,4 @@
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://bioblitz.net";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "bioblitz.net";
 
 function esc(s: string): string {
   return String(s)
@@ -32,7 +32,7 @@ export function generateNewsletterNotificationEmail(
   issueNumber: number,
   unsubscribeUid?: string,
 ): string {
-  const newsletterUrl = `${SITE}/weekly-newsletter/${issueNumber}`;
+  const newsletterUrl = `${SITE}/weekly-newsletter/${issueNumber}?uid=${unsubscribeUid}`;
   const unsubscribeUrl = unsubscribeUid
     ? `${SITE}/settings?unsubscribe=${unsubscribeUid}`
     : `${SITE}/settings`;
