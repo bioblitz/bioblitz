@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 import MountainHero from "@/components/MountainHero";
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
