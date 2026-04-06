@@ -262,16 +262,6 @@ export default async function mainPage({
               About
             </Link>
           </div>
-          © {new Date().getFullYear()} BioBlitz. Powered by{" "}
-          <Link
-            href="https://mitosisphere.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className=" transition-colors font-medium"
-          >
-            Mitosisphere
-          </Link>
-          .
         </footer>
       </main>
     </div>

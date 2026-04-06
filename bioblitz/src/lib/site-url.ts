@@ -1,1 +1,1 @@
-export const SITE_URL = "https://bioblitz.net";
+export const SITE_URL = "https://www.bioblitz.net";
