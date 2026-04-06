@@ -1,201 +1,201 @@
-import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
-import { gatherWeeklyDigest } from "@/lib/digest-data";
-import { generateDigestHtml } from "@/lib/digest-email";
-import { sendMail } from "@/lib/mailer";
+import { NextResponse } from "next/server";
+import { adminFirestore } from "@/lib/firebase-admin";
+import { gatherNewsletterData } from "@/lib/newsletter/weekly-newsletter-data";
+import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-page";
+import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
+import nodemailer from "nodemailer";
 
-const CRON_SECRET = process.env.CRON_SECRET || "";
+const TEST_MODE = true;
+const ALLOWED_TEST_UIDS = [
+  "jCiJOnMGpMZEggNJTN9RR5QhmLN2", // dipishasubedi@gmail.com
+  "61B9a6VKyGSGqinMvxPI1L2L5Y23", // aarnavsuwal@gmail.com
+  "RP8SEvXvxyYrLZYv2a40kLunmyD3", // elifeldman769@gmail.com
+  "VsiffsXavFRKs1HBFdLHMlzb3rX2", // elijah.feldman.sunshine.123@gmail.com
+  "KjmC2i3d3GUPpDQ4uSXVRNrml7z1", // dipishasubedi340@gmail.com
+];
+const BATCH_SIZE = 50;
 
-export const maxDuration = 300;
+const FROM_ADDRESS = process.env.SMTP_FROM_ADDRESS || "newsletter@bioblitz.net";
+const FROM_NAME = "BioBlitz";
 
-export async function POST(req: NextRequest) {
-  const startTime = Date.now();
-
-  const authorized = await checkAuth(req);
-  if (!authorized) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const url = new URL(req.url);
-  const testUid = url.searchParams.get("testUid");
-  const dryRun = url.searchParams.get("dryRun") === "true";
-  const batchSize = Math.min(
-    parseInt(url.searchParams.get("batchSize") || "3", 10) || 3,
-    10,
-  );
-  const delayMs = Math.max(
-    parseInt(url.searchParams.get("delayMs") || "1500", 10) || 1500,
-    500,
-  );
-
-  const log: string[] = [];
-  let sent = 0;
-  let skipped = 0;
-  let failed = 0;
-
-  try {
-    let userIds: string[];
-
-    if (testUid) {
-      userIds = [testUid];
-      log.push(`Test mode: sending only to ${testUid}`);
-    } else {
-      const usersSnap = await adminFirestore
-        .collection("users")
-        .where("emailNotifications", "!=", false)
-        .get();
-
-      userIds = usersSnap.docs
-        .filter((d) => {
-          const data = d.data();
-          return data.email && typeof data.email === "string";
-        })
-        .map((d) => d.id);
-
-      log.push(`Found ${userIds.length} opted-in users with emails`);
-    }
-
-    if (dryRun) {
-      log.push("Dry run — no emails will be sent");
-    }
-
-    for (let i = 0; i < userIds.length; i += batchSize) {
-      const batch = userIds.slice(i, i + batchSize);
-
-      const results = await Promise.allSettled(
-        batch.map((uid) => processUser(uid, dryRun)),
-      );
-
-      for (let j = 0; j < results.length; j++) {
-        const result = results[j];
-        const uid = batch[j];
-
-        if (result.status === "fulfilled") {
-          if (result.value === "sent") {
-            sent++;
-          } else if (result.value === "dry-run") {
-            sent++;
-            log.push(`[dry-run] Would send to ${uid}`);
-          } else {
-            skipped++;
-            log.push(`Skipped ${uid}: ${result.value}`);
-          }
-        } else {
-          failed++;
-          log.push(`Failed ${uid}: ${result.reason?.message || result.reason}`);
-        }
-      }
-
-      if (i + batchSize < userIds.length) {
-        await sleep(delayMs);
-      }
-    }
-
-    const elapsed = Math.round((Date.now() - startTime) / 1000);
-
-    return NextResponse.json({
-      success: true,
-      sent,
-      skipped,
-      failed,
-      total: userIds.length,
-      elapsed: `${elapsed}s`,
-      dryRun,
-      log: log.slice(0, 100),
-    });
-  } catch (error: any) {
-    console.error("[digest/send] Fatal error:", error);
-    return NextResponse.json(
-      {
-        error: error?.message || "Internal server error",
-        sent,
-        skipped,
-        failed,
-        log: log.slice(0, 50),
-      },
-      { status: 500 },
-    );
-  }
+interface SendResult {
+  uid: string;
+  email: string;
+  status: "sent" | "skipped" | "error";
+  error?: string;
 }
 
-async function processUser(
-  uid: string,
-  dryRun: boolean,
-): Promise<"sent" | "dry-run" | string> {
-  const data = await gatherWeeklyDigest(uid);
-
-  if (!data) return "no user or no email";
-  if (!data.email) return "no email";
-
-  const html = generateDigestHtml(data);
-  const subject = buildSubject(data);
-
-  if (dryRun) return "dry-run";
-
-  await sendMail({
-    to: data.email,
+async function sendEmail(
+  to: string,
+  toName: string,
+  subject: string,
+  html: string,
+): Promise<void> {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.zeptomail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER || "",
+      pass: process.env.SMTP_PASS || "",
+    },
+  });
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${FROM_ADDRESS}>`,
+    to: `"${toName}" <${to}>`,
     subject,
     html,
   });
-
-  return "sent";
 }
 
-function buildSubject(data: {
-  currentElo: number;
-  eloChange: number;
-  blitzesThisWeek: number;
-  currentStreak: number;
-}): string {
-  if (data.blitzesThisWeek === 0) {
-    return data.currentStreak > 0
-      ? `Your ${data.currentStreak}-day streak is at risk`
-      : "Your weekly BioBlitz recap is here";
+export async function POST(request: Request) {
+  console.log("digest/send POST hit");
+
+  const authHeader = request.headers.get("authorization") || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
+
+  if (!expectedToken || token !== expectedToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (data.eloChange > 0) {
-    return `You climbed +${data.eloChange} Elo this week`;
+  const body = await request.json();
+  const issue: number = body.issue;
+  const startAfterUid: string | undefined = body.startAfter;
+
+  if (!issue) {
+    return NextResponse.json({ error: "issue required" }, { status: 400 });
   }
 
-  if (data.currentStreak >= 7) {
-    return `${data.currentStreak} days strong — your BioBlitz week`;
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    return NextResponse.json(
+      { error: "SMTP credentials not set" },
+      { status: 500 },
+    );
   }
 
-  return `Your week on BioBlitz: ${data.blitzesThisWeek} blitz${data.blitzesThisWeek !== 1 ? "es" : ""}, ${data.currentElo} Elo`;
-}
+  console.log("SMTP debug:", {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER,
+    passLength: process.env.SMTP_PASS?.length,
+  });
 
-async function checkAuth(req: NextRequest): Promise<boolean> {
-  const cronHeader = req.headers.get("x-cron-secret");
-  if (CRON_SECRET && cronHeader === CRON_SECRET) {
-    return true;
+  let blitzOfWeekId: string | undefined;
+  let studyTipTitle: string | undefined;
+  let studyTipBody: string | undefined;
+
+  try {
+    const configSnap = await adminFirestore
+      .collection("newsletterConfig")
+      .doc(`issue-${issue}`)
+      .get();
+    if (configSnap.exists) {
+      const cfg = configSnap.data()!;
+      blitzOfWeekId = cfg.blitzOfWeekId;
+      studyTipTitle = cfg.studyTipTitle;
+      studyTipBody = cfg.studyTipBody;
+    }
+  } catch (e) {
+    console.error("newsletter: config load error", e);
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`) {
-    return true;
-  }
+  let usersQuery = adminFirestore
+    .collection("users")
+    .where("emailNotifications", "!=", false)
+    .orderBy("emailNotifications")
+    .orderBy("__name__")
+    .limit(BATCH_SIZE);
 
-  if (authHeader?.startsWith("Bearer ")) {
-    try {
-      const token = authHeader.split("Bearer ")[1];
-      const decoded = await adminAuth.verifyIdToken(token);
-      const claims = decoded as any;
-      const roles = Array.isArray(claims.roles)
-        ? claims.roles.map((r: any) => String(r).toLowerCase())
-        : [];
-      return (
-        claims.admin === true ||
-        claims.role === "admin" ||
-        roles.includes("admin")
-      );
-    } catch {
-      return false;
+  if (startAfterUid) {
+    const startAfterDoc = await adminFirestore
+      .collection("users")
+      .doc(startAfterUid)
+      .get();
+    if (startAfterDoc.exists) {
+      usersQuery = usersQuery.startAfter(startAfterDoc);
     }
   }
 
-  return false;
-}
+  const usersSnap = await usersQuery.get();
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  const results: SendResult[] = [];
+  let sentCount = 0;
+  let skippedCount = 0;
+  let errorCount = 0;
+  let lastUid: string | null = null;
+
+  for (const doc of usersSnap.docs) {
+    const u = doc.data();
+    const uid = doc.id;
+    lastUid = uid;
+    const email: string = u.email || "";
+    const username: string = u.username || "there";
+
+    if (!email) {
+      skippedCount++;
+      continue;
+    }
+
+    if (TEST_MODE && !ALLOWED_TEST_UIDS.includes(uid)) {
+      skippedCount++;
+      continue;
+    }
+
+    if (u.marketingConsent === false) {
+      skippedCount++;
+      continue;
+    }
+
+    try {
+      const data = await gatherNewsletterData(
+        uid,
+        issue,
+        blitzOfWeekId,
+        studyTipTitle,
+        studyTipBody,
+      );
+
+      if (data) {
+        const pageHtml = generateNewsletterPageHtml(data);
+        await adminFirestore
+          .collection("newsletterSnapshots")
+          .doc(`issue-${issue}`)
+          .collection("users")
+          .doc(uid)
+          .set({ html: pageHtml, savedAt: new Date() });
+      }
+
+      const notificationHtml = generateNewsletterNotificationEmail(
+        username,
+        issue,
+        uid,
+      );
+      const subject = `Your BioBlitz Weekly Digest · Issue #${issue} is here`;
+
+      await sendEmail(email, username, subject, notificationHtml);
+
+      results.push({ uid, email, status: "sent" });
+      sentCount++;
+
+      await new Promise((r) => setTimeout(r, 150));
+    } catch (e: any) {
+      results.push({ uid, email, status: "error", error: e.message });
+      errorCount++;
+      console.error(`newsletter send error for ${uid}:`, e);
+    }
+  }
+
+  const hasMore = usersSnap.docs.length === BATCH_SIZE;
+
+  return NextResponse.json({
+    testMode: TEST_MODE,
+    issue,
+    sent: sentCount,
+    skipped: skippedCount,
+    errors: errorCount,
+    hasMore,
+    netxtStartAfter: hasMore ? lastUid : null,
+    results: TEST_MODE ? results : undefined,
+  });
 }

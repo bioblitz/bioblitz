@@ -1,13 +1,31 @@
-
 import { getContestById } from "@/lib/actions";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
 
 type ContestPageParams = {
   params: {
     contestId: string;
   };
 };
+
+export async function generateMetadata({
+  params,
+}: ContestPageParams): Promise<Metadata> {
+  const contest = await getContestById(params.contestId);
+  if (!contest) {
+    return { title: "Blitz Not Found | BioBlitz" };
+  }
+  return {
+    title: `${contest.title} | BioBlitz`,
+    description:
+      contest.description ?? "A competitive biology blitz on BioBlitz.",
+    alternates: {
+      canonical: `${SITE_URL}/contests/${params.contestId}`,
+    },
+  };
+}
 
 export default async function ContestPage({ params }: ContestPageParams) {
   await params;
@@ -35,13 +53,13 @@ export default async function ContestPage({ params }: ContestPageParams) {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
             {contest.title}
           </h1>
-          <p className="text-zinc-400 mt-4 text-lg">
-            {contest.description}
-          </p>
+          <p className="text-zinc-400 mt-4 text-lg">{contest.description}</p>
         </header>
 
         <main className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-zinc-300 mb-6">Blitz Details</h2>
+          <h2 className="text-2xl font-bold text-zinc-300 mb-6">
+            Blitz Details
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-zinc-400">Topic</p>

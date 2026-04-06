@@ -1,8 +1,15 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 import MountainHero from "@/components/MountainHero";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: SITE_URL,
+  },
+};
 
 export default async function mainPage({
   searchParams,
@@ -22,12 +29,13 @@ export default async function mainPage({
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-neutral-900 text-slate-200 selection:text-white overflow-x-hidden">
-
-
       <main className="relative z-10 flex-grow flex flex-col w-full">
         <MountainHero />
 
-        <section id="demo" className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20">
+        <section
+          id="demo"
+          className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20"
+        >
           <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
             <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
               <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
@@ -68,35 +76,77 @@ export default async function mainPage({
                     </p>
                     <div className="flex flex-col space-y-3">
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">A</span>
-                        <span className="text-lg">ATP, CO2, and Acetyl-CoA</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          A
+                        </span>
+                        <span className="text-lg">
+                          ATP, CO2, and Acetyl-CoA
+                        </span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-emerald-600 text-white border-emerald-300  scale-[1.01] cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-white/20 text-white">B</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-white/20 text-white">
+                          B
+                        </span>
                         <span className="text-lg">ATP, CO2, and Ethanol</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">C</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          C
+                        </span>
                         <span className="text-lg">ATP, NADH, and Pyruvate</span>
                       </div>
                       <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">D</span>
-                        <span className="text-lg">ATP, Pyruvate, and Acetyl-CoA</span>
+                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
+                          D
+                        </span>
+                        <span className="text-lg">
+                          ATP, Pyruvate, and Acetyl-CoA
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="hidden xl:block sticky top-8">
                     <div className="flex flex-col items-center">
-                      <div style={{ width: size, height: size, position: "relative" }}>
-                        <svg height={size} width={size} className="transform -rotate-90">
-                          <circle stroke="#27272a" fill="transparent" strokeWidth={strokeWidth} r={radius} cx={size / 2} cy={size / 2} />
-                          <circle stroke="#e5e5e5" fill="transparent" strokeWidth={strokeWidth} strokeLinecap="round"
-                            strokeDasharray={circumference} strokeDashoffset={dashOffset} r={radius} cx={size / 2} cy={size / 2} />
+                      <div
+                        style={{
+                          width: size,
+                          height: size,
+                          position: "relative",
+                        }}
+                      >
+                        <svg
+                          height={size}
+                          width={size}
+                          className="transform -rotate-90"
+                        >
+                          <circle
+                            stroke="#27272a"
+                            fill="transparent"
+                            strokeWidth={strokeWidth}
+                            r={radius}
+                            cx={size / 2}
+                            cy={size / 2}
+                          />
+                          <circle
+                            stroke="#e5e5e5"
+                            fill="transparent"
+                            strokeWidth={strokeWidth}
+                            strokeLinecap="round"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={dashOffset}
+                            r={radius}
+                            cx={size / 2}
+                            cy={size / 2}
+                          />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-4xl font-bold text-white tabular-nums">00:{timeLeft}</span>
-                          <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">Remaining</span>
+                          <span className="text-4xl font-bold text-white tabular-nums">
+                            00:{timeLeft}
+                          </span>
+                          <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">
+                            Remaining
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -106,7 +156,6 @@ export default async function mainPage({
             </div>
           </div>
         </section>
-
 
         <style>{`
           .demo-pop {
@@ -127,11 +176,11 @@ export default async function mainPage({
           }
         `}</style>
 
-        
-
         <section className="w-full py-16 px-45">
           <div className="max-w-2xl left">
-            <h2 className="text-2xl font-semibold text-neutral-200 mb-8">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-semibold text-neutral-200 mb-8">
+              Frequently Asked Questions
+            </h2>
             <div className="space-y-4">
               {[
                 {
@@ -159,7 +208,17 @@ export default async function mainPage({
                   <summary className="flex cursor-pointer justify-between p-6 font-medium text-slate-200">
                     <span>{item.q}</span>
                     <span className="transition-transform duration-300 group-open:rotate-180 ml-4 flex-shrink-0">
-                      <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24">
+                      <svg
+                        fill="none"
+                        height="24"
+                        shapeRendering="geometricPrecision"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        width="24"
+                      >
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </span>
@@ -192,15 +251,16 @@ export default async function mainPage({
 
         <footer className="w-full text-center py-8 text-neutral-400 text-sm border-t border-slate-900 bg-neutral-900">
           <div className="flex justify-center gap-6 mb-4">
-            <Link href="/privacy-policy" className=" transition-colors">Privacy</Link>
-            <Link href="/terms-and-conditions" className=" transition-colors">Terms and Conditions</Link>
-            <Link href="/about" className=" transition-colors">About</Link>
+            <Link href="/privacy-policy" className=" transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms-and-conditions" className=" transition-colors">
+              Terms and Conditions
+            </Link>
+            <Link href="/about" className=" transition-colors">
+              About
+            </Link>
           </div>
-          © {new Date().getFullYear()} BioBlitz. Powered by{" "}
-          <Link href="https://mitosisphere.org" target="_blank" rel="noopener noreferrer" className=" transition-colors font-medium">
-            Mitosisphere
-          </Link>
-          .
         </footer>
       </main>
     </div>

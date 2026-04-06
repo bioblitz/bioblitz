@@ -3,7 +3,16 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getCompletedContests } from "@/lib/actions";
 import ContestCard from "@/components/features/contests/ContestCard";
+import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site-url";
 
+export const metadata: Metadata = {
+  title: "Blitzes | BioBlitz",
+  description: "Browse and take biology contests on BioBlitz.",
+  alternates: {
+    canonical: `${SITE_URL}/contests`,
+  },
+};
 
 export default async function ContestsPage() {
   const user = await getCurrentUser();
@@ -14,7 +23,7 @@ export default async function ContestsPage() {
 
   const completedContests = await getCompletedContests();
 
-    return (
+  return (
     <div className="min-h-screen font-inter bg-neutral-900 text-white p-8 pl-16">
       <h1 className="text-4xl font-bold mb-8">Blitzes</h1>
       <div className="flex gap-8">
@@ -35,5 +44,4 @@ export default async function ContestsPage() {
       </div>
     </div>
   );
-
 }

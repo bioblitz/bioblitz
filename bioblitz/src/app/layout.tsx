@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { UsernameChecker } from "@/components/auth/UsernameChecker";
 import ActivityTracker from "../components/ActivityTracker";
+import { SITE_URL } from "@/lib/site-url";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "BioBlitz | Competitive Biology Platform",
   description:
     "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
@@ -29,10 +31,10 @@ export const metadata = {
     title: "BioBlitz | Competitive Biology Platform",
     description:
       "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
-    url: "https://bioblitz.net",
+    url: SITE_URL,
     images: [
       {
-        url: "https://bioblitz.net/images/BIOBLITZ.png",
+        url: `${SITE_URL}/images/BIOBLITZ.png`,
       },
     ],
   },
@@ -41,7 +43,7 @@ export const metadata = {
     title: "BioBlitz | Competitive Biology Platform",
     description:
       "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
-    images: ["https://bioblitz.net/images/BIOBLITZ.png"],
+    images: [`${SITE_URL}/images/BIOBLITZ.png`],
   },
 };
 
@@ -51,7 +53,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${dmSans.className} ${instrumentSerif.variable}`}>
+    <html
+      lang="en"
+      className={`${dmSans.className} ${instrumentSerif.variable}`}
+    >
       <body>
         <AuthProvider>
           <ActivityTracker />
