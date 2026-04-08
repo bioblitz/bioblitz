@@ -116,9 +116,9 @@ export default function TermsOfServicePage() {
               5. Changes to Terms
             </h2>
             <p>
-              We reserve the right to modify these Terms at any time. Continued
-              use of the service following any changes constitutes your
-              acceptance of the new Terms.
+              We reserve the right to modify these Terms and Conditions at any
+              time. Continued use of the service following any changes
+              constitutes your acceptance of the new Terms.
             </p>
           </section>
 
