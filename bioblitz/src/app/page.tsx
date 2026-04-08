@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { HeartPulse, Microscope, Dna, Leaf, Globe } from "lucide-react";
 import MountainHero from "@/components/MountainHero";
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
@@ -262,16 +261,6 @@ export default async function mainPage({
               About
             </Link>
           </div>
-          © {new Date().getFullYear()} BioBlitz. Powered by{" "}
-          <Link
-            href="https://mitosisphere.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className=" transition-colors font-medium"
-          >
-            Mitosisphere
-          </Link>
-          .
         </footer>
       </main>
     </div>
