@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/settings/", "/auth/"],
       },
     ],
-    sitemap: "https://bioblitz.net/sitemap.xml",
+    sitemap: "https://www.bioblitz.net/sitemap.xml",
   };
 }
