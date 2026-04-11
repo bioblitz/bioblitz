@@ -11,8 +11,7 @@ import React, {
 } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import QuestionEditorForm from "@/components/forms/QuestionEditorForm";
-import ContestQuestionView from "@/components/features/contests/ContestQuestionView";
-import { EditableQuestion, IQuestionForDisplay } from "@/types";
+import { EditableQuestion } from "@/types";
 import {
   Plus,
   Trash2,
@@ -28,41 +27,6 @@ import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { debounce } from "@/lib/utils";
-
-const generateChoiceKey = (index: number): string => {
-  const charCodeA = "a".charCodeAt(0);
-  return String.fromCharCode(charCodeA + index);
-};
-
-const transformForPreview = (
-  editable: EditableQuestion | undefined,
-): [IQuestionForDisplay, string | undefined] => {
-  if (!editable) {
-    return [
-      {
-        content: "Select a question to preview",
-      },
-      undefined,
-    ];
-  }
-
-  const questionForPreview: IQuestionForDisplay = {
-    content: editable.content || "...",
-    imgURL: editable.imageUrl,
-  };
-
-  let correctChoiceKey: string | undefined;
-
-  editable.choices.forEach((choice, index) => {
-    const key = generateChoiceKey(index);
-    questionForPreview[key as keyof IQuestionForDisplay] = choice.text;
-    if (choice.id === editable.correctAnswerId) {
-      correctChoiceKey = key;
-    }
-  });
-
-  return [questionForPreview, correctChoiceKey];
-};
 
 const initialQuestion = (): EditableQuestion => ({
   id: Date.now().toString(),
@@ -642,10 +606,6 @@ export default function EditContestPage() {
   const inputClass =
     "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
 
-  const [currentPreview, currentCorrectKey] = transformForPreview(
-    questions[currentEditorIndex],
-  );
-
   return (
     <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16 pl-14">
       <div className="max-w-7xl mx-auto px-6">
@@ -655,7 +615,7 @@ export default function EditContestPage() {
               Blitz Editor
             </h1>
             <p className="text-zinc-500 text-sm mt-0.5">
-              Build your blitz and preview it live.
+              Build and edit your blitz.
             </p>
             {postAsUsername && (
               <p className="text-xs text-neutral-300 mt-1">
@@ -696,8 +656,145 @@ export default function EditContestPage() {
         </div>
 
         <form onSubmit={validateAndSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Questions editor — takes 2/3 */}
+            <div className="lg:col-span-2 space-y-8">
+              <section ref={carouselRef}>
+                <h2 className="text-xs font-semibold text-zinc-500 mb-3">
+                  Questions ({questions.length})
+                </h2>
+                <div className="space-y-4">
+                  {/* Carousel nav */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentEditorIndex((i) => Math.max(0, i - 1))
+                      }
+                      disabled={currentEditorIndex === 0}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      Prev
+                    </button>
+                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-neutral-500 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${((currentEditorIndex + 1) / questions.length) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0">
+                      {currentEditorIndex + 1} / {questions.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentEditorIndex((i) =>
+                          Math.min(questions.length - 1, i + 1),
+                        )
+                      }
+                      disabled={currentEditorIndex === questions.length - 1}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    >
+                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Current question editor */}
+                  <div className="relative">
+                    {questions[currentEditorIndex] && (
+                      <div
+                        className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}
+                      >
+                        <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
+                          <span className="text-sm font-semibold text-zinc-300">
+                            Question {currentEditorIndex + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeQuestion(questions[currentEditorIndex].id)
+                            }
+                            disabled={questions.length === 1}
+                            className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded disabled:opacity-30"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {errors[questions[currentEditorIndex].id] && (
+                          <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
+                            {errors[questions[currentEditorIndex].id].map(
+                              (err, i) => (
+                                <p key={i} className="text-xs text-red-400">
+                                  {err}
+                                </p>
+                              ),
+                            )}
+                          </div>
+                        )}
+                        <QuestionEditorForm
+                          key={questions[currentEditorIndex].id}
+                          question={questions[currentEditorIndex]}
+                          onQuestionChange={(updated) =>
+                            handleQuestionChange(
+                              questions[currentEditorIndex].id,
+                              updated,
+                            )
+                          }
+                        />
+                      </div>
+                    )}
+                    {fetchingContest && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[200px]">
+                        <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
+                        <span className="text-neutral-400 text-sm font-medium">
+                          Loading...
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-zinc-500 hover:text-zinc-300 border border-dashed border-zinc-800 hover:border-zinc-600 rounded-xl transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add question
+                  </button>
+                </div>
+              </section>
+
+              <div className="flex items-center justify-between pt-1">
+                {state.message && !state.message.startsWith("Blitz saved") && (
+                  <p className="text-sm text-red-400">{state.message}</p>
+                )}
+                <div className="ml-auto flex items-center gap-3">
+                  <span
+                    className={`flex items-center gap-1.5 text-xs text-green-400 transition-opacity duration-300 ${showSaved ? "opacity-100" : "opacity-0"}`}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    Saved
+                  </span>
+                  {Object.keys(errors).length > 0 && (
+                    <span className="text-xs text-red-400">
+                      Resolve errors before publishing
+                    </span>
+                  )}
+                  <SubmitButton
+                    isPublished={isPublished}
+                    publishing={publishing}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Details sidebar — takes 1/3 */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
               <section>
                 <button
                   type="button"
@@ -851,155 +948,7 @@ export default function EditContestPage() {
                   </div>
                 )}
               </section>
-
-              <section ref={carouselRef}>
-                <h2 className="text-xs font-semibold text-zinc-500 mb-3">
-                  Questions ({questions.length})
-                </h2>
-                <div className="space-y-4">
-                  {/* Carousel nav */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setCurrentEditorIndex((i) => Math.max(0, i - 1))
-                      }
-                      disabled={currentEditorIndex === 0}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      Prev
-                    </button>
-                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-neutral-500 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${((currentEditorIndex + 1) / questions.length) * 100}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0">
-                      {currentEditorIndex + 1} / {questions.length}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setCurrentEditorIndex((i) =>
-                          Math.min(questions.length - 1, i + 1),
-                        )
-                      }
-                      disabled={currentEditorIndex === questions.length - 1}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-                    >
-                      Next
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Current question editor */}
-                  <div className="relative">
-                    {questions[currentEditorIndex] && (
-                      <div
-                        className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}
-                      >
-                        <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
-                          <span className="text-sm font-semibold text-zinc-300">
-                            Question {currentEditorIndex + 1}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeQuestion(questions[currentEditorIndex].id)
-                            }
-                            disabled={questions.length === 1}
-                            className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded disabled:opacity-30"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        {errors[questions[currentEditorIndex].id] && (
-                          <div className="px-5 py-2 bg-red-900/10 border-b border-red-900/20">
-                            {errors[questions[currentEditorIndex].id].map(
-                              (err, i) => (
-                                <p key={i} className="text-xs text-red-400">
-                                  {err}
-                                </p>
-                              ),
-                            )}
-                          </div>
-                        )}
-                        <QuestionEditorForm
-                          key={questions[currentEditorIndex].id}
-                          question={questions[currentEditorIndex]}
-                          onQuestionChange={(updated) =>
-                            handleQuestionChange(
-                              questions[currentEditorIndex].id,
-                              updated,
-                            )
-                          }
-                        />
-                      </div>
-                    )}
-                    {fetchingContest && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[200px]">
-                        <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-                        <span className="text-neutral-400 text-sm font-medium">
-                          Loading...
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={addQuestion}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-zinc-500 hover:text-zinc-300 border border-dashed border-zinc-800 hover:border-zinc-600 rounded-xl transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add question
-                  </button>
-                </div>
-              </section>
-
-              <div className="flex items-center justify-between pt-1">
-                {state.message && !state.message.startsWith("Blitz saved") && (
-                  <p className="text-sm text-red-400">{state.message}</p>
-                )}
-                <div className="ml-auto flex items-center gap-3">
-                  <span
-                    className={`flex items-center gap-1.5 text-xs text-green-400 transition-opacity duration-300 ${showSaved ? "opacity-100" : "opacity-0"}`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    Saved
-                  </span>
-                  {Object.keys(errors).length > 0 && (
-                    <span className="text-xs text-red-400">
-                      Resolve errors before publishing
-                    </span>
-                  )}
-                  <SubmitButton
-                    isPublished={isPublished}
-                    publishing={publishing}
-                  />
-                </div>
               </div>
-            </div>
-
-            <div className="sticky top-20">
-              <h2 className="text-xs font-semibold text-zinc-500 mb-3">
-                Live Preview
-              </h2>
-              {fetchingContest ? (
-                <div className="flex items-center justify-center py-16 bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl gap-3">
-                  <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <ContestQuestionView
-                  questionNumber={currentEditorIndex + 1}
-                  question={currentPreview}
-                  correctAnswerKey={currentCorrectKey}
-                />
-              )}
             </div>
           </div>
         </form>
