@@ -126,7 +126,7 @@ export default function SubscribersModal({
                           src={sub.photoURL}
                           alt={sub.username || "User"}
                           className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-neutral-500/30 transition-colors"
-                          referrerPolicy="no-referrer"
+
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                             e.currentTarget.nextElementSibling?.classList.remove("hidden");

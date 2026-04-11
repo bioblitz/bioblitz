@@ -321,6 +321,7 @@ export default function ProfilePage() {
                               src={friend.photoURL}
                               alt={friend.displayName}
                               className="w-8 h-8 rounded-full object-cover shrink-0"
+
                               onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }}
                             />
                           ) : (
@@ -403,7 +404,7 @@ export default function ProfilePage() {
                                 <div className="flex items-center gap-2 min-w-0">
                                   {req.photoURL ? (
                                     <img src={req.photoURL} alt={req.displayName} className="w-7 h-7 rounded-full object-cover shrink-0"
-                                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }} />
+ onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/logo.svg"; }} />
                                   ) : (
                                     <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0">
                                       {req.displayName?.[0]}
@@ -478,7 +479,7 @@ export default function ProfilePage() {
                   className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
                   alt=""
                   aria-hidden
-                  referrerPolicy="no-referrer"
+
                 />
                 <div className="absolute inset-0 bg-neutral-900/60" />
                 <div className="relative h-full flex items-center justify-center">
@@ -486,7 +487,7 @@ export default function ProfilePage() {
                     src={userProfile.photoURL}
                     alt="Channel owner"
                     className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
-                    referrerPolicy="no-referrer"
+
                   />
                 </div>
               </>

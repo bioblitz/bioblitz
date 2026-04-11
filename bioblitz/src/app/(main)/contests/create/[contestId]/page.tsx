@@ -469,6 +469,14 @@ export default function EditContestPage() {
   ]);
 
   useEffect(() => {
+    if (fetchingContest || isFetchingRef.current) return;
+    const timer = setTimeout(() => {
+      handleSaveDraft();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [title, description, timeLimit, selectedTopic, customTopic, questions, bannerUrl, isAiGenerated, fetchingContest, handleSaveDraft]);
+
+  useEffect(() => {
     if (!contestId) return;
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -921,6 +929,7 @@ export default function EditContestPage() {
                           </div>
                         )}
                         <QuestionEditorForm
+                          key={questions[currentEditorIndex].id}
                           question={questions[currentEditorIndex]}
                           onQuestionChange={(updated) =>
                             handleQuestionChange(
@@ -963,6 +972,11 @@ export default function EditContestPage() {
                     <Check className="w-3.5 h-3.5" />
                     Saved
                   </span>
+                  {Object.keys(errors).length > 0 && (
+                    <span className="text-xs text-red-400">
+                      Resolve errors before publishing
+                    </span>
+                  )}
                   <SubmitButton
                     isPublished={isPublished}
                     publishing={publishing}

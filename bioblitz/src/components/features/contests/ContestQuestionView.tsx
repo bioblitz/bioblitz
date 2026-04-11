@@ -25,10 +25,7 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
   return (
     <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
       <div className="flex items-center mb-4">
-        <span
-          className="bg-neutral-500/10 text-neutral-400 text-[11px] font-[800] px-3 py-1 rounded-lg border border-neutral-500/20"
-          style={{ letterSpacing: "0.06em" }}
-        >
+        <span className="text-neutral-400 text-sm">
           Question {questionNumber}
         </span>
       </div>
@@ -56,7 +53,7 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
           let rowClass =
             "flex items-center w-full px-5 py-4 rounded-xl border transition-all duration-200 ";
           let keyBadgeClass =
-            "flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-[800] text-[12px] uppercase ";
+            "flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-normal text-[12px] uppercase ";
 
           if (isCorrect) {
             rowClass += "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
@@ -78,7 +75,7 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
                 dangerouslySetInnerHTML={{ __html: text }}
               />
               {isCorrect && (
-                <span className="ml-auto text-emerald-400 font-[800] text-[11px] tracking-wider shrink-0">
+                <span className="ml-auto text-emerald-400 font-normal text-[11px] tracking-wider shrink-0">
                   CORRECT
                 </span>
               )}

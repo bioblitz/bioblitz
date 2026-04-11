@@ -208,7 +208,7 @@ export default function NotificationBell() {
                           src={notification.senderPhotoURL}
                           alt="User"
                           className="w-8 h-8 rounded-full object-cover border border-zinc-700"
-                          referrerPolicy="no-referrer"
+
                           onError={(e) => {
                             const target = e.currentTarget;
                             target.onerror = null;

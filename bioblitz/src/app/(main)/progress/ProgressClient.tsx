@@ -360,7 +360,7 @@ function EloSection({
           <div>
             <div className="flex items-baseline gap-2.5">
               <motion.span
-                className={`${mono} text-[48px] font-[800] text-white tabular-nums leading-none`}
+                className={`${mono} text-[48px] font-normal text-white tabular-nums leading-none`}
                 style={{ letterSpacing: "-2px" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -585,7 +585,7 @@ function ActivitySection({
         <div>
           <div className="flex items-baseline gap-1.5">
             <span
-              className={`${mono} text-[24px] font-[800] text-white tabular-nums leading-none`}
+              className={`${mono} text-[24px] font-normal text-white tabular-nums leading-none`}
             >
               <AnimatedNumber value={currentStreak} duration={800} />
             </span>
@@ -662,7 +662,7 @@ function ActivitySection({
               className={`flex items-center justify-center gap-1 ${s.color} mb-0.5`}
             >
               {s.icon}
-              <span className={`${mono} text-[16px] font-[800] tabular-nums`}>
+              <span className={`${mono} text-[16px] font-normal tabular-nums`}>
                 {s.custom ?? <AnimatedNumber value={s.val} duration={1000} />}
               </span>
             </div>
@@ -743,7 +743,7 @@ function TopicBreakdownSection({ topicStats }: { topicStats: TopicStat[] }) {
                   color={vc.ring}
                   trackColor={vc.ringTrack}
                 >
-                  <span className={`${mono} text-[15px] font-[800] ${vc.text}`}>
+                  <span className={`${mono} text-[15px] font-normal ${vc.text}`}>
                     {Math.round(stat.accuracy)}
                   </span>
                 </RingChart>
@@ -753,7 +753,7 @@ function TopicBreakdownSection({ topicStats }: { topicStats: TopicStat[] }) {
                       {stat.topic}
                     </span>
                     <span
-                      className={`${mono} text-[9px] font-[800] uppercase px-1.5 py-0.5 rounded ${vc.bg} ${vc.text}`}
+                      className={`${mono} text-[9px] font-normal uppercase px-1.5 py-0.5 rounded ${vc.bg} ${vc.text}`}
                       style={{ letterSpacing: "0.1em" }}
                     >
                       {verdict}
@@ -840,7 +840,7 @@ function WeeklySnapshotSection({
           ].map((s) => (
             <div key={s.label} className="text-center">
               <span
-                className={`${mono} text-[20px] font-[800] tabular-nums ${s.color}`}
+                className={`${mono} text-[20px] font-normal tabular-nums ${s.color}`}
               >
                 {s.prefix || ""}
                 <AnimatedNumber value={s.val} duration={800} />
@@ -951,7 +951,7 @@ function ReviewSection({
                     trackColor={ringTrack}
                   >
                     <span
-                      className={`${mono} text-[13px] font-[800] ${textColor}`}
+                      className={`${mono} text-[13px] font-normal ${textColor}`}
                     >
                       {Math.round(set.accuracy)}
                     </span>

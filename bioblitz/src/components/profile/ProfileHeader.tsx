@@ -43,7 +43,7 @@ export default function ProfileHeader({
                   src={userProfile.photoURL}
                   alt={userProfile.displayName}
                   className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
+
                   onError={() => setImgError(true)}
                 />
               ) : (

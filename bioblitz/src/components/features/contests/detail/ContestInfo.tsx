@@ -113,7 +113,7 @@ export default function ContestInfo({
                     src={game.creatorPfp}
                     alt={game.creatorUsername}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-neutral-500"
-                    referrerPolicy="no-referrer"
+
                   />
                 ) : (
                   <div className="w-6 h-6 flex-shrink-0">

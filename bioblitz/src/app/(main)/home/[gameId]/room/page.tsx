@@ -601,7 +601,7 @@ export default function GameRoomPage() {
               </h1>
               {!submitted && (
                 <span
-                  className={`text-[10px] px-2.5 py-1 rounded-lg font-[800] mb-2 ${
+                  className={`text-[10px] px-2.5 py-1 rounded-lg font-normal mb-2 ${
                     isRanked
                       ? "bg-neutral-600 text-white"
                       : "bg-zinc-800 text-zinc-400"
@@ -682,10 +682,7 @@ export default function GameRoomPage() {
                 <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`bg-neutral-500/12 text-neutral-400 text-[11px] font-[800] px-3 py-1 rounded-lg border border-neutral-500/20`}
-                        style={{ letterSpacing: "0.06em" }}
-                      >
+                      <span className="text-neutral-400 text-sm">
                         Question {currentQuestion + 1}
                       </span>
                       <ReportButton
@@ -725,7 +722,7 @@ export default function GameRoomPage() {
                           }`}
                         >
                           <span
-                            className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-[800] text-[12px] uppercase transition-colors ${
+                            className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-normal text-[12px] uppercase transition-colors ${
                               isSelected
                                 ? "bg-white/20 text-white"
                                 : "bg-neutral-900/30 text-zinc-500 group-hover:text-white"
@@ -791,7 +788,7 @@ export default function GameRoomPage() {
                         <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
                           Time
                         </h2>
-                        <p className={`text-[24px] font-[800] text-white`}>
+                        <p className={`text-[24px] font-normal text-white`}>
                           {formatTime(timeTotal - (timeLeft ?? 0))}
                         </p>
                       </div>
@@ -804,7 +801,7 @@ export default function GameRoomPage() {
                           <Loader2 className="w-5 h-5 text-neutral-400 animate-spin mx-auto mt-1" />
                         ) : userRank !== null ? (
                           <p
-                            className={`relative text-[32px] font-[800] text-neutral-400`}
+                            className={`relative text-[32px] font-normal text-neutral-400`}
                           >
                             {userRank === 1
                               ? "🥇"
@@ -816,7 +813,7 @@ export default function GameRoomPage() {
                           </p>
                         ) : (
                           <p
-                            className={`relative text-[20px] font-[800] text-zinc-500`}
+                            className={`relative text-[20px] font-normal text-zinc-500`}
                           >
                             —
                           </p>
@@ -832,7 +829,7 @@ export default function GameRoomPage() {
                           </p>
                         ) : finalResult.ratingDelta !== null ? (
                           <p
-                            className={`text-[28px] font-[800] ${finalResult.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                            className={`text-[28px] font-normal ${finalResult.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}
                           >
                             {finalResult.ratingDelta >= 0 ? "+" : ""}
                             {finalResult.ratingDelta}
@@ -869,10 +866,7 @@ export default function GameRoomPage() {
                           className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8"
                         >
                           <div className="flex items-center gap-3 mb-4">
-                            <span
-                              className={`bg-zinc-800 text-zinc-400 text-[11px] font-[800] px-3 py-1 rounded-lg`}
-                              style={{ letterSpacing: "0.06em" }}
-                            >
+                            <span className="text-zinc-400 text-sm">
                               Question {idx + 1}
                             </span>
                             <BookmarkButton
@@ -917,7 +911,7 @@ export default function GameRoomPage() {
                                   className={`flex items-center px-5 py-4 rounded-xl border ${bgClass}`}
                                 >
                                   <span
-                                    className={`font-[800] mr-4 uppercase w-6 text-[12px]`}
+                                    className={`font-normal mr-4 uppercase w-6 text-[12px]`}
                                   >
                                     {key}
                                   </span>
@@ -927,7 +921,7 @@ export default function GameRoomPage() {
                                   />
                                   {isCorrect && (
                                     <span
-                                      className={`ml-auto text-emerald-400 font-[800] text-[11px] uppercase`}
+                                      className={`ml-auto text-emerald-400 font-normal text-[11px] uppercase`}
                                       style={{ letterSpacing: "0.06em" }}
                                     >
                                       CORRECT
@@ -935,7 +929,7 @@ export default function GameRoomPage() {
                                   )}
                                   {isUserAnswer && !isCorrect && (
                                     <span
-                                      className={`ml-auto text-red-400 font-[800] text-[11px] uppercase`}
+                                      className={`ml-auto text-red-400 font-normal text-[11px] uppercase`}
                                       style={{ letterSpacing: "0.06em" }}
                                     >
                                       YOUR ANSWER
@@ -1019,7 +1013,7 @@ export default function GameRoomPage() {
                           </div>
                           <div className="text-right">
                             <span
-                              className={`font-[800] text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}
+                              className={`font-normal text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}
                             >
                               {entry.correctCount ?? "?"}/
                               {entry.totalQuestions ?? "?"}
@@ -1072,7 +1066,7 @@ export default function GameRoomPage() {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span
-                    className={`text-[36px] font-[800] text-white tabular-nums`}
+                    className={`text-[36px] font-normal text-white tabular-nums`}
                   >
                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                   </span>
@@ -1100,7 +1094,7 @@ export default function GameRoomPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {unansweredCount > 0 && (
-                    <span className="bg-zinc-700 text-zinc-300 text-[10px] font-[800] px-1.5 py-0.5 rounded-full">
+                    <span className="bg-zinc-700 text-zinc-300 text-[10px] font-normal px-1.5 py-0.5 rounded-full">
                       {unansweredCount}
                     </span>
                   )}
@@ -1122,7 +1116,7 @@ export default function GameRoomPage() {
                           key={i}
                           onClick={() => goTo(i)}
                           title={`Question ${i + 1}`}
-                          className={`h-8 rounded-lg text-[11px] font-[800] transition-all border ${
+                          className={`h-8 rounded-lg text-[11px] font-normal transition-all border ${
                             isCurrent
                               ? "ring-2 ring-neutral-400 ring-offset-1 ring-offset-zinc-950"
                               : ""

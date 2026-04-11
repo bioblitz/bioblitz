@@ -335,7 +335,7 @@ export default function SettingsPage() {
                 src={profileData?.photoURL || user?.photoURL}
                 alt="Profile picture"
                 className="w-16 h-16 rounded-full object-cover border border-zinc-700"
-                referrerPolicy="no-referrer"
+
               />
             </div>
             <div>

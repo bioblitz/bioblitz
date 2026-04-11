@@ -91,6 +91,7 @@ export default function ContestLeaderboard({
                       src={entry.photoURL}
                       alt={entry.username}
                       className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 object-cover"
+
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
@@ -193,7 +194,6 @@ export default function ContestLeaderboard({
                       </span>
                     )}
                   </div>
-                  {isAdmin && 
                   <div className="flex items-center justify-between pt-2 border-t border-zinc-800/40">
                     <div className="flex items-center gap-1 text-zinc-100">
                       <Info className="w-3 h-3" />
@@ -225,7 +225,6 @@ export default function ContestLeaderboard({
                       </div>
                     </div>
                   </div>
-                  }  
                 </div>
               )}
             </div>

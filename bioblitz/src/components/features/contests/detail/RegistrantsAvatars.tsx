@@ -40,7 +40,7 @@ export default function RegistrantsAvatars({
                     src={entry.photoURL}
                     alt={entry.username}
                     className="w-full h-full rounded-full object-cover"
-                    referrerPolicy="no-referrer"
+
                   />
                 ) : (
                   entry.username?.[0]?.toUpperCase()

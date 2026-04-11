@@ -99,7 +99,7 @@ function FriendRanking({
                   src={friend.photoURL}
                   alt={friend.displayName}
                   className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900 object-cover"
-                  referrerPolicy="no-referrer"
+
                 />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
@@ -115,7 +115,7 @@ function FriendRanking({
 
               <div className="text-right">
                 <span
-                  className={`font-[800] text-[16px] tabular-nums ${isMe ? "text-neutral-400" : "text-zinc-300"}`}
+                  className={`font-normal text-[16px] tabular-nums ${isMe ? "text-neutral-400" : "text-zinc-300"}`}
                 >
                   {friend.bElo}
                 </span>
@@ -217,11 +217,11 @@ function ChallengeCard({
                       ? "ring-2 ring-neutral-500/50 ring-offset-1"
                       : "border border-zinc-700"
                   }`}
-                  referrerPolicy="no-referrer"
+
                 />
               ) : (
                 <div
-                  className={`${mono} w-11 h-11 rounded-full flex items-center justify-center text-sm font-[800] transition-all ${
+                  className={`${mono} w-11 h-11 rounded-full flex items-center justify-center text-sm font-normal transition-all ${
                     urgent && needsMyPlay
                       ? "bg-neutral-400/40 text-neutral-300 ring-2 ring-neutral-500/50 ring-offset-1 ring-offset-[#09090b]"
                       : "bg-zinc-800 text-zinc-400 border border-zinc-700"
@@ -256,7 +256,7 @@ function ChallengeCard({
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 {needsMyPlay && (
                   <span
-                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-[800] uppercase px-2 py-1 rounded-lg ${
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-normal uppercase px-2 py-1 rounded-lg ${
                       isExpiringSoon
                         ? "text-red-300 bg-red-500/12 border border-red-500/30"
                         : "text-neutral-200 bg-neutral-500/15 border border-neutral-500/30"
@@ -281,7 +281,7 @@ function ChallengeCard({
                 )}
                 {iWon && (
                   <span
-                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-[800] uppercase text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-lg`}
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-normal uppercase text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-lg`}
                     style={{ letterSpacing: "0.06em" }}
                   >
                     <CheckCircle2 className="w-2.5 h-2.5" /> Won
@@ -302,7 +302,7 @@ function ChallengeCard({
             {isCompleted && myScore !== null && theirScore !== null ? (
               <div className="flex-shrink-0 text-right">
                 <div
-                  className={`${mono} text-[24px] font-[800] tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-zinc-600"}`}
+                  className={`${mono} text-[24px] font-normal tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-zinc-600"}`}
                 >
                   {myScore}
                 </div>
@@ -521,7 +521,7 @@ export default function ChallengesPage() {
                 Active
                 {needsMyPlay.length > 0 && (
                   <span
-                    className={`${mono} w-5 h-5 rounded-full bg-white text-[10px] font-[800] flex items-center justify-center leading-none`}
+                    className={`${mono} w-5 h-5 rounded-full bg-white text-[10px] font-normal flex items-center justify-center leading-none`}
                   >
                     {needsMyPlay.length}
                   </span>
@@ -564,7 +564,7 @@ export default function ChallengesPage() {
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-500" />
                         </span>
                         <p
-                          className={`${mono} text-[10px] font-[800] text-neutral-400 uppercase`}
+                          className={`${mono} text-[10px] font-normal text-neutral-400 uppercase`}
                           style={{ letterSpacing: "0.12em" }}
                         >
                           Your turn
@@ -646,7 +646,7 @@ export default function ChallengesPage() {
                         <div className="flex items-center gap-5 px-5 py-3.5 rounded-xl border border-zinc-800 bg-[rgba(9,9,11,0.6)] mb-4">
                           <div>
                             <span
-                              className={`${mono} text-[24px] font-[800] text-emerald-400 tabular-nums`}
+                              className={`${mono} text-[24px] font-normal text-emerald-400 tabular-nums`}
                             >
                               {wins}
                             </span>
@@ -660,7 +660,7 @@ export default function ChallengesPage() {
                           <div className="w-px h-6 bg-zinc-800" />
                           <div>
                             <span
-                              className={`${mono} text-[24px] font-[800] text-zinc-500 tabular-nums`}
+                              className={`${mono} text-[24px] font-normal text-zinc-500 tabular-nums`}
                             >
                               {losses}
                             </span>
@@ -705,7 +705,7 @@ export default function ChallengesPage() {
           >
             <div className="flex items-center gap-2.5 px-1">
               <Trophy className="w-7 h-7 text-amber-500" />
-              <p className="text-[18px] font-[800] text-white">
+              <p className="text-[18px] font-normal text-white">
                 Friends Ranking
               </p>
             </div>

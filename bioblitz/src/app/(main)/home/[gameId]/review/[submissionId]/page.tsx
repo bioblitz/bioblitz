@@ -214,14 +214,14 @@ export default function ReviewPage() {
             </div>
             <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
               <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Time Played</h2>
-              <p className={`${mono} text-[24px] font-[800] text-white`}>{formatTime(submission.timeTaken)}</p>
+              <p className={`${mono} text-[24px] font-normal text-white`}>{formatTime(submission.timeTaken)}</p>
             </div>
             <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
               <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">Rating</h2>
               {submission.ratingDelta != null ? (
                 <>
-                  <p className={`${mono} relative text-[32px] font-[800] ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  <p className={`${mono} relative text-[32px] font-normal ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                     {submission.ratingDelta >= 0 ? "+" : ""}{submission.ratingDelta}
                   </p>
                   {submission.newElo != null && (
@@ -297,7 +297,7 @@ export default function ReviewPage() {
                     className="flex items-center gap-3 px-6 py-4 cursor-pointer group select-none"
                     onClick={() => toggleQuestion(idx)}
                   >
-                    <span className={`${mono} bg-zinc-800 text-zinc-400 text-[11px] font-[800] px-3 py-1 rounded-lg flex-shrink-0`} style={{ letterSpacing: "0.06em" }}>
+                    <span className="text-zinc-400 text-sm flex-shrink-0">
                       Q {idx + 1}
                     </span>
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDotClass}`} />
@@ -364,7 +364,7 @@ export default function ReviewPage() {
                               key={key}
                               className={`flex items-center px-5 py-4 rounded-xl border transition-all ${bgClass}`}
                             >
-                              <span className={`${mono} font-[800] mr-4 uppercase w-6 text-[12px]`}>{key}</span>
+                              <span className={`${mono} font-normal mr-4 uppercase w-6 text-[12px]`}>{key}</span>
                               <span className="font-medium text-[15px]">{text}</span>
                               {isChoiceCorrect && (
                                 <span className={`${sans} ml-auto text-emerald-400 font-semibold text-[12px]`}>

@@ -225,7 +225,7 @@ export default function ChallengeButton({
                           src={friend.photoURL}
                           alt={friend.displayName}
                           className="w-9 h-9 rounded-full object-cover border border-zinc-800 flex-shrink-0"
-                          referrerPolicy="no-referrer"
+
                         />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-neutral-900/30 flex items-center justify-center text-neutral-300 font-bold text-sm flex-shrink-0">

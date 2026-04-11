@@ -222,7 +222,7 @@ export default function ChannelPage() {
                     className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
                     alt=""
                     aria-hidden
-                    referrerPolicy="no-referrer"
+
                   />
                   <div className="absolute inset-0 bg-neutral-900/60" />
 
@@ -231,7 +231,7 @@ export default function ChannelPage() {
                       src={channelOwnerProfile.photoURL}
                       alt="Channel owner"
                       className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
-                      referrerPolicy="no-referrer"
+
                     />
                   </div>
                 </>

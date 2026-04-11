@@ -15,7 +15,6 @@ export default function AuthenticationPage() {
   const auth = getAuth(app);
   const {
     isAuthenticated,
-    setIsAuthenticated,
     loading: authLoading,
   } = useAuth();
   const provider = new GoogleAuthProvider();
@@ -41,7 +40,6 @@ export default function AuthenticationPage() {
 
       if (res.ok) {
         await createUserProfile(user);
-        setIsAuthenticated(true);
         window.location.assign("/home");
       } else {
         console.error("Failed to create session:", await res.json());

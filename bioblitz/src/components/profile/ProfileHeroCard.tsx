@@ -72,7 +72,7 @@ export default function ProfileHeroCard({
               src={userProfile.photoURL}
               alt="Profile"
               className="w-full h-full object-cover group-hover:opacity-50 transition-all duration-300"
-              referrerPolicy="no-referrer"
+
               onError={(e) => {
                 const target = e.currentTarget;
                 target.onerror = null;

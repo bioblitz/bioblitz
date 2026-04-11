@@ -112,7 +112,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
                   src={contest.creatorPfp}
                   alt="Channel owner"
                   className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-                  referrerPolicy="no-referrer"
+
                 />
               </div>
             </>
@@ -128,7 +128,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
           {isCompleted && (
             <div className="absolute inset-0 bg-neutral-950/40 backdrop-blur-[0.25px] z-20">
               <div className="absolute top-0 left-0 flex overflow-hidden w-24 h-24">
-                <span className="absolute -left-6 top-4 w-28 text-black text-[10px] font-semibold uppercase bg-yellow-300 -rotate-45 px-5 justify-center py-1 border border-white/10">
+                <span className="absolute -left-6 top-4 w-28 text-black text-xs font-semibold bg-yellow-300 -rotate-45 px-5 justify-center py-1 border border-white/10">
                   Completed
                 </span>
               </div>
@@ -173,7 +173,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
                 src={contest.creatorPfp}
                 alt={contest.creatorUsername || "Creator"}
                 className="w-12 h-12 rounded-full object-cover border-2 border-neutral-700 flex-shrink-0"
-                referrerPolicy="no-referrer"
+
               />
             ) : (
               <div className="w-12 h-12 flex-shrink-0">

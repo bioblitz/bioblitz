@@ -34,7 +34,7 @@ export default function ContestBanner({ game }: ContestBannerProps) {
                 className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
                 alt=""
                 aria-hidden
-                referrerPolicy="no-referrer"
+
               />
               <div className="absolute inset-0 bg-neutral-900/60" />
               <div className="relative h-full flex items-center justify-center">
@@ -42,7 +42,7 @@ export default function ContestBanner({ game }: ContestBannerProps) {
                   src={game.creatorPfp}
                   alt="Creator"
                   className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
-                  referrerPolicy="no-referrer"
+
                 />
               </div>
             </>

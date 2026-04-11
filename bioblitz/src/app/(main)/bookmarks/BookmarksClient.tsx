@@ -368,14 +368,14 @@ export default function BookmarksClient() {
                                     className={`flex items-center px-4 py-3 rounded-xl border transition-all ${bgClass}`}
                                   >
                                     <span
-                                      className={`${mono} font-[800] mr-3 uppercase w-5 text-[11px]`}
+                                      className={`${mono} font-normal mr-3 uppercase w-5 text-[11px]`}
                                     >
                                       {key}
                                     </span>
                                     <span className="text-[14px]">{text}</span>
                                     {isCorrect && (
                                       <span
-                                        className={`${mono} ml-auto text-emerald-400 font-[800] text-[10px] uppercase`}
+                                        className={`${mono} ml-auto text-emerald-400 font-normal text-[10px] uppercase`}
                                         style={{ letterSpacing: "0.06em" }}
                                       >
                                         CORRECT
@@ -383,7 +383,7 @@ export default function BookmarksClient() {
                                     )}
                                     {isUserAnswer && !isCorrect && (
                                       <span
-                                        className={`${mono} ml-auto text-red-400 font-[800] text-[10px] uppercase`}
+                                        className={`${mono} ml-auto text-red-400 font-normal text-[10px] uppercase`}
                                         style={{ letterSpacing: "0.06em" }}
                                       >
                                         YOUR ANSWER

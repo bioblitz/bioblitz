@@ -157,7 +157,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
           color: #8ab4f8;
         }
         .quill > .ql-container > .ql-editor.ql-blank::before{
-          color: white;
+          color: #52525b;
         }
       ` }} />
 
@@ -179,7 +179,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
               onChange={handleContentChange}
               modules={modules}
               formats={formats}
-              placeholder="What is the powerhouse of the cell?"
+              placeholder="Enter question here..."
             />
           </div>
         )}
@@ -265,7 +265,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                     handleChoiceTextChange(choice.id, e.target.value)
                   }
                   placeholder="Answer"
-                  className="flex-grow text-zinc-700"
+                  className="flex-grow text-white focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <button
                   type="button"

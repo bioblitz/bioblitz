@@ -64,8 +64,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 });
             }
           } else {
-            // Firebase user exists but server session is expired — clean up
-            await fetch("/api/logout", { method: "POST" });
+            // Firebase user exists but no valid server session.
+            // Don't call /api/logout here — it races with /api/login during
+            // sign-in and can wipe the session cookie that was just created.
             setIsAuthenticated(false);
             setUser(null);
           }

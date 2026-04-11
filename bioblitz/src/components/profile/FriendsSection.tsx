@@ -78,7 +78,7 @@ export default function FriendsSection({
                         src={friend.photoURL}
                         alt={friend.displayName}
                         className="w-10 h-10 rounded-full object-cover"
-                        referrerPolicy="no-referrer"
+
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                           e.currentTarget.nextElementSibling?.classList.remove("hidden");

@@ -125,7 +125,7 @@ export default function LeaderboardClient({
                             src={user.photoURL}
                             alt={user.displayName}
                             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-zinc-800"
-                            referrerPolicy="no-referrer"
+
                             onError={(e) => {
                               e.currentTarget.style.display = "none";
                               e.currentTarget.nextElementSibling?.classList.remove("hidden");
