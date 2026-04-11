@@ -143,7 +143,7 @@ export default function About() {
               </div>
 
               <img
-                src="images/about/computer.png"
+                src="/images/about/computer.png"
                 alt=""
                 className="relative z-10 w-full pointer-events-none"
               />
