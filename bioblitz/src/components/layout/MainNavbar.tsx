@@ -20,7 +20,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
-import { BarChart2 } from "lucide-react";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -164,12 +163,7 @@ export default function MainNavbar() {
     }
     if (!isAuthenticated || !user) {
       return (
-        <Link
-          href="/auth"
-          className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-        >
-          Sign In
-        </Link>
+        <div></div>
       );
     }
     return (

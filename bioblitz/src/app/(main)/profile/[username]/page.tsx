@@ -11,12 +11,7 @@ import { app } from "@/lib/firebase";
 import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Inter } from "next/font/google";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+import { uploadImage } from "@/lib/storage";
 import { isUsernameUnique } from "@/lib/user";
 import Link from "next/link";
 import SetsPlayedGrid from "@/components/profile/SetsPlayedGrid";
@@ -59,7 +54,6 @@ export default function ProfilePage() {
 
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const storage = getStorage(app);
   const router = useRouter();
   const { updateUsername, loading: authLoading, user: authUser } = useAuth();
 
@@ -133,12 +127,9 @@ export default function ProfilePage() {
     if (!e.target.files || !userProfile || !auth.currentUser) return;
     const file = e.target.files[0];
     try {
-      const profileRef = storageRef(
-        storage,
-        `profilePictures/${auth.currentUser.uid}`
-      );
-      await uploadBytes(profileRef, file);
-      const downloadURL = await getDownloadURL(profileRef);
+      const extension = file.name.split(".").pop() || "jpg";
+      const path = `profilePictures/${auth.currentUser.uid}/${Date.now()}.${extension}`;
+      const downloadURL = await uploadImage(file, path);
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         photoURL: downloadURL,
       });
