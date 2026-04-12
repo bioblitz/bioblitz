@@ -26,6 +26,7 @@ import { UserProfile } from "@/hooks/profile/types";
 import { useAuth } from "@/context/AuthContext";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { applyTextPolicy } from "@/lib/textPolicy";
+import ImageUploadZone from "@/components/ui/ImageUploadZone";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -122,6 +123,19 @@ export default function ProfilePage() {
     }
   }, [userProfile]);
 
+
+  const handleFileDirect = async (file: File) => {
+    if (!userProfile || !auth.currentUser) return;
+    try {
+      const profileRef = storageRef(storage, `profilePictures/${auth.currentUser.uid}`);
+      await uploadBytes(profileRef, file);
+      const downloadURL = await getDownloadURL(profileRef);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { photoURL: downloadURL });
+      setUserProfile({ ...userProfile, photoURL: downloadURL });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !userProfile || !auth.currentUser) return;
@@ -227,21 +241,25 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="grid gap-6"
         >
-          <ProfileHeroCard
-            userProfile={userProfile}
-            isOwnProfile={authUser?.uid === profileUid}
-            isAuthenticated={!!authUser}
-            friendshipStatus={friendshipStatus}
-            fileInputRef={fileInputRef}
-            onFileChange={handleFileChange}
-            onOpenAuth={() => router.push("/auth")}
-            onSendFriendRequest={sendFriendRequest}
-            onAcceptFriendRequest={acceptFriendRequest}
-            onDeclineFriendRequest={declineFriendRequest}
-            onRemoveFriend={removeFriend}
-            onEditProfile={() => setEditing(true)}
-            onOpenReport={() => setReporting(true)}
-          />
+          <ImageUploadZone
+            onFile={authUser?.uid === profileUid ? handleFileDirect : () => {}}
+          >
+            <ProfileHeroCard
+              userProfile={userProfile}
+              isOwnProfile={authUser?.uid === profileUid}
+              isAuthenticated={!!authUser}
+              friendshipStatus={friendshipStatus}
+              fileInputRef={fileInputRef}
+              onFileChange={handleFileChange}
+              onOpenAuth={() => router.push("/auth")}
+              onSendFriendRequest={sendFriendRequest}
+              onAcceptFriendRequest={acceptFriendRequest}
+              onDeclineFriendRequest={declineFriendRequest}
+              onRemoveFriend={removeFriend}
+              onEditProfile={() => setEditing(true)}
+              onOpenReport={() => setReporting(true)}
+            />
+          </ImageUploadZone>
 
         </motion.div>
 

@@ -27,6 +27,7 @@ import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { debounce } from "@/lib/utils";
+import ImageUploadZone from "@/components/ui/ImageUploadZone";
 
 const initialQuestion = (): EditableQuestion => ({
   id: Date.now().toString(),
@@ -350,24 +351,22 @@ export default function EditContestPage() {
     }
   };
 
-  const handleBannerUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    if (event.target.files && event.target.files[0] && contestId) {
-      const file = event.target.files[0];
-      setUploadingBanner(true);
-      try {
-        const downloadURL = await uploadImage(
-          file,
-          `contests/${contestId}/banner`,
-        );
-        setBannerUrl(downloadURL);
-      } catch (error) {
-        console.error("Error uploading banner image:", error);
-      } finally {
-        setUploadingBanner(false);
-      }
+  const handleBannerFile = async (file: File) => {
+    if (!contestId) return;
+    setUploadingBanner(true);
+    try {
+      const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
+      setBannerUrl(downloadURL);
+    } catch (error) {
+      console.error("Error uploading banner image:", error);
+    } finally {
+      setUploadingBanner(false);
     }
+  };
+
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) handleBannerFile(file);
   };
 
   const handleSaveDraft = useCallback(async () => {
@@ -505,6 +504,10 @@ export default function EditContestPage() {
 
     if (!title.trim()) {
       newErrors.title = ["Title cannot be empty."];
+      isValid = false;
+    }
+    if (questions.length < 3) {
+      newErrors.general = ["A blitz must have at least 3 questions."];
       isValid = false;
     }
     if (timeLimit <= 0) {
@@ -769,7 +772,10 @@ export default function EditContestPage() {
               </section>
 
               <div className="flex items-center justify-between pt-1">
-                {state.message && !state.message.startsWith("Blitz saved") && (
+                {errors.general && (
+                  <p className="text-sm text-red-400">{errors.general[0]}</p>
+                )}
+                {!errors.general && state.message && !state.message.startsWith("Blitz saved") && (
                   <p className="text-sm text-red-400">{state.message}</p>
                 )}
                 <div className="ml-auto flex items-center gap-3">
@@ -892,7 +898,7 @@ export default function EditContestPage() {
                         <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                           Banner Image
                         </label>
-                        <div className="flex items-center gap-3">
+                        <ImageUploadZone onFile={handleBannerFile} className="flex items-center gap-3">
                           {bannerUrl ? (
                             <img
                               src={bannerUrl}
@@ -942,7 +948,7 @@ export default function EditContestPage() {
                               Toggle if any part of your blitz is AI-generated
                             </div>
                           </div>
-                        </div>
+                        </ImageUploadZone>
                       </div>
                     </div>
                   </div>

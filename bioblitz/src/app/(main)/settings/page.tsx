@@ -32,6 +32,7 @@ import { Loader2, Info, Camera } from "lucide-react";
 import ImageCropper from "@/components/ui/ImageCropper";
 import { uploadImage } from "@/lib/storage";
 import { updateUserPhoto } from "@/lib/user";
+import ImageUploadZone from "@/components/ui/ImageUploadZone";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,18 +57,17 @@ export default function SettingsPage() {
   const router = useRouter();
   const db = getFirestore(app);
 
+  const handleFileDirect = (file: File) => {
+    const type = file.type || "image/jpeg";
+    setImageType(type);
+    const reader = new FileReader();
+    reader.onload = () => setImageToEdit(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const type = file.type || "image/jpeg";
-      setImageType(type);
-      
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImageToEdit(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (file) handleFileDirect(file);
   };
 
   const handleCropComplete = async (croppedImage: Blob) => {
@@ -329,7 +329,7 @@ export default function SettingsPage() {
             className="hidden"
             accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
           />
-          <div className="flex items-center gap-4 mb-4">
+          <ImageUploadZone onFile={handleFileDirect} className="flex items-center gap-4 mb-4">
             <div className="relative group">
               <img
                 src={profileData?.photoURL || user?.photoURL}
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                 {user?.email || "No email available"}
               </p>
             </div>
-          </div>
+          </ImageUploadZone>
           <Link
             href={username ? `/profile/${username}` : "#"}
             className="bg-neutral-300 border px-4 py-2 mb-10 rounded-lg text-neutral-800 font-semibold hover:scale-105 transition-transform inline-block"

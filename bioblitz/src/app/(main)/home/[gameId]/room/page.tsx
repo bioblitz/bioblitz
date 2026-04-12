@@ -117,6 +117,7 @@ export default function GameRoomPage() {
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [finalResult, setFinalResult] = useState<GameResult | null>(null);
   const [ratingTimedOut, setRatingTimedOut] = useState(false);
+  const [isOwnBlitz, setIsOwnBlitz] = useState(false);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(
@@ -255,6 +256,7 @@ export default function GameRoomPage() {
         if (isMounted.current) {
           setGameTitle(data.title || "Untitled Blitz");
           setTimeTotal(data.timeLimit);
+          if (user && data.creator === user.uid) setIsOwnBlitz(true);
 
           if (user) {
             const key = `startTime-${user.uid}-${gameId}`;
@@ -823,9 +825,9 @@ export default function GameRoomPage() {
                         <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
                           Rating
                         </h2>
-                        {!isRanked ? (
-                          <p className={`text-[14px] font-[700] text-zinc-500`}>
-                            Practice
+                        {!isRanked || isOwnBlitz ? (
+                          <p className="text-[14px] font-[700] text-zinc-500">
+                            {isOwnBlitz ? "Your blitz" : "Practice"}
                           </p>
                         ) : finalResult.ratingDelta !== null ? (
                           <p
@@ -835,9 +837,7 @@ export default function GameRoomPage() {
                             {finalResult.ratingDelta}
                           </p>
                         ) : ratingTimedOut ? (
-                          <p
-                            className={`text-[12px] font-[700] text-zinc-500 leading-snug`}
-                          >
+                          <p className="text-[12px] font-[700] text-zinc-500 leading-snug">
                             Pending
                             <br />
                             activation
@@ -845,7 +845,7 @@ export default function GameRoomPage() {
                         ) : (
                           <div className="flex flex-col items-center gap-1 mt-1">
                             <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
-                            <p className={`text-[10px] text-zinc-500`}>
+                            <p className="text-[10px] text-zinc-500">
                               Calculating…
                             </p>
                           </div>

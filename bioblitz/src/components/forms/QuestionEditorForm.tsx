@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { EditableQuestion, AnswerChoice } from "@/types";
 import { CheckCircle, Circle, Plus, Trash2, ChevronDown } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import "react-quill-new/dist/quill.snow.css";
+import ImageUploadZone from "@/components/ui/ImageUploadZone";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), {
   ssr: false,
@@ -40,12 +40,14 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
     onQuestionChange({ ...question, content });
   };
 
+  const handleImageFile = (file: File) => {
+    const imageUrl = URL.createObjectURL(file);
+    onQuestionChange({ ...question, imageUrl });
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      onQuestionChange({ ...question, imageUrl });
-    }
+    if (file) handleImageFile(file);
   };
 
   const removeImage = () => {
@@ -196,7 +198,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
           <span className={sectionLabelClass}>Image <span className="text-zinc-600 font-normal">(optional)</span></span>
         </button>
         {showImage && (
-          <div className="mt-2">
+          <ImageUploadZone onFile={handleImageFile} className="mt-2">
             <input
               type="file"
               ref={fileInputRef}
@@ -225,10 +227,10 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full flex flex-col items-center justify-center gap-2 p-8 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-zinc-400 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-neutral-100"
               >
-                <span>Upload an Image</span>
+                <span>Drop, paste, or click to upload an image</span>
               </button>
             )}
-          </div>
+          </ImageUploadZone>
         )}
       </div>
 
@@ -258,14 +260,14 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                     <Circle className="w-6 h-6" />
                   )}
                 </button>
-                <Input
+                <input
                   type="text"
                   value={choice.text}
                   onChange={(e) =>
                     handleChoiceTextChange(choice.id, e.target.value)
                   }
                   placeholder="Answer"
-                  className="flex-grow text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex-grow bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
                 />
                 <button
                   type="button"

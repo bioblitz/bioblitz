@@ -181,7 +181,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
               </div>
             )}
             <div className="flex-1 min-w-0 flex flex-col">
-              <h2 className="text-base font-bold text-white line-clamp-2 mb-1">
+              <h2 className="text-base font-bold text-white truncate mb-1">
                 {contest.title}
               </h2>
               {contest.creatorUsername && (
