@@ -1,10 +1,20 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { Zap, Trophy, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 export default function MarketingNavbar() {
   const { loading } = useAuth();
+
+  const trackClick = (event: string, target: string) => {
+    void trackAnalyticsEvent({
+      event,
+      source: "marketing_navbar",
+      page: "navigation",
+      metadata: { target },
+    });
+  };
 
   return (
     <nav className="fixed w-full bg-neutral-900 z-50 shadow-md">
@@ -22,6 +32,7 @@ export default function MarketingNavbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/home"
+              onClick={() => trackClick("marketing_nav_click", "/home")}
               className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-zinc-400 hover:border-none border text-white border-slate-50 transition-all duration-200"
             >
               Blitzes
@@ -30,6 +41,7 @@ export default function MarketingNavbar() {
             {!loading && (
               <Link
                 href="/auth"
+                onClick={() => trackClick("marketing_nav_click", "/auth")}
                 className="group relative inline-flex items-center justify-center px-5 py-2 text-sm font-460 bg-slate-50 text-black transition-all duration-200 font-pj rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 outline"
               >
                 <span className="relative flex items-center gap-2">

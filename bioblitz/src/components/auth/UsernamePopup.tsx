@@ -6,18 +6,13 @@ import {
   updateUsername as updateUsernameInDb,
   updateMarketingPreference,
 } from "@/lib/user";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowRight,
   ArrowLeft,
   Check,
-  Dna,
-  Trophy,
-  Zap,
-  User,
-  Mail,
-  Star,
 } from "lucide-react";
 
 const INTRO_STEPS = [
@@ -115,6 +110,15 @@ export function UsernamePopup() {
         updateMarketingPreference(user.uid, wantsMarketing),
       ]);
 
+      void trackAnalyticsEvent({
+        event: "onboarding_username_completed",
+        source: "username_popup",
+        page: "onboarding",
+        metadata: {
+          wantsMarketing,
+        },
+      });
+
       updateUsername(trimmed);
       setDone(true);
     } catch {
@@ -161,7 +165,7 @@ export function UsernamePopup() {
                   Pick your username
                 </h2>
                 <p className="text-sm text-zinc-500">
-                  This is how you'll appear on the leaderboard.
+                  This is how you&apos;ll appear on the leaderboard.
                 </p>
               </div>
 
@@ -212,7 +216,7 @@ export function UsernamePopup() {
                     </div>
                     <p className="text-xs text-zinc-500 leading-relaxed">
                       Can we send you occassional emails about new competitions,
-                      features, or updates? No spam and you may unsubcribe
+                      features, or updates? No spam and you may unsubscribe
                       anytime.
                     </p>
                   </div>

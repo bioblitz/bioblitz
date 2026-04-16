@@ -4,6 +4,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { UsernameChecker } from "@/components/auth/UsernameChecker";
 import ActivityTracker from "../components/ActivityTracker";
+import MarketingPopup from "@/components/auth/MarketingPopup";
+import RouteAnalyticsTracker from "@/components/analytics/RouteAnalyticsTracker";
 import { SITE_URL } from "@/lib/site-url";
 
 const dmSans = DM_Sans({
@@ -60,7 +62,9 @@ export default async function RootLayout({
       <body>
         <AuthProvider>
           <ActivityTracker />
+          <RouteAnalyticsTracker />
           <UsernameChecker />
+          <MarketingPopup />
           <NavbarWrapper />
           {children}
         </AuthProvider>

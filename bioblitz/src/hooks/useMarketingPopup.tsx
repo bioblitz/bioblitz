@@ -1,15 +1,40 @@
-import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, serverTimestamp, getFirestore } from "firebase/firestore";
-import { app } from "@/lib/firebase"
+import { useState, useEffect, useRef } from "react";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { app } from "@/lib/firebase";
 import { UserProfile } from "@/lib/user";
+import { updateMarketingPreference } from "@/lib/user";
 
+const NEXT_SIGN_IN_POPUP_KEY = "showMarketingPopupOnNextSignIn";
 
-interface useMarketingPopup{
+interface useMarketingPopup {
     user: UserProfile | null;
+    checkNextSignInFlag?: boolean;
 }
-export function useMarketingPopup({user} : useMarketingPopup) {
+
+export function markMarketingPopupForNextSignIn() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(NEXT_SIGN_IN_POPUP_KEY, "1");
+}
+
+export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMarketingPopup) {
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
+        const shownLoggedRef = useRef(false);
+
+        const trackAnalytics = async (
+            event: "shown" | "accepted" | "declined",
+            reason = "",
+        ) => {
+            try {
+                await fetch("/api/analytics/marketing-consent", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ event, source: "popup", reason }),
+                });
+            } catch {
+                // best-effort analytics only
+            }
+        };
     
     useEffect(() => {
         if(!user?.uid) return;
@@ -18,33 +43,56 @@ export function useMarketingPopup({user} : useMarketingPopup) {
             const snap = await getDoc(ref);
             const data = snap.data();
 
-            if(data?.marketingConsent == true){
+                        const forceShow =
+                            checkNextSignInFlag &&
+                            typeof window !== "undefined" &&
+                            window.localStorage.getItem(NEXT_SIGN_IN_POPUP_KEY) === "1";
+
+                        if(data?.marketingConsent === true){
+                                if (typeof window !== "undefined") {
+                                    window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
+                                }
                 return;
             }
+
             if(!data?.marketingConsentAskedAt ){
                 setShowModal(true);
+                                if (!shownLoggedRef.current) {
+                                    shownLoggedRef.current = true;
+                                    trackAnalytics("shown", forceShow ? "next_sign_in_first_ask" : "first_ask");
+                                }
+                                if (forceShow && typeof window !== "undefined") {
+                                    window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
+                                }
                 return;
             }
+
             const askedAt = data?.marketingConsentAskedAt.toDate();
             const daysSince = (Date.now() -askedAt) / (1000*60*60*24);
-            if(daysSince >=30 ) setShowModal(true);
+                        if (daysSince >= 30) {
+                            setShowModal(true);
+                            if (!shownLoggedRef.current) {
+                                shownLoggedRef.current = true;
+                                trackAnalytics("shown", forceShow ? "next_sign_in_cooldown_met" : "cooldown_met");
+                            }
+                        }
+
+                        if (forceShow && typeof window !== "undefined") {
+                            window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
+                        }
         }
         check();
-    }, [user]);
+    }, [checkNextSignInFlag, db, user]);
+
     const handleAccept = async () => {
-        await setDoc(doc(db, "users", user.uid),{
-            marketingConsent: true,
-            marketingConsentAskedAt: serverTimestamp(),
-        }, {merge: true}
-        );
+        if (!user?.uid) return;
+                await updateMarketingPreference(user.uid, true, "popup");
         setShowModal(false);
     }
+
     const handleDecline = async () => {
-        await setDoc(doc(db, "users", user.uid), {
-            marketingConsent: false,
-            marketingConsentAskedAt: serverTimestamp()
-        }, {merge: true}
-        );
+        if (!user?.uid) return;
+                await updateMarketingPreference(user.uid, false, "popup");
         setShowModal(false);
     }
     return { showModal, handleAccept, handleDecline};

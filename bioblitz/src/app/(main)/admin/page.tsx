@@ -406,6 +406,12 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/analytics"
+              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+            >
+              Open Analytics
+            </Link>
             <button
               onClick={handleReindexSearch}
               className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"

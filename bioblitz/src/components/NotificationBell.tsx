@@ -22,6 +22,7 @@ import { getAuth } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { AppNotification } from "@/lib/notifications";
 import { useRouter } from "next/navigation";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -80,6 +81,15 @@ export default function NotificationBell() {
   }, []);
 
   const handleOpen = async () => {
+    void trackAnalyticsEvent({
+      event: "notification_bell_click",
+      source: "notification_bell",
+      page: "navigation",
+      metadata: {
+        opening: !isOpen,
+        unreadCount,
+      },
+    });
     setIsOpen(!isOpen);
 
     if (!isOpen && unreadCount > 0) {
@@ -96,6 +106,11 @@ export default function NotificationBell() {
 
   const loadMore = async () => {
     if (!lastDoc || !currentUser || loadingMore) return;
+    void trackAnalyticsEvent({
+      event: "notification_load_more_click",
+      source: "notification_panel",
+      page: "navigation",
+    });
     setLoadingMore(true);
     try {
       const q = query(
@@ -123,6 +138,11 @@ export default function NotificationBell() {
 
   const dismissNotification = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    void trackAnalyticsEvent({
+      event: "notification_dismiss_click",
+      source: "notification_panel",
+      page: "navigation",
+    });
     try {
       await deleteDoc(doc(db, "notifications", id));
       setOlderNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -132,6 +152,12 @@ export default function NotificationBell() {
   };
 
   const clearAll = async () => {
+    void trackAnalyticsEvent({
+      event: "notification_clear_all_click",
+      source: "notification_panel",
+      page: "navigation",
+      metadata: { count: allNotifications.length },
+    });
     const batch = writeBatch(db);
     allNotifications.forEach((n) => {
       batch.delete(doc(db, "notifications", n.id));
@@ -141,6 +167,14 @@ export default function NotificationBell() {
   };
 
   const handleNotificationClick = (link: string) => {
+    void trackAnalyticsEvent({
+      event: "notification_item_click",
+      source: "notification_panel",
+      page: "navigation",
+      metadata: {
+        hasLink: Boolean(link),
+      },
+    });
     setIsOpen(false);
     if (!link || link.trim() === "") return;
     router.push(link);

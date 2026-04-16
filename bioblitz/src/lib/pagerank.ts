@@ -411,13 +411,13 @@ export function rankGamesWithPersonalizedPageRank({
   return games
     .map((game, index) => {
       const pageRankScore = pageRank[index] || 0;
-      const playedPenalty = playedGameIds.has(game.id) ? 1000 : 0;
       const starComponent = starRatingScore(game) * 0.25;
       const contestComponent = contestRatingScore(game) * 0.25;
       const difficultyComponent = difficultyFitScore(game, preferredDifficulty) * 0.15;
       const qualityPrior = starComponent + contestComponent + difficultyComponent;
       const noveltyBonus = playedGameIds.has(game.id) ? 0 : 0.12 + 0.08 * explore;
-      const finalScore = pageRankScore + qualityPrior + noveltyBonus - playedPenalty;
+      const completedPenalty = playedGameIds.has(game.id) ? 0.06 : 0;
+      const finalScore = pageRankScore + qualityPrior + noveltyBonus - completedPenalty;
 
       return {
         game,

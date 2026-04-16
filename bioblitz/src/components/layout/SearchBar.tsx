@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 interface SearchResult {
   type: string;
@@ -58,6 +59,16 @@ export default function SearchBar() {
             : result.href
         }));
 
+        void trackAnalyticsEvent({
+          event: "search_query_executed",
+          source: "navbar_search",
+          page: "navigation",
+          metadata: {
+            queryLength: query.length,
+            resultCount: mappedResults.length,
+          },
+        });
+
         setSearchResults(mappedResults);
         setSearchOpen(true);
       } catch (error) {
@@ -83,6 +94,14 @@ export default function SearchBar() {
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && searchResults[0]) {
+              void trackAnalyticsEvent({
+                event: "search_enter_navigate",
+                source: "navbar_search",
+                page: "navigation",
+                metadata: {
+                  resultHref: searchResults[0].href,
+                },
+              });
               router.push(searchResults[0].href);
               setSearchOpen(false);
             }
@@ -109,7 +128,19 @@ export default function SearchBar() {
                 <Link
                   key={`${result.type}-${index}`}
                   href={result.href}
-                  onClick={() => setSearchOpen(false)}
+                  onClick={() => {
+                    void trackAnalyticsEvent({
+                      event: "search_result_click",
+                      source: "navbar_search",
+                      page: "navigation",
+                      metadata: {
+                        position: index + 1,
+                        resultType: result.type,
+                        resultHref: result.href,
+                      },
+                    });
+                    setSearchOpen(false);
+                  }}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                 >
                   <span className="text-[10px] uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2 py-0.5">
