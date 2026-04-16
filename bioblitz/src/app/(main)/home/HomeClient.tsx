@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { gameRoom } from "@/types";
-import { getGamesPage } from "@/lib/gameRoomsAll";
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import { allGames } from "@/lib/gameRoomsAll";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ContestCard from "@/components/features/contests/ContestCard";
 import {
   User,
@@ -14,16 +13,14 @@ import {
   ChevronUp,
   Search,
 } from "lucide-react";
-import { getAuth } from "firebase/auth";
 import {
   getFirestore,
   doc,
   getDoc,
-  QueryDocumentSnapshot,
-  DocumentData,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { rankGamesWithPersonalizedPageRank } from "@/lib/pagerank";
 
 export default function HomeClient() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,21 +33,14 @@ export default function HomeClient() {
     "All" | "Official" | "Community"
   >("All");
 
-  const [pages, setPages] = useState<gameRoom[][]>([]);
-  const [cursors, setCursors] = useState<
-    (QueryDocumentSnapshot<DocumentData> | null)[]
-  >([null]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [loadingPage, setLoadingPage] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [games, setGames] = useState<gameRoom[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [playedGameIds, setPlayedGameIds] = useState<Set<string>>(new Set());
   const [playedGamesLoaded, setPlayedGamesLoaded] = useState(false);
   const { user: authUser, loading: authLoading } = useAuth();
 
   const db = getFirestore(app);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const topics = [
     { value: "All Topics", label: "All Topics" },
@@ -64,27 +54,7 @@ export default function HomeClient() {
     { value: "Multiple", label: "Multiple" },
   ];
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (authUser?.uid) {
-      fetchPlayedGames(authUser.uid);
-      const firebaseUser = getAuth(app).currentUser;
-      if (firebaseUser) {
-        firebaseUser.getIdTokenResult(true).then((result) => {
-          const claims: any = result.claims || {};
-          const roles = Array.isArray(claims.roles)
-            ? claims.roles.map((r: any) => String(r).toLowerCase())
-            : [];
-          setIsAdmin(claims.admin === true || roles.includes("admin"));
-        }).catch(() => {});
-      }
-    } else {
-      setPlayedGamesLoaded(true);
-      setIsAdmin(false);
-    }
-  }, [authLoading, authUser?.uid]);
-
-  const fetchPlayedGames = async (uid: string) => {
+  const fetchPlayedGames = useCallback(async (uid: string) => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
       const ids: string[] = userDoc.data()?.playedGameIds ?? [];
@@ -94,37 +64,43 @@ export default function HomeClient() {
     } finally {
       setPlayedGamesLoaded(true);
     }
-  };
-  const loadPage = async (pageIndex: number) => {
-    if (pages[pageIndex]) {
-      setCurrentPage(pageIndex);
-      return;
+  }, [db]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (authUser?.uid) {
+      fetchPlayedGames(authUser.uid);
+    } else {
+      setPlayedGamesLoaded(true);
     }
-    setLoadingPage(true);
-    const cursor = cursors[pageIndex] ?? null;
-    const { games, lastSnap } = await getGamesPage(cursor);
-    setPages((prev) => {
-      const next = [...prev];
-      next[pageIndex] = games;
-      return next;
-    });
-    setCursors((prev) => {
-      const next = [...prev];
-      next[pageIndex + 1] = lastSnap;
-      return next;
-    });
-    setHasMore(games.length === 20);
-    setCurrentPage(pageIndex);
-    setLoadingPage(false);
+  }, [authLoading, authUser?.uid, fetchPlayedGames]);
+
+  const loadAllGames = async () => {
+    setLoading(true);
+    try {
+      const all = await allGames();
+      setGames(all);
+    } catch (error) {
+      console.error("Error loading games:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadPage(0);
+    loadAllGames();
   }, []);
 
-  const allGames = pages.flat();
+  const rankedGames = useMemo(() => {
+    if (games.length === 0) return [];
+    return rankGamesWithPersonalizedPageRank({
+      games,
+      playedGameIds,
+    });
+  }, [games, playedGameIds]);
+
   const filteredGames = useMemo(() => {
-    const games = allGames.filter((game: gameRoom) => {
+    const filtered = games.filter((game: gameRoom) => {
       const matchesSearch = game.title
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
@@ -135,7 +111,7 @@ export default function HomeClient() {
       if (statusFilter === "Completed") matchesStatus = isPlayed;
       if (statusFilter === "New") matchesStatus = !isPlayed;
 
-      const hasSource = (game as any).source;
+      const hasSource = game.source;
       const hasCreator = game.creator;
       let matchesType = true;
 
@@ -148,32 +124,29 @@ export default function HomeClient() {
       return matchesSearch && matchesTopic && matchesStatus && matchesType;
     });
 
-    return [...games].sort((a, b) => {
+    const rankByGameId = new Map<string, number>();
+    rankedGames.forEach((item, index) => {
+      rankByGameId.set(item.game.id, index);
+    });
+
+    return [...filtered].sort((a, b) => {
       const aPlayed = playedGameIds.has(a.id);
       const bPlayed = playedGameIds.has(b.id);
-      if (aPlayed && !bPlayed) return 1;
-      if (!aPlayed && bPlayed) return -1;
-      return 0;
+      if (aPlayed !== bPlayed) return aPlayed ? 1 : -1;
+
+      const aRank = rankByGameId.get(a.id);
+      const bRank = rankByGameId.get(b.id);
+      if (typeof aRank === "number" && typeof bRank === "number") {
+        if (aRank !== bRank) return aRank - bRank;
+      }
+
+      const aScore = (a.trendingScore || 0) + (a.rating || 0);
+      const bScore = (b.trendingScore || 0) + (b.rating || 0);
+      if (bScore !== aScore) return bScore - aScore;
+
+      return (b.rating || 0) - (a.rating || 0);
     });
-  }, [allGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
-
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-  const loadingRef = useRef(loadingPage);
-  loadingRef.current = loadingPage;
-
-  const handleScroll = useCallback(() => {
-    if (!loaderRef.current || loadingRef.current || !hasMore) return;
-    const rect = loaderRef.current.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 200) {
-      loadPage(pages.length);
-    }
-  }, [hasMore, loadPage, pages.length]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
-
+  }, [games, rankedGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
 
   const activeFilterCount =
     (statusFilter !== "All" ? 1 : 0) +
@@ -311,7 +284,7 @@ export default function HomeClient() {
           )}
         </div>
 
-        {authLoading || pages.length === 0 || !playedGamesLoaded ? (
+        {authLoading || loading || !playedGamesLoaded ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
             <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
             <span className="text-neutral-400 text-sm font-medium">Loading...</span>
@@ -349,7 +322,6 @@ export default function HomeClient() {
             )}
           </div>
         )}
-        <div ref={loaderRef} />
       </main>
     </div>
   );

@@ -197,12 +197,12 @@ const ContestCard: React.FC<ContestCardProps> = ({
                 </span>
               )}
               <div className="flex items-center gap-3 text-xs mt-auto">
-                {contest.rating && contest.rating > 0 && (
+                {(contest.rating ?? 0) > 0 && (
                   <div className="flex items-center gap-1 text-yellow-400">
                     <span className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       <span className="font-medium">
-                        {contest.rating.toFixed(1)}/5
+                        {contest.rating?.toFixed(1)}/5
                       </span>
                     </span>
                   </div>
