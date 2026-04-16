@@ -53,8 +53,12 @@ export async function POST(request: Request) {
 
   const authHeader = request.headers.get("authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
-  const expectedToken = process.env.DIGEST_PREVIEW_TOKEN || "";
-
+  const expectedToken = (process.env.DIGEST_PREVIEW_TOKEN || "").trim();
+  console.log("token check:", {
+    received: token,
+    expected: expectedToken,
+    match: token === expectedToken,
+  });
   if (!expectedToken || token !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
