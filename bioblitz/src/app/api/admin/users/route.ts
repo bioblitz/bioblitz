@@ -4,6 +4,18 @@ import { FieldValue } from "firebase-admin/firestore";
 import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { applyTextPolicy } from "@/lib/textPolicy";
 
+function toDate(value: any): Date | null {
+  if (!value) return null;
+  if (typeof value?.toDate === "function") return value.toDate();
+  if (value instanceof Date) return value;
+  if (typeof value?.seconds === "number") return new Date(value.seconds * 1000);
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  return null;
+}
+
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -70,6 +82,14 @@ export async function GET(request: Request) {
 
   let submissionsCount = 0;
   let totalUsers = 0;
+  let dau = 0;
+  let wau = 0;
+  let mau = 0;
+  let week1Retention = 0;
+  let month1Retention = 0;
+  let potdAttempts = 0;
+  let potdCorrect = 0;
+  let potdPublished = 0;
 
   try {
     const submissionsSnap = await adminFirestore.collection("gameSubmissions").count().get();
@@ -85,8 +105,84 @@ export async function GET(request: Request) {
     totalUsers = 0;
   }
 
+  try {
+    const usersSnap = await adminFirestore.collection("users").select("createdAt", "lastActive").get();
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const active1dCutoff = now - dayMs;
+    const active7dCutoff = now - 7 * dayMs;
+    const active30dCutoff = now - 30 * dayMs;
+
+    let eligibleWeek1 = 0;
+    let retainedWeek1 = 0;
+    let eligibleMonth1 = 0;
+    let retainedMonth1 = 0;
+
+    usersSnap.docs.forEach((docSnap) => {
+      const data = docSnap.data() as any;
+      const createdAt = toDate(data.createdAt);
+      const lastActive = toDate(data.lastActive) || toDate(data.lastLogin);
+
+      if (!lastActive) return;
+      const lastActiveMs = lastActive.getTime();
+      if (lastActiveMs >= active1dCutoff) dau += 1;
+      if (lastActiveMs >= active7dCutoff) wau += 1;
+      if (lastActiveMs >= active30dCutoff) mau += 1;
+
+      if (!createdAt) return;
+      const createdMs = createdAt.getTime();
+      const ageDays = (now - createdMs) / dayMs;
+
+      if (ageDays >= 7) {
+        eligibleWeek1 += 1;
+        if (lastActiveMs >= createdMs + 7 * dayMs) retainedWeek1 += 1;
+      }
+
+      if (ageDays >= 30) {
+        eligibleMonth1 += 1;
+        if (lastActiveMs >= createdMs + 30 * dayMs) retainedMonth1 += 1;
+      }
+    });
+
+    week1Retention = eligibleWeek1 > 0 ? retainedWeek1 / eligibleWeek1 : 0;
+    month1Retention = eligibleMonth1 > 0 ? retainedMonth1 / eligibleMonth1 : 0;
+  } catch {
+    dau = 0;
+    wau = 0;
+    mau = 0;
+    week1Retention = 0;
+    month1Retention = 0;
+  }
+
+  try {
+    const statsDoc = await adminFirestore.collection("stats").doc("global").get();
+    if (statsDoc.exists) {
+      potdAttempts = statsDoc.data()?.potdAttempts || 0;
+      potdCorrect = statsDoc.data()?.potdCorrect || 0;
+    }
+  } catch {}
+
+  try {
+    const potdSnap = await adminFirestore.collection("potd").count().get();
+    potdPublished = potdSnap.data().count;
+  } catch {}
+
   if (statsOnly) {
-    return NextResponse.json({ submissionsCount, totalUsers });
+    return NextResponse.json({
+      submissionsCount,
+      totalUsers,
+      potdAttempts,
+      potdCorrect,
+      potdPublished,
+      analytics: {
+        dau,
+        wau,
+        mau,
+        stickiness: mau > 0 ? dau / mau : 0,
+        week1Retention,
+        month1Retention,
+      },
+    });
   }
 
   // Username lookup — returns a single user's full profile
@@ -133,7 +229,7 @@ export async function GET(request: Request) {
     };
   });
 
-  return NextResponse.json({ users, submissionsCount, totalUsers });
+  return NextResponse.json({ users, submissionsCount, totalUsers, potdAttempts, potdCorrect, potdPublished });
 }
 
 export async function DELETE(request: Request) {

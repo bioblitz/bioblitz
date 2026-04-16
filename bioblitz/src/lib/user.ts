@@ -9,12 +9,18 @@ import {
   query,
   where,
   getDocs,
-  increment,
   FieldValue,
   Timestamp,
   serverTimestamp,
 } from "firebase/firestore";
 import { uploadImage } from "./storage";
+
+type AuthLikeUser = {
+  uid: string;
+  displayName?: string | null;
+  email?: string | null;
+  photoURL?: string | null;
+};
 
 export interface UserProfile {
   uid: string;
@@ -64,12 +70,27 @@ export async function updateUsername(
 export async function updateMarketingPreference(
   uid: string,
   consent: boolean,
+  source: string = "unknown",
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
   await updateDoc(userRef, {
     marketingConsent: consent,
     marketingConsentAskedAt: serverTimestamp(),
   });
+
+  try {
+    await fetch("/api/analytics/marketing-consent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: consent ? "accepted" : "declined",
+        source,
+        reason: "user_preference_update",
+      }),
+    });
+  } catch {
+    // best-effort analytics only
+  }
 }
 
 export async function updateUserBanner(
@@ -126,7 +147,7 @@ export async function cacheUserPhotoURL(
   }
 }
 
-export async function createUserProfile(user: any) {
+export async function createUserProfile(user: AuthLikeUser) {
   const userRef = doc(firestore, "users", user.uid);
 
   const userSnap = await getDoc(userRef);
@@ -181,8 +202,8 @@ export async function getUserProfileByUsername(
   const usersRef = collection(firestore, "users");
   const normalized = username.toLowerCase();
 
-  let q = query(usersRef, where("username", "==", normalized));
-  let querySnapshot = await getDocs(q);
+  const q = query(usersRef, where("username", "==", normalized));
+  const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
     const userDoc = querySnapshot.docs[0];

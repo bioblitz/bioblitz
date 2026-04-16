@@ -4,11 +4,24 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { getAuth } from "firebase/auth";
+import { app } from "@/lib/firebase";
+
+type StaffQuota = {
+  target: number;
+  published: number;
+  remaining: number;
+  progress: number;
+  monthLabel: string;
+  daysRemaining: number;
+};
 
 export default function StaffPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [authorized, setAuthorized] = useState(false);
+  const [quota, setQuota] = useState<StaffQuota | null>(null);
+  const [quotaLoading, setQuotaLoading] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -25,6 +38,31 @@ export default function StaffPage() {
 
     setAuthorized(isStaff);
   }, [loading, router, user]);
+
+  useEffect(() => {
+    const loadQuota = async () => {
+      if (!authorized || !user) return;
+      try {
+        setQuotaLoading(true);
+        const token = await getAuth(app).currentUser?.getIdToken();
+        if (!token) throw new Error("No auth token");
+        const res = await fetch("/api/staff/metrics", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to load staff metrics.");
+        setQuota(data.quota || null);
+      } catch (error) {
+        console.error("Failed to load staff quota:", error);
+      } finally {
+        setQuotaLoading(false);
+      }
+    };
+
+    loadQuota();
+  }, [authorized, user]);
 
   if (loading) {
     return (
@@ -60,6 +98,49 @@ export default function StaffPage() {
       <div className="max-w-5xl mx-auto px-4 py-20">
         <h1 className="text-3xl font-bold text-zinc-100">Staff Page</h1>
         <p className="text-zinc-400 mt-2">Staff and admins only.</p>
+
+        <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold text-zinc-100">
+                Contest Publishing Quota
+              </h2>
+              <p className="text-sm text-zinc-400 mt-1">
+                Goal: 100 contests published by the end of April.
+              </p>
+            </div>
+            <span className="text-xs text-zinc-500">
+              {quota?.monthLabel || "April"}
+            </span>
+          </div>
+
+          {quotaLoading ? (
+            <p className="text-sm text-zinc-500 mt-4">Loading progress...</p>
+          ) : quota ? (
+            <>
+              <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-yellow-400 transition-all"
+                  style={{ width: `${Math.max(4, Math.round(quota.progress * 100))}%` }}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                <span className="text-zinc-200">
+                  <strong>{quota.published}</strong> / {quota.target} published
+                </span>
+                <span className="text-zinc-400">
+                  {quota.remaining} remaining
+                </span>
+                <span className="text-zinc-500">
+                  {quota.daysRemaining} day{quota.daysRemaining === 1 ? "" : "s"} left
+                </span>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-500 mt-4">Quota metrics unavailable right now.</p>
+          )}
+        </div>
+
         <div className="mt-6 flex flex-col gap-3">
           <button
             type="button"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 const SIZE = 180;
 const STROKE = 15;
@@ -27,6 +28,11 @@ export default function DemoQuestion() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !started) {
+          void trackAnalyticsEvent({
+            event: "landing_demo_question_view",
+            source: "demo_question",
+            page: "landing",
+          });
           setStarted(true);
         }
       },
@@ -76,7 +82,17 @@ export default function DemoQuestion() {
             return (
               <button
                 key={key}
-                onClick={() => setSelected(key)}
+                onClick={() => {
+                  void trackAnalyticsEvent({
+                    event: "landing_demo_option_select",
+                    source: "demo_question",
+                    page: "landing",
+                    metadata: {
+                      selectedOption: key,
+                    },
+                  });
+                  setSelected(key);
+                }}
                 className={`flex items-center w-full px-5 py-4 rounded-xl text-left border-2 transition-all duration-150 cursor-pointer
                   ${
                     isSelected

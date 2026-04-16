@@ -10,6 +10,7 @@ import { getRatingTier } from "@/lib/rating";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 interface ContestCardProps {
   contest: gameRoom;
@@ -95,6 +96,17 @@ const ContestCard: React.FC<ContestCardProps> = ({
     <Link
       key={contest.id}
       href={href || `/contests/${contest.id}`}
+      onClick={() => {
+        void trackAnalyticsEvent({
+          event: "contest_card_click",
+          source: "contest_card",
+          page: "contest_list",
+          metadata: {
+            gameId: contest.id,
+            isCompleted: Boolean(isCompleted),
+          },
+        });
+      }}
       className="block group w-full"
     >
       <div className="relative h-full flex flex-col bg-black border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
@@ -190,6 +202,14 @@ const ContestCard: React.FC<ContestCardProps> = ({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    void trackAnalyticsEvent({
+                      event: "contest_creator_click",
+                      source: "contest_card",
+                      page: "contest_list",
+                      metadata: {
+                        creatorUsername: contest.creatorUsername || "",
+                      },
+                    });
                     window.location.href = `/channel/${contest.creatorUsername}`;
                   }}
                 >
@@ -197,12 +217,12 @@ const ContestCard: React.FC<ContestCardProps> = ({
                 </span>
               )}
               <div className="flex items-center gap-3 text-xs mt-auto">
-                {contest.rating && contest.rating > 0 && (
+                {(contest.rating ?? 0) > 0 && (
                   <div className="flex items-center gap-1 text-yellow-400">
                     <span className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       <span className="font-medium">
-                        {contest.rating.toFixed(1)}/5
+                        {contest.rating?.toFixed(1)}/5
                       </span>
                     </span>
                   </div>

@@ -62,6 +62,10 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [submissionsCount, setSubmissionsCount] = useState(0);
+  const [potdAttempts, setPotdAttempts] = useState(0);
+  const [potdCorrect, setPotdCorrect] = useState(0);
+  const [potdPublished, setPotdPublished] = useState(0);
+  const [analytics, setAnalytics] = useState<{ dau: number; wau: number; mau: number; stickiness: number; week1Retention: number; month1Retention: number } | null>(null);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(null);
 
@@ -121,6 +125,10 @@ export default function AdminPage() {
       const data = await response.json();
       setSubmissionsCount(data.submissionsCount || 0);
       setTotalUsers(data.totalUsers || 0);
+      setPotdAttempts(data.potdAttempts || 0);
+      setPotdCorrect(data.potdCorrect || 0);
+      setPotdPublished(data.potdPublished || 0);
+      if (data.analytics) setAnalytics(data.analytics);
     } catch (error: any) {
       console.error(error);
     }
@@ -145,6 +153,9 @@ export default function AdminPage() {
       setUsers(Array.isArray(data.users) ? data.users : []);
       setSubmissionsCount(data.submissionsCount || 0);
       setTotalUsers(data.totalUsers || 0);
+      setPotdAttempts(data.potdAttempts || 0);
+      setPotdCorrect(data.potdCorrect || 0);
+      setPotdPublished(data.potdPublished || 0);
       setShowDb(true);
     } catch (error: any) {
       setStatus(error?.message || "Failed to fetch users.");
@@ -399,13 +410,37 @@ export default function AdminPage() {
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
-            <div className="text-sm text-zinc-400 mt-1">
-              Total users: <span className="text-zinc-100 font-semibold">{totalUsers}</span>
-              <span className="mx-2 text-zinc-600">|</span>
-              Contests taken: <span className="text-zinc-100 font-semibold">{submissionsCount}</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400 mt-1">
+              <span>Users: <span className="text-zinc-100 font-semibold">{totalUsers}</span></span>
+              {analytics && (
+                <>
+                  <span className="text-zinc-700">|</span>
+                  <span>DAU <span className="text-zinc-100 font-semibold">{analytics.dau}</span></span>
+                  <span className="text-zinc-700">·</span>
+                  <span>WAU <span className="text-zinc-100 font-semibold">{analytics.wau}</span></span>
+                  <span className="text-zinc-700">·</span>
+                  <span>MAU <span className="text-zinc-100 font-semibold">{analytics.mau}</span></span>
+                  <span className="text-zinc-700">|</span>
+                  <span>7d retention <span className="text-zinc-100 font-semibold">{Math.round(analytics.week1Retention * 100)}%</span></span>
+                </>
+              )}
+              <span className="text-zinc-700">|</span>
+              <span>Game submissions: <span className="text-zinc-100 font-semibold">{submissionsCount}</span></span>
+              <span className="text-zinc-700">|</span>
+              <span>POTDs published: <span className="text-zinc-100 font-semibold">{potdPublished}</span></span>
+              <span className="text-zinc-700">|</span>
+              <span>POTD attempts: <span className="text-zinc-100 font-semibold">{potdAttempts}</span></span>
+              <span className="text-zinc-700">|</span>
+              <span>POTD accuracy: <span className="text-zinc-100 font-semibold">{potdAttempts > 0 ? `${Math.round((potdCorrect / potdAttempts) * 100)}%` : "—"}</span></span>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/analytics"
+              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+            >
+              Open Analytics
+            </Link>
             <button
               onClick={handleReindexSearch}
               className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"

@@ -20,6 +20,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -44,6 +45,15 @@ export default function MainNavbar() {
     : [];
   const isAdmin = roles.includes("admin");
   const isStaff = isAdmin || roles.includes("staff");
+
+  const trackNavClick = (event: string, target: string) => {
+    void trackAnalyticsEvent({
+      event,
+      source: "main_navbar",
+      page: "navigation",
+      metadata: { target },
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -114,6 +124,7 @@ export default function MainNavbar() {
   }, [pathname]);
 
   const handleSignOut = async () => {
+    trackNavClick("nav_sign_out_click", "sign_out");
     try {
       await fetch("/api/logout", { method: "POST" });
       const auth = getAuth(app);
@@ -182,7 +193,10 @@ export default function MainNavbar() {
         <NotificationBell />
         <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+            onClick={() => {
+              trackNavClick("nav_user_menu_toggle", dropdownOpen ? "close" : "open");
+              setDropdownOpen(!dropdownOpen);
+            }}
             className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
             aria-label="Toggle user menu"
           >
@@ -246,7 +260,10 @@ export default function MainNavbar() {
                 <Link href={`/profile/${user.username}`}>
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "profile");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Profile
                   </span>
@@ -257,7 +274,10 @@ export default function MainNavbar() {
               >
                 <span
                   className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                  onClick={() => setDropdownOpen(false)}
+                  onClick={() => {
+                    trackNavClick("nav_menu_link_click", "channel");
+                    setDropdownOpen(false);
+                  }}
                 >
                   Channel
                 </span>
@@ -265,7 +285,10 @@ export default function MainNavbar() {
               <Link href="/settings">
                 <span
                   className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                  onClick={() => setDropdownOpen(false)}
+                  onClick={() => {
+                    trackNavClick("nav_menu_link_click", "settings");
+                    setDropdownOpen(false);
+                  }}
                 >
                   Settings
                 </span>
@@ -274,7 +297,10 @@ export default function MainNavbar() {
                 <Link href="/staff">
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "staff");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Staff
                   </span>
@@ -284,7 +310,10 @@ export default function MainNavbar() {
                 <Link href="/admin">
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "admin");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Admin
                   </span>
@@ -321,7 +350,11 @@ export default function MainNavbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 group">
+            <Link
+              href="/"
+              onClick={() => trackNavClick("nav_logo_click", "home_logo")}
+              className="flex items-center space-x-2 group"
+            >
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
                 <img
                   src="/icons/favicon.ico"
@@ -369,6 +402,7 @@ export default function MainNavbar() {
                 title={item.name}
                 aria-label={item.name}
                 onClick={() => {
+                  trackNavClick("nav_side_link_click", item.href);
                   setRailOpen(false);
                   setSuppressRailHover(true);
                 }}
@@ -403,6 +437,7 @@ export default function MainNavbar() {
               title="Staff"
               aria-label="Staff"
               onClick={() => {
+                trackNavClick("nav_side_link_click", "/staff");
                 setRailOpen(false);
                 setSuppressRailHover(true);
               }}
@@ -433,6 +468,7 @@ export default function MainNavbar() {
               title="Admin"
               aria-label="Admin"
               onClick={() => {
+                trackNavClick("nav_side_link_click", "/admin");
                 setRailOpen(false);
                 setSuppressRailHover(true);
               }}

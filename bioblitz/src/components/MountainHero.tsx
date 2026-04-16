@@ -2,11 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 export default function MountainHero() {
   const starsRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    void trackAnalyticsEvent({
+      event: "hero_page_view",
+      source: "mountain_hero",
+      page: "landing",
+    });
+
     const canvas = starsRef.current;
     if (!canvas) return;
     const canvasEl = canvas;
@@ -168,6 +175,13 @@ export default function MountainHero() {
         >
           <Link
             href="/auth"
+            onClick={() => {
+              void trackAnalyticsEvent({
+                event: "hero_cta_click",
+                source: "start_competing",
+                page: "landing",
+              });
+            }}
             className="bg-white hover:shadow-[0 0 30px rgba(245, 224, 36, 0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
           >
             <span className="pointer-events-none absolute inset-0 z-30 bg-neutral-900 opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
@@ -195,6 +209,13 @@ export default function MountainHero() {
 
       <a
         href="#demo"
+        onClick={() => {
+          void trackAnalyticsEvent({
+            event: "hero_scroll_cue_click",
+            source: "scroll_anchor",
+            page: "landing",
+          });
+        }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
         style={{
           color: "rgba(245,240,232,0.2)",

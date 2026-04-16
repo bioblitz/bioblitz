@@ -1,6 +1,6 @@
 import { User } from "firebase/auth";
-import { ArrowUpRight } from "lucide-react";
 import ChallengeButton from "@/components/features/challenges/ChallengeButton";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import { gameRoom } from "@/types/index";
 import { formatCountdown } from "./utils";
 
@@ -27,11 +27,52 @@ export default function ContestActionButtons({
   proceedToGame,
   handleJoinGame,
 }: ContestActionButtonsProps) {
+  const trackResumeClick = () => {
+    void trackAnalyticsEvent({
+      event: "contest_resume_click",
+      source: "contest_action_buttons",
+      page: "contest_detail",
+      metadata: { gameId: game.id },
+    });
+    proceedToGame();
+  };
+
+  const trackStartClick = () => {
+    const intent = !user
+      ? "requires_auth"
+      : isOwner
+        ? "owner_practice"
+        : isFirstAttempt
+          ? "ranked_first_attempt"
+          : "unranked_replay";
+
+    void trackAnalyticsEvent({
+      event: "contest_start_click",
+      source: "contest_action_buttons",
+      page: "contest_detail",
+      metadata: {
+        gameId: game.id,
+        intent,
+      },
+    });
+    handleJoinGame();
+  };
+
+  const trackChallengePlay = () => {
+    void trackAnalyticsEvent({
+      event: "contest_challenge_play_click",
+      source: "challenge_button",
+      page: "contest_detail",
+      metadata: { gameId: game.id },
+    });
+    handleJoinGame();
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {activeSession && (
         <button
-          onClick={proceedToGame}
+          onClick={trackResumeClick}
           className="w-full relative group overflow-hidden rounded-xl p-5 bg-amber-500/10 border border-amber-500/50 hover:bg-amber-500/20 transition-all duration-300 transform active:scale-[0.98] mb-1"
         >
           <div className="relative z-10 flex items-center justify-between">
@@ -51,7 +92,7 @@ export default function ContestActionButtons({
       )}
       <div className="flex gap-2">
         <button
-          onClick={handleJoinGame}
+          onClick={trackStartClick}
           disabled={loadingAttempts || !authResolved || activeSession !== null}
           className={`w-full py-2.5 blurred-border relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
             loadingAttempts
@@ -76,7 +117,7 @@ export default function ContestActionButtons({
                   Your Blitz
                 </span>
                 <span className="text-xs font-medium opacity-60 text-black">
-                  Playing won't affect your Elo
+                  Playing won&apos;t affect your Elo
                 </span>
               </div>
             ) : activeSession ? (
@@ -108,7 +149,7 @@ export default function ContestActionButtons({
           <ChallengeButton
             blitzId={game.id}
             blitzTitle={game.title}
-            onPlay={handleJoinGame}
+            onPlay={trackChallengePlay}
           />
         )}
       </div>

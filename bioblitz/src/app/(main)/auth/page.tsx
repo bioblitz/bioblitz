@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { createUserProfile } from "@/lib/user";
+import { markMarketingPopupForNextSignIn } from "@/hooks/useMarketingPopup";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import GoogleButton from "@/components/ui/GoogleButton";
 import { useAuth } from "@/context/AuthContext";
-import { Trophy, Timer, BookOpen } from "lucide-react";
+import { Trophy, Timer, BookOpen, LucideIcon } from "lucide-react";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,12 @@ export default function AuthenticationPage() {
     }
   }, [authLoading, isAuthenticated, router]);
   const handleClick = async () => {
+    void trackAnalyticsEvent({
+      event: "auth_google_click",
+      source: "auth_page_google_button",
+      page: "auth",
+    });
+
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, provider);
@@ -39,7 +47,23 @@ export default function AuthenticationPage() {
       });
 
       if (res.ok) {
+<<<<<<< HEAD
         await createUserProfile(user);
+=======
+        const profile = await createUserProfile(user);
+        void trackAnalyticsEvent({
+          event: "auth_google_success",
+          source: "auth_page_google_button",
+          page: "auth",
+          metadata: {
+            isNewUser: profile?.username ? false : true,
+          },
+        });
+        setIsAuthenticated(true);
+        if (profile?.marketingConsent !== true) {
+          markMarketingPopupForNextSignIn();
+        }
+>>>>>>> 07b5bb7af40c33be037d02e2645454d5a14adb03
         window.location.assign("/home");
       } else {
         console.error("Failed to create session:", await res.json());
@@ -52,6 +76,11 @@ export default function AuthenticationPage() {
         "code" in error &&
         error.code === "auth/popup-closed-by-user"
       ) {
+        void trackAnalyticsEvent({
+          event: "auth_google_popup_closed",
+          source: "auth_page_google_button",
+          page: "auth",
+        });
         setLoading(false);
         return;
       }
@@ -66,7 +95,7 @@ export default function AuthenticationPage() {
     title,
     description,
   }: {
-    icon: any;
+    icon: LucideIcon;
     title: string;
     description: string;
   }) => (

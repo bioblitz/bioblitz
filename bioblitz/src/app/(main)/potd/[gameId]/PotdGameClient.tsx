@@ -208,15 +208,21 @@ export default function PotdGameClient({
 
       try {
         const activityRef = doc(db, "potdActivity", puzzle.id);
-        await setDoc(
-          activityRef,
-          {
-            attempts: increment(1),
-            correctCount: correct ? increment(1) : increment(0),
-            lastPlayedAt: serverTimestamp(),
-          },
-          { merge: true },
-        );
+        const globalStatsRef = doc(db, "stats", "global");
+        const globalUpdate: Record<string, any> = { potdAttempts: increment(1) };
+        if (correct) globalUpdate.potdCorrect = increment(1);
+        await Promise.all([
+          setDoc(
+            activityRef,
+            {
+              attempts: increment(1),
+              correctCount: correct ? increment(1) : increment(0),
+              lastPlayedAt: serverTimestamp(),
+            },
+            { merge: true },
+          ),
+          setDoc(globalStatsRef, globalUpdate, { merge: true }),
+        ]);
       } catch (error) {
         console.warn("Failed to update POTD activity:", error);
       }
