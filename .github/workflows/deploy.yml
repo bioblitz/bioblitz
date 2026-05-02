@@ -15,8 +15,6 @@ jobs:
         with:
           node-version: 20
 
-      - run: cd bioblitz && npm install
-      - run: cd bioblitz && npm run build
 
       - name: Deploy if build passes
         run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
