@@ -747,6 +747,7 @@ export default function EditContestPage() {
                               updated,
                             )
                           }
+                          contestId={contestId ?? ""}
                         />
                       </div>
                     )}

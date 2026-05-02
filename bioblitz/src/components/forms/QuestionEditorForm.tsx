@@ -6,6 +6,7 @@ import { EditableQuestion, AnswerChoice } from "@/types";
 import { CheckCircle, Circle, Plus, Trash2, ChevronDown } from "lucide-react";
 import "react-quill-new/dist/quill.snow.css";
 import ImageUploadZone from "@/components/ui/ImageUploadZone";
+import { uploadImage } from "@/lib/storage";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), {
   ssr: false,
@@ -15,6 +16,7 @@ const ReactQuill = dynamic(() => import("react-quill-new"), {
 interface QuestionEditorFormProps {
   question: EditableQuestion;
   onQuestionChange: (question: EditableQuestion) => void;
+  contestId: string;
 }
 
 const sectionHeaderClass =
@@ -27,6 +29,7 @@ const chevronClass = (open: boolean) =>
 const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   question,
   onQuestionChange,
+  contestId,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -34,15 +37,21 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   const [showImage, setShowImage] = useState(false);
   const [showAnswerChoices, setShowAnswerChoices] = useState(true);
   const [showSolution, setShowSolution] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const handleContentChange = (content: string) => {
     if (content === question.content) return;
     onQuestionChange({ ...question, content });
   };
 
-  const handleImageFile = (file: File) => {
-    const imageUrl = URL.createObjectURL(file);
-    onQuestionChange({ ...question, imageUrl });
+  const handleImageFile = async (file: File) => {
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadImage(file, `contests/${contestId}/questions/${question.id}/image`);
+      onQuestionChange({ ...question, imageUrl });
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,9 +60,6 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   };
 
   const removeImage = () => {
-    if (question.imageUrl) {
-      URL.revokeObjectURL(question.imageUrl);
-    }
     onQuestionChange({ ...question, imageUrl: "" });
   };
 
@@ -206,7 +212,11 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
               className="hidden"
               accept="image/*"
             />
-            {question.imageUrl ? (
+            {uploadingImage ? (
+              <div className="w-full flex items-center justify-center p-8 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
+                <span className="text-zinc-400 text-sm">Uploading...</span>
+              </div>
+            ) : question.imageUrl ? (
               <div className="relative group">
                 <img
                   src={question.imageUrl}
