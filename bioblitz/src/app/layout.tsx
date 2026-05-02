@@ -7,6 +7,7 @@ import ActivityTracker from "../components/ActivityTracker";
 import MarketingPopup from "@/components/auth/MarketingPopup";
 import RouteAnalyticsTracker from "@/components/analytics/RouteAnalyticsTracker";
 import { SITE_URL } from "@/lib/site-url";
+import { Suspense } from "react";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -63,7 +64,9 @@ export default async function RootLayout({
       <body>
         <AuthProvider>
           <ActivityTracker />
-          <RouteAnalyticsTracker />
+          <Suspense fallback={null}>
+            <RouteAnalyticsTracker />
+          </Suspense>
           <UsernameChecker />
           <MarketingPopup />
           <NavbarWrapper />
