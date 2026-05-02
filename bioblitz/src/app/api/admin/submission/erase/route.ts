@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
-import { FieldValue } from "firebase-admin/firestore";
+import admin, { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -61,7 +60,7 @@ export async function POST(request: Request) {
       const newElo = Math.max(0, currentElo - eloPenalty);
 
       const update: Record<string, any> = { bElo: newElo };
-      if (eraseAttempt) update.contestsPlayed = FieldValue.increment(-1);
+      if (eraseAttempt) update.contestsPlayed = admin.firestore.FieldValue.increment(-1);
 
       await userRef.update(update);
       return NextResponse.json({ message: "Done.", newElo });

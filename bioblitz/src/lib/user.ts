@@ -22,6 +22,43 @@ type AuthLikeUser = {
   photoURL?: string | null;
 };
 
+type CachedPhotoRecord = {
+  sourceUrl: string;
+  cachedUrl: string;
+  cachedAt: number;
+};
+
+const PHOTO_CACHE_PREFIX = "bioblitz:photo-cache:";
+const PHOTO_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 14;
+
+function readCachedPhoto(uid: string, sourceUrl: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(`${PHOTO_CACHE_PREFIX}${uid}`);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CachedPhotoRecord;
+    if (cached.sourceUrl !== sourceUrl) return null;
+    if (Date.now() - cached.cachedAt > PHOTO_CACHE_TTL_MS) return null;
+    return cached.cachedUrl;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedPhoto(uid: string, sourceUrl: string, cachedUrl: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const record: CachedPhotoRecord = {
+      sourceUrl,
+      cachedUrl,
+      cachedAt: Date.now(),
+    };
+    window.localStorage.setItem(`${PHOTO_CACHE_PREFIX}${uid}`, JSON.stringify(record));
+  } catch {
+    // Best-effort cache only.
+  }
+}
+
 export interface UserProfile {
   uid: string;
   username: string | null;
@@ -131,6 +168,12 @@ export async function cacheUserPhotoURL(
     return null;
   }
 
+  const locallyCached = readCachedPhoto(uid, photoURL);
+  if (locallyCached) {
+    await updateUserPhoto(uid, locallyCached);
+    return locallyCached;
+  }
+
   try {
     const response = await fetch(photoURL);
     if (!response.ok) return null;
@@ -140,6 +183,7 @@ export async function cacheUserPhotoURL(
     const path = `avatars/${uid}/${Date.now()}.${extension}`;
     const cachedUrl = await uploadImage(file, path);
     await updateUserPhoto(uid, cachedUrl);
+    writeCachedPhoto(uid, photoURL, cachedUrl);
     return cachedUrl;
   } catch (error) {
     console.warn("Failed to cache user photo:", error);
@@ -166,7 +210,7 @@ export async function createUserProfile(user: AuthLikeUser) {
     username: null,
     displayName: user.displayName || "",
     email: user.email || "",
-    photoURL: user.photoURL || null,
+    photoURL: user.photoURL || "",
     bElo: 500,
     mElo: 0,
     buElo: 0,

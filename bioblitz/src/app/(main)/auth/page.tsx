@@ -47,23 +47,7 @@ export default function AuthenticationPage() {
       });
 
       if (res.ok) {
-<<<<<<< HEAD
         await createUserProfile(user);
-=======
-        const profile = await createUserProfile(user);
-        void trackAnalyticsEvent({
-          event: "auth_google_success",
-          source: "auth_page_google_button",
-          page: "auth",
-          metadata: {
-            isNewUser: profile?.username ? false : true,
-          },
-        });
-        setIsAuthenticated(true);
-        if (profile?.marketingConsent !== true) {
-          markMarketingPopupForNextSignIn();
-        }
->>>>>>> 07b5bb7af40c33be037d02e2645454d5a14adb03
         window.location.assign("/home");
       } else {
         console.error("Failed to create session:", await res.json());

@@ -1,6 +1,6 @@
 "use server";
 import { firestore, auth } from "./firebase";
-import { adminAuth, adminFirestore } from "./firebase-admin";
+import admin, { adminAuth, adminFirestore } from "./firebase-admin";
 import {
   collection,
   addDoc,
@@ -14,7 +14,6 @@ import {
 import { gameRoom, Question } from "@/types";
 import { revalidatePath } from "next/cache";
 import { getUserProfile } from "./user";
-import { DocumentData, FieldValue } from "firebase-admin/firestore";
 
 export async function createContest(
   prevState: { message: string },
@@ -171,7 +170,7 @@ export async function createContest(
       await adminFirestore
         .collection("users")
         .doc(uid)
-        .set({ publicSetCount: FieldValue.increment(1) }, { merge: true });
+        .set({ publicSetCount: admin.firestore.FieldValue.increment(1) }, { merge: true });
     }
 
     revalidatePath("/contests");
@@ -188,7 +187,7 @@ export async function getContestsByCreator(
 ): Promise<gameRoom[]> {
   try {
     const contests: gameRoom[] = [];
-    const docsById = new Map<string, DocumentData>();
+    const docsById = new Map<string, any>();
 
     const byCreator = query(
       collection(firestore, "sets"),

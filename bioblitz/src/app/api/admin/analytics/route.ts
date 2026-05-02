@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { DecodedIdToken } from "firebase-admin/auth";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -41,12 +40,25 @@ type StatsPayload = {
       onboardingToContestRate: number;
     };
   };
+  timeline: Array<{
+    day: string;
+    newUsers: number;
+    trackedEvents: number;
+    heroViews: number;
+    authSuccesses: number;
+    contestStartClicks: number;
+    marketingShown: number;
+    marketingAccepted: number;
+    marketingDeclined: number;
+  }>;
 };
 
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((role) => String(role).toLowerCase().trim()).filter(Boolean);
 }
+
+type DecodedIdToken = Awaited<ReturnType<typeof adminAuth.verifyIdToken>>;
 
 function isAdminFromClaims(claims: DecodedIdToken): boolean {
   const roles = normalizeRoles((claims as { roles?: unknown }).roles);
@@ -106,6 +118,39 @@ type EventNode = {
   byPage?: Record<string, unknown>;
 };
 
+type TimelineBucket = {
+  newUsers: number;
+  trackedEvents: number;
+  heroViews: number;
+  authSuccesses: number;
+  contestStartClicks: number;
+  marketingShown: number;
+  marketingAccepted: number;
+  marketingDeclined: number;
+};
+
+function dayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function buildTimeline(days: number, endDate: Date): Record<string, TimelineBucket> {
+  const buckets: Record<string, TimelineBucket> = {};
+  for (let offset = days - 1; offset >= 0; offset -= 1) {
+    const current = new Date(endDate.getTime() - offset * 24 * 60 * 60 * 1000);
+    buckets[dayKey(current)] = {
+      newUsers: 0,
+      trackedEvents: 0,
+      heroViews: 0,
+      authSuccesses: 0,
+      contestStartClicks: 0,
+      marketingShown: 0,
+      marketingAccepted: 0,
+      marketingDeclined: 0,
+    };
+  }
+  return buckets;
+}
+
 export async function GET(request: Request) {
   try {
     await requireAdmin(request);
@@ -117,6 +162,9 @@ export async function GET(request: Request) {
 
   const dayMs = 24 * 60 * 60 * 1000;
   const now = Date.now();
+  const timelineDays = 30;
+  const timelineStart = new Date(now - (timelineDays - 1) * dayMs);
+  const timelineBuckets = buildTimeline(timelineDays, new Date(now));
 
   let totalUsers = 0;
   let dau = 0;
@@ -153,6 +201,13 @@ export async function GET(request: Request) {
       const createdMs = createdAt.getTime();
       const ageDays = (now - createdMs) / dayMs;
 
+      if (createdMs >= timelineStart.getTime()) {
+        const bucket = timelineBuckets[dayKey(createdAt)];
+        if (bucket) {
+          bucket.newUsers += 1;
+        }
+      }
+
       if (ageDays >= 7) {
         eligibleWeek1 += 1;
         if (lastActiveMs >= createdMs + 7 * dayMs) retainedWeek1 += 1;
@@ -166,6 +221,55 @@ export async function GET(request: Request) {
 
     week1Retention = eligibleWeek1 > 0 ? retainedWeek1 / eligibleWeek1 : 0;
     month1Retention = eligibleMonth1 > 0 ? retainedMonth1 / eligibleMonth1 : 0;
+  } catch {
+    // keep defaults
+  }
+
+  try {
+    const eventsSnap = await adminFirestore
+      .collection("analyticsEvents")
+      .where("createdAt", ">=", timelineStart)
+      .orderBy("createdAt", "asc")
+      .select("createdAt", "event")
+      .get();
+
+    eventsSnap.docs.forEach((docSnap) => {
+      const data = docSnap.data() as { createdAt?: unknown; event?: unknown };
+      const createdAt = asDate(data.createdAt);
+      if (!createdAt) return;
+      const bucket = timelineBuckets[dayKey(createdAt)];
+      if (!bucket) return;
+
+      const event = String(data.event || "");
+      bucket.trackedEvents += 1;
+      if (event === "hero_page_view") bucket.heroViews += 1;
+      if (event === "auth_google_success") bucket.authSuccesses += 1;
+      if (event === "contest_start_click") bucket.contestStartClicks += 1;
+    });
+  } catch {
+    // keep defaults
+  }
+
+  try {
+    const marketingSnap = await adminFirestore
+      .collection("marketingConsentEvents")
+      .where("createdAt", ">=", timelineStart)
+      .orderBy("createdAt", "asc")
+      .select("createdAt", "event")
+      .get();
+
+    marketingSnap.docs.forEach((docSnap) => {
+      const data = docSnap.data() as { createdAt?: unknown; event?: unknown };
+      const createdAt = asDate(data.createdAt);
+      if (!createdAt) return;
+      const bucket = timelineBuckets[dayKey(createdAt)];
+      if (!bucket) return;
+
+      const event = String(data.event || "");
+      if (event === "shown") bucket.marketingShown += 1;
+      if (event === "accepted") bucket.marketingAccepted += 1;
+      if (event === "declined") bucket.marketingDeclined += 1;
+    });
   } catch {
     // keep defaults
   }
@@ -324,6 +428,7 @@ export async function GET(request: Request) {
         onboardingToContestRate,
       },
     },
+    timeline: Object.entries(timelineBuckets).map(([day, bucket]) => ({ day, ...bucket })),
   };
 
   return NextResponse.json(payload);

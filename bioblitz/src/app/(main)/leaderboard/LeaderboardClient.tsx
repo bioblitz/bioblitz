@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Trophy, Flame, Zap } from "lucide-react";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import type { LeaderboardUser } from "./page";
+import type { LeaderboardUser } from "@/lib/leaderboard";
 import { getRatingTier } from "@/lib/rating";
 
 const inter = Inter({ subsets: ["latin"] });

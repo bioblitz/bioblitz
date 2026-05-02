@@ -7,6 +7,11 @@ import { app } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import AdminTabs from "@/components/admin/AdminTabs";
+import AdminOverview from "@/components/admin/AdminOverview";
+import AdminAnalyticsCard from "@/components/admin/AdminAnalyticsCard";
+import UserEditor from "@/components/admin/UserEditor";
+import UsersTable from "@/components/admin/UsersTable";
 
 type AdminUser = {
   uid: string;
@@ -130,6 +135,28 @@ export default function AdminPage() {
       setPotdPublished(data.potdPublished || 0);
       if (data.analytics) setAnalytics(data.analytics);
     } catch (error: any) {
+      console.error(error);
+    }
+  };
+
+  const handleRefreshStats = async () => {
+    if (!user) return;
+    try {
+      setStatus("Refreshing stats...");
+      const idToken = await user.getIdToken();
+      const response = await fetch("/api/admin/cache-invalidate", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to invalidate cache.");
+      // Fetch fresh stats after invalidation
+      await fetchStats(user);
+      setStatus("Stats refreshed successfully!");
+      setTimeout(() => setStatus(null), 3000);
+    } catch (error: any) {
+      setStatus(error?.message || "Failed to refresh stats.");
       console.error(error);
     }
   };
@@ -412,35 +439,25 @@ export default function AdminPage() {
             <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400 mt-1">
               <span>Users: <span className="text-zinc-100 font-semibold">{totalUsers}</span></span>
-              {analytics && (
-                <>
-                  <span className="text-zinc-700">|</span>
-                  <span>DAU <span className="text-zinc-100 font-semibold">{analytics.dau}</span></span>
-                  <span className="text-zinc-700">·</span>
-                  <span>WAU <span className="text-zinc-100 font-semibold">{analytics.wau}</span></span>
-                  <span className="text-zinc-700">·</span>
-                  <span>MAU <span className="text-zinc-100 font-semibold">{analytics.mau}</span></span>
-                  <span className="text-zinc-700">|</span>
-                  <span>7d retention <span className="text-zinc-100 font-semibold">{Math.round(analytics.week1Retention * 100)}%</span></span>
-                </>
-              )}
               <span className="text-zinc-700">|</span>
               <span>Game submissions: <span className="text-zinc-100 font-semibold">{submissionsCount}</span></span>
-              <span className="text-zinc-700">|</span>
-              <span>POTDs published: <span className="text-zinc-100 font-semibold">{potdPublished}</span></span>
-              <span className="text-zinc-700">|</span>
-              <span>POTD attempts: <span className="text-zinc-100 font-semibold">{potdAttempts}</span></span>
-              <span className="text-zinc-700">|</span>
-              <span>POTD accuracy: <span className="text-zinc-100 font-semibold">{potdAttempts > 0 ? `${Math.round((potdCorrect / potdAttempts) * 100)}%` : "—"}</span></span>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleRefreshStats}
+              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+              title="Invalidate cached stats and fetch fresh data"
+            >
+              Refresh Stats
+            </button>
             <Link
               href="/admin/analytics"
               className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
             >
               Open Analytics
             </Link>
+            {/** 
             <button
               onClick={handleReindexSearch}
               className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
@@ -448,6 +465,8 @@ export default function AdminPage() {
             >
               {reindexing ? "Reindexing..." : "Reindex Search"}
             </button>
+            **/}
+
             <Link href="/home" className="text-sm text-neutral-400 hover:text-neutral-300 transition-colors">
               Return to home
             </Link>
@@ -456,70 +475,19 @@ export default function AdminPage() {
 
         {status && <p className="text-sm text-zinc-400 mb-4">{status}</p>}
 
-        {/* Find & Edit User by Username */}
-        <div className="mb-8 border border-zinc-800 rounded-2xl bg-zinc-950/50 p-6">
-          <h2 className="text-base font-semibold text-zinc-200 mb-4">Edit User Fields</h2>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              placeholder="Username (without @)"
-              value={findUsername}
-              onChange={(e) => setFindUsername(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleFindUser()}
-              className="flex-1 bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
-            />
-            <button
-              onClick={handleFindUser}
-              disabled={findingUser || !findUsername.trim()}
-              className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors"
-            >
-              {findingUser ? "Finding…" : "Find"}
-            </button>
-          </div>
-
-          {editUserStatus && (
-            <p className="text-sm text-zinc-400 mb-3">{editUserStatus}</p>
-          )}
-
-          {foundUser && (
-            <div className="space-y-4">
-              <p className="text-xs text-zinc-500 font-mono">{foundUser.uid} · {foundUser.email}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {(
-                  [
-                    { key: "displayName", label: "Display Name", type: "text" },
-                    { key: "username", label: "Username", type: "text" },
-                    { key: "bio", label: "Bio", type: "text" },
-                    { key: "location", label: "Location", type: "text" },
-                    { key: "grade", label: "Grade", type: "text" },
-                    { key: "school", label: "School", type: "text" },
-                    { key: "bElo", label: "Rating (bElo)", type: "number" },
-                    { key: "contestsPlayed", label: "Contests Played", type: "number" },
-                  ] as { key: keyof FullUser; label: string; type: string }[]
-                ).map(({ key, label, type }) => (
-                  <div key={key} className="flex flex-col gap-1">
-                    <label className="text-xs text-zinc-500 font-medium">{label}</label>
-                    <input
-                      type={type}
-                      value={String(editFields[key] ?? "")}
-                      onChange={(e) =>
-                        setEditFields((prev) => ({ ...prev, [key]: e.target.value }))
-                      }
-                      className="bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-                    />
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={handleSaveUserFields}
-                disabled={savingUser}
-                className="px-5 py-2 bg-neutral-600 hover:bg-neutral-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors"
-              >
-                {savingUser ? "Saving…" : "Save Changes"}
-              </button>
-            </div>
-          )}
-        </div>
+        <UserEditor
+          status={status}
+          findUsername={findUsername}
+          setFindUsername={setFindUsername}
+          findingUser={findingUser}
+          handleFindUser={handleFindUser}
+          editUserStatus={editUserStatus}
+          foundUser={foundUser}
+          editFields={editFields}
+          setEditFields={setEditFields}
+          savingUser={savingUser}
+          handleSaveUserFields={handleSaveUserFields}
+        />
 
         {!showDb ? (
           <div className="py-20 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">
@@ -536,128 +504,20 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <Input
-                placeholder="Search users by name, username, email, or UID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 max-w-md"
-              />
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm">
-                <thead>
-                  <tr className="text-left text-zinc-300">
-                    <th className="py-2 px-4 border-b border-zinc-800">Display Name</th>
-                    <th
-                      className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
-                      onClick={() => handleSort("username")}
-                    >
-                      Username {sortColumn === "username" && (sortDirection === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th className="py-2 px-4 border-b border-zinc-800">Email</th>
-                    <th
-                      className="py-2 px-4 border-b border-zinc-800 cursor-pointer"
-                      onClick={() => handleSort("role")}
-                    >
-                      Role {sortColumn === "role" && (sortDirection === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th className="py-2 px-4 border-b border-zinc-800">UID</th>
-                    <th className="py-2 px-4 border-b border-zinc-800 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedUsers.map((u) => (
-                    <tr key={u.uid} className="hover:bg-zinc-900/60">
-                      <td
-                        className="py-2 px-4 border-b border-zinc-800 text-zinc-100 cursor-pointer"
-                        onClick={() => {
-                          setEditingUser({ ...u });
-                          setEditingOriginal({ ...u });
-                        }}
-                      >
-                        {editingUser?.uid === u.uid ? (
-                          <input
-                            value={editingUser.displayName}
-                            onChange={(e) =>
-                              setEditingUser((prev) => {
-                                if (!prev) return prev;
-                                return { ...prev, displayName: e.target.value };
-                              })
-                            }
-                            onBlur={() => {
-                              if (!editingUser) return;
-                              handleUpdateUser({ ...editingUser });
-                              setEditingUser(null);
-                              setEditingOriginal(null);
-                            }}
-                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
-                          />
-                        ) : (
-                          u.displayName || "Unnamed"
-                        )}
-                      </td>
-                      <td
-                        className="py-2 px-4 border-b border-zinc-800 text-zinc-300 cursor-pointer"
-                        onClick={() => {
-                          setEditingUser({ ...u });
-                          setEditingOriginal({ ...u });
-                        }}
-                      >
-                        {editingUser?.uid === u.uid ? (
-                          <input
-                            value={editingUser.username}
-                            onChange={(e) =>
-                              setEditingUser((prev) => {
-                                if (!prev) return prev;
-                                return { ...prev, username: e.target.value };
-                              })
-                            }
-                            onBlur={() => {
-                              if (!editingUser) return;
-                              handleUpdateUser({ ...editingUser });
-                              setEditingUser(null);
-                              setEditingOriginal(null);
-                            }}
-                            className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
-                          />
-                        ) : (
-                          `@${u.username || "no-username"}`
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
-                        {u.email || "-"}
-                      </td>
-                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
-                        <select
-                          value={primaryRole(u.roles || [])}
-                          onChange={(e) => handleSetUserRole(u.uid, e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-md px-2 py-1"
-                        >
-                          <option value="user">User</option>
-                          <option value="staff">Staff</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-4 border-b border-zinc-800 text-zinc-400 font-mono text-xs break-all">
-                        {u.uid}
-                      </td>
-                      <td className="py-2 px-4 border-b border-zinc-800">
-                        <div className="flex items-center justify-center space-x-2 whitespace-nowrap">
-                          <button
-                            onClick={() => handleDeleteUser(u.uid)}
-                            className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <UsersTable
+              showDb={showDb}
+              fetchingUsers={fetchingUsers}
+              handleLoadDb={handleLoadDb}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              sortedUsers={sortedUsers}
+              editingUser={editingUser}
+              setEditingUser={setEditingUser}
+              setEditingOriginal={setEditingOriginal}
+              handleUpdateUser={handleUpdateUser}
+              handleSetUserRole={handleSetUserRole}
+              handleDeleteUser={handleDeleteUser}
+            />
           </>
         )}
       </div>

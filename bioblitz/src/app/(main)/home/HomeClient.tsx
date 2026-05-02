@@ -64,23 +64,6 @@ export default function HomeClient() {
     } finally {
       setPlayedGamesLoaded(true);
     }
-<<<<<<< HEAD
-  };
-  const fetchFirstPage = useCallback(async () => {
-    setLoadingPage(true);
-    const { games, lastSnap } = await getGamesPage(null);
-    setPages([games]);
-    setCursors([null, lastSnap]);
-    setHasMore(games.length === 20);
-    setCurrentPage(0);
-    setLoadingPage(false);
-  }, []);
-
-  const loadPage = async (pageIndex: number) => {
-    if (pages[pageIndex]) {
-      setCurrentPage(pageIndex);
-      return;
-=======
   }, [db]);
 
   useEffect(() => {
@@ -101,23 +84,12 @@ export default function HomeClient() {
       console.error("Error loading games:", error);
     } finally {
       setLoading(false);
->>>>>>> 07b5bb7af40c33be037d02e2645454d5a14adb03
     }
   };
 
   useEffect(() => {
-<<<<<<< HEAD
-    fetchFirstPage();
-  }, [fetchFirstPage]);
-
-  useEffect(() => {
-    const interval = setInterval(fetchFirstPage, 120_000);
-    return () => clearInterval(interval);
-  }, [fetchFirstPage]);
-=======
     loadAllGames();
   }, []);
->>>>>>> 07b5bb7af40c33be037d02e2645454d5a14adb03
 
   const rankedGames = useMemo(() => {
     if (games.length === 0) return [];

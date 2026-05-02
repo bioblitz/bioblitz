@@ -58,6 +58,7 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`${dmSans.className} ${instrumentSerif.variable}`}
+      style={{ backgroundColor: "#171717" }}
     >
       <body>
         <AuthProvider>
