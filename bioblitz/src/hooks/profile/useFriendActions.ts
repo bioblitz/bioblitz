@@ -345,9 +345,9 @@ export function useFriendActions({
         uid: profileUid,
         status: "sent",
         createdAt: Timestamp.now(),
-        displayName: userProfile.displayName,
+        displayName: userProfile.displayName || "",
         username: userProfile.username || "",
-        photoURL: userProfile.photoURL,
+        photoURL: userProfile.photoURL || "",
       });
 
       const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
