@@ -7,7 +7,7 @@ import { firestore } from "@/lib/firebase";
 import { Loader2, ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import BookmarkButton from "@/components/ui/BookmarkButton";
 import ReportButton from "@/components/ui/ReportQuestionButton";
 
@@ -15,14 +15,6 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const mono = jetbrainsMono.className;
-const sans = dmSans.className;
 
 interface SubmissionData {
   correctCount: number;
@@ -54,7 +46,6 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [gameTitle, setGameTitle] = useState("");
   const [panelCollapsed, setPanelCollapsed] = useState(false);
-  const [collapsedQuestions, setCollapsedQuestions] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,23 +84,13 @@ export default function ReviewPage() {
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${minutes} min${minutes !== 1 ? "s" : ""} ${seconds} sec${seconds !== 1 ? "s" : ""}`;
+    return `${minutes}m ${seconds}s`;
   };
 
   const scrollToQuestion = (idx: number) => {
     const el = document.getElementById(`question-${idx}`);
     if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - 96;
-    window.scrollTo({ top, behavior: "smooth" });
-  };
-
-  const toggleQuestion = (idx: number) => {
-    setCollapsedQuestions((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
-      return next;
-    });
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" });
   };
 
   if (loading || !submission) {
@@ -138,34 +119,29 @@ export default function ReviewPage() {
         }}
       />
 
-      {/* Fixed review panel */}
+      {/* Fixed review panel — desktop */}
       <div className="fixed right-4 top-24 z-40 hidden lg:block">
         <div className="bg-[rgba(9,9,11,0.97)] border border-zinc-800 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden w-[168px]">
           <button
             onClick={() => setPanelCollapsed((v) => !v)}
             className="w-full flex items-center justify-between px-4 py-3 text-zinc-400 hover:text-white transition-colors border-b border-zinc-800/60"
           >
-            <span className={`${sans} text-[12px] font-semibold text-zinc-400`}>Review</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 transition-transform duration-200 ${panelCollapsed ? "-rotate-90" : ""}`}
-            />
+            <span className={`text-[12px] font-semibold text-zinc-400`}>Review</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${panelCollapsed ? "-rotate-90" : ""}`} />
           </button>
-
           {!panelCollapsed && (
             <div className="p-3 max-h-[calc(100vh-11rem)] overflow-y-auto">
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-2.5">
                 {questions.map((_, idx) => {
                   const userAnswer = submission.userAnswers[idx];
                   const correctAnswer = submission.correctAnswers?.[idx];
                   const isUnanswered = !userAnswer;
                   const isCorrect = !isUnanswered && userAnswer === correctAnswer;
-
                   const circleClass = isUnanswered
                     ? "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-zinc-700"
                     : isCorrect
                     ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30"
                     : "bg-red-500/20 border-red-500/50 text-red-300 hover:bg-red-500/30";
-
                   return (
                     <button
                       key={idx}
@@ -185,6 +161,8 @@ export default function ReviewPage() {
 
       <div className="flex-1 flex justify-center py-8 px-4 relative z-10">
         <div className="w-full max-w-4xl relative">
+
+          {/* Header */}
           <div className="mb-8">
             <Link
               href={`/home/${gameId}`}
@@ -193,62 +171,59 @@ export default function ReviewPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blitz Info
             </Link>
-            <div className="flex items-center gap-4">
-              <h1 className="text-[32px] font-[900] text-white" style={{ letterSpacing: "-0.02em" }}>
-                Attempt Review
-              </h1>
-            </div>
+            <h1
+              className="text-[32px] font-[900] text-white"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              {gameTitle || "Attempt Review"}
+            </h1>
             <div className="h-[3px] w-20 bg-neutral-600 rounded-full mt-4" />
           </div>
 
+          {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
               <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Accuracy</h2>
               <p className="text-[24px] font-[900] text-white">
                 <span className="text-neutral-400">{submission.correctCount}</span>
-                <span className={`${mono} text-zinc-600 text-[24px]`}> / {submission.totalQuestions}</span>
-              </p>
-              <p className={`${mono} text-[11px] mt-1 ${accuracyPct >= 65 ? "text-emerald-400" : accuracyPct >= 40 ? "text-amber-400" : "text-red-400"}`}>
-                {accuracyPct}%
+                <span className={`text-zinc-600 text-[24px]`}> / {submission.totalQuestions}</span>
               </p>
             </div>
             <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
               <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Time Played</h2>
-              <p className={`${mono} text-[24px] font-normal text-white`}>{formatTime(submission.timeTaken)}</p>
+              <p className={`text-[24px] font-normal text-white`}>{formatTime(submission.timeTaken)}</p>
             </div>
             <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
               <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">Rating</h2>
               {submission.ratingDelta != null ? (
                 <>
-                  <p className={`${mono} relative text-[32px] font-normal ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  <p className={`relative text-[32px] font-normal ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                     {submission.ratingDelta >= 0 ? "+" : ""}{submission.ratingDelta}
                   </p>
                   {submission.newElo != null && (
-                    <p className={`${mono} text-[11px] mt-1 text-zinc-500`}>→ {submission.newElo}</p>
+                    <p className={`text-[11px] mt-1 text-zinc-500`}>→ {submission.newElo}</p>
                   )}
                 </>
               ) : (
-                <p className={`${mono} relative text-[18px] font-[700] text-zinc-500`}>Pending</p>
+                <p className={`relative text-[18px] font-[700] text-zinc-500`}>Pending</p>
               )}
             </div>
           </div>
 
-          {/* Mobile quick-nav bar */}
-          <div className="flex lg:hidden gap-1.5 flex-wrap mb-6 p-3 bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl">
-            <span className={`${sans} text-[12px] font-semibold text-zinc-400 w-full mb-1.5`}>Review</span>
+          {/* Mobile quick-nav */}
+          <div className="flex lg:hidden gap-2.5 flex-wrap mb-6 p-3 bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl">
+            <span className={`text-[12px] font-semibold text-zinc-400 w-full mb-1.5`}>Review</span>
             {questions.map((_, idx) => {
               const userAnswer = submission.userAnswers[idx];
               const correctAnswer = submission.correctAnswers?.[idx];
               const isUnanswered = !userAnswer;
               const isCorrect = !isUnanswered && userAnswer === correctAnswer;
-
               const circleClass = isUnanswered
                 ? "bg-zinc-800 border-zinc-700 text-zinc-500"
                 : isCorrect
                 ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300"
                 : "bg-red-500/20 border-red-500/50 text-red-300";
-
               return (
                 <button
                   key={idx}
@@ -261,127 +236,102 @@ export default function ReviewPage() {
             })}
           </div>
 
-          <div className="space-y-4">
+          {/* Questions */}
+          <div className="space-y-6">
             {questions.map((question, idx) => {
               const choices = ["a", "b", "c", "d", "e"]
                 .filter((key) => question[key as keyof Question])
                 .map((key) => ({ key, text: question[key as keyof Question] as string }));
 
               const userAnswer = submission.userAnswers[idx];
-              const correctAnswer = submission.correctAnswers ? submission.correctAnswers[idx] : "";
+              const correctAnswer = submission.correctAnswers?.[idx] ?? "";
               const isUnanswered = !userAnswer;
               const isCorrect = !isUnanswered && userAnswer === correctAnswer;
-              const isCollapsed = collapsedQuestions.has(idx);
-
-              const statusDotClass = isUnanswered
-                ? "bg-zinc-600"
-                : isCorrect
-                ? "bg-emerald-500"
-                : "bg-red-500";
 
               const statusLabel = isUnanswered ? "Unanswered" : isCorrect ? "Correct" : "Incorrect";
-              const statusTextClass = isUnanswered
-                ? "text-zinc-500"
-                : isCorrect
-                ? "text-emerald-400"
-                : "text-red-400";
+              const statusDotClass = isUnanswered ? "bg-zinc-600" : isCorrect ? "bg-emerald-500" : "bg-red-500";
+              const statusTextClass = isUnanswered ? "text-zinc-500" : isCorrect ? "text-emerald-400" : "text-red-400";
 
               return (
                 <div
                   key={idx}
                   id={`question-${idx}`}
-                  className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden scroll-mt-24"
+                  className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8 scroll-mt-24"
                 >
-                  {/* Card header — always visible */}
-                  <div
-                    className="flex items-center gap-3 px-6 py-4 cursor-pointer group select-none"
-                    onClick={() => toggleQuestion(idx)}
-                  >
-                    <span className="text-zinc-400 text-sm flex-shrink-0">
-                      Q {idx + 1}
-                    </span>
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDotClass}`} />
-                    <span className={`${sans} text-[12px] font-semibold flex-shrink-0 ${statusTextClass}`}>
-                      {statusLabel}
-                    </span>
-                    {isCollapsed && (
-                      <p className="text-zinc-500 text-sm truncate flex-1 min-w-0">
-                        {question.content.length > 80 ? question.content.slice(0, 80) + "…" : question.content}
-                      </p>
-                    )}
-                    <ChevronDown
-                      className={`w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-transform duration-200 ml-auto flex-shrink-0 ${isCollapsed ? "-rotate-90" : ""}`}
-                    />
+                  {/* Question header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-neutral-400 text-sm">Question {idx + 1}</span>
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDotClass}`} />
+                      <span className={`text-[12px] font-semibold ${statusTextClass}`}>{statusLabel}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <BookmarkButton
+                        gameId={gameId as string}
+                        questionIndex={idx}
+                        gameTitle={gameTitle}
+                        correctAnswer={correctAnswer}
+                        userAnswer={userAnswer}
+                      />
+                      <ReportButton
+                        gameId={gameId as string}
+                        questionIndex={idx}
+                        gameTitle={gameTitle}
+                      />
+                    </div>
                   </div>
 
-                  {/* Card body — collapsible */}
-                  {!isCollapsed && (
-                    <div className="px-6 pb-6 md:px-8 md:pb-8 border-t border-zinc-800/60">
-                      <div className="flex items-center gap-3 pt-4 mb-4">
-                        <BookmarkButton
-                          gameId={gameId as string}
-                          questionIndex={idx}
-                          gameTitle={gameTitle}
-                          correctAnswer={correctAnswer}
-                          userAnswer={userAnswer}
-                        />
-                        <ReportButton
-                          gameId={gameId as string}
-                          questionIndex={idx}
-                          gameTitle={gameTitle}
-                        />
-                        {isUnanswered && (
-                          <span className={`${sans} ml-auto text-zinc-500 text-[12px] font-medium bg-zinc-800/60 border border-zinc-700/60 px-2.5 py-1 rounded-lg`}>
-                            Not answered
-                          </span>
-                        )}
-                      </div>
+                  {/* Question text */}
+                  <div
+                    className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                    dangerouslySetInnerHTML={{ __html: question.content }}
+                  />
 
-                      <p className="mb-6 text-[18px] text-zinc-100 leading-relaxed">{question.content}</p>
-
-                      {question.imgURL && (
-                        <img
-                          src={question.imgURL}
-                          alt={`Question ${idx + 1}`}
-                          className="mb-6 rounded-xl max-h-[300px] w-auto border border-zinc-800"
-                        />
-                      )}
-
-                      <div className="flex flex-col space-y-2.5">
-                        {choices.map(({ key, text }) => {
-                          const isUserAnswer = userAnswer === key;
-                          const isChoiceCorrect = correctAnswer === key;
-
-                          let bgClass = "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
-                          if (isChoiceCorrect) {
-                            bgClass = "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
-                          } else if (isUserAnswer) {
-                            bgClass = "bg-red-500/10 border-red-500/50 text-red-300";
-                          }
-
-                          return (
-                            <div
-                              key={key}
-                              className={`flex items-center px-5 py-4 rounded-xl border transition-all ${bgClass}`}
-                            >
-                              <span className={`${mono} font-normal mr-4 uppercase w-6 text-[12px]`}>{key}</span>
-                              <span className="font-medium text-[15px]">{text}</span>
-                              {isChoiceCorrect && (
-                                <span className={`${sans} ml-auto text-emerald-400 font-semibold text-[12px]`}>
-                                  Correct
-                                </span>
-                              )}
-                              {isUserAnswer && !isChoiceCorrect && (
-                                <span className={`${sans} ml-auto text-red-400 font-semibold text-[12px]`}>
-                                  Your answer
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                  {/* Image */}
+                  {question.imgURL && (
+                    <div className="mb-6 rounded-xl overflow-hidden border border-zinc-800 bg-neutral-900">
+                      <img
+                        src={question.imgURL}
+                        alt={`Question ${idx + 1}`}
+                        className="w-full max-h-[400px] object-contain"
+                      />
                     </div>
                   )}
+
+                  {/* Choices */}
+                  <div className="flex flex-col space-y-2.5">
+                    {choices.map(({ key, text }) => {
+                      const isUserAnswer = userAnswer === key;
+                      const isChoiceCorrect = correctAnswer === key;
+
+                      const choiceClass = isChoiceCorrect
+                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-300"
+                        : isUserAnswer
+                        ? "bg-red-500/10 border-red-500/50 text-red-300"
+                        : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border-zinc-700/60";
+
+                      const badgeClass = isChoiceCorrect
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : isUserAnswer
+                        ? "bg-red-500/20 text-red-300"
+                        : "bg-neutral-900/30 text-zinc-500";
+
+                      return (
+                        <div
+                          key={key}
+                          className={`flex items-center w-full px-5 py-4 rounded-xl border ${choiceClass}`}
+                        >
+                          <span className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-normal text-[12px] uppercase flex-shrink-0 ${badgeClass}`}>
+                            {key}
+                          </span>
+                          <span
+                            className="text-[16px]"
+                            dangerouslySetInnerHTML={{ __html: text }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}

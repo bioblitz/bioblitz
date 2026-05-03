@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import MountainHero from "@/components/MountainHero";
+import DemoBlitz from "@/components/DemoBlitz";
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
 
@@ -18,14 +19,6 @@ export default async function mainPage({
 }) {
   const user = await getCurrentUser();
   if (user) redirect("/home");
-
-  const size = 180;
-  const strokeWidth = 15;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const timeLeft = 43;
-  const timeTotal = 60;
-  const dashOffset = circumference * (1 - timeLeft / timeTotal);
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-neutral-900 text-slate-200 selection:text-white overflow-x-hidden">
@@ -55,103 +48,14 @@ export default async function mainPage({
                     <h3 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">
                       2014 Opens Cell Bio
                     </h3>
-                    <span className=" text-white border text-xs px-2 py-1 rounded-md font-bold uppercase tracking-wider mb-2">
+                    <span className="text-white border text-xs px-2 py-1 rounded-md font-bold mb-2">
                       Ranked
                     </span>
                   </div>
                   <div className="h-1 w-20  rounded mx-auto md:mx-0" />
                 </div>
 
-                <div className="flex flex-col xl:flex-row gap-8 items-start">
-                  <div className="flex-1 w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className=" text-sm font-bold px-3 py-1 rounded-full border">
-                        Question 4
-                      </span>
-                    </div>
-                    <p className="mb-8 text-lg md:text-xl leading-relaxed text-zinc-100 font-medium">
-                      In the absence of oxygen, yeast cells can obtain energy by
-                      fermentation, resulting in the production of which of the
-                      following sets of molecules?
-                    </p>
-                    <div className="flex flex-col space-y-3">
-                      <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
-                          A
-                        </span>
-                        <span className="text-lg">
-                          ATP, CO2, and Acetyl-CoA
-                        </span>
-                      </div>
-                      <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-emerald-600 text-white border-emerald-300  scale-[1.01] cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-white/20 text-white">
-                          B
-                        </span>
-                        <span className="text-lg">ATP, CO2, and Ethanol</span>
-                      </div>
-                      <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
-                          C
-                        </span>
-                        <span className="text-lg">ATP, NADH, and Pyruvate</span>
-                      </div>
-                      <div className="flex items-center w-full px-5 py-4 rounded-xl border-2 bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-600 cursor-pointer transition-all">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm bg-neutral-900/20 text-zinc-400">
-                          D
-                        </span>
-                        <span className="text-lg">
-                          ATP, Pyruvate, and Acetyl-CoA
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="hidden xl:block sticky top-8">
-                    <div className="flex flex-col items-center">
-                      <div
-                        style={{
-                          width: size,
-                          height: size,
-                          position: "relative",
-                        }}
-                      >
-                        <svg
-                          height={size}
-                          width={size}
-                          className="transform -rotate-90"
-                        >
-                          <circle
-                            stroke="#27272a"
-                            fill="transparent"
-                            strokeWidth={strokeWidth}
-                            r={radius}
-                            cx={size / 2}
-                            cy={size / 2}
-                          />
-                          <circle
-                            stroke="#e5e5e5"
-                            fill="transparent"
-                            strokeWidth={strokeWidth}
-                            strokeLinecap="round"
-                            strokeDasharray={circumference}
-                            strokeDashoffset={dashOffset}
-                            r={radius}
-                            cx={size / 2}
-                            cy={size / 2}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-4xl font-bold text-white tabular-nums">
-                            00:{timeLeft}
-                          </span>
-                          <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">
-                            Remaining
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <DemoBlitz />
               </div>
             </div>
           </div>
@@ -196,12 +100,16 @@ export default async function mainPage({
                   a: "Your rating is dynamic. It updates after every full Blitz submission based on your performance relative to the set's difficulty. Perform well on blitzes to increase your rating.",
                 },
                 {
-                  q: "Is the content aligned with USABO & Campbell?",
-                  a: "Yes. Our question bank is rigorously aligned with Campbell Biology (12th Ed), Raven's Biology of Plants, and past USABO Open/Semifinal exams. We cover all 7 official syllabus areas, from Cell Biology to Biosystematics.",
+                  q: "Can you create your own blitzes?",
+                  a: "Yep! While Mitosisphere's content writers create a lot of official content for the website, anyone with an account can create ranked blitzes for others to play. We are a tight-knit community, and your contributions help others improve their bio skills.",
                 },
                 {
-                  q: "Is this useful for AP Biology or MCAT?",
-                  a: "Absolutely. While BioBlitz is optimized for the United States Biology Olympiad exam, it is equally useful for other biology tests, such as for AP Biology exams and the MCAT.",
+                  q: "Is the content aligned with USABO & Campbell?",
+                  a: "Yes. As the community creates a LOT of blitzes, there are many that are aligned with the official content areas of USABO. However, that's not the only content that's on the website, as there are other biology and medical exam-related content that many have uploaded.",
+                },
+                {
+                  q: "Is this useful for other biology exams, like AP Biology or medical exams?",
+                  a: "Absolutely. While BioBlitz is optimized for the United States Biology Olympiad exam, it is equally useful for other biology-related tests, such as for AP Biology exams, the MCAT, and USMLE.",
                 },
               ].map((item, i) => (
                 <details key={i} className="group transition-all duration-300">
@@ -238,12 +146,10 @@ export default async function mainPage({
             <h2 className="text-3xl md:text-5xl font-bold text-black mb-4">
               See where you rank.
             </h2>
-            <p className="text-slate-800 mb-8 text-lg">
-              Take blitzes, grow your channel, and compete
-            </p>
-            <Link href="/home">
+            
+            <Link href="/auth">
               <button className="bg-neutral-900 text-white font-bold py-3 px-10 rounded-full hover:bg-neutral-900 transition-colors shadow-lg shadow-white/10">
-                Start a Blitz
+                Get started
               </button>
             </Link>
           </div>

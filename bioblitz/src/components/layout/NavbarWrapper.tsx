@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import MainNavbar from "./MainNavbar";
+import TooltipNavbar from "./TooltipNavbar";
 import MarketingNavbar from "./MarketingNavbar";
 
 export default function NavbarWrapper() {
@@ -27,5 +27,5 @@ export default function NavbarWrapper() {
     return <MarketingNavbar />;
   }
 
-  return isAuthenticated ? <MainNavbar /> : <MarketingNavbar />;
+  return isAuthenticated ? <TooltipNavbar /> : <MarketingNavbar />;
 }

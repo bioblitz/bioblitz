@@ -21,13 +21,17 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { createContest } from "@/lib/actions";
 import { uploadImage } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { debounce } from "@/lib/utils";
 import ImageUploadZone from "@/components/ui/ImageUploadZone";
+import ImageCropModal from "@/components/ui/ImageCropModal";
+import GenerateFromPdfModal from "@/components/ui/GenerateFromPdfModal";
 
 const initialQuestion = (): EditableQuestion => ({
   id: Date.now().toString(),
@@ -91,6 +95,12 @@ export default function EditContestPage() {
   const routeContestId = (params as any)?.contestId as string | undefined;
   const postAsUsername = searchParams?.get("postAs")?.trim() || "";
 
+  const { user: authUser } = useAuth();
+  const userRoles = Array.isArray(authUser?.roles)
+    ? authUser.roles.map((r: unknown) => String(r).toLowerCase())
+    : [];
+  const isStaffOrAdmin = userRoles.includes("admin") || userRoles.includes("staff");
+
   const [state, formAction] = useActionState(createContest, initialState);
   const [questions, setQuestions] = useState<EditableQuestion[]>([
     initialQuestion(),
@@ -111,6 +121,8 @@ export default function EditContestPage() {
   const [timeLimit, setTimeLimit] = useState<number>(600);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerCropSrc, setBannerCropSrc] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
@@ -209,6 +221,15 @@ export default function EditContestPage() {
     navigateToNewRef.current = true;
     setQuestions((prev) => [...prev, newQuestion]);
     setActiveQuestionId(newQuestion.id);
+  };
+
+  const handlePdfApply = (newQuestions: EditableQuestion[], mode: "replace" | "append") => {
+    setShowPdfModal(false);
+    const updated = mode === "replace" ? newQuestions : [...questions, ...newQuestions];
+    setQuestions(updated);
+    setActiveQuestionId(updated[0]?.id ?? null);
+    setCurrentEditorIndex(0);
+    setIsAiGenerated(true);
   };
 
   useEffect(() => {
@@ -351,10 +372,22 @@ export default function EditContestPage() {
     }
   };
 
-  const handleBannerFile = async (file: File) => {
+  const handleBannerFile = (file: File) => {
+    const objectUrl = URL.createObjectURL(file);
+    setBannerCropSrc(objectUrl);
+  };
+
+  const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) handleBannerFile(file);
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
     if (!contestId) return;
+    setBannerCropSrc(null);
     setUploadingBanner(true);
     try {
+      const file = new File([blob], "banner.jpg", { type: "image/jpeg" });
       const downloadURL = await uploadImage(file, `contests/${contestId}/banner`);
       setBannerUrl(downloadURL);
     } catch (error) {
@@ -362,11 +395,6 @@ export default function EditContestPage() {
     } finally {
       setUploadingBanner(false);
     }
-  };
-
-  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) handleBannerFile(file);
   };
 
   const handleSaveDraft = useCallback(async () => {
@@ -429,6 +457,8 @@ export default function EditContestPage() {
     selectedTopic,
     customTopic,
     bannerUrl,
+    isPublished,
+    isHidden,
   ]);
 
   useEffect(() => {
@@ -611,6 +641,23 @@ export default function EditContestPage() {
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16 pl-14">
+      {showPdfModal && (
+        <GenerateFromPdfModal
+          onApply={handlePdfApply}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
+      {bannerCropSrc && (
+        <ImageCropModal
+          src={bannerCropSrc}
+          aspect={16 / 9}
+          onConfirm={handleCropConfirm}
+          onClose={() => {
+            URL.revokeObjectURL(bannerCropSrc);
+            setBannerCropSrc(null);
+          }}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
           <div>
@@ -769,6 +816,16 @@ export default function EditContestPage() {
                     <Plus className="w-4 h-4" />
                     Add question
                   </button>
+                  {isStaffOrAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPdfModal(true)}
+                      className="w-full flex items-center justify-center gap-2 py-3 text-sm text-yellow-500/70 hover:text-yellow-400 border border-dashed border-yellow-900/40 hover:border-yellow-700/60 rounded-xl transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Generate from PDF
+                    </button>
+                  )}
                 </div>
               </section>
 

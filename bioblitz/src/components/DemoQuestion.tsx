@@ -147,7 +147,7 @@ export default function DemoQuestion() {
               >
                 00:{seconds}
               </span>
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">
+              <span className="text-zinc-500 text-xs font-medium tracking-wider mt-1">
                 Remaining
               </span>
             </div>

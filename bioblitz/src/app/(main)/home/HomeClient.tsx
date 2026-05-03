@@ -210,7 +210,7 @@ export default function HomeClient() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                 <div className="md:col-span-5 space-y-6">
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 tracking-wider flex items-center gap-2">
                       <CheckCircle2 className="w-3 h-3" /> Status
                     </span>
                     <div className="flex flex-wrap gap-2">
@@ -231,7 +231,7 @@ export default function HomeClient() {
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 tracking-wider flex items-center gap-2">
                       <User className="w-3 h-3" /> Type
                     </span>
                     <div className="flex flex-wrap gap-2">
@@ -256,7 +256,7 @@ export default function HomeClient() {
 
                 <div className="md:col-span-7 border-t md:border-t-0 md:border-l border-neutral-800 pt-6 md:pt-0 md:pl-8">
                   <div className="space-y-3">
-                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-xs font-bold text-neutral-500 tracking-wider flex items-center gap-2">
                       <Filter className="w-3 h-3" /> Topics
                     </span>
                     <div className="flex flex-wrap gap-2">

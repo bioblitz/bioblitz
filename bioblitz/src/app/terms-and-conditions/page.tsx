@@ -45,9 +45,8 @@ export default function TermsOfServicePage() {
               1. Eligibility & Registration
             </h2>
             <p className="mb-4">
-              <strong>Age Requirement:</strong> Our services are not intended
-              for children under the age of 13. By using BioBlitz, you confirm
-              that you are at least 13 years old.
+              <strong>Age Requirement:</strong> BioBlitz is designed for users
+              who are 13 or older. Please don't sign up if you are under 13 🙃
             </p>
             <p>
               <strong>Account Access:</strong> You must have a valid Google

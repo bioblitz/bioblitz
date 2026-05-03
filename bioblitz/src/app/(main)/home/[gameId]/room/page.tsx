@@ -1071,7 +1071,7 @@ export default function GameRoomPage() {
                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                   </span>
                   <span
-                    className={`text-zinc-500 text-[10px] font-bold mt-1`}
+                    className={`text-zinc-500 text-[10px] font-medium mt-1`}
                     style={{ letterSpacing: "0.06em" }}
                   >
                     Remaining

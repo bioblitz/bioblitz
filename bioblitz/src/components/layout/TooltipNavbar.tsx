@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,7 +14,6 @@ import {
   Plus,
   Hammer,
   ShieldUser,
-  Swords,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -22,14 +23,11 @@ import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
-export default function MainNavbar() {
+export default function TooltipNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-
-  const [railOpen, setRailOpen] = useState(false);
-  const [suppressRailHover, setSuppressRailHover] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -49,7 +47,7 @@ export default function MainNavbar() {
   const trackNavClick = (event: string, target: string) => {
     void trackAnalyticsEvent({
       event,
-      source: "main_navbar",
+      source: "tooltip_navbar",
       page: "navigation",
       metadata: { target },
     });
@@ -70,36 +68,27 @@ export default function MainNavbar() {
     if (user?.uid) {
       const db = getFirestore(app);
       const userRef = doc(db, "users", user.uid);
-
       const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           setStreak(data.streak || 0);
-
           if (data.lastStreakDate) {
             const lastDate = data.lastStreakDate.toDate();
             const now = new Date();
-
             const pstOptions: Intl.DateTimeFormatOptions = {
               timeZone: "America/Los_Angeles",
               year: "numeric",
               month: "2-digit",
               day: "2-digit",
             };
-
-            const lastDatePst = lastDate.toLocaleDateString(
-              "en-US",
-              pstOptions,
-            );
+            const lastDatePst = lastDate.toLocaleDateString("en-US", pstOptions);
             const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
-
             setStreakActive(lastDatePst === nowDatePst);
           } else {
             setStreakActive(false);
           }
         }
       });
-
       return () => unsubscribe();
     } else {
       setStreak(0);
@@ -110,13 +99,8 @@ export default function MainNavbar() {
   useEffect(() => {
     setRouteLoading(true);
     setRouteLong(false);
-    const longHandle = window.setTimeout(() => {
-      setRouteLong(true);
-    }, 600);
-    const handle = window.setTimeout(() => {
-      setRouteLoading(false);
-    }, 180);
-
+    const longHandle = window.setTimeout(() => setRouteLong(true), 600);
+    const handle = window.setTimeout(() => setRouteLoading(false), 180);
     return () => {
       window.clearTimeout(handle);
       window.clearTimeout(longHandle);
@@ -137,23 +121,8 @@ export default function MainNavbar() {
     setDropdownOpen(false);
   };
 
-  const createHref = user?.username ? `/channel/${user.username}` : "/channel";
-  const sideItems = [
-    { name: "Home", href: "/home", icon: House },
-    { name: "Daily Problem", href: "/potd", icon: Flame },
-    {
-      name: "Leaderboard",
-      href: "/leaderboard",
-      icon: Trophy,
-    },
-
-    { name: "Create", href: createHref, icon: Plus },
-  ];
-
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -166,16 +135,22 @@ export default function MainNavbar() {
     return () => unsubscribe();
   }, []);
 
+  const createHref = user?.username ? `/channel/${user.username}` : "/channel";
+  const sideItems = [
+    { name: "Home", href: "/home", icon: House },
+    { name: "Daily Problem", href: "/potd", icon: Flame },
+    { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
+    { name: "Create", href: createHref, icon: Plus },
+    ...(isStaff ? [{ name: "Staff", href: "/staff", icon: ShieldUser }] : []),
+    ...(isAdmin ? [{ name: "Admin", href: "/admin", icon: Hammer }] : []),
+  ];
+
   const renderUserNav = () => {
     if (loading) {
-      return (
-        <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />
-      );
+      return <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />;
     }
     if (!isAuthenticated || !user) {
-      return (
-        <div></div>
-      );
+      return <div />;
     }
     return (
       <div className="flex items-center gap-4">
@@ -184,9 +159,7 @@ export default function MainNavbar() {
           title="Current Streak"
         >
           <Flame
-            className={`w-4 h-4 text-orange-500 ${
-              streakActive ? "fill-orange-500" : "fill-transparent"
-            }`}
+            className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`}
           />
           <span className="text-sm font-bold text-orange-400">{streak}</span>
         </div>
@@ -205,14 +178,12 @@ export default function MainNavbar() {
                 {user.displayName || user.username || ""}
               </h2>
             </div>
-
             <div className="relative">
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
                   alt={user.displayName}
                   className="h-10 w-10 rounded-full object-cover border border-zinc-700"
-
                   onError={(e) => {
                     const target = e.currentTarget;
                     target.onerror = null;
@@ -223,15 +194,12 @@ export default function MainNavbar() {
                 <DefaultAvatar name={user.displayName} />
               )}
             </div>
-
             <div className="text-zinc-400 group-hover:text-white transition-colors">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
-                className={`w-5 h-5 transition-transform duration-200 ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-5 h-5 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
               >
                 <path
                   fillRule="evenodd"
@@ -247,37 +215,24 @@ export default function MainNavbar() {
               <div className="md:hidden px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
                 <span className="text-zinc-400 text-sm">Streak</span>
                 <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-                  <Flame
-                    className={`w-4 h-4 text-orange-500 ${
-                      streakActive ? "fill-orange-500" : "fill-transparent"
-                    }`}
-                  />
+                  <Flame className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`} />
                   {streak}
                 </div>
               </div>
-
               {user?.username && (
                 <Link href={`/profile/${user.username}`}>
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => {
-                      trackNavClick("nav_menu_link_click", "profile");
-                      setDropdownOpen(false);
-                    }}
+                    onClick={() => { trackNavClick("nav_menu_link_click", "profile"); setDropdownOpen(false); }}
                   >
                     Profile
                   </span>
                 </Link>
               )}
-              <Link
-                href={user?.username ? `/channel/${user.username}` : "/channel"}
-              >
+              <Link href={user?.username ? `/channel/${user.username}` : "/channel"}>
                 <span
                   className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                  onClick={() => {
-                    trackNavClick("nav_menu_link_click", "channel");
-                    setDropdownOpen(false);
-                  }}
+                  onClick={() => { trackNavClick("nav_menu_link_click", "channel"); setDropdownOpen(false); }}
                 >
                   Channel
                 </span>
@@ -285,10 +240,7 @@ export default function MainNavbar() {
               <Link href="/settings">
                 <span
                   className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                  onClick={() => {
-                    trackNavClick("nav_menu_link_click", "settings");
-                    setDropdownOpen(false);
-                  }}
+                  onClick={() => { trackNavClick("nav_menu_link_click", "settings"); setDropdownOpen(false); }}
                 >
                   Settings
                 </span>
@@ -297,10 +249,7 @@ export default function MainNavbar() {
                 <Link href="/staff">
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => {
-                      trackNavClick("nav_menu_link_click", "staff");
-                      setDropdownOpen(false);
-                    }}
+                    onClick={() => { trackNavClick("nav_menu_link_click", "staff"); setDropdownOpen(false); }}
                   >
                     Staff
                   </span>
@@ -310,10 +259,7 @@ export default function MainNavbar() {
                 <Link href="/admin">
                   <span
                     className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
-                    onClick={() => {
-                      trackNavClick("nav_menu_link_click", "admin");
-                      setDropdownOpen(false);
-                    }}
+                    onClick={() => { trackNavClick("nav_menu_link_click", "admin"); setDropdownOpen(false); }}
                   >
                     Admin
                   </span>
@@ -337,9 +283,7 @@ export default function MainNavbar() {
   return (
     <>
       <div
-        className={`route-progress-bar ${routeLoading ? "is-active" : ""} ${
-          routeLong ? "is-long" : ""
-        }`}
+        className={`route-progress-bar ${routeLoading ? "is-active" : ""} ${routeLong ? "is-long" : ""}`}
       />
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
@@ -356,11 +300,7 @@ export default function MainNavbar() {
               className="flex items-center space-x-2 group"
             >
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                <img
-                  src="/icons/favicon.ico"
-                  className="w-6 h-6"
-                  alt="BioBlitz"
-                />
+                <img src="/icons/favicon.ico" className="w-6 h-6" alt="BioBlitz" />
               </div>
               <span
                 style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }}
@@ -369,129 +309,40 @@ export default function MainNavbar() {
                 BioBlitz
               </span>
             </Link>
-
             <SearchBar />
-
             <div className="flex items-center space-x-4">{renderUserNav()}</div>
           </div>
         </div>
       </nav>
 
-      <aside
-        className={`fixed left-0 top-16 h-[calc(100%-4rem)] w-56 z-40 flex items-center justify-start overflow-visible -translate-y-8 pointer-events-none ${
-          railOpen ? "bg-neutral-900/90" : "bg-transparent"
-        }`}
-        onMouseLeave={() => {
-          setRailOpen(false);
-          setSuppressRailHover(false);
-        }}
-      >
-        <div
-          className="w-16 flex flex-col items-center justify-center py-6 gap-0 ml-2 pointer-events-auto"
-          onMouseEnter={() => {
-            if (!suppressRailHover) setRailOpen(true);
-          }}
-        >
+      <aside className="fixed left-0 top-16 h-[calc(100%-4rem)] z-40 flex items-center pointer-events-none -translate-y-8">
+        <div className="flex flex-col items-center py-6 gap-0 ml-2 pointer-events-auto">
           {sideItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-                title={item.name}
                 aria-label={item.name}
-                onClick={() => {
-                  trackNavClick("nav_side_link_click", item.href);
-                  setRailOpen(false);
-                  setSuppressRailHover(true);
-                }}
+                onClick={() => trackNavClick("nav_side_link_click", item.href)}
+                className="group/tip relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-150"
               >
                 <span
-                  className={`absolute left-0 top-0 h-full rounded-full bg-white/25 w-12 opacity-0 transition-all duration-200 ${
-                    suppressRailHover
-                      ? ""
-                      : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
+                  className={`absolute inset-0 rounded-full bg-white/20 scale-75 opacity-0 transition-all duration-150 group-hover/tip:scale-100 group-hover/tip:opacity-100 ${
+                    isActive ? "scale-100 opacity-30" : ""
                   }`}
                 />
                 <item.icon
                   size={26}
-                  className={isActive ? "text-white fill-white" : ""}
+                  className={`relative z-10 ${isActive ? "text-white fill-white" : ""}`}
                 />
-                <span
-                  className={`absolute left-14 h-full flex items-center text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    railOpen
-                      ? "opacity-100 translate-x-0"
-                      : "opacity-0 translate-x-1"
-                  }`}
-                >
+                {/* Tooltip callout */}
+                <span className="pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white text-xs font-medium whitespace-nowrap opacity-0 -translate-x-1 group-hover/tip:opacity-100 group-hover/tip:translate-x-0 transition-all duration-150 shadow-lg">
                   {item.name}
                 </span>
               </Link>
             );
           })}
-          {isStaff && (
-            <Link
-              href="/staff"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-              title="Staff"
-              aria-label="Staff"
-              onClick={() => {
-                trackNavClick("nav_side_link_click", "/staff");
-                setRailOpen(false);
-                setSuppressRailHover(true);
-              }}
-            >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <ShieldUser size={26} />
-              <span
-                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-1"
-                }`}
-              >
-                Staff
-              </span>
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="group/railitem relative w-14 h-14 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 overflow-visible"
-              title="Admin"
-              aria-label="Admin"
-              onClick={() => {
-                trackNavClick("nav_side_link_click", "/admin");
-                setRailOpen(false);
-                setSuppressRailHover(true);
-              }}
-            >
-              <span
-                className={`absolute left-0 top-0 h-full rounded-full bg-white/25 opacity-0 transition-all duration-200 w-12 ${
-                  suppressRailHover
-                    ? ""
-                    : "group-hover/railitem:opacity-100 group-hover/railitem:w-40"
-                }`}
-              />
-              <Hammer size={26} />
-              <span
-                className={`absolute left-14 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  railOpen
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-1"
-                }`}
-              >
-                Admin
-              </span>
-            </Link>
-          )}
         </div>
       </aside>
     </>

@@ -130,29 +130,7 @@ export default function MountainHero() {
           className="flex items-center gap-4 my-3 w-full max-w-xs mx-auto hero-reveal"
           style={{ animationDelay: "0.35s" }}
         >
-          <div
-            className="flex-1 h-px"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent)",
-            }}
-          />
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 20 20"
-            fill="#ffffff"
-            opacity="0.6"
-          >
-            <path d="M11 2L4 11h7l-2 7 9-10h-7l2-6z" />
-          </svg>
-          <div
-            className="flex-1 h-px"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent)",
-            }}
-          />
+          
         </div>
 
         <p

@@ -8,8 +8,9 @@ import { createUserProfile } from "@/lib/user";
 import { markMarketingPopupForNextSignIn } from "@/hooks/useMarketingPopup";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import GoogleButton from "@/components/ui/GoogleButton";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Trophy, Timer, BookOpen, LucideIcon } from "lucide-react";
+import { Trophy, Timer, BookOpen, PlusCircle, LucideIcon } from "lucide-react";
 
 export default function AuthenticationPage() {
   const [loading, setLoading] = useState(false);
@@ -117,8 +118,8 @@ export default function AuthenticationPage() {
                   </div>
                 </h2>
                 <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
-                  Join the fastest-growing community of biology enthusiasts.
-                  Compete in real-time, track your progress, and climb the
+                  Join a tight-knit and fast-growing community of biology enthusiasts!
+                  Compete in real-time, create your own content, and climb the
                   global leaderboard.
                 </p>
 
@@ -138,6 +139,11 @@ export default function AuthenticationPage() {
                     title="Diverse Topics"
                     description="Test your knowledge across Genetics, Cell Bio, Biochemistry, and more."
                   />
+                  <FeatureItem
+                    icon={PlusCircle}
+                    title="Create Your Own Blitzes"
+                    description="Create content for others to play."
+                  />
                 </div>
               </div>
             </div>
@@ -148,7 +154,7 @@ export default function AuthenticationPage() {
                   Sign in to your account
                 </h3>
                 <p className="text-zinc-400 text-sm">
-                  Start your journey today.
+                  Go play some blitzes!
                 </p>
               </div>
 
@@ -159,11 +165,20 @@ export default function AuthenticationPage() {
 
                 <div className="relative flex items-center py-0">
                   <div className="grow border-t border-white/10"></div>
-                  <span className="shrink-0 mx-4 text-xs text-slate-500 uppercase tracking-widest">
-                    Secure Login
+                  <span className="shrink-0 mx-4 text-xs text-slate-500 tracking-widest">
+                    Secure login
                   </span>
                   <div className="grow border-t border-white/10"></div>
                 </div>
+              </div>
+
+              <div className="text-center mt-8">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Want to see what it's like first?
+                </h3>
+                <Link href="/about" className="inline-block text-sm font-medium text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 px-4 py-2 rounded-lg transition-colors w-full text-center">
+                  See a demo
+                </Link>
               </div>
 
               <div className="mt-8 text-center">

@@ -131,11 +131,19 @@ const ContestCard: React.FC<ContestCardProps> = ({
           ) : (
             <div className="absolute inset-0 bg-neutral-900" />
           )}
-          <div className="absolute inset-0 bg-neutral-900/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <p className="text-white text-sm text-center px-4">
+          <div className="absolute inset-0 bg-neutral-900/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4 z-20">
+            <p className="text-white text-sm text-center">
               {questionCount} problem{questionCount !== 1 ? "s" : ""} in{" "}
               {timeInMinutes} minute{timeInMinutes !== 1 ? "s" : ""}
             </p>
+            {contest.description && (
+              <>
+                <div className="h-3" />
+                <p className="text-zinc-300 text-xs text-center line-clamp-3 leading-relaxed">
+                  {contest.description}
+                </p>
+              </>
+            )}
           </div>
           {isCompleted && (
             <div className="absolute inset-0 bg-neutral-950/40 backdrop-blur-[0.25px] z-20">
@@ -147,7 +155,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
             </div>
           )}
           {contest.topic && (
-            <div className="absolute bottom-2 left-2 z-10">
+            <div className="absolute bottom-2 left-2 z-10 transition-opacity duration-300 group-hover:opacity-80">
               <span
                 className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}
               >
@@ -156,14 +164,14 @@ const ContestCard: React.FC<ContestCardProps> = ({
             </div>
           )}
           {!contest.ratingActivated && (
-            <div className="absolute top-2 left-2 z-10">
+            <div className="absolute top-2 left-2 z-10 transition-opacity duration-300 group-hover:opacity-80">
               <span className="flex items-center gap-0.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 <Zap className="w-2.5 h-2.5" />
                 2x
               </span>
             </div>
           )}
-          <div className="absolute bottom-2 right-2 z-10 flex rounded bg-neutral-800/80 backdrop-blur-md">
+          <div className="absolute bottom-2 right-2 z-10 flex rounded bg-neutral-800/80 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-80">
             {contestElo > 0 && (
               <div className="flex rounded px-1.5 backdrop-blur-sm py-1">
                 <span className={`text-xs font-bold ${tier.textClass}`}>
@@ -193,9 +201,16 @@ const ContestCard: React.FC<ContestCardProps> = ({
               </div>
             )}
             <div className="flex-1 min-w-0 flex flex-col">
-              <h2 className="text-base font-bold text-white truncate mb-1">
-                {contest.title}
-              </h2>
+              <div className="group/title relative">
+                <h2 className="text-base font-bold text-white truncate mb-1">
+                  {contest.title}
+                </h2>
+                <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 z-50 opacity-0 group-hover/title:opacity-100 transition-opacity duration-150 delay-0 group-hover/title:delay-[1000ms]">
+                  <div className="bg-zinc-900 border border-zinc-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-xl whitespace-normal max-w-[220px] leading-snug">
+                    {contest.title}
+                  </div>
+                </div>
+              </div>
               {contest.creatorUsername && (
                 <span
                   className="text-xs text-neutral-400 hover:underline block truncate mb-1 cursor-pointer"

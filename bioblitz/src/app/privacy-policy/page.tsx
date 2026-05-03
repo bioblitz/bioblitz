@@ -65,13 +65,11 @@ export default function PrivacyPolicyPage() {
             <div className="bg-zinc-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
               <h3 className="text-white font-bold mb-2">Children's Privacy</h3>
               <p>
-                Protecting younger users is important to us. Our services are
-                not intended for children under 13, and we do not knowingly
-                collect personal information from children in this age group. If
-                we discover that we have received personal information from a
-                child under 13, we will promptly remove it from our records in
-                accordance with the Children's Online Privacy Protection Act
-                (COPPA).
+                BioBlitz is not intended for users under 13. Please don't make an account if you're under 13 🙃. If we
+                discover that we have received personal information from a child
+                under 13, we will promptly remove it from our records in
+                accordance with the Children&apos;s Online Privacy Protection
+                Act (COPPA).
               </p>
             </div>
           </section>
