@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import admin, { adminFirestore } from "@/lib/firebase-admin";
 import { requireStaffOrAdmin } from "@/lib/adminAccess";
 
+export const dynamic = 'force-dynamic';
+
 function buildOptionFields(options: { key: string; text: string }[]) {
   const map: Record<string, string> = {};
   options.forEach((opt) => {

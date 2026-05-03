@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 type StatsPayload = {
   users: {
     totalUsers: number;

@@ -3,6 +3,8 @@ import admin, { adminFirestore } from '@/lib/firebase-admin';
 import { getCurrentUser } from '@/lib/auth';
 import type { UserProfile } from '@/lib/user';
 
+export const dynamic = 'force-dynamic';
+
 function buildFallbackProfile(decodedIdToken: Awaited<ReturnType<typeof getCurrentUser>>): UserProfile {
   if (!decodedIdToken) {
     throw new Error('Cannot build profile without a decoded token');

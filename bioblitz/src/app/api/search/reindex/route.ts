@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import admin, { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 
+export const dynamic = 'force-dynamic';
+
 function normalize(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }

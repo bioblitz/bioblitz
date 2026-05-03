@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase-admin";
 
+export const dynamic = 'force-dynamic';
+
 const TYPE_PRIORITY: Record<string, number> = {
   user: 4,
   channel: 3,

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 
+export const dynamic = 'force-dynamic';
+
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw

@@ -5,6 +5,8 @@ import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-p
 import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
 import nodemailer from "nodemailer";
 
+export const dynamic = 'force-dynamic';
+
 const TEST_MODE = true;
 const ALLOWED_TEST_UIDS = [
   "jCiJOnMGpMZEggNJTN9RR5QhmLN2", // dipishasubedi@gmail.com

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import admin, { adminFirestore } from "@/lib/firebase-admin";
 import { requireStaffOrAdmin } from "@/lib/adminAccess";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     await requireStaffOrAdmin(request);

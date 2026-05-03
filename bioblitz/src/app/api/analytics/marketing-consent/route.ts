@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import admin, { adminFirestore } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 type MarketingEvent = "shown" | "accepted" | "declined";
 
 function toEvent(value: unknown): MarketingEvent | null {

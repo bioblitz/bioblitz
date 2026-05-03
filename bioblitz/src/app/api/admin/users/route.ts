@@ -4,6 +4,8 @@ import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { applyTextPolicy } from "@/lib/textPolicy";
 import { getAdminStats } from "@/lib/admin-cache";
 
+export const dynamic = 'force-dynamic';
+
 function toDate(value: any): Date | null {
   if (!value) return null;
   if (typeof value?.toDate === "function") return value.toDate();

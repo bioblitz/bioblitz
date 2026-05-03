@@ -3,6 +3,8 @@ import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { DecodedIdToken } from "firebase-admin/auth";
 
+export const dynamic = 'force-dynamic';
+
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw

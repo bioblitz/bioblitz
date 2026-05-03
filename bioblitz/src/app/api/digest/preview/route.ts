@@ -3,6 +3,8 @@ import { adminFirestore } from "@/lib/firebase-admin";
 import { gatherNewsletterData } from "@/lib/newsletter/weekly-newsletter-data";
 import { generateNewsletterPageHtml } from "@/lib/newsletter/weekly-newsletter-page";
 import { generateNewsletterNotificationEmail } from "@/lib/newsletter/weekly-newsletter-email";
+
+export const dynamic = 'force-dynamic';
 // all you need to go to view your newsletter (or anyone's really) is their uid and the issue number, only admin can do this though so it's not a security risk
 
 // GET /api/weekly-newsletter/preview?uid=xxx&issue=14&blitzOfWeek=abc&studyTipTitle=...&studyTipBody=...&mode=email|page

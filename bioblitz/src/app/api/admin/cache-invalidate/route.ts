@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/admin/cache-invalidate
  * 

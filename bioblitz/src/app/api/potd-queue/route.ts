@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import admin, { adminFirestore } from "@/lib/firebase-admin";
 import { requireStaffOrAdmin } from "@/lib/adminAccess";
 
+export const dynamic = 'force-dynamic';
+
 function toArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => String(item).toLowerCase()).filter(Boolean);
