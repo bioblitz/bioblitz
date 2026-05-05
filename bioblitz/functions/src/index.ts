@@ -380,7 +380,7 @@ export const gradeTest = onDocumentCreated(
       const gameData = gameDoc.data();
 
       let totalQuestions = 0;
-      const correctAnswersMap: { [key: number]: string } = {};
+      const correctAnswersMap: { [key: number]: string | string[] } = {};
 
       if (
         gameData?.questions &&
@@ -404,12 +404,24 @@ export const gradeTest = onDocumentCreated(
         return snap.ref.update({ score: 0, status: "error_no_questions" });
       }
 
+      const checkAnswer = (userAnswer: any, correct: string | string[]): boolean => {
+        if (Array.isArray(correct)) {
+          const userArr: string[] = Array.isArray(userAnswer)
+            ? [...userAnswer].sort()
+            : userAnswer ? [userAnswer] : [];
+          const correctArr = [...correct].sort();
+          return (
+            userArr.length === correctArr.length &&
+            userArr.every((a, i) => a === correctArr[i])
+          );
+        }
+        return !!(userAnswer && userAnswer === correct);
+      };
+
       let correctCount = 0;
       const questionResults: boolean[] = [];
       for (let i = 0; i < totalQuestions; i++) {
-        const isCorrect = !!(
-          userAnswers[i] && userAnswers[i] === correctAnswersMap[i]
-        );
+        const isCorrect = checkAnswer(userAnswers[i], correctAnswersMap[i]);
         questionResults.push(isCorrect);
         if (isCorrect) correctCount++;
       }
@@ -621,7 +633,7 @@ export const getPublicQuestions = onCall(async (request) => {
 
     const publicQuestions = questionsSnap.docs.map((doc) => {
       const { correct, ...publicData } = doc.data();
-      return publicData;
+      return { ...publicData, multipleCorrect: Array.isArray(correct) };
     });
 
     return { questions: publicQuestions };

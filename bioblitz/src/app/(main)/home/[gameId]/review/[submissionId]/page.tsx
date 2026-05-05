@@ -20,8 +20,8 @@ interface SubmissionData {
   correctCount: number;
   totalQuestions: number;
   timeTaken: number;
-  userAnswers: { [key: string]: string };
-  correctAnswers: { [key: string]: string };
+  userAnswers: { [key: string]: string | string[] };
+  correctAnswers: { [key: string]: string | string[] };
   gameId: string;
   ratingDelta?: number;
   newElo?: number;
@@ -35,6 +35,7 @@ interface Question {
   d?: string;
   e?: string;
   imgURL?: string;
+  multipleCorrect?: boolean;
 }
 
 export default function ReviewPage() {
@@ -135,8 +136,11 @@ export default function ReviewPage() {
                 {questions.map((_, idx) => {
                   const userAnswer = submission.userAnswers[idx];
                   const correctAnswer = submission.correctAnswers?.[idx];
-                  const isUnanswered = !userAnswer;
-                  const isCorrect = !isUnanswered && userAnswer === correctAnswer;
+                  const correctArr = Array.isArray(correctAnswer) ? correctAnswer : correctAnswer ? [correctAnswer] : [];
+                  const userArr = Array.isArray(userAnswer) ? userAnswer : userAnswer ? [userAnswer as string] : [];
+                  const isUnanswered = userArr.length === 0;
+                  const isCorrect = !isUnanswered && userArr.length === correctArr.length &&
+                    [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
                   const circleClass = isUnanswered
                     ? "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-zinc-700"
                     : isCorrect
@@ -217,8 +221,11 @@ export default function ReviewPage() {
             {questions.map((_, idx) => {
               const userAnswer = submission.userAnswers[idx];
               const correctAnswer = submission.correctAnswers?.[idx];
-              const isUnanswered = !userAnswer;
-              const isCorrect = !isUnanswered && userAnswer === correctAnswer;
+              const correctArr = Array.isArray(correctAnswer) ? correctAnswer : correctAnswer ? [correctAnswer] : [];
+              const userArr = Array.isArray(userAnswer) ? userAnswer : userAnswer ? [userAnswer as string] : [];
+              const isUnanswered = userArr.length === 0;
+              const isCorrect = !isUnanswered && userArr.length === correctArr.length &&
+                [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
               const circleClass = isUnanswered
                 ? "bg-zinc-800 border-zinc-700 text-zinc-500"
                 : isCorrect
@@ -245,8 +252,11 @@ export default function ReviewPage() {
 
               const userAnswer = submission.userAnswers[idx];
               const correctAnswer = submission.correctAnswers?.[idx] ?? "";
-              const isUnanswered = !userAnswer;
-              const isCorrect = !isUnanswered && userAnswer === correctAnswer;
+              const correctArr = Array.isArray(correctAnswer) ? correctAnswer : correctAnswer ? [correctAnswer] : [];
+              const userArr = Array.isArray(userAnswer) ? userAnswer : userAnswer ? [userAnswer as string] : [];
+              const isUnanswered = userArr.length === 0;
+              const isCorrect = !isUnanswered && userArr.length === correctArr.length &&
+                [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
 
               const statusLabel = isUnanswered ? "Unanswered" : isCorrect ? "Correct" : "Incorrect";
               const statusDotClass = isUnanswered ? "bg-zinc-600" : isCorrect ? "bg-emerald-500" : "bg-red-500";
@@ -270,8 +280,8 @@ export default function ReviewPage() {
                         gameId={gameId as string}
                         questionIndex={idx}
                         gameTitle={gameTitle}
-                        correctAnswer={correctAnswer}
-                        userAnswer={userAnswer}
+                        correctAnswer={Array.isArray(correctAnswer) ? correctAnswer.join(",") : (correctAnswer as string)}
+                        userAnswer={Array.isArray(userAnswer) ? userAnswer.join(",") : (userAnswer as string | undefined)}
                       />
                       <ReportButton
                         gameId={gameId as string}
@@ -301,8 +311,8 @@ export default function ReviewPage() {
                   {/* Choices */}
                   <div className="flex flex-col space-y-2.5">
                     {choices.map(({ key, text }) => {
-                      const isUserAnswer = userAnswer === key;
-                      const isChoiceCorrect = correctAnswer === key;
+                      const isUserAnswer = userArr.includes(key);
+                      const isChoiceCorrect = correctArr.includes(key);
 
                       const choiceClass = isChoiceCorrect
                         ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-300"

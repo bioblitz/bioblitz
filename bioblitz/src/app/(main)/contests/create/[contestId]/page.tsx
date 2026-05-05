@@ -41,7 +41,8 @@ const initialQuestion = (): EditableQuestion => ({
     { id: "1", text: "" },
     { id: "2", text: "" },
   ],
-  correctAnswerId: "",
+  correctAnswerIds: [],
+  isMultiSelect: false,
   solution: "",
 });
 
@@ -188,16 +189,25 @@ export default function EditContestPage() {
                     id: String(idx + 1),
                     text: q[k] as string,
                   }));
-                const correctIndex = choiceKeys.indexOf(
-                  q.correct as (typeof choiceKeys)[number],
-                );
+                // correct can be a single letter ("a") or an array (["a","c"])
+                const correctLetters: string[] = Array.isArray(q.correct)
+                  ? q.correct
+                  : q.correct
+                  ? [q.correct]
+                  : [];
+                const correctAnswerIds = correctLetters
+                  .map((letter) => {
+                    const idx = choiceKeys.indexOf(letter as (typeof choiceKeys)[number]);
+                    return idx >= 0 ? String(idx + 1) : "";
+                  })
+                  .filter(Boolean);
                 return {
                   id: q.id || Date.now().toString(),
                   content: q.content || "",
                   imageUrl: q.imgURL || "",
                   choices,
-                  correctAnswerId:
-                    correctIndex >= 0 ? String(correctIndex + 1) : "",
+                  correctAnswerIds,
+                  isMultiSelect: Array.isArray(q.correct) && q.correct.length > 1,
                   solution: q.solution || "",
                 } as EditableQuestion;
               });
@@ -272,17 +282,23 @@ export default function EditContestPage() {
   const convertToQuestions = (editableQuestions: EditableQuestion[]) => {
     const choiceKeys = ["a", "b", "c", "d", "e"] as const;
     return editableQuestions.map((eq) => {
-      const correctIndex = eq.choices.findIndex(
-        (c) => c.id === eq.correctAnswerId,
-      );
-      const correctLetter = correctIndex >= 0 ? choiceKeys[correctIndex] : "";
-      const q: Record<string, string> = {
+      const correctLetters = (eq.correctAnswerIds ?? [])
+        .map((id) => {
+          const idx = eq.choices.findIndex((c) => c.id === id);
+          return idx >= 0 ? choiceKeys[idx] : "";
+        })
+        .filter(Boolean);
+
+      const q: Record<string, any> = {
         id: eq.id,
         content: cleanHtml(eq.content),
-        correct: correctLetter,
+        // Store as array for multi-select, single string for single-select
+        correct: eq.isMultiSelect ? correctLetters : (correctLetters[0] ?? ""),
+        multipleCorrect: eq.isMultiSelect ? true : undefined,
         imgURL: eq.imageUrl || "",
         solution: eq.solution || "",
       };
+      if (!eq.isMultiSelect) delete q.multipleCorrect;
       eq.choices.forEach((choice, idx) => {
         if (idx < choiceKeys.length) q[choiceKeys[idx]] = choice.text;
       });
@@ -570,8 +586,8 @@ export default function EditContestPage() {
           isValid = false;
         }
       });
-      if (!q.correctAnswerId) {
-        questionErrors.push("A correct answer must be selected.");
+      if (!q.correctAnswerIds || q.correctAnswerIds.length === 0) {
+        questionErrors.push("At least one correct answer must be selected.");
         isValid = false;
       }
       if (questionErrors.length > 0) {

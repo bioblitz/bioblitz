@@ -174,7 +174,10 @@ export async function createContest(
     }
 
     revalidatePath("/contests");
-    return { message: `Blitz saved with ID: ${savedId}` };
+    // "Blitz saved with ID:" prefix is checked by the editor to set isPublished=true.
+    // Draft saves use a different prefix so the editor doesn't treat them as published.
+    const messagePrefix = status === "completed" ? "Blitz saved with ID:" : "Blitz draft saved with ID:";
+    return { message: `${messagePrefix} ${savedId}` };
   } catch (e) {
     console.error("Error saving document: ", e);
     return { message: "Failed to save Blitz" };

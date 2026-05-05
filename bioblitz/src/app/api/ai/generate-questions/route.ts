@@ -31,14 +31,16 @@ Return ONLY a valid JSON array — no explanation, no markdown, no code fences �
   {
     "content": "Question text here",
     "choices": ["First choice", "Second choice", "Third choice", "Fourth choice"],
-    "correctIndex": 0,
-    "solution": "Brief explanation of why the answer is correct"
+    "correctIndices": [0],
+    "solution": "Brief explanation of why the correct answer(s) are right"
   }
 ]
 
 Rules:
 - Each question must have between 2 and 5 choices
-- correctIndex is 0-based (0 = first choice is correct)
+- correctIndices is an array of 0-based indices of ALL correct answers
+- Most questions should have exactly one correct answer (correctIndices with one element)
+- Use multiple correct answers (2+) only when the question genuinely requires selecting all that apply — do not overuse this
 - Questions must be specific and directly supported by the document
 - Include a concise solution/explanation for each question
 - Do not include ambiguous questions`;
@@ -74,7 +76,7 @@ Rules:
 
     const jsonText = rawText.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
 
-    let parsed: { content: string; choices: string[]; correctIndex: number; solution?: string }[];
+    let parsed: { content: string; choices: string[]; correctIndices: number[]; solution?: string }[];
     try {
       parsed = JSON.parse(jsonText);
     } catch {
@@ -90,13 +92,18 @@ Rules:
         id: String(i + 1),
         text: String(text),
       }));
-      const correctChoice = choices[q.correctIndex ?? 0];
+      const indices: number[] = Array.isArray(q.correctIndices) ? q.correctIndices : [0];
+      const correctAnswerIds = indices
+        .map((i) => choices[i]?.id)
+        .filter((id): id is string => !!id);
+      const isMultiSelect = correctAnswerIds.length > 1;
       return {
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         content: String(q.content),
         imageUrl: "",
         choices,
-        correctAnswerId: correctChoice?.id ?? choices[0]?.id ?? "",
+        correctAnswerIds: correctAnswerIds.length > 0 ? correctAnswerIds : [choices[0]?.id ?? ""].filter(Boolean),
+        isMultiSelect,
         solution: q.solution ? String(q.solution) : "",
       };
     });
