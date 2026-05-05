@@ -19,7 +19,8 @@ export function markMarketingPopupForNextSignIn() {
 export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMarketingPopup) {
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
-        const shownLoggedRef = useRef(false);
+    const shownLoggedRef = useRef(false);
+    const decidedRef = useRef(false);
 
         const trackAnalytics = async (
             event: "shown" | "accepted" | "declined",
@@ -39,6 +40,7 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
     useEffect(() => {
         if(!user?.uid) return;
         async function check(){
+            if (decidedRef.current) return;
             const ref = doc(db, "users", user?.uid)
             const snap = await getDoc(ref);
             const data = snap.data();
@@ -86,14 +88,16 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
 
     const handleAccept = async () => {
         if (!user?.uid) return;
-                await updateMarketingPreference(user.uid, true, "popup");
+        decidedRef.current = true;
         setShowModal(false);
+        await updateMarketingPreference(user.uid, true, "popup");
     }
 
     const handleDecline = async () => {
         if (!user?.uid) return;
-                await updateMarketingPreference(user.uid, false, "popup");
+        decidedRef.current = true;
         setShowModal(false);
+        await updateMarketingPreference(user.uid, false, "popup");
     }
     return { showModal, handleAccept, handleDecline};
 }
