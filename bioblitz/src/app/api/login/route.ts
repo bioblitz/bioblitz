@@ -12,12 +12,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000;
-    const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn });
+    const expiresInMs = 60 * 60 * 24 * 14 * 1000; // 14 days in ms (Firebase maximum)
+    const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn: expiresInMs });
 
     const response = NextResponse.json({ success: true }, { status: 200 });
     response.cookies.set('session', sessionCookie, {
-      maxAge: expiresIn,
+      maxAge: 60 * 60 * 24 * 14, // 14 days in seconds (cookie spec)
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
