@@ -23,29 +23,49 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "BioBlitz | Competitive Biology Platform",
+  title: {
+    default: "BioBlitz – Biology Quiz Game & Competition Platform",
+    template: "%s | BioBlitz",
+  },
   description:
-    "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+    "BioBlitz is a free competitive biology quiz game for USABO, AP Biology, and MCAT prep. Race against the clock, earn an Elo rating, and climb the global leaderboard.",
+  keywords: [
+    "biology quiz game",
+    "bioblitz game",
+    "USABO practice",
+    "competitive biology",
+    "AP biology practice",
+    "biology olympiad",
+    "biology competition",
+    "MCAT biology",
+    "biology flashcards",
+    "biology elo rating",
+  ],
   icons: {
     icon: "/icons/favicon.ico",
     shortcut: "/icons/favicon.ico",
   },
   openGraph: {
-    title: "BioBlitz | Competitive Biology Platform",
+    title: "BioBlitz – Biology Quiz Game & Competition Platform",
     description:
-      "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+      "Free competitive biology quiz game. Practice USABO, AP Bio, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
     url: SITE_URL,
+    siteName: "BioBlitz",
+    type: "website",
     images: [
       {
         url: `${SITE_URL}/images/BIOBLITZ.png`,
+        width: 1200,
+        height: 630,
+        alt: "BioBlitz – Biology Quiz Game",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BioBlitz | Competitive Biology Platform",
+    title: "BioBlitz – Biology Quiz Game & Competition Platform",
     description:
-      "BioBlitz is a competitive biology platform for training, tracking, and improving performance in biology competitions.",
+      "Free competitive biology quiz game. Practice USABO, AP Bio, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
     images: [`${SITE_URL}/images/BIOBLITZ.png`],
   },
 };

@@ -3,9 +3,9 @@ import React from "react";
 import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "About | BioBlitz",
+  title: "About BioBlitz – Biology Quiz Game for USABO & AP Bio",
   description:
-    "Learn about BioBlitz, the competitive biology platform for training, tracking, and improving performance in biology competitions.",
+    "BioBlitz is a free competitive biology quiz game built for USABO, AP Biology, and MCAT students. Earn an Elo rating, solve daily problems, and compete on a global leaderboard.",
   alternates: {
     canonical: `${SITE_URL}/about`,
   },
