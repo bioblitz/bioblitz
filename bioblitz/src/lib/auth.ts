@@ -25,7 +25,7 @@ export async function getCurrentUser() {
   try {
     const decodedIdToken = await getAuth(app).verifySessionCookie(
       session,
-      true
+      false
     );
     return decodedIdToken;
   } catch (error) {

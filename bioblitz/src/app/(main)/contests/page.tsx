@@ -7,8 +7,9 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Blitzes | BioBlitz",
-  description: "Browse and take biology contests on BioBlitz.",
+  title: "Biology Blitzes – Practice & Compete",
+  description:
+    "Browse hundreds of timed biology quiz sets covering USABO, AP Biology, Cell Biology, Genetics, Ecology, and more. Earn Elo and climb the leaderboard.",
   alternates: {
     canonical: `${SITE_URL}/contests`,
   },

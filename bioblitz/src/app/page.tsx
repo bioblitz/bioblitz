@@ -7,9 +7,112 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
+  title: "BioBlitz – Biology Quiz Game & Competition Platform",
+  description:
+    "BioBlitz is a free competitive biology quiz game. Practice USABO, AP Biology, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
   alternates: {
     canonical: SITE_URL,
   },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "BioBlitz",
+      description:
+        "Free competitive biology quiz game for USABO, AP Biology, and MCAT prep.",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/contests?search={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "WebApplication",
+      "@id": `${SITE_URL}/#app`,
+      name: "BioBlitz",
+      url: SITE_URL,
+      applicationCategory: "GameApplication",
+      operatingSystem: "Web",
+      description:
+        "Competitive biology quiz game with Elo ratings, timed blitzes, and a global leaderboard. Designed for USABO, AP Biology, and MCAT students.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: "BioBlitz",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/images/BIOBLITZ.png`,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "What is the difference between a Ranked and Practice Blitz?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Your first attempt will count towards your rating, while subsequent attempts are just for practice.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How do I build my streak?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Streaks are exclusively tied to the Problem of the Day (POTD). Completing standard Blitzes contributes to your Elo, but to keep your streak alive, you must solve the official daily problem every 24 hours. Miss a day, and the streak resets.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How is my Elo rating calculated?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Your rating updates after every full Blitz submission based on your performance relative to the set's difficulty.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Can you create your own blitzes?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. Anyone with an account can create ranked blitzes for others to play. Official content is created by writers who are USABO Top 25 and above.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is the content aligned with USABO and Campbell Biology?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. Many blitzes are aligned with the official USABO content areas. There are also blitzes covering AP Biology, MCAT, and other biology-related exams.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is BioBlitz useful for AP Biology or the MCAT?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Absolutely. While BioBlitz is optimized for USABO, it is equally useful for AP Biology, the MCAT, and USMLE preparation.",
+          },
+        },
+      ],
+    },
+  ],
 };
 
 export default async function mainPage({
@@ -22,6 +125,10 @@ export default async function mainPage({
 
   return (
     <div className="min-h-screen flex flex-col font-inter bg-neutral-900 text-slate-200 selection:text-white overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="relative z-10 flex-grow flex flex-col w-full">
         <MountainHero />
 

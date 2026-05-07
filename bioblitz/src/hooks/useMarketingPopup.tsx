@@ -21,7 +21,8 @@ export function markMarketingPopupForNextSignIn() {
 export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMarketingPopup) {
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
-        const shownLoggedRef = useRef(false);
+    const shownLoggedRef = useRef(false);
+    const decidedRef = useRef(false);
 
         const readLocalState = () => {
             if (typeof window === "undefined") return null;
@@ -136,6 +137,7 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                 await updateMarketingPreference(user.uid, true, "popup");
         writeLocalState(true);
         setShowModal(false);
+        await updateMarketingPreference(user.uid, true, "popup");
     }
 
     const handleDecline = async () => {
@@ -143,6 +145,7 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                 await updateMarketingPreference(user.uid, false, "popup");
         writeLocalState(false);
         setShowModal(false);
+        await updateMarketingPreference(user.uid, false, "popup");
     }
     return { showModal, handleAccept, handleDecline};
 }

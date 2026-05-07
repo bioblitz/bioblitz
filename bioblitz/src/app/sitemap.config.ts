@@ -42,7 +42,8 @@ export async function getContestIds(): Promise<
 > {
   const snapshot = await adminFirestore
     .collection("sets")
-    .where("hidden", "!=", "true")
+    .where("status", "==", "completed")
+    .where("hidden", "==", false)
     .get();
 
   return snapshot.docs.map((doc) => {
