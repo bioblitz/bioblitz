@@ -6,7 +6,9 @@ import { updateMarketingPreference } from "@/lib/user";
 
 const NEXT_SIGN_IN_POPUP_KEY = "showMarketingPopupOnNextSignIn";
 const MARKETING_POPUP_LOCAL_STATE_KEY = "marketingPopupLocalState";
+const MARKETING_POPUP_RESPONSE_TIME_KEY = "marketingPopupResponseTime";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const RESPONSE_COOLDOWN_MS = 5 * 60 * 1000;
 
 interface useMarketingPopup {
     user: UserProfile | null;
@@ -22,7 +24,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
     const shownLoggedRef = useRef(false);
-    const decidedRef = useRef(false);
 
         const readLocalState = () => {
             if (typeof window === "undefined") return null;
@@ -45,7 +46,20 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                     MARKETING_POPUP_LOCAL_STATE_KEY,
                     JSON.stringify({ consent, askedAt: Date.now() })
                 );
+                window.localStorage.setItem(MARKETING_POPUP_RESPONSE_TIME_KEY, Date.now().toString());
             } catch {
+            }
+        };
+
+        const hasRecentlyResponded = () => {
+            if (typeof window === "undefined") return false;
+            try {
+                const responseTime = window.localStorage.getItem(MARKETING_POPUP_RESPONSE_TIME_KEY);
+                if (!responseTime) return false;
+                const lastResponseTime = parseInt(responseTime, 10);
+                return Date.now() - lastResponseTime < RESPONSE_COOLDOWN_MS;
+            } catch {
+                return false;
             }
         };
 
@@ -65,6 +79,11 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
     
     useEffect(() => {
         if(!user?.uid) return;
+        
+        if (hasRecentlyResponded()) {
+            return;
+        }
+        
         const uid = user.uid;
         async function check(){
             const ref = doc(db, "users", uid)
@@ -84,10 +103,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                 return;
             }
 
-            if (decidedRef.current) {
-                return;
-            }
-
             const askedAtMs = data?.marketingConsentAskedAt?.toDate?.()?.getTime?.() || null;
             const localState = readLocalState();
             const effectiveConsent =
@@ -102,6 +117,13 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                     window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
                 }
                 return;
+            }
+
+            if (effectiveConsent === false && effectiveAskedAt !== null) {
+                const daysSinceDeclining = (Date.now() - effectiveAskedAt) / (1000 * 60 * 60 * 24);
+                if (daysSinceDeclining < 30) {
+                    return;
+                }
             }
 
             const shouldShowFirstAsk = effectiveAskedAt === null;
@@ -136,7 +158,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
 
     const handleAccept = async () => {
         if (!user?.uid) return;
-        decidedRef.current = true;
         writeLocalState(true);
         await updateMarketingPreference(user.uid, true, "popup");
         await trackAnalytics("accepted");
@@ -145,7 +166,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
 
     const handleDecline = async () => {
         if (!user?.uid) return;
-        decidedRef.current = true;
         writeLocalState(false);
         await updateMarketingPreference(user.uid, false, "popup");
         await trackAnalytics("declined");
@@ -153,4 +173,5 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
     }
     return { showModal, handleAccept, handleDecline};
 }
+
 
