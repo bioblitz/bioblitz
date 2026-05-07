@@ -217,6 +217,8 @@ export default function PotdGameClient({
             {
               attempts: increment(1),
               correctCount: correct ? increment(1) : increment(0),
+              answeredUserIds: arrayUnion(user.uid),
+              ...(correct ? { correctUserIds: arrayUnion(user.uid) } : {}),
               lastPlayedAt: serverTimestamp(),
             },
             { merge: true },
