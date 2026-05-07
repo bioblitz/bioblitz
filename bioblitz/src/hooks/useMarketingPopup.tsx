@@ -46,7 +46,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                     JSON.stringify({ consent, askedAt: Date.now() })
                 );
             } catch {
-                // best-effort local fallback only
             }
         };
 
@@ -61,7 +60,6 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                     body: JSON.stringify({ event, source: "popup", reason }),
                 });
             } catch {
-                // best-effort analytics only
             }
         };
     
@@ -83,6 +81,10 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                                 if (typeof window !== "undefined") {
                                     window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
                                 }
+                return;
+            }
+
+            if (decidedRef.current) {
                 return;
             }
 
@@ -134,18 +136,20 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
 
     const handleAccept = async () => {
         if (!user?.uid) return;
-                await updateMarketingPreference(user.uid, true, "popup");
+        decidedRef.current = true;
         writeLocalState(true);
-        setShowModal(false);
         await updateMarketingPreference(user.uid, true, "popup");
+        await trackAnalytics("accepted");
+        setShowModal(false);
     }
 
     const handleDecline = async () => {
         if (!user?.uid) return;
-                await updateMarketingPreference(user.uid, false, "popup");
+        decidedRef.current = true;
         writeLocalState(false);
-        setShowModal(false);
         await updateMarketingPreference(user.uid, false, "popup");
+        await trackAnalytics("declined");
+        setShowModal(false);
     }
     return { showModal, handleAccept, handleDecline};
 }
