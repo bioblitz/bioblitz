@@ -109,6 +109,43 @@ export async function POST(request: Request, { params }: { params: Promise<{ con
 
     const questionsArr: any[] = body.questions || [];
 
+    // Preserve original creator fields when editing an existing contest
+    // without an explicit postAsUsername — editing must never re-assign ownership.
+    let finalCreatorUid = uid;
+    let finalCreatorPfp: string | undefined;
+    let finalCreatorUsername: string | undefined;
+
+    const docRef = adminFirestore.collection('sets').doc(contestId);
+
+    if (!postAsUsername) {
+      try {
+        const existingSnap = await docRef.get();
+        if (existingSnap.exists) {
+          const existing = existingSnap.data() as any;
+          if (existing.creator) {
+            finalCreatorUid = existing.creator;
+            finalCreatorPfp = existing.creatorPfp;
+            finalCreatorUsername = existing.creatorUsername;
+          }
+        }
+      } catch (e) {
+        // non-fatal: fall back to current user
+      }
+    }
+
+    if (finalCreatorPfp === undefined || finalCreatorUsername === undefined) {
+      try {
+        const userDoc = await adminFirestore.collection('users').doc(finalCreatorUid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data() as any;
+          if (finalCreatorPfp === undefined && data.photoURL) finalCreatorPfp = data.photoURL;
+          if (finalCreatorUsername === undefined && data.username) finalCreatorUsername = data.username;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
     const contestData: any = {
       title: body.title || '',
       description: body.description || '',
@@ -118,26 +155,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ con
       status: body.status || 'incomplete',
       incomplete: body.incomplete === true,
       bannerUrl: body.bannerUrl || '',
-      creator: uid,
+      creator: finalCreatorUid,
+      ...(finalCreatorPfp !== undefined && { creatorPfp: finalCreatorPfp }),
+      ...(finalCreatorUsername !== undefined && { creatorUsername: finalCreatorUsername }),
     };
 
     contestData.tags = Array.isArray(body.tags) ? body.tags.slice() : [];
     if (contestData.incomplete && !contestData.tags.includes('incomplete')) {
       contestData.tags.push('incomplete');
     }
-
-    try {
-      const userDoc = await adminFirestore.collection('users').doc(uid).get();
-      if (userDoc.exists) {
-        const data = userDoc.data() as any;
-        if (data.photoURL) contestData.creatorPfp = data.photoURL;
-        if (data.username) contestData.creatorUsername = data.username;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    const docRef = adminFirestore.collection('sets').doc(contestId);
     await docRef.set(contestData, { merge: true });
 
     if (questionsArr.length > 0) {

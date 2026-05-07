@@ -1,12 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // This allows the build to finish even with those "any" and "unescaped entity" errors
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // This ignores the type errors (like the "defined but never used" variables)
     ignoreBuildErrors: true,
+  },
+  async redirects() {
+    return [
+      // Redirect bare domain → www so Google only indexes one canonical version
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "bioblitz.net" }],
+        destination: "https://www.bioblitz.net/:path*",
+        permanent: true,
+      },
+    ];
   },
 };
 

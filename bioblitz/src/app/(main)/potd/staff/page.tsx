@@ -18,6 +18,7 @@ import {
   Loader2,
   ImageIcon,
   Trash2,
+  GripVertical,
 } from "lucide-react";
 
 const topics = [
@@ -35,6 +36,8 @@ const topics = [
 type QueueActivity = {
   attempts: number;
   correctCount: number;
+  answeredUserIds?: string[];
+  correctUserIds?: string[];
   lastPlayedAt: string | null;
 };
 
@@ -113,6 +116,7 @@ function formatDate(dateStr?: string | null) {
 function statusColor(status: string) {
   if (status === "published") return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
   if (status === "scheduled") return "bg-blue-500/15 text-blue-300 border-blue-500/30";
+  if (status === "archived") return "bg-amber-500/10 text-amber-300 border-amber-500/30";
   return "bg-zinc-800 text-zinc-400 border-zinc-700";
 }
 
@@ -187,6 +191,7 @@ function PotdFormFields({
               <option value="queued">Queued</option>
               <option value="scheduled">Scheduled</option>
               <option value="published">Published</option>
+              <option value="archived">Archived</option>
             </select>
           </div>
         </div>
@@ -267,6 +272,8 @@ export default function PotdStaffPage() {
   const [loadingQueue, setLoadingQueue] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"scheduled" | "archived">("scheduled");
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
   // Create form
@@ -332,6 +339,18 @@ export default function PotdStaffPage() {
     () => [...queue].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)),
     [queue]
   );
+
+  const scheduledQueue = useMemo(
+    () => queueOrdered.filter((item) => item.status !== "archived"),
+    [queueOrdered]
+  );
+
+  const archivedQueue = useMemo(
+    () => queueOrdered.filter((item) => item.status === "archived"),
+    [queueOrdered]
+  );
+
+  const visibleQueue = activeTab === "scheduled" ? scheduledQueue : archivedQueue;
 
   // ── Create ──────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
@@ -424,14 +443,39 @@ export default function PotdStaffPage() {
   };
 
   const moveItem = (id: string, direction: "up" | "down") => {
-    const current = [...queueOrdered];
+    const current = [...visibleQueue];
     const index = current.findIndex((item) => item.id === id);
     if (index < 0) return;
     const target = direction === "up" ? index - 1 : index + 1;
     if (target < 0 || target >= current.length) return;
-    const next = [...current];
-    [next[index], next[target]] = [next[target], next[index]];
-    handleReorder(next);
+    const reorderedVisible = [...current];
+    [reorderedVisible[index], reorderedVisible[target]] = [reorderedVisible[target], reorderedVisible[index]];
+
+    const hidden = activeTab === "scheduled" ? archivedQueue : scheduledQueue;
+    handleReorder([...reorderedVisible, ...hidden]);
+  };
+
+  const handleDropOnItem = (targetId: string) => {
+    if (!draggedItemId || draggedItemId === targetId) {
+      setDraggedItemId(null);
+      return;
+    }
+
+    const current = [...visibleQueue];
+    const from = current.findIndex((item) => item.id === draggedItemId);
+    const to = current.findIndex((item) => item.id === targetId);
+    if (from < 0 || to < 0) {
+      setDraggedItemId(null);
+      return;
+    }
+
+    const reorderedVisible = [...current];
+    const [moved] = reorderedVisible.splice(from, 1);
+    reorderedVisible.splice(to, 0, moved);
+
+    const hidden = activeTab === "scheduled" ? archivedQueue : scheduledQueue;
+    handleReorder([...reorderedVisible, ...hidden]);
+    setDraggedItemId(null);
   };
 
   // ── Delete ───────────────────────────────────────────────────────────────────
@@ -482,7 +526,7 @@ export default function PotdStaffPage() {
           <div>
             <h1 className="text-2xl font-bold text-white">POTD Queue</h1>
             <p className="text-sm text-zinc-500 mt-0.5">
-              {queueOrdered.length} problem{queueOrdered.length !== 1 ? "s" : ""} queued
+              {scheduledQueue.length} scheduled • {archivedQueue.length} archived
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -560,14 +604,50 @@ export default function PotdStaffPage() {
             No problems in queue yet.
           </div>
         ) : (
-          <div className="grid gap-3">
-            {queueOrdered.map((item, index) => (
+          <>
+            <div className="mb-4 inline-flex rounded-xl border border-zinc-800 bg-zinc-900/60 p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("scheduled")}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${
+                  activeTab === "scheduled"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Scheduled ({scheduledQueue.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("archived")}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${
+                  activeTab === "archived"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Archived ({archivedQueue.length})
+              </button>
+            </div>
+
+            <div className="grid gap-3">
+            {visibleQueue.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center text-zinc-600">
+                No {activeTab} POTDs.
+              </div>
+            ) : visibleQueue.map((item, index) => (
               <div
                 key={item.id}
+                draggable
+                onDragStart={() => setDraggedItemId(item.id)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDropOnItem(item.id)}
+                onDragEnd={() => setDraggedItemId(null)}
                 className="group rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 flex gap-4 hover:border-zinc-700 transition-colors"
               >
                 {/* Position + reorder */}
                 <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                  <GripVertical className="w-4 h-4 text-zinc-700 mb-1 cursor-grab" />
                   <button
                     onClick={() => moveItem(item.id, "up")}
                     disabled={index === 0}
@@ -578,7 +658,7 @@ export default function PotdStaffPage() {
                   <span className="text-sm font-bold text-zinc-600 tabular-nums">{index + 1}</span>
                   <button
                     onClick={() => moveItem(item.id, "down")}
-                    disabled={index === queueOrdered.length - 1}
+                    disabled={index === visibleQueue.length - 1}
                     className="p-1 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronDown className="w-4 h-4" />
@@ -627,6 +707,8 @@ export default function PotdStaffPage() {
                     )}
                     <span>{item.activity?.attempts ?? 0} attempts</span>
                     <span>{item.activity?.correctCount ?? 0} correct</span>
+                    <span>{item.activity?.answeredUserIds?.length ?? 0} users answered</span>
+                    <span>{item.activity?.correctUserIds?.length ?? 0} users correct</span>
                   </div>
                 </div>
 
@@ -649,7 +731,8 @@ export default function PotdStaffPage() {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
 

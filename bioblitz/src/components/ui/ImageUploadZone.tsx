@@ -46,35 +46,51 @@ export default function ImageUploadZone({
     handleFile(e.dataTransfer.files?.[0]);
   };
 
-  useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      const active = document.activeElement;
-      const tag = active?.tagName ?? "";
-      if (tag === "INPUT" || tag === "TEXTAREA") return;
-      if ((active as HTMLElement)?.isContentEditable) return;
-
+  const extractImageFromClipboard = useCallback(
+    (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
-      if (!items) return;
+      if (!items) return false;
       for (const item of Array.from(items)) {
         if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (file) {
             e.preventDefault();
             handleFile(file);
-            break;
+            return true;
           }
         }
       }
+      return false;
+    },
+    [handleFile],
+  );
+
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const active = document.activeElement;
+      const tag = active?.tagName ?? "";
+      // Skip plain text input fields — they handle their own paste.
+      // ContentEditable (Quill) is NOT skipped so image paste works from there too.
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      extractImageFromClipboard(e);
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [handleFile]);
+  }, [extractImageFromClipboard]);
+
+  const handleLocalPaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      extractImageFromClipboard(e.nativeEvent);
+    },
+    [extractImageFromClipboard],
+  );
 
   return (
     <div
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onPaste={handleLocalPaste}
       className={`${className ?? ""} ${
         dragging
           ? "ring-2 ring-neutral-400 ring-offset-2 ring-offset-neutral-900 rounded-lg"

@@ -122,6 +122,28 @@ export async function createContest(
     ? (hiddenParam === "true" ? true : false)
     : true;
 
+  // When editing an existing contest without an explicit postAs, preserve the
+  // original creator fields so editing never re-assigns ownership.
+  let finalCreatorUid = uid;
+  let finalCreatorPfp = creatorPfp;
+  let finalCreatorUsername = creatorUsername;
+
+  if (contestId && !postAsUsernameRaw) {
+    try {
+      const existingDoc = await adminFirestore.collection("sets").doc(contestId).get();
+      if (existingDoc.exists) {
+        const existing = existingDoc.data() as any;
+        if (existing.creator) {
+          finalCreatorUid = existing.creator;
+          finalCreatorPfp = existing.creatorPfp ?? creatorPfp;
+          finalCreatorUsername = existing.creatorUsername ?? creatorUsername;
+        }
+      }
+    } catch (e) {
+      // non-fatal: fall back to current user's info
+    }
+  }
+
   const contest: Omit<gameRoom, "id"> = {
     title: formData.get("title") as string,
     source: formData.get("source") as string,
@@ -130,9 +152,9 @@ export async function createContest(
     difficulty: formData.get("difficulty") as string,
     timeLimit: formData.get("timeLimit") as string,
     description: formData.get("description") as string,
-    creator: uid,
-    creatorPfp: creatorPfp,
-    creatorUsername: creatorUsername,
+    creator: finalCreatorUid,
+    creatorPfp: finalCreatorPfp,
+    creatorUsername: finalCreatorUsername,
     rating: Number(formData.get("rating")) || 0,
     status: status,
     hidden,
@@ -169,12 +191,15 @@ export async function createContest(
     if (status === "completed") {
       await adminFirestore
         .collection("users")
-        .doc(uid)
+        .doc(finalCreatorUid)
         .set({ publicSetCount: admin.firestore.FieldValue.increment(1) }, { merge: true });
     }
 
     revalidatePath("/contests");
-    return { message: `Blitz saved with ID: ${savedId}` };
+    // "Blitz saved with ID:" prefix is checked by the editor to set isPublished=true.
+    // Draft saves use a different prefix so the editor doesn't treat them as published.
+    const messagePrefix = status === "completed" ? "Blitz saved with ID:" : "Blitz draft saved with ID:";
+    return { message: `${messagePrefix} ${savedId}` };
   } catch (e) {
     console.error("Error saving document: ", e);
     return { message: "Failed to save Blitz" };

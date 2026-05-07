@@ -160,7 +160,7 @@ export default function GenerateFromPdfModal({ onApply, onClose }: GenerateFromP
                           <div
                             key={ci}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                              c.id === q.correctAnswerId
+                              (q.correctAnswerIds ?? []).includes(c.id)
                                 ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
                                 : "bg-zinc-800/50 text-zinc-400"
                             }`}

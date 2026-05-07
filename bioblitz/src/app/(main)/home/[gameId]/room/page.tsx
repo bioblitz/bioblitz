@@ -62,6 +62,7 @@ type Question = {
   d?: string;
   e?: string;
   imgURL?: string;
+  multipleCorrect?: boolean;
 };
 
 type Tab = "result" | "leaderboard" | "home";
@@ -70,7 +71,7 @@ type GameResult = {
   score: number;
   correctCount: number;
   totalQuestions: number;
-  correctAnswers: { [key: number]: string };
+  correctAnswers: { [key: number]: string | string[] };
   ratingDelta: number | null;
   newElo: number | null;
 };
@@ -104,7 +105,7 @@ export default function GameRoomPage() {
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string }>(
+  const [userAnswers, setUserAnswers] = useState<{ [index: number]: string | string[] }>(
     {},
   );
   const [submitted, setSubmitted] = useState(false);
@@ -310,7 +311,11 @@ export default function GameRoomPage() {
   const handleSubmit = async (isAutoSubmit = false) => {
     if (submitted) return;
 
-    if (!isAutoSubmit && Object.keys(userAnswers).length < questions.length) {
+    const answeredQuestions = questions.filter((_, i) => {
+      const a = userAnswers[i];
+      return Array.isArray(a) ? a.length > 0 : !!a;
+    });
+    if (!isAutoSubmit && answeredQuestions.length < questions.length) {
       alert("Please answer all questions before submitting.");
       return;
     }
@@ -419,7 +424,17 @@ export default function GameRoomPage() {
 
   const handleAnswer = (idx: number, choice: string) => {
     if (submitted) return;
-    setUserAnswers((prev) => ({ ...prev, [idx]: choice }));
+    const q = questions[idx];
+    if (q?.multipleCorrect) {
+      setUserAnswers((prev) => {
+        const current = Array.isArray(prev[idx]) ? [...(prev[idx] as string[])] : [];
+        const pos = current.indexOf(choice);
+        if (pos === -1) current.push(choice); else current.splice(pos, 1);
+        return { ...prev, [idx]: current };
+      });
+    } else {
+      setUserAnswers((prev) => ({ ...prev, [idx]: choice }));
+    }
   };
 
   const toggleFlag = (idx: number) => {
@@ -557,7 +572,9 @@ export default function GameRoomPage() {
         .filter((key) => question[key])
         .map((key) => ({ key, text: question[key] as string }))
     : [];
-  const answeredCount = Object.keys(userAnswers).length;
+  const answeredCount = Object.values(userAnswers).filter((a) =>
+    Array.isArray(a) ? a.length > 0 : !!a,
+  ).length;
   const unansweredCount = questions.length - answeredCount;
 
   return (
@@ -710,9 +727,15 @@ export default function GameRoomPage() {
                     </div>
                   )}
 
+                  {question.multipleCorrect && (
+                    <p className="text-[11px] text-amber-400/80 mb-3 font-medium">Select all that apply</p>
+                  )}
                   <div className="flex flex-col space-y-2.5">
                     {choices.map(({ key, text }) => {
-                      const isSelected = userAnswers[currentQuestion] === key;
+                      const ans = userAnswers[currentQuestion];
+                      const isSelected = question.multipleCorrect
+                        ? Array.isArray(ans) && (ans as string[]).includes(key)
+                        : ans === key;
                       return (
                         <button
                           key={key}
@@ -859,6 +882,12 @@ export default function GameRoomPage() {
                         .map((key) => ({ key, text: q[key] as string }));
                       const userAnswer = userAnswers[idx];
                       const correctAnswer = finalResult.correctAnswers[idx];
+                      const correctArr = Array.isArray(correctAnswer)
+                        ? correctAnswer
+                        : correctAnswer ? [correctAnswer] : [];
+                      const userArr = Array.isArray(userAnswer)
+                        ? userAnswer
+                        : userAnswer ? [userAnswer as string] : [];
 
                       return (
                         <div
@@ -873,8 +902,8 @@ export default function GameRoomPage() {
                               gameId={gameId as string}
                               questionIndex={idx}
                               gameTitle={gameTitle}
-                              correctAnswer={correctAnswer}
-                              userAnswer={userAnswer}
+                              correctAnswer={Array.isArray(correctAnswer) ? correctAnswer.join(",") : (correctAnswer ?? "")}
+                              userAnswer={Array.isArray(userAnswer) ? userAnswer.join(",") : (userAnswer as string | undefined)}
                             />
                             <ReportButton
                               gameId={gameId as string}
@@ -895,14 +924,14 @@ export default function GameRoomPage() {
                           )}
                           <div className="flex flex-col space-y-2.5">
                             {qChoices.map(({ key, text }) => {
-                              const isUserAnswer = userAnswer === key;
-                              const isCorrect = correctAnswer === key;
+                              const isChoiceCorrect = correctArr.includes(key);
+                              const isUserChoice = userArr.includes(key);
                               let bgClass =
                                 "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
-                              if (isCorrect)
+                              if (isChoiceCorrect)
                                 bgClass =
                                   "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
-                              else if (isUserAnswer)
+                              else if (isUserChoice)
                                 bgClass =
                                   "bg-red-500/10 border-red-500/50 text-red-300";
                               return (
@@ -919,7 +948,7 @@ export default function GameRoomPage() {
                                     className="font-medium text-[15px]"
                                     dangerouslySetInnerHTML={{ __html: text }}
                                   />
-                                  {isCorrect && (
+                                  {isChoiceCorrect && (
                                     <span
                                       className={`ml-auto text-emerald-400 font-normal text-[11px] uppercase`}
                                       style={{ letterSpacing: "0.06em" }}
@@ -927,7 +956,7 @@ export default function GameRoomPage() {
                                       CORRECT
                                     </span>
                                   )}
-                                  {isUserAnswer && !isCorrect && (
+                                  {isUserChoice && !isChoiceCorrect && (
                                     <span
                                       className={`ml-auto text-red-400 font-normal text-[11px] uppercase`}
                                       style={{ letterSpacing: "0.06em" }}
@@ -1108,7 +1137,8 @@ export default function GameRoomPage() {
                 <div className="px-3 pb-3 border-t border-zinc-800">
                   <div className="grid grid-cols-5 gap-1.5 pt-3">
                     {questions.map((_, i) => {
-                      const isAnswered = !!userAnswers[i];
+                      const a = userAnswers[i];
+                      const isAnswered = Array.isArray(a) ? a.length > 0 : !!a;
                       const isFlagged = flaggedQuestions.has(i);
                       const isCurrent = i === currentQuestion;
                       return (

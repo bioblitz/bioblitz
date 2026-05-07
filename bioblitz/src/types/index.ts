@@ -66,7 +66,8 @@ export interface EditableQuestion {
   content: string;
   imageUrl?: string;
   choices: AnswerChoice[];
-  correctAnswerId: string;
+  correctAnswerIds: string[];
+  isMultiSelect?: boolean;
   solution?: string;
 }
 

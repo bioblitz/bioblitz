@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { EditableQuestion, AnswerChoice } from "@/types";
-import { CheckCircle, Circle, Plus, Trash2, ChevronDown } from "lucide-react";
+import { CheckCircle, Circle, Plus, Trash2, ChevronDown, ToggleLeft, ToggleRight } from "lucide-react";
 import "react-quill-new/dist/quill.snow.css";
 import ImageUploadZone from "@/components/ui/ImageUploadZone";
 import { uploadImage } from "@/lib/storage";
@@ -70,8 +70,25 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
     onQuestionChange({ ...question, choices: updatedChoices });
   };
 
-  const setCorrectAnswer = (id: string) => {
-    onQuestionChange({ ...question, correctAnswerId: id });
+  const toggleCorrectAnswer = (id: string) => {
+    if (question.isMultiSelect) {
+      const ids = question.correctAnswerIds ?? [];
+      const next = ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
+      onQuestionChange({ ...question, correctAnswerIds: next });
+    } else {
+      onQuestionChange({ ...question, correctAnswerIds: [id] });
+    }
+  };
+
+  const toggleMultiSelect = () => {
+    const next = !question.isMultiSelect;
+    // When switching to single-select, keep only the first selected answer
+    const ids = question.correctAnswerIds ?? [];
+    onQuestionChange({
+      ...question,
+      isMultiSelect: next,
+      correctAnswerIds: next ? ids : ids.slice(0, 1),
+    });
   };
 
   const addChoice = () => {
@@ -85,12 +102,10 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
 
   const removeChoice = (id: string) => {
     const updatedChoices = question.choices.filter((c) => c.id !== id);
-    const newCorrectAnswerId =
-      question.correctAnswerId === id ? "" : question.correctAnswerId;
     onQuestionChange({
       ...question,
       choices: updatedChoices,
-      correctAnswerId: newCorrectAnswerId,
+      correctAnswerIds: (question.correctAnswerIds ?? []).filter((x) => x !== id),
     });
   };
 
@@ -246,25 +261,46 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
 
       {/* Answer Choices */}
       <div className="border-b border-zinc-800/60 pb-3">
-        <button
-          type="button"
-          onClick={() => setShowAnswerChoices((v) => !v)}
-          className={sectionHeaderClass}
-        >
-          <ChevronDown className={chevronClass(showAnswerChoices)} />
-          <span className={sectionLabelClass}>Answer Choices</span>
-        </button>
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setShowAnswerChoices((v) => !v)}
+            className={sectionHeaderClass}
+          >
+            <ChevronDown className={chevronClass(showAnswerChoices)} />
+            <span className={sectionLabelClass}>Answer Choices</span>
+          </button>
+          <button
+            type="button"
+            onClick={toggleMultiSelect}
+            className={`flex items-center gap-1.5 text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors ${
+              question.isMultiSelect
+                ? "text-amber-300 bg-amber-500/10 border border-amber-500/30"
+                : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+            }`}
+            title="Allow multiple correct answers"
+          >
+            {question.isMultiSelect
+              ? <ToggleRight className="w-4 h-4" />
+              : <ToggleLeft className="w-4 h-4" />
+            }
+            Multi-select
+          </button>
+        </div>
         {showAnswerChoices && (
           <div className="mt-2 space-y-3">
+            {question.isMultiSelect && (
+              <p className="text-[11px] text-amber-400/80 pb-1">Select all correct answers</p>
+            )}
             {question.choices.map((choice) => (
               <div key={choice.id} className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setCorrectAnswer(choice.id)}
+                  onClick={() => toggleCorrectAnswer(choice.id)}
                   className="text-zinc-500 hover:text-white transition-colors"
                   aria-label="Mark as correct"
                 >
-                  {question.correctAnswerId === choice.id ? (
+                  {(question.correctAnswerIds ?? []).includes(choice.id) ? (
                     <CheckCircle className="w-6 h-6 text-green-500" />
                   ) : (
                     <Circle className="w-6 h-6" />

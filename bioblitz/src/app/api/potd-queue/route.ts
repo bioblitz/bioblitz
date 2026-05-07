@@ -4,6 +4,58 @@ import { requireStaffOrAdmin } from "@/lib/adminAccess";
 
 export const dynamic = 'force-dynamic';
 
+function getTodayPstDateKey(): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(new Date());
+  const year = parts.find((p) => p.type === "year")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const day = parts.find((p) => p.type === "day")?.value;
+  return `${year}-${month}-${day}`;
+}
+
+function isPastPstDate(date: string | null | undefined): boolean {
+  if (!date) return false;
+  return date < getTodayPstDateKey();
+}
+
+async function archiveReplacedQueueItems(date: string, keepId: string) {
+  const sameDateSnap = await adminFirestore
+    .collection("potdQueue")
+    .where("date", "==", date)
+    .where("status", "in", ["queued", "scheduled", "published"])
+    .get();
+
+  if (sameDateSnap.empty) return;
+
+  const batch = adminFirestore.batch();
+  let updates = 0;
+
+  sameDateSnap.docs.forEach((docSnap) => {
+    if (docSnap.id === keepId) return;
+    batch.set(
+      docSnap.ref,
+      {
+        status: "archived",
+        archivedAt: admin.firestore.FieldValue.serverTimestamp(),
+        archiveReason: "replaced_by_same_day_schedule",
+        replacedBy: keepId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    updates += 1;
+  });
+
+  if (updates > 0) {
+    await batch.commit();
+  }
+}
+
 function toArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => String(item).toLowerCase()).filter(Boolean);
@@ -39,6 +91,35 @@ export async function GET(request: Request) {
     .orderBy("orderIndex", "asc")
     .get();
 
+  const todayPst = getTodayPstDateKey();
+  const autoArchiveBatch = adminFirestore.batch();
+  let archiveUpdates = 0;
+  const statusById = new Map<string, string>();
+
+  queueSnap.docs.forEach((docSnap) => {
+    const data = docSnap.data() as any;
+    const date = typeof data?.date === "string" ? data.date : null;
+    const currentStatus = String(data?.status || "queued");
+    if (date && date < todayPst && currentStatus !== "archived") {
+      statusById.set(docSnap.id, "archived");
+      autoArchiveBatch.set(
+        docSnap.ref,
+        {
+          status: "archived",
+          archivedAt: admin.firestore.FieldValue.serverTimestamp(),
+          archiveReason: "past_date",
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      archiveUpdates += 1;
+    }
+  });
+
+  if (archiveUpdates > 0) {
+    await autoArchiveBatch.commit();
+  }
+
   const queue = await Promise.all(
     queueSnap.docs.map(async (docSnap) => {
       const data = docSnap.data() as any;
@@ -51,9 +132,12 @@ export async function GET(request: Request) {
       return {
         id: docSnap.id,
         ...data,
+        status: statusById.get(docSnap.id) || data?.status || "queued",
         activity: {
           attempts: activity?.attempts || 0,
           correctCount: activity?.correctCount || 0,
+          answeredUserIds: Array.isArray(activity?.answeredUserIds) ? activity.answeredUserIds : [],
+          correctUserIds: Array.isArray(activity?.correctUserIds) ? activity.correctUserIds : [],
           lastPlayedAt: activity?.lastPlayedAt?.toDate?.()?.toISOString?.() || null,
         },
       };
@@ -82,7 +166,7 @@ export async function POST(request: Request) {
   const imageAlt = String(body?.imageAlt || "").trim();
   const date = body?.date ? String(body?.date).trim() : null;
   const multiSelect = Boolean(body?.multiSelect);
-  const status = String(body?.status || "queued").trim();
+  let status = String(body?.status || "queued").trim();
   const optionsInput = Array.isArray(body?.options) ? body.options : [];
   const options = optionsInput
     .map((opt: any) => ({ key: String(opt.key || "").toLowerCase(), text: String(opt.text || "").trim() }))
@@ -109,6 +193,10 @@ export async function POST(request: Request) {
   }
 
   const docRef = adminFirestore.collection("potdQueue").doc();
+  if (isPastPstDate(date)) {
+    status = "archived";
+  }
+
   await docRef.set({
     title,
     question,
@@ -127,6 +215,10 @@ export async function POST(request: Request) {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     createdBy: actingUid,
   });
+
+  if (date && status !== "archived") {
+    await archiveReplacedQueueItems(date, docRef.id);
+  }
 
   return NextResponse.json({ id: docRef.id });
 }
