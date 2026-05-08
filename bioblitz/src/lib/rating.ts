@@ -120,32 +120,32 @@ export function getRatingTier(elo: number): RatingTier {
   }
   if (elo >= 1100) {
     return {
-      color: "zinc",
+      color: "neutral",
       label: "Silver I",
-      textClass: "text-zinc-200",
-      bgClass: "bg-zinc-400/20",
-      borderClass: "border-zinc-400/50",
-      ringClass: "ring-zinc-400/30",
+      textClass: "text-neutral-200",
+      bgClass: "bg-neutral-400/20",
+      borderClass: "border-neutral-400/50",
+      ringClass: "ring-neutral-400/30",
     };
   }
   if (elo >= 950) {
     return {
-      color: "zinc",
+      color: "neutral",
       label: "Silver II",
-      textClass: "text-zinc-300",
-      bgClass: "bg-zinc-400/20",
-      borderClass: "border-zinc-400/50",
-      ringClass: "ring-zinc-400/30",
+      textClass: "text-neutral-300",
+      bgClass: "bg-neutral-400/20",
+      borderClass: "border-neutral-400/50",
+      ringClass: "ring-neutral-400/30",
     };
   }
   if (elo >= 750) {
     return {
-      color: "zinc",
+      color: "neutral",
       label: "Silver III",
-      textClass: "text-zinc-400",
-      bgClass: "bg-zinc-400/10",
-      borderClass: "border-zinc-400/30",
-      ringClass: "ring-zinc-400/20",
+      textClass: "text-neutral-400",
+      bgClass: "bg-neutral-400/10",
+      borderClass: "border-neutral-400/30",
+      ringClass: "ring-neutral-400/20",
     };
   }
   if (elo >= 600) {

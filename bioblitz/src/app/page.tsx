@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "BioBlitz – Biology Quiz Game & Competition Platform",
+  title: "BioBlitz - Biology Quiz Game & Competition Platform",
   description:
     "BioBlitz is a free competitive biology quiz game. Practice USABO, AP Biology, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
   alternates: {
@@ -134,18 +134,18 @@ export default async function mainPage({
 
         <section
           id="demo"
-          className="w-full pt-12.5 pointer-events-none pb-20 px-6 relative -mt-[42vh] z-20"
+          className="w-full pointer-events-none pb-20 px-4 sm:px-6 pt-8 sm:pt-10 relative mt-10 md:mt-12 lg:-mt-[12vh] xl:-mt-[22vh] z-25"
         >
           <div className="max-w-6xl pointer-events-auto mx-auto relative z-10">
-            <div className="relative rounded-2xl border border-zinc-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
-              <div className="h-10 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 gap-2">
+            <div className="relative rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl overflow-hidden demo-pop">
+              <div className="h-10 border-b border-neutral-800 bg-neutral-900 flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
                   <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
                 </div>
-                <div className="ml-4 px-3 py-1 bg-neutral-900/40 rounded text-[10px] text-zinc-500 font-mono w-64 border border-zinc-800/50">
-                  bioblitz.com/home/opens2014
+                <div className="ml-4 px-3 py-1 bg-neutral-900/40 rounded text-[10px] text-neutral-500 font-mono w-64 border border-neutral-800/50">
+                  bioblitz.net/home/opens2014
                 </div>
               </div>
 
@@ -187,12 +187,12 @@ export default async function mainPage({
           }
         `}</style>
 
-        <section className="w-full py-16 px-45">
-          <div className="max-w-2xl left">
-            <h2 className="text-2xl font-semibold text-neutral-200 mb-8">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-neutral-200 mb-6 sm:mb-8">
               Frequently Asked Questions
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[
                 {
                   q: "What is the difference between a Ranked and Practice Blitz?",
@@ -219,9 +219,9 @@ export default async function mainPage({
                   a: "Absolutely. While BioBlitz is optimized for the United States Biology Olympiad exam, it is equally useful for other biology-related tests, such as for AP Biology exams, the MCAT, and USMLE.",
                 },
               ].map((item, i) => (
-                <details key={i} className="group transition-all duration-300">
-                  <summary className="flex cursor-pointer justify-between p-6 font-medium text-slate-200">
-                    <span>{item.q}</span>
+                <details key={i} className="group rounded border border-neutral-700 bg-neutral-900 transition-all duration-300 open:border-neutral-700">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-4 py-4 sm:px-6 sm:py-5 font-medium text-slate-200">
+                    <span className="text-sm sm:text-base leading-6">{item.q}</span>
                     <span className="transition-transform duration-300 group-open:rotate-180 ml-4 flex-shrink-0">
                       <svg
                         fill="none"
@@ -238,7 +238,7 @@ export default async function mainPage({
                       </svg>
                     </span>
                   </summary>
-                  <div className="px-6 pb-6 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 pt-4">
+                  <div className="border-t border-neutral-800 px-4 pb-4 pt-4 text-sm leading-6 text-slate-400 sm:px-6 sm:pb-6 sm:text-[15px]">
                     {item.a}
                   </div>
                 </details>

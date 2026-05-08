@@ -79,18 +79,18 @@ export default function GameRating({ gameId, hasPlayed, averageRating, ratingCou
         ref={badgeRef}
         onClick={() => setOpen((v) => !v)}
         title="Rate this blitz"
-        className="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-all duration-150"
+        className="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-600 transition-all duration-150"
       >
         <Star
           className={`w-3.5 h-3.5 transition-colors duration-150 ${
             hasUserRated
               ? "fill-yellow-400 text-yellow-400"
-              : "text-zinc-500 group-hover:text-yellow-400"
+              : "text-neutral-500 group-hover:text-yellow-400"
           }`}
         />
         <span
           className={`text-xs font-semibold tabular-nums transition-colors duration-150 ${
-            hasUserRated ? "text-yellow-400" : "text-zinc-400 group-hover:text-zinc-200"
+            hasUserRated ? "text-yellow-400" : "text-neutral-400 group-hover:text-neutral-200"
           }`}
         >
           {displayRating}
@@ -100,23 +100,23 @@ export default function GameRating({ gameId, hasPlayed, averageRating, ratingCou
       {open && (
         <div
           ref={popupRef}
-          className="absolute left-0 top-full mt-2 z-50 bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          className="absolute left-0 top-full mt-2 z-50 bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden"
           style={{ width: 232 }}
         >
           {/* Stats row */}
-          <div className="flex items-stretch divide-x divide-zinc-800 border-b border-zinc-800">
+          <div className="flex items-stretch divide-x divide-neutral-800 border-b border-neutral-800">
             <div className="flex-1 px-4 py-3">
               <p className="text-[22px] font-bold text-white leading-none">
                 {ratingCount ?? 0}
               </p>
-              <p className="text-[11px] text-zinc-500 mt-0.5">ratings</p>
+              <p className="text-[11px] text-neutral-500 mt-0.5">ratings</p>
             </div>
             {(averageRating ?? 0) > 0 && (
               <div className="flex-1 px-4 py-3">
                 <p className="text-[22px] font-bold text-white leading-none">
                   {(averageRating as number).toFixed(1)}
                 </p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">average</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">average</p>
               </div>
             )}
           </div>
@@ -141,7 +141,7 @@ export default function GameRating({ gameId, hasPlayed, averageRating, ratingCou
                           className={`w-7 h-7 transition-all duration-100 ${
                             isActive
                               ? "fill-yellow-400 text-yellow-400"
-                              : "fill-zinc-800 text-zinc-600"
+                              : "fill-neutral-800 text-neutral-600"
                           }`}
                         />
                       </button>
@@ -151,7 +151,7 @@ export default function GameRating({ gameId, hasPlayed, averageRating, ratingCou
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || pendingRating === 0}
-                  className="w-full py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {submitting
                     ? "Submitting…"
@@ -161,7 +161,7 @@ export default function GameRating({ gameId, hasPlayed, averageRating, ratingCou
                 </button>
               </>
             ) : (
-              <p className="flex items-center gap-1.5 text-xs text-zinc-500">
+              <p className="flex items-center gap-1.5 text-xs text-neutral-500">
                 <Lock className="w-3 h-3 flex-shrink-0" />
                 Play first to rate
               </p>

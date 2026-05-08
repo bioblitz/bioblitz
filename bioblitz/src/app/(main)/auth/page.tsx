@@ -49,6 +49,11 @@ export default function AuthenticationPage() {
 
       if (res.ok) {
         await createUserProfile(user);
+        void trackAnalyticsEvent({
+          event: "auth_google_success",
+          source: "auth_page_google_button",
+          page: "auth",
+        });
         window.location.assign("/home");
       } else {
         console.error("Failed to create session:", await res.json());
@@ -90,7 +95,7 @@ export default function AuthenticationPage() {
       </div>
       <div>
         <h3 className="text-white font-medium text-sm">{title}</h3>
-        <p className="text-zinc-400 text-xs leading-relaxed">{description}</p>
+        <p className="text-neutral-400 text-xs leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -108,7 +113,7 @@ export default function AuthenticationPage() {
           {" "}
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="p-5 md:p-8 flex flex-col justify-center md:border-r border-neutral-500 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-neutral-600/5 pointer-events-none z-0"></div>
+              <div className="absolute top-0 left-0 w-full h-full bg-neutral-800/30 pointer-events-none z-0"></div>
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold tracking-tight mb-4 text-white">
                   Master Biology, <br />
@@ -117,7 +122,7 @@ export default function AuthenticationPage() {
                     One Blitz at a Time.
                   </div>
                 </h2>
-                <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+                <p className="text-neutral-400 text-sm mb-8 leading-relaxed">
                   Join a tight-knit and fast-growing community of biology enthusiasts!
                   Compete in real-time, create your own content, and climb the
                   global leaderboard.
@@ -148,12 +153,12 @@ export default function AuthenticationPage() {
               </div>
             </div>
 
-            <div className="p-8 md:p-12 flex flex-col justify-center bg-zinc-900/30">
+            <div className="p-8 md:p-12 flex flex-col justify-center bg-neutral-800/30">
               <div className="text-center mb-8">
                 <h3 className="text-xl font-semibold text-white mb-2">
                   Sign in to your account
                 </h3>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-neutral-400 text-sm">
                   Go play some blitzes!
                 </p>
               </div>
@@ -176,13 +181,13 @@ export default function AuthenticationPage() {
                 <h3 className="text-xl font-semibold text-white mb-4">
                   Want to see what it's like first?
                 </h3>
-                <Link href="/about" className="inline-block text-sm font-medium text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 px-4 py-2 rounded-lg transition-colors w-full text-center">
+                <Link href="/about" className="inline-block text-sm font-medium text-neutral-300 hover:text-white border border-neutral-700 hover:border-neutral-500 px-4 py-2 rounded-lg transition-colors w-full text-center">
                   See a demo
                 </Link>
               </div>
 
               <div className="mt-8 text-center">
-                <p className="text-xs text-slate-500 leading-relaxed px-4">
+                <p className="text-xs text-neutral-400 leading-relaxed px-4">
                   By continuing, you agree to our{" "}
                   <a
                     href="/terms-and-conditions"

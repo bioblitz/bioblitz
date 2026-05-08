@@ -41,13 +41,13 @@ export default function ContestBanner({ game }: ContestBannerProps) {
                 <img
                   src={game.creatorPfp}
                   alt="Creator"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
 
                 />
               </div>
             </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+            <div className="absolute inset-0 bg-gradient-to-b from-neutral-900 to-black" />
           )}
         </div>
       </div>

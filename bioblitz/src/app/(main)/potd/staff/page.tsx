@@ -117,7 +117,7 @@ function statusColor(status: string) {
   if (status === "published") return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
   if (status === "scheduled") return "bg-blue-500/15 text-blue-300 border-blue-500/30";
   if (status === "archived") return "bg-amber-500/10 text-amber-300 border-amber-500/30";
-  return "bg-zinc-800 text-zinc-400 border-zinc-700";
+  return "bg-neutral-800 text-neutral-400 border-neutral-700";
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -125,14 +125,14 @@ function QueueSkeleton() {
   return (
     <div className="grid gap-3">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 flex gap-4 animate-pulse">
-          <div className="w-8 h-8 rounded-full bg-zinc-800 shrink-0" />
+        <div key={i} className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 flex gap-4 animate-pulse">
+          <div className="w-8 h-8 rounded-full bg-neutral-800 shrink-0" />
           <div className="flex-1 space-y-2.5">
-            <div className="h-4 bg-zinc-800 rounded w-1/3" />
-            <div className="h-3 bg-zinc-800 rounded w-2/3" />
-            <div className="h-3 bg-zinc-800 rounded w-1/4" />
+            <div className="h-4 bg-neutral-800 rounded w-1/3" />
+            <div className="h-3 bg-neutral-800 rounded w-2/3" />
+            <div className="h-3 bg-neutral-800 rounded w-1/4" />
           </div>
-          <div className="w-20 h-14 rounded-xl bg-zinc-800 shrink-0" />
+          <div className="w-20 h-14 rounded-xl bg-neutral-800 shrink-0" />
         </div>
       ))}
     </div>
@@ -160,8 +160,8 @@ function PotdFormFields({
     set({ correct: next });
   };
 
-  const inputCls = "w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
-  const labelCls = "block text-xs text-zinc-500 mb-1";
+  const inputCls = "w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors";
+  const labelCls = "block text-xs text-neutral-500 mb-1";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -208,7 +208,7 @@ function PotdFormFields({
               onChange={(e) => set({ multiSelect: e.target.checked })}
               className="accent-orange-400"
             />
-            <label htmlFor="multiSelect" className="text-sm text-zinc-400">Multi-select</label>
+            <label htmlFor="multiSelect" className="text-sm text-neutral-400">Multi-select</label>
           </div>
         </div>
       </div>
@@ -220,10 +220,10 @@ function PotdFormFields({
             type="file"
             accept="image/*"
             onChange={(e) => onImageChange(e.target.files?.[0] || null)}
-            className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-3 file:py-1.5 file:text-xs file:text-zinc-300 hover:file:bg-zinc-700"
+            className="block w-full text-sm text-neutral-400 file:mr-3 file:rounded-lg file:border-0 file:bg-neutral-800 file:px-3 file:py-1.5 file:text-xs file:text-neutral-300 hover:file:bg-neutral-700"
           />
           {imagePreview && (
-            <img src={imagePreview} alt="Preview" className="mt-3 rounded-xl border border-zinc-800 max-h-40 object-cover" />
+            <img src={imagePreview} alt="Preview" className="mt-3 rounded-xl border border-neutral-800 max-h-40 object-cover" />
           )}
           <input
             value={form.imageAlt}
@@ -244,13 +244,13 @@ function PotdFormFields({
                   onChange={() => toggleCorrect(key)}
                   className="accent-orange-400 shrink-0"
                 />
-                <span className="text-xs text-zinc-500 w-4 font-mono">{key}</span>
+                <span className="text-xs text-neutral-500 w-4 font-mono">{key}</span>
                 <input
                   value={value}
                   onChange={(e) =>
                     set({ options: { ...form.options, [key]: e.target.value } })
                   }
-                  className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-zinc-600 transition-colors"
+                  className="flex-1 rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors"
                 />
               </div>
             ))}
@@ -501,31 +501,31 @@ export default function PotdStaffPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+        <Loader2 className="w-6 h-6 text-neutral-500 animate-spin" />
       </div>
     );
   }
 
   if (!hasAccess) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-zinc-100 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Access denied</h1>
-          <p className="text-zinc-500">You don't have permission to view this page.</p>
+          <p className="text-neutral-500">You don't have permission to view this page.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-zinc-100">
+    <div className="min-h-screen bg-neutral-900 text-neutral-100">
       <div className="max-w-4xl mx-auto px-4 py-14">
 
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white">POTD Queue</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">
+            <p className="text-sm text-neutral-500 mt-0.5">
               {scheduledQueue.length} scheduled • {archivedQueue.length} archived
             </p>
           </div>
@@ -533,7 +533,7 @@ export default function PotdStaffPage() {
             <button
               onClick={() => fetchQueue(user)}
               disabled={loadingQueue}
-              className="p-2 rounded-xl border border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors disabled:opacity-40"
+              className="p-2 rounded-xl border border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-700 transition-colors disabled:opacity-40"
               title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${loadingQueue ? "animate-spin" : ""}`} />
@@ -547,7 +547,7 @@ export default function PotdStaffPage() {
             </button>
             <Link
               href="/potd"
-              className="px-3 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 text-sm transition-colors"
+              className="px-3 py-2 rounded-xl border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700 text-sm transition-colors"
             >
               Back to POTD
             </Link>
@@ -566,7 +566,7 @@ export default function PotdStaffPage() {
 
         {/* Create form */}
         {showForm && (
-          <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6">
+          <div className="mb-8 rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6">
             <h2 className="text-sm font-semibold text-white mb-5">New POTD</h2>
             <PotdFormFields
               form={newItem}
@@ -588,7 +588,7 @@ export default function PotdStaffPage() {
               </button>
               <button
                 onClick={() => { setNewItem(emptyForm); setNewImageFile(null); setNewImagePreview(null); }}
-                className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white text-sm transition-colors"
+                className="px-4 py-2 rounded-xl border border-neutral-800 text-neutral-400 hover:text-white text-sm transition-colors"
               >
                 Reset
               </button>
@@ -600,19 +600,19 @@ export default function PotdStaffPage() {
         {loadingQueue ? (
           <QueueSkeleton />
         ) : queueOrdered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center text-zinc-600">
+          <div className="rounded-2xl border border-dashed border-neutral-800 p-12 text-center text-neutral-600">
             No problems in queue yet.
           </div>
         ) : (
           <>
-            <div className="mb-4 inline-flex rounded-xl border border-zinc-800 bg-zinc-900/60 p-1 text-xs">
+            <div className="mb-4 inline-flex rounded-xl border border-neutral-800 bg-neutral-900/60 p-1 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab("scheduled")}
                 className={`px-3 py-1.5 rounded-lg transition-colors ${
                   activeTab === "scheduled"
-                    ? "bg-zinc-800 text-white"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-400 hover:text-neutral-200"
                 }`}
               >
                 Scheduled ({scheduledQueue.length})
@@ -622,8 +622,8 @@ export default function PotdStaffPage() {
                 onClick={() => setActiveTab("archived")}
                 className={`px-3 py-1.5 rounded-lg transition-colors ${
                   activeTab === "archived"
-                    ? "bg-zinc-800 text-white"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-400 hover:text-neutral-200"
                 }`}
               >
                 Archived ({archivedQueue.length})
@@ -632,7 +632,7 @@ export default function PotdStaffPage() {
 
             <div className="grid gap-3">
             {visibleQueue.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center text-zinc-600">
+              <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-center text-neutral-600">
                 No {activeTab} POTDs.
               </div>
             ) : visibleQueue.map((item, index) => (
@@ -643,23 +643,23 @@ export default function PotdStaffPage() {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDropOnItem(item.id)}
                 onDragEnd={() => setDraggedItemId(null)}
-                className="group rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 flex gap-4 hover:border-zinc-700 transition-colors"
+                className="group rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 flex gap-4 hover:border-neutral-700 transition-colors"
               >
                 {/* Position + reorder */}
                 <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
-                  <GripVertical className="w-4 h-4 text-zinc-700 mb-1 cursor-grab" />
+                  <GripVertical className="w-4 h-4 text-neutral-700 mb-1 cursor-grab" />
                   <button
                     onClick={() => moveItem(item.id, "up")}
                     disabled={index === 0}
-                    className="p-1 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-lg text-neutral-600 hover:text-neutral-300 hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronUp className="w-4 h-4" />
                   </button>
-                  <span className="text-sm font-bold text-zinc-600 tabular-nums">{index + 1}</span>
+                  <span className="text-sm font-bold text-neutral-600 tabular-nums">{index + 1}</span>
                   <button
                     onClick={() => moveItem(item.id, "down")}
                     disabled={index === visibleQueue.length - 1}
-                    className="p-1 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-lg text-neutral-600 hover:text-neutral-300 hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -670,11 +670,11 @@ export default function PotdStaffPage() {
                   <img
                     src={item.imageUrl}
                     alt={item.imageAlt || item.title}
-                    className="w-20 h-20 rounded-xl object-cover border border-zinc-800 shrink-0 self-start"
+                    className="w-20 h-20 rounded-xl object-cover border border-neutral-800 shrink-0 self-start"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-xl border border-dashed border-zinc-800 flex items-center justify-center shrink-0 self-start">
-                    <ImageIcon className="w-5 h-5 text-zinc-700" />
+                  <div className="w-20 h-20 rounded-xl border border-dashed border-neutral-800 flex items-center justify-center shrink-0 self-start">
+                    <ImageIcon className="w-5 h-5 text-neutral-700" />
                   </div>
                 )}
 
@@ -685,22 +685,22 @@ export default function PotdStaffPage() {
                     <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusColor(item.status)}`}>
                       {item.status}
                     </span>
-                    <span className="text-[11px] text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-full">
+                    <span className="text-[11px] text-neutral-500 border border-neutral-800 px-2 py-0.5 rounded-full">
                       {item.topic}
                     </span>
                   </div>
 
-                  <p className="text-xs text-zinc-400 line-clamp-2 mb-2">{item.question}</p>
+                  <p className="text-xs text-neutral-400 line-clamp-2 mb-2">{item.question}</p>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-600">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-600">
                     {item.date && (
-                      <span className="flex items-center gap-1 text-zinc-400">
+                      <span className="flex items-center gap-1 text-neutral-400">
                         <Calendar className="w-3 h-3" />
                         {formatDate(item.date)}
                       </span>
                     )}
                     {!item.date && (
-                      <span className="flex items-center gap-1 text-zinc-700">
+                      <span className="flex items-center gap-1 text-neutral-700">
                         <Calendar className="w-3 h-3" />
                         No date set
                       </span>
@@ -716,14 +716,14 @@ export default function PotdStaffPage() {
                 <div className="shrink-0 self-start flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => openEdit(item)}
-                    className="p-2 rounded-xl border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 transition-colors"
+                    className="p-2 rounded-xl border border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-600 transition-colors"
                     title="Edit"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(item)}
-                    className="p-2 rounded-xl border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 transition-colors"
+                    className="p-2 rounded-xl border border-neutral-800 text-neutral-500 hover:text-red-400 hover:border-red-500/40 transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -739,15 +739,15 @@ export default function PotdStaffPage() {
       {/* Edit modal */}
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 bg-neutral-900/70 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-3xl bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl mb-16">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+          <div className="w-full max-w-3xl bg-neutral-950 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl mb-16">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-800">
               <div>
                 <p className="text-white font-semibold text-sm">Edit POTD</p>
-                <p className="text-zinc-500 text-xs mt-0.5 truncate max-w-xs">{editingItem.title}</p>
+                <p className="text-neutral-500 text-xs mt-0.5 truncate max-w-xs">{editingItem.title}</p>
               </div>
               <button
                 onClick={() => setEditingItem(null)}
-                className="p-1.5 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+                className="p-1.5 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-800 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -766,14 +766,14 @@ export default function PotdStaffPage() {
                 <button
                   onClick={handleEdit}
                   disabled={editSaving}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors disabled:opacity-50"
                 >
                   {editSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   {editSaving ? "Saving…" : "Save changes"}
                 </button>
                 <button
                   onClick={() => setEditingItem(null)}
-                  className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white text-sm transition-colors"
+                  className="px-4 py-2 rounded-xl border border-neutral-800 text-neutral-400 hover:text-white text-sm transition-colors"
                 >
                   Cancel
                 </button>

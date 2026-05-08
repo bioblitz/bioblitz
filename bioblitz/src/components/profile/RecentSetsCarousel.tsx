@@ -37,13 +37,13 @@ export default function RecentSetsCarousel({
         <div className="flex gap-2">
           <button
             onClick={onScrollLeft}
-            className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 rounded-full bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={onScrollRight}
-            className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 rounded-full bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -56,7 +56,7 @@ export default function RecentSetsCarousel({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {setsPlayed.length === 0 ? (
-          <div className="w-full p-8 text-center border border-dashed border-zinc-800 rounded-2xl text-zinc-500">
+          <div className="w-full p-8 text-center border border-dashed border-neutral-800 rounded-2xl text-neutral-500">
             No recent activity recorded.
           </div>
         ) : (
@@ -64,14 +64,14 @@ export default function RecentSetsCarousel({
             <Link
               key={i}
               href={`/home/${set.setId}`}
-              className="min-w-60 bg-zinc-900/50 border border-zinc-800/50 p-5 rounded-2xl hover:border-neutral-500/30 transition-all group block"
+              className="min-w-60 bg-neutral-900/50 border border-neutral-800/50 p-5 rounded-2xl hover:border-neutral-500/30 transition-all group block"
             >
               <div className="flex flex-col h-full justify-between gap-4">
-                <span className="text-zinc-300 font-medium line-clamp-2 text-sm group-hover:text-white transition-colors">
+                <span className="text-neutral-300 font-medium line-clamp-2 text-sm group-hover:text-white transition-colors">
                   {set.name.replace("Name: ", "")}
                 </span>
-                <div className="flex items-end justify-between border-t border-zinc-800 pt-3">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                <div className="flex items-end justify-between border-t border-neutral-800 pt-3">
+                  <span className="text-xs text-neutral-500 uppercase tracking-wider">
                     Score
                   </span>
                   <span className="text-xl font-bold text-neutral-400">{set.score}</span>

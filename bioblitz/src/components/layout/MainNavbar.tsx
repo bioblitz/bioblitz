@@ -169,7 +169,7 @@ export default function MainNavbar() {
   const renderUserNav = () => {
     if (loading) {
       return (
-        <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse" />
+        <div className="h-10 w-10 rounded-full bg-neutral-700 animate-pulse" />
       );
     }
     if (!isAuthenticated || !user) {
@@ -211,7 +211,7 @@ export default function MainNavbar() {
                 <img
                   src={user.photoURL}
                   alt={user.displayName}
-                  className="h-10 w-10 rounded-full object-cover border border-zinc-700"
+                  className="h-10 w-10 rounded-full object-cover border border-neutral-700"
 
                   onError={(e) => {
                     const target = e.currentTarget;
@@ -224,7 +224,7 @@ export default function MainNavbar() {
               )}
             </div>
 
-            <div className="text-zinc-400 group-hover:text-white transition-colors">
+            <div className="text-neutral-400 group-hover:text-white transition-colors">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -243,9 +243,9 @@ export default function MainNavbar() {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
-              <div className="md:hidden px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
-                <span className="text-zinc-400 text-sm">Streak</span>
+            <div className="absolute right-0 mt-2 w-48 bg-neutral-950 border border-neutral-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="md:hidden px-4 py-3 border-b border-neutral-800 flex items-center justify-between">
+                <span className="text-neutral-400 text-sm">Streak</span>
                 <div className="flex items-center gap-1.5 text-orange-400 font-bold">
                   <Flame
                     className={`w-4 h-4 text-orange-500 ${
@@ -259,7 +259,7 @@ export default function MainNavbar() {
               {user?.username && (
                 <Link href={`/profile/${user.username}`}>
                   <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
                     onClick={() => {
                       trackNavClick("nav_menu_link_click", "profile");
                       setDropdownOpen(false);
@@ -273,7 +273,7 @@ export default function MainNavbar() {
                 href={user?.username ? `/channel/${user.username}` : "/channel"}
               >
                 <span
-                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                  className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
                   onClick={() => {
                     trackNavClick("nav_menu_link_click", "channel");
                     setDropdownOpen(false);
@@ -284,7 +284,7 @@ export default function MainNavbar() {
               </Link>
               <Link href="/settings">
                 <span
-                  className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                  className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
                   onClick={() => {
                     trackNavClick("nav_menu_link_click", "settings");
                     setDropdownOpen(false);
@@ -296,7 +296,7 @@ export default function MainNavbar() {
               {isStaff && (
                 <Link href="/staff">
                   <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
                     onClick={() => {
                       trackNavClick("nav_menu_link_click", "staff");
                       setDropdownOpen(false);
@@ -309,7 +309,7 @@ export default function MainNavbar() {
               {isAdmin && (
                 <Link href="/admin">
                   <span
-                    className="block px-4 py-3 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 cursor-pointer transition-colors"
+                    className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
                     onClick={() => {
                       trackNavClick("nav_menu_link_click", "admin");
                       setDropdownOpen(false);
@@ -319,7 +319,7 @@ export default function MainNavbar() {
                   </span>
                 </Link>
               )}
-              <div className="border-t border-zinc-800 mt-1">
+              <div className="border-t border-neutral-800 mt-1">
                 <span
                   className="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"
                   onClick={handleSignOut}

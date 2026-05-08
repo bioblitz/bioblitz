@@ -67,8 +67,8 @@ function FriendRanking({
 
   if (sorted.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center mx-3 mb-3">
-        <p className="text-zinc-600 text-xs leading-relaxed">
+      <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-center mx-3 mb-3">
+        <p className="text-neutral-600 text-xs leading-relaxed">
           Add friends from your profile to see rankings.
         </p>
       </div>
@@ -85,11 +85,11 @@ function FriendRanking({
               className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
                 isMe
                   ? "bg-neutral-500/[0.08] border border-neutral-500/30 text-white font-semibold"
-                  : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border border-transparent hover:border-zinc-800"
+                  : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border border-transparent hover:border-neutral-800"
               }`}
             >
               <div className="w-6 flex justify-center">
-                <span className="text-zinc-500 font-mono text-s w-6 text-center">
+                <span className="text-neutral-500 font-mono text-s w-6 text-center">
                   #{i + 1}
                 </span>
               </div>
@@ -98,7 +98,7 @@ function FriendRanking({
                 <img
                   src={friend.photoURL}
                   alt={friend.displayName}
-                  className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900 object-cover"
+                  className="w-9 h-9 rounded-full border border-neutral-800 bg-neutral-900 object-cover"
 
                 />
               ) : (
@@ -115,11 +115,11 @@ function FriendRanking({
 
               <div className="text-right">
                 <span
-                  className={`font-normal text-[16px] tabular-nums ${isMe ? "text-neutral-400" : "text-zinc-300"}`}
+                  className={`font-normal text-[16px] tabular-nums ${isMe ? "text-neutral-400" : "text-neutral-300"}`}
                 >
                   {friend.bElo}
                 </span>
-                <p className="text-[11px] text-zinc-500">Elo</p>
+                <p className="text-[11px] text-neutral-500">Elo</p>
               </div>
             </div>
           </Link>
@@ -183,7 +183,7 @@ function ChallengeCard({
               ? "border-neutral-500/50"
               : isCompleted && iWon
                 ? "border-neutral-500/25 bg-[rgba(9,9,11,0.7)] hover:border-neutral-500/40"
-                : "border-zinc-800 bg-[rgba(9,9,11,0.6)] hover:border-zinc-700"
+                : "border-neutral-800 bg-[rgba(9,9,11,0.6)] hover:border-neutral-700"
           }`}
         >
           {urgent && needsMyPlay && (
@@ -202,7 +202,7 @@ function ChallengeCard({
                 ? "bg-neutral-900"
                 : iWon
                   ? "bg-emerald-500"
-                  : "bg-zinc-700"
+                  : "bg-neutral-700"
             }`}
           />
 
@@ -215,7 +215,7 @@ function ChallengeCard({
                   className={`w-11 h-11 rounded-full object-cover transition-all ${
                     urgent && needsMyPlay
                       ? "ring-2 ring-neutral-500/50 ring-offset-1"
-                      : "border border-zinc-700"
+                      : "border border-neutral-700"
                   }`}
 
                 />
@@ -224,7 +224,7 @@ function ChallengeCard({
                   className={`${mono} w-11 h-11 rounded-full flex items-center justify-center text-sm font-normal transition-all ${
                     urgent && needsMyPlay
                       ? "bg-neutral-400/40 text-neutral-300 ring-2 ring-neutral-500/50 ring-offset-1 ring-offset-[#09090b]"
-                      : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                      : "bg-neutral-800 text-neutral-400 border border-neutral-700"
                   }`}
                 >
                   {opponent.name[0]?.toUpperCase()}
@@ -241,14 +241,14 @@ function ChallengeCard({
             <div className="flex-1 min-w-0">
               <p
                 className={`text-[14px] font-bold truncate leading-tight transition-colors ${
-                  urgent && needsMyPlay ? "text-white" : "text-zinc-200"
+                  urgent && needsMyPlay ? "text-white" : "text-neutral-200"
                 }`}
               >
                 {challenge.blitzTitle}
               </p>
-              <p className="text-zinc-500 text-[12px] mt-0.5">
+              <p className="text-neutral-500 text-[12px] mt-0.5">
                 vs{" "}
-                <span className="text-zinc-400 font-semibold">
+                <span className="text-neutral-400 font-semibold">
                   @{opponent.name}
                 </span>
               </p>
@@ -273,7 +273,7 @@ function ChallengeCard({
                 )}
                 {isPending && myScore !== null && theirScore === null && (
                   <span
-                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-zinc-500 bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 rounded-lg`}
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-neutral-500 bg-neutral-800 border border-neutral-700/60 px-2 py-0.5 rounded-lg`}
                     style={{ letterSpacing: "0.06em" }}
                   >
                     <Clock className="w-2.5 h-2.5" /> {hoursLeft}h left
@@ -289,7 +289,7 @@ function ChallengeCard({
                 )}
                 {iLost && (
                   <span
-                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-zinc-600 bg-zinc-800/80 border border-zinc-700/50 px-2 py-0.5 rounded-lg`}
+                    className={`${mono} inline-flex items-center gap-1 text-[10px] font-bold uppercase text-neutral-600 bg-neutral-800/80 border border-neutral-700/50 px-2 py-0.5 rounded-lg`}
                     style={{ letterSpacing: "0.06em" }}
                   >
                     <XCircle className="w-2.5 h-2.5" /> Lost
@@ -302,12 +302,12 @@ function ChallengeCard({
             {isCompleted && myScore !== null && theirScore !== null ? (
               <div className="flex-shrink-0 text-right">
                 <div
-                  className={`${mono} text-[24px] font-normal tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-zinc-600"}`}
+                  className={`${mono} text-[24px] font-normal tabular-nums leading-none ${iWon ? "text-emerald-400" : "text-neutral-600"}`}
                 >
                   {myScore}
                 </div>
                 <div
-                  className={`${mono} text-[11px] text-zinc-600 tabular-nums mt-0.5`}
+                  className={`${mono} text-[11px] text-neutral-600 tabular-nums mt-0.5`}
                 >
                   vs {theirScore}
                 </div>
@@ -317,7 +317,7 @@ function ChallengeCard({
                 className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                   urgent
                     ? "bg-neutral-600 group-hover:bg-neutral-500."
-                    : "bg-zinc-800 group-hover:bg-zinc-700"
+                    : "bg-neutral-800 group-hover:bg-neutral-700"
                 }`}
               >
                 <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
@@ -506,15 +506,15 @@ export default function ChallengesPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-7 items-start">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-0.5 p-[3px] bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-xl">
+            <div className="inline-flex items-center gap-0.5 p-[3px] bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-xl">
               <button
                 onClick={() => setActiveTab("active")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === "active"
                     ? needsMyPlay.length > 0
                       ? "bg-neutral-600 text-white"
-                      : "bg-zinc-800 text-white"
-                    : "text-zinc-500 hover:text-zinc-300"
+                      : "bg-neutral-800 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <Swords className="w-3.5 h-3.5" />
@@ -531,15 +531,15 @@ export default function ChallengesPage() {
                 onClick={() => setActiveTab("history")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                   activeTab === "history"
-                    ? "bg-zinc-800 text-white"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <History className="w-3.5 h-3.5" />
                 History
                 {history.length > 0 && (
                   <span
-                    className={`${mono} text-zinc-600 text-[11px] font-medium`}
+                    className={`${mono} text-neutral-600 text-[11px] font-medium`}
                   >
                     {wins}W {losses}L
                   </span>
@@ -588,9 +588,9 @@ export default function ChallengesPage() {
                   {waiting.length > 0 && (
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-zinc-700" />
+                        <div className="w-2 h-2 rounded-full bg-neutral-700" />
                         <p
-                          className={`${mono} text-[10px] font-bold text-zinc-600 uppercase`}
+                          className={`${mono} text-[10px] font-bold text-neutral-600 uppercase`}
                           style={{ letterSpacing: "0.12em" }}
                         >
                           Waiting on them
@@ -611,12 +611,12 @@ export default function ChallengesPage() {
                   )}
 
                   {pending.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-zinc-800 p-14 text-center">
-                      <Swords className="w-10 h-10 text-zinc-800 mx-auto mb-4" />
-                      <p className="text-zinc-500 text-sm font-semibold">
+                    <div className="rounded-2xl border border-dashed border-neutral-800 p-14 text-center">
+                      <Swords className="w-10 h-10 text-neutral-800 mx-auto mb-4" />
+                      <p className="text-neutral-500 text-sm font-semibold">
                         No active challenges
                       </p>
-                      <p className="text-zinc-700 text-xs mt-2 max-w-xs mx-auto leading-relaxed">
+                      <p className="text-neutral-700 text-xs mt-2 max-w-xs mx-auto leading-relaxed">
                         Open any Blitz and hit "Challenge a Friend" to start
                         competing.
                       </p>
@@ -634,16 +634,16 @@ export default function ChallengesPage() {
                   className="space-y-2.5"
                 >
                   {history.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-zinc-800 p-14 text-center">
-                      <History className="w-10 h-10 text-zinc-800 mx-auto mb-4" />
-                      <p className="text-zinc-500 text-sm">
+                    <div className="rounded-2xl border border-dashed border-neutral-800 p-14 text-center">
+                      <History className="w-10 h-10 text-neutral-800 mx-auto mb-4" />
+                      <p className="text-neutral-500 text-sm">
                         No completed challenges yet.
                       </p>
                     </div>
                   ) : (
                     <>
                       {wins + losses > 0 && (
-                        <div className="flex items-center gap-5 px-5 py-3.5 rounded-xl border border-zinc-800 bg-[rgba(9,9,11,0.6)] mb-4">
+                        <div className="flex items-center gap-5 px-5 py-3.5 rounded-xl border border-neutral-800 bg-[rgba(9,9,11,0.6)] mb-4">
                           <div>
                             <span
                               className={`${mono} text-[24px] font-normal text-emerald-400 tabular-nums`}
@@ -651,28 +651,28 @@ export default function ChallengesPage() {
                               {wins}
                             </span>
                             <span
-                              className={`${mono} text-[11px] text-zinc-600 uppercase ml-1.5`}
+                              className={`${mono} text-[11px] text-neutral-600 uppercase ml-1.5`}
                               style={{ letterSpacing: "0.08em" }}
                             >
                               W
                             </span>
                           </div>
-                          <div className="w-px h-6 bg-zinc-800" />
+                          <div className="w-px h-6 bg-neutral-800" />
                           <div>
                             <span
-                              className={`${mono} text-[24px] font-normal text-zinc-500 tabular-nums`}
+                              className={`${mono} text-[24px] font-normal text-neutral-500 tabular-nums`}
                             >
                               {losses}
                             </span>
                             <span
-                              className={`${mono} text-[11px] text-zinc-600 uppercase ml-1.5`}
+                              className={`${mono} text-[11px] text-neutral-600 uppercase ml-1.5`}
                               style={{ letterSpacing: "0.08em" }}
                             >
                               L
                             </span>
                           </div>
-                          <div className="w-px h-6 bg-zinc-800" />
-                          <span className="text-[13px] font-bold text-zinc-400">
+                          <div className="w-px h-6 bg-neutral-800" />
+                          <span className="text-[13px] font-bold text-neutral-400">
                             {Math.round((wins / (wins + losses)) * 100)}% win
                             rate
                           </span>
@@ -710,7 +710,7 @@ export default function ChallengesPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] overflow-hidden">
+            <div className="rounded-2xl border border-neutral-800 bg-[rgba(9,9,11,0.8)] overflow-hidden">
               {uid && <FriendRanking friends={friends} currentUid={uid} />}
             </div>
           </motion.div>

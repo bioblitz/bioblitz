@@ -61,7 +61,7 @@ export const getTopicColors = (topic: string | undefined) => {
     case "Multiple":
       return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", shadow: "hover:shadow-yellow-500/10 hover:border-yellow-500/50", badge: "bg-yellow-600 text-white" };
     default:
-      return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20", shadow: "hover:shadow-zinc-500/10 hover:border-zinc-500/50", badge: "bg-zinc-600 text-white" };
+      return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20", shadow: "hover:shadow-neutral-500/10 hover:border-neutral-500/50", badge: "bg-neutral-600 text-white" };
   }
 };
 

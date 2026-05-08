@@ -19,7 +19,7 @@ const tierHexByColor: Record<string, string> = {
   slate: "#d4d4d8",
   neutral: "#a1a1aa",
   yellow: "#facc15",
-  zinc: "#d4d4d8",
+  neutral: "#d4d4d8",
   orange: "#fb923c",
 };
 
@@ -35,9 +35,9 @@ interface EloChartProps {
 export default function EloChart({ eloHistory }: EloChartProps) {
   if (eloHistory.length === 0) {
     return (
-      <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6 shadow-xl">
+      <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6 shadow-xl">
         <h3 className="text-lg font-bold text-white mb-4">Rating History</h3>
-        <div className="h-64 flex items-center justify-center text-zinc-600">
+        <div className="h-64 flex items-center justify-center text-neutral-600">
           <p>No rating history yet</p>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function EloChart({ eloHistory }: EloChartProps) {
   }));
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6 shadow-xl overflow-hidden relative group">
+    <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6 shadow-xl overflow-hidden relative group">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-bold text-white">Rating History</h3>
@@ -63,7 +63,7 @@ export default function EloChart({ eloHistory }: EloChartProps) {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.5)]" />
-            <span className="text-[10px] font-medium text-zinc-400 tracking-wider">Elo</span>
+            <span className="text-[10px] font-medium text-neutral-400 tracking-wider">Elo</span>
           </div>
         </div>
       </div>
@@ -117,8 +117,8 @@ export default function EloChart({ eloHistory }: EloChartProps) {
                   const data = payload[0].payload as EloHistoryPoint;
                   const tier = getRatingTier(Math.round(data.elo));
                   return (
-                    <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter mb-1">{data.fullDate}</p>
+                    <div className="bg-neutral-900 border border-neutral-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
+                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-tighter mb-1">{data.fullDate}</p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-black text-white">{Math.round(data.elo)}</span>
                         {data.delta !== undefined && data.delta !== 0 && (
@@ -135,7 +135,7 @@ export default function EloChart({ eloHistory }: EloChartProps) {
                         <span className={`text-[11px] font-semibold ${tier.textClass}`}>
                           {tier.label}
                         </span>
-                        <span className="text-[10px] text-zinc-500">{data.date}</span>
+                        <span className="text-[10px] text-neutral-500">{data.date}</span>
                       </div>
                     </div>
                   );

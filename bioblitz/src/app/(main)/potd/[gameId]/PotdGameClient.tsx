@@ -63,7 +63,7 @@ const getTopicColors = (topic: string | undefined) => {
     case "Multiple":
       return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" };
     default:
-      return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" };
+      return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20" };
   }
 };
 
@@ -287,7 +287,7 @@ export default function PotdGameClient({
 
   return (
     <div
-      className={`${inter.className} min-h-screen bg-neutral-900 text-zinc-100 relative overflow-hidden`}
+      className={`${inter.className} min-h-screen bg-neutral-900 text-neutral-100 relative overflow-hidden`}
     >
       <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900 pointer-events-none" />
 
@@ -310,13 +310,13 @@ export default function PotdGameClient({
                       ? router.push("/potd")
                       : router.push(`/potd/${nextPuzzleEntry.id}`)
                   }
-                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                  className="text-neutral-600 hover:text-neutral-300 transition-colors"
                   title="Newer problem"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
               )}
-              <span className="text-zinc-500 text-sm">
+              <span className="text-neutral-500 text-sm">
                 {new Date(puzzle.date).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -326,7 +326,7 @@ export default function PotdGameClient({
               {prevPuzzle && (
                 <button
                   onClick={() => router.push(`/potd/${prevPuzzle.id}`)}
-                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                  className="text-neutral-600 hover:text-neutral-300 transition-colors"
                   title="Older problem"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -347,21 +347,21 @@ export default function PotdGameClient({
         {loadingUser ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
             <Loader2 className="w-10 h-10 text-neutral-500 animate-spin" />
-            <p className="text-zinc-500 text-sm font-medium animate-pulse">
+            <p className="text-neutral-500 text-sm font-medium animate-pulse">
               Loading Your Progress...
             </p>
           </div>
         ) : (
           <div className="space-y-0">
-            <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 mb-8">
+            <div className="flex items-center gap-0.5 p-[3px] border-b border-neutral-800 mb-8">
               {(["problem", "archive"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                     activeTab === tab
-                      ? "bg-zinc-800 text-white shadow-sm shadow-white/5"
-                      : "text-zinc-500 hover:text-zinc-300"
+                      ? "bg-neutral-800 text-white shadow-sm shadow-white/5"
+                      : "text-neutral-500 hover:text-neutral-300"
                   }`}
                 >
                   {tab === "problem" ? "Daily Problem" : "Archive"}
@@ -379,7 +379,7 @@ export default function PotdGameClient({
                       >
                         {puzzle.topic}
                       </span>
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 border border-neutral-800 bg-neutral-900 px-3 py-1 rounded-full">
                         {puzzle.multiSelect ? "Multi-Select" : "Single Choice"}
                       </span>
                       {isCompleted && (
@@ -394,7 +394,7 @@ export default function PotdGameClient({
                       <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
                         {puzzle.title}
                       </h2>
-                      <p className="text-zinc-300 text-lg leading-relaxed">
+                      <p className="text-neutral-300 text-lg leading-relaxed">
                         {puzzle.questionText}
                       </p>
                     </div>
@@ -408,9 +408,9 @@ export default function PotdGameClient({
                         const showResults = isSubmitted;
 
                         let borderClass =
-                          "border-zinc-800 hover:border-zinc-700";
-                        let bgClass = "bg-zinc-900/50 hover:bg-zinc-800";
-                        let textClass = "text-zinc-300";
+                          "border-neutral-800 hover:border-neutral-700";
+                        let bgClass = "bg-neutral-900/50 hover:bg-neutral-800";
+                        let textClass = "text-neutral-300";
 
                         if (showResults) {
                           if (isCorrectKey) {
@@ -445,7 +445,7 @@ export default function PotdGameClient({
                                 ${
                                   isSelected || (showResults && isCorrectKey)
                                     ? "bg-white/20 text-white"
-                                    : "bg-zinc-800 text-zinc-500"
+                                    : "bg-neutral-800 text-neutral-500"
                                 }
                               `}
                             >
@@ -476,12 +476,12 @@ export default function PotdGameClient({
 
                     {isSubmitted && (
                       <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                        <div className="bg-zinc-900 rounded p-6 text-left">
-                          <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm font-bold uppercase tracking-wider">
+                        <div className="bg-neutral-900 rounded p-6 text-left">
+                          <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold uppercase tracking-wider">
                             <Lightbulb className="w-4 h-4 text-yellow-500" />
                             Explanation
                           </div>
-                          <p className="text-zinc-300 leading-relaxed">
+                          <p className="text-neutral-300 leading-relaxed">
                             {puzzle.explanation}
                           </p>
                         </div>
@@ -498,7 +498,7 @@ export default function PotdGameClient({
                             ${
                               selectedOptions.length > 0 && !submitting
                                 ? "bg-neutral-600 text-white hover:bg-neutral-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-neutral-900/20"
-                                : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
                             }
                           `}
                         >
@@ -523,13 +523,13 @@ export default function PotdGameClient({
                 <div className="flex flex-col gap-6 mb-8">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="relative flex-grow">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search past questions..."
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-neutral-600"
                       />
                     </div>
                   </div>
@@ -537,7 +537,7 @@ export default function PotdGameClient({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredArchive.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-zinc-500">
+                    <div className="col-span-full py-12 text-center text-neutral-500">
                       No past problems found.
                     </div>
                   ) : (
@@ -551,7 +551,7 @@ export default function PotdGameClient({
                           href={`/potd/${p.id}`}
                           className="block group"
                         >
-                          <div className="relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                          <div className="relative h-full flex flex-col justify-between bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1">
                             <div className="p-5">
                               <div className="flex justify-between items-start mb-3">
                                 <span
@@ -568,7 +568,7 @@ export default function PotdGameClient({
                                 {isPlayed && (
                                   <div
                                     title="Redo Problem"
-                                    className="absolute top-5 right-5 text-zinc-600 group-hover:text-zinc-400 transition-colors"
+                                    className="absolute top-5 right-5 text-neutral-600 group-hover:text-neutral-400 transition-colors"
                                   >
                                     <RotateCcw className="w-4 h-4" />
                                   </div>
@@ -577,10 +577,10 @@ export default function PotdGameClient({
                               <h2 className="text-lg font-bold text-white mb-2 line-clamp-2">
                                 {p.title}
                               </h2>
-                              <p className="text-sm text-zinc-500 line-clamp-2 mb-3">
+                              <p className="text-sm text-neutral-500 line-clamp-2 mb-3">
                                 {p.questionText}
                               </p>
-                              <div className="flex items-center text-sm text-zinc-400 mt-auto">
+                              <div className="flex items-center text-sm text-neutral-400 mt-auto">
                                 <Calendar className="w-3 h-3 mr-2" />
                                 <span className="truncate">
                                   {new Date(p.date).toLocaleDateString(

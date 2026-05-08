@@ -19,14 +19,14 @@ export default function RankedRatingCard({
   const padding = (maxElo - minElo) * 0.2 || 50;
 
   return (
-    <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl flex flex-col shadow-xl relative overflow-hidden h-full min-h-75">
+    <div className="bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 rounded-3xl flex flex-col shadow-xl relative overflow-hidden h-full min-h-75">
       <div className="absolute inset-0 bg-linear-to-br from-neutral-500/5 to-transparent opacity-50 pointer-events-none" />
       <div className="relative z-10 flex flex-col items-center pt-8 pb-4">
-        <h3 className="text-zinc-400 text-sm font-medium uppercase tracking-wider mb-1">
+        <h3 className="text-neutral-400 text-sm font-medium uppercase tracking-wider mb-1">
           Ranked Rating
         </h3>
         <div className="flex items-center gap-3">
-          <span className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-zinc-400 tracking-tighter">
+          <span className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-neutral-400 tracking-tighter">
             {Math.round(rating || 0)}
           </span>
           {eloHistory.length > 1 && (
@@ -66,7 +66,7 @@ export default function RankedRatingCard({
                   if (active && payload && payload.length) {
                     const data = payload[0].payload as EloHistoryPoint;
                     return (
-                      <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-2xl backdrop-blur-md">
+                      <div className="bg-neutral-900 border border-neutral-800 p-2 rounded-lg shadow-2xl backdrop-blur-md">
                         <div className="flex items-baseline gap-2">
                           <span className="text-sm font-bold text-white">{Math.round(data.elo)}</span>
                           {data.delta !== undefined && data.delta !== 0 && (
@@ -93,7 +93,7 @@ export default function RankedRatingCard({
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-full text-zinc-600 text-sm pb-8">
+          <div className="flex items-center justify-center h-full text-neutral-600 text-sm pb-8">
             Play more games to see history
           </div>
         )}

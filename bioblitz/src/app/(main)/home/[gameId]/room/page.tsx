@@ -623,7 +623,7 @@ export default function GameRoomPage() {
                   className={`text-[10px] px-2.5 py-1 rounded-lg font-normal mb-2 ${
                     isRanked
                       ? "bg-neutral-600 text-white"
-                      : "bg-zinc-800 text-zinc-400"
+                      : "bg-neutral-800 text-neutral-400"
                   }`}
                   style={{ letterSpacing: "0.08em" }}
                 >
@@ -643,7 +643,7 @@ export default function GameRoomPage() {
                   className={`px-5 py-2 rounded-xl font-bold text-[14px] transition-all capitalize ${
                     activeTab === tab
                       ? "bg-neutral-600 text-white shadow-lg shadow-neutral-900/40"
-                      : "bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                      : "bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
                   }`}
                 >
                   {tab === "result" ? "Results" : "Leaderboard"}
@@ -651,7 +651,7 @@ export default function GameRoomPage() {
               ))}
               <button
                 onClick={() => router.push("/home")}
-                className="px-5 py-2 rounded-xl bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[14px] hover:bg-white hover:text-black hover:border-white transition-all"
+                className="px-5 py-2 rounded-xl bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[14px] hover:bg-white hover:text-black hover:border-white transition-all"
               >
                 Back to Home
               </button>
@@ -667,12 +667,12 @@ export default function GameRoomPage() {
                       currentQuestion > 0 && goTo(currentQuestion - 1)
                     }
                     disabled={currentQuestion === 0}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     Prev
                   </button>
-                  <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1 bg-neutral-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-neutral-500 rounded-full transition-all duration-300"
                       style={{
@@ -681,7 +681,7 @@ export default function GameRoomPage() {
                     />
                   </div>
                   <span
-                    className={`text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0`}
+                    className={`text-neutral-400 text-[11px] font-[700] tabular-nums shrink-0`}
                   >
                     {currentQuestion + 1} / {questions.length}
                   </span>
@@ -691,14 +691,14 @@ export default function GameRoomPage() {
                       goTo(currentQuestion + 1)
                     }
                     disabled={currentQuestion === questions.length - 1}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                   >
                     Next
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
+                <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-6 md:p-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <span className="text-neutral-400 text-sm">
@@ -713,12 +713,12 @@ export default function GameRoomPage() {
                   </div>
 
                   <div
-                    className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                    className="mb-6 text-[18px] leading-relaxed text-neutral-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                     dangerouslySetInnerHTML={{ __html: question.content }}
                   />
 
                   {question.imgURL && (
-                    <div className="mb-6 rounded-xl overflow-hidden border border-zinc-800 bg-neutral-900">
+                    <div className="mb-6 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900">
                       <img
                         src={question.imgURL}
                         alt={`Question ${currentQuestion + 1}`}
@@ -743,14 +743,14 @@ export default function GameRoomPage() {
                           className={`group flex items-center w-full px-5 py-4 rounded-xl text-left border transition-all duration-200 ${
                             isSelected
                               ? "bg-neutral-600 text-white border-neutral-500 shadow-lg shadow-neutral-900/30"
-                              : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border-zinc-700/60 hover:bg-zinc-800 hover:text-white hover:border-neutral-500/50"
+                              : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border-neutral-700/60 hover:bg-neutral-800 hover:text-white hover:border-neutral-500/50"
                           }`}
                         >
                           <span
                             className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-normal text-[12px] uppercase transition-colors ${
                               isSelected
                                 ? "bg-white/20 text-white"
-                                : "bg-neutral-900/30 text-zinc-500 group-hover:text-white"
+                                : "bg-neutral-900/30 text-neutral-500 group-hover:text-white"
                             }`}
                           >
                             {key}
@@ -775,7 +775,7 @@ export default function GameRoomPage() {
                   </button>
                   <button
                     onClick={() => setShowConfirmModal(true)}
-                    className="w-full md:w-auto px-10 py-4 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 text-[16px] font-bold rounded-xl hover:bg-zinc-800 hover:text-white transition-all"
+                    className="w-full md:w-auto px-10 py-4 bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 text-[16px] font-bold rounded-xl hover:bg-neutral-800 hover:text-white transition-all"
                   >
                     Quit Blitz
                   </button>
@@ -788,29 +788,29 @@ export default function GameRoomPage() {
                 {!finalResult ? (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
                     <Loader2 className="w-10 h-10 text-neutral-500 animate-spin mb-4" />
-                    <p className="text-[18px] font-bold text-zinc-400 animate-pulse">
+                    <p className="text-[18px] font-bold text-neutral-400 animate-pulse">
                       Calculating score...
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                      <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                      <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-neutral-500 font-medium text-[13px] mb-2">
                           Correct
                         </h2>
                         <p className="text-[28px] font-[900] text-white">
                           <span className="text-neutral-400">
                             {finalResult.correctCount}
                           </span>
-                          <span className={`text-zinc-600 text-[18px]`}>
+                          <span className={`text-neutral-600 text-[18px]`}>
                             {" "}
                             / {finalResult.totalQuestions}
                           </span>
                         </p>
                       </div>
-                      <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                      <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-neutral-500 font-medium text-[13px] mb-2">
                           Time
                         </h2>
                         <p className={`text-[24px] font-normal text-white`}>
@@ -819,7 +819,7 @@ export default function GameRoomPage() {
                       </div>
                       <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
-                        <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">
+                        <h2 className="relative text-neutral-500 font-medium text-[13px] mb-2">
                           Rank
                         </h2>
                         {loadingLeaderboard ? (
@@ -838,18 +838,18 @@ export default function GameRoomPage() {
                           </p>
                         ) : (
                           <p
-                            className={`relative text-[20px] font-normal text-zinc-500`}
+                            className={`relative text-[20px] font-normal text-neutral-500`}
                           >
                             —
                           </p>
                         )}
                       </div>
-                      <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-                        <h2 className="text-zinc-500 font-medium text-[13px] mb-2">
+                      <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 p-6 rounded-2xl text-center">
+                        <h2 className="text-neutral-500 font-medium text-[13px] mb-2">
                           Rating
                         </h2>
                         {!isRanked || isOwnBlitz ? (
-                          <p className="text-[14px] font-[700] text-zinc-500">
+                          <p className="text-[14px] font-[700] text-neutral-500">
                             {isOwnBlitz ? "Your blitz" : "Practice"}
                           </p>
                         ) : finalResult.ratingDelta !== null ? (
@@ -860,7 +860,7 @@ export default function GameRoomPage() {
                             {finalResult.ratingDelta}
                           </p>
                         ) : ratingTimedOut ? (
-                          <p className="text-[12px] font-[700] text-zinc-500 leading-snug">
+                          <p className="text-[12px] font-[700] text-neutral-500 leading-snug">
                             Pending
                             <br />
                             activation
@@ -868,7 +868,7 @@ export default function GameRoomPage() {
                         ) : (
                           <div className="flex flex-col items-center gap-1 mt-1">
                             <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
-                            <p className="text-[10px] text-zinc-500">
+                            <p className="text-[10px] text-neutral-500">
                               Calculating…
                             </p>
                           </div>
@@ -892,10 +892,10 @@ export default function GameRoomPage() {
                       return (
                         <div
                           key={idx}
-                          className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8"
+                          className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-6 md:p-8"
                         >
                           <div className="flex items-center gap-3 mb-4">
-                            <span className="text-zinc-400 text-sm">
+                            <span className="text-neutral-400 text-sm">
                               Question {idx + 1}
                             </span>
                             <BookmarkButton
@@ -912,14 +912,14 @@ export default function GameRoomPage() {
                             />
                           </div>
                           <div
-                            className="mb-6 text-[18px] text-zinc-100"
+                            className="mb-6 text-[18px] text-neutral-100"
                             dangerouslySetInnerHTML={{ __html: q.content }}
                           />
                           {q.imgURL && (
                             <img
                               src={q.imgURL}
                               alt={`Question ${idx + 1}`}
-                              className="mb-6 rounded-xl max-h-[300px] w-auto border border-zinc-800"
+                              className="mb-6 rounded-xl max-h-[300px] w-auto border border-neutral-800"
                             />
                           )}
                           <div className="flex flex-col space-y-2.5">
@@ -927,7 +927,7 @@ export default function GameRoomPage() {
                               const isChoiceCorrect = correctArr.includes(key);
                               const isUserChoice = userArr.includes(key);
                               let bgClass =
-                                "bg-[rgba(24,24,27,0.6)] border-zinc-700/60 text-zinc-500";
+                                "bg-[rgba(24,24,27,0.6)] border-neutral-700/60 text-neutral-500";
                               if (isChoiceCorrect)
                                 bgClass =
                                   "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
@@ -977,7 +977,7 @@ export default function GameRoomPage() {
             )}
 
             {submitted && activeTab === "leaderboard" && (
-              <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-8">
+              <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-8">
                 <h2
                   className="text-[22px] font-[900] mb-6 text-center"
                   style={{ letterSpacing: "-0.02em" }}
@@ -987,12 +987,12 @@ export default function GameRoomPage() {
                 {loadingLeaderboard ? (
                   <div className="flex flex-col items-center">
                     <Loader2 className="w-8 h-8 text-neutral-500 animate-spin mb-2" />
-                    <span className="text-zinc-500 text-[13px]">
+                    <span className="text-neutral-500 text-[13px]">
                       Loading leaderboard...
                     </span>
                   </div>
                 ) : leaderboard.length === 0 ? (
-                  <p className="text-zinc-600 text-center text-[14px]">
+                  <p className="text-neutral-600 text-center text-[14px]">
                     No submissions yet.
                   </p>
                 ) : (
@@ -1011,12 +1011,12 @@ export default function GameRoomPage() {
                           className={`flex items-center gap-4 px-4 py-3 rounded-xl transition ${
                             isCurrentUser
                               ? "bg-neutral-500/[0.08] border border-neutral-500/30 text-white font-semibold"
-                              : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border border-transparent hover:border-zinc-800"
+                              : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border border-transparent hover:border-neutral-800"
                           }`}
                         >
                           <div className="w-6 flex justify-center">
                             <span
-                              className={`font-bold text-zinc-600 w-6 text-center text-[12px]`}
+                              className={`font-bold text-neutral-600 w-6 text-center text-[12px]`}
                             >
                               #{idx + 1}
                             </span>
@@ -1024,7 +1024,7 @@ export default function GameRoomPage() {
                           <img
                             src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
                             alt={displayName}
-                            className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900"
+                            className="w-9 h-9 rounded-full border border-neutral-800 bg-neutral-900"
                           />
                           <div className="truncate flex-1 text-left text-[13px] font-bold">
                             {displayName ? (
@@ -1042,12 +1042,12 @@ export default function GameRoomPage() {
                           </div>
                           <div className="text-right">
                             <span
-                              className={`font-normal text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-zinc-300"}`}
+                              className={`font-normal text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-neutral-300"}`}
                             >
                               {entry.correctCount ?? "?"}/
                               {entry.totalQuestions ?? "?"}
                             </span>
-                            <p className={`text-[11px] text-zinc-500`}>
+                            <p className={`text-[11px] text-neutral-500`}>
                               {formatTime(entry.timeTaken)}
                             </p>
                           </div>
@@ -1100,7 +1100,7 @@ export default function GameRoomPage() {
                     {`${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                   </span>
                   <span
-                    className={`text-zinc-500 text-[10px] font-medium mt-1`}
+                    className={`text-neutral-500 text-[10px] font-medium mt-1`}
                     style={{ letterSpacing: "0.06em" }}
                   >
                     Remaining
@@ -1110,12 +1110,12 @@ export default function GameRoomPage() {
             )}
 
             <div
-              className="w-full bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden"
+              className="w-full bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl overflow-hidden"
               style={{ width: size }}
             >
               <button
                 onClick={() => setShowReviewPanel((p) => !p)}
-                className="w-full flex items-center justify-between px-4 py-3 text-zinc-300 hover:text-white transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 text-neutral-300 hover:text-white transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <ClipboardList className="w-4 h-4" />
@@ -1123,7 +1123,7 @@ export default function GameRoomPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {unansweredCount > 0 && (
-                    <span className="bg-zinc-700 text-zinc-300 text-[10px] font-normal px-1.5 py-0.5 rounded-full">
+                    <span className="bg-neutral-700 text-neutral-300 text-[10px] font-normal px-1.5 py-0.5 rounded-full">
                       {unansweredCount}
                     </span>
                   )}
@@ -1134,7 +1134,7 @@ export default function GameRoomPage() {
               </button>
 
               {showReviewPanel && (
-                <div className="px-3 pb-3 border-t border-zinc-800">
+                <div className="px-3 pb-3 border-t border-neutral-800">
                   <div className="grid grid-cols-5 gap-1.5 pt-3">
                     {questions.map((_, i) => {
                       const a = userAnswers[i];
@@ -1148,14 +1148,14 @@ export default function GameRoomPage() {
                           title={`Question ${i + 1}`}
                           className={`h-8 rounded-lg text-[11px] font-normal transition-all border ${
                             isCurrent
-                              ? "ring-2 ring-neutral-400 ring-offset-1 ring-offset-zinc-950"
+                              ? "ring-2 ring-neutral-400 ring-offset-1 ring-offset-neutral-950"
                               : ""
                           } ${
                             isFlagged
                               ? "bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25"
                               : isAnswered
-                                ? "bg-neutral-600/70 border-neutral-500/40 text-zinc-200 hover:bg-neutral-500/70"
-                                : "bg-zinc-800/80 border-zinc-700 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
+                                ? "bg-neutral-600/70 border-neutral-500/40 text-neutral-200 hover:bg-neutral-500/70"
+                                : "bg-neutral-800/80 border-neutral-700 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
                           }`}
                         >
                           {i + 1}
@@ -1166,20 +1166,20 @@ export default function GameRoomPage() {
                   <div className="flex flex-col gap-1.5 mt-3 text-[10px]">
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-sm bg-neutral-600/70 border border-neutral-500/40 shrink-0" />
-                      <span className="text-zinc-500">
+                      <span className="text-neutral-500">
                         {answeredCount} answered
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-sm bg-zinc-800/80 border border-zinc-700 shrink-0" />
-                      <span className="text-zinc-500">
+                      <div className="w-2 h-2 rounded-sm bg-neutral-800/80 border border-neutral-700 shrink-0" />
+                      <span className="text-neutral-500">
                         {unansweredCount} unanswered
                       </span>
                     </div>
                     {flaggedQuestions.size > 0 && (
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-sm bg-amber-500/15 border border-amber-500/40 shrink-0" />
-                        <span className="text-zinc-500">
+                        <span className="text-neutral-500">
                           {flaggedQuestions.size} flagged
                         </span>
                       </div>
@@ -1194,14 +1194,14 @@ export default function GameRoomPage() {
 
       {showConfirmModal && (
         <div className="fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-          <div className="bg-[rgba(9,9,11,0.95)] border border-zinc-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">
+          <div className="bg-[rgba(9,9,11,0.95)] border border-neutral-800 rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">
             <h2
               className="text-[22px] font-[900] mb-2 text-white"
               style={{ letterSpacing: "-0.02em" }}
             >
               Quit the Blitz?
             </h2>
-            <p className="text-zinc-500 text-[14px] mb-8">
+            <p className="text-neutral-500 text-[14px] mb-8">
               Your current answers will be submitted and you will return to the
               home screen.
             </p>
@@ -1217,7 +1217,7 @@ export default function GameRoomPage() {
               </button>
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 px-6 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-all"
+                className="flex-1 px-6 py-3 bg-neutral-800 text-white font-bold rounded-xl hover:bg-neutral-700 transition-all"
               >
                 Cancel
               </button>

@@ -99,7 +99,7 @@ export default function ReviewPage() {
       <div className={`${dmSans.className} flex items-center justify-center h-screen bg-neutral-900 text-white`}>
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-12 h-12 text-neutral-500 animate-spin" />
-          <p className="text-zinc-500 font-medium tracking-wide animate-pulse">Loading Review...</p>
+          <p className="text-neutral-500 font-medium tracking-wide animate-pulse">Loading Review...</p>
         </div>
       </div>
     );
@@ -122,12 +122,12 @@ export default function ReviewPage() {
 
       {/* Fixed review panel — desktop */}
       <div className="fixed right-4 top-24 z-40 hidden lg:block">
-        <div className="bg-[rgba(9,9,11,0.97)] border border-zinc-800 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden w-[168px]">
+        <div className="bg-[rgba(9,9,11,0.97)] border border-neutral-800 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden w-[168px]">
           <button
             onClick={() => setPanelCollapsed((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 text-zinc-400 hover:text-white transition-colors border-b border-zinc-800/60"
+            className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:text-white transition-colors border-b border-neutral-800/60"
           >
-            <span className={`text-[12px] font-semibold text-zinc-400`}>Review</span>
+            <span className={`text-[12px] font-semibold text-neutral-400`}>Review</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${panelCollapsed ? "-rotate-90" : ""}`} />
           </button>
           {!panelCollapsed && (
@@ -142,7 +142,7 @@ export default function ReviewPage() {
                   const isCorrect = !isUnanswered && userArr.length === correctArr.length &&
                     [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
                   const circleClass = isUnanswered
-                    ? "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-zinc-700"
+                    ? "bg-neutral-800 border-neutral-700 text-neutral-500 hover:bg-neutral-700"
                     : isCorrect
                     ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30"
                     : "bg-red-500/20 border-red-500/50 text-red-300 hover:bg-red-500/30";
@@ -170,7 +170,7 @@ export default function ReviewPage() {
           <div className="mb-8">
             <Link
               href={`/home/${gameId}`}
-              className="inline-flex items-center text-zinc-500 hover:text-white mb-4 transition-colors font-medium text-[13px]"
+              className="inline-flex items-center text-neutral-500 hover:text-white mb-4 transition-colors font-medium text-[13px]"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blitz Info
@@ -186,38 +186,38 @@ export default function ReviewPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-              <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Accuracy</h2>
+            <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 p-6 rounded-2xl text-center">
+              <h2 className="text-neutral-500 font-medium text-[13px] mb-2">Accuracy</h2>
               <p className="text-[24px] font-[900] text-white">
                 <span className="text-neutral-400">{submission.correctCount}</span>
-                <span className={`text-zinc-600 text-[24px]`}> / {submission.totalQuestions}</span>
+                <span className={`text-neutral-600 text-[24px]`}> / {submission.totalQuestions}</span>
               </p>
             </div>
-            <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 p-6 rounded-2xl text-center">
-              <h2 className="text-zinc-500 font-medium text-[13px] mb-2">Time Played</h2>
+            <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 p-6 rounded-2xl text-center">
+              <h2 className="text-neutral-500 font-medium text-[13px] mb-2">Time Played</h2>
               <p className={`text-[24px] font-normal text-white`}>{formatTime(submission.timeTaken)}</p>
             </div>
             <div className="relative bg-[rgba(9,9,11,0.8)] border border-neutral-500/30 p-6 rounded-2xl text-center overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
-              <h2 className="relative text-zinc-500 font-medium text-[13px] mb-2">Rating</h2>
+              <h2 className="relative text-neutral-500 font-medium text-[13px] mb-2">Rating</h2>
               {submission.ratingDelta != null ? (
                 <>
                   <p className={`relative text-[32px] font-normal ${submission.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                     {submission.ratingDelta >= 0 ? "+" : ""}{submission.ratingDelta}
                   </p>
                   {submission.newElo != null && (
-                    <p className={`text-[11px] mt-1 text-zinc-500`}>→ {submission.newElo}</p>
+                    <p className={`text-[11px] mt-1 text-neutral-500`}>→ {submission.newElo}</p>
                   )}
                 </>
               ) : (
-                <p className={`relative text-[18px] font-[700] text-zinc-500`}>Pending</p>
+                <p className={`relative text-[18px] font-[700] text-neutral-500`}>Pending</p>
               )}
             </div>
           </div>
 
           {/* Mobile quick-nav */}
-          <div className="flex lg:hidden gap-2.5 flex-wrap mb-6 p-3 bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl">
-            <span className={`text-[12px] font-semibold text-zinc-400 w-full mb-1.5`}>Review</span>
+          <div className="flex lg:hidden gap-2.5 flex-wrap mb-6 p-3 bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl">
+            <span className={`text-[12px] font-semibold text-neutral-400 w-full mb-1.5`}>Review</span>
             {questions.map((_, idx) => {
               const userAnswer = submission.userAnswers[idx];
               const correctAnswer = submission.correctAnswers?.[idx];
@@ -227,7 +227,7 @@ export default function ReviewPage() {
               const isCorrect = !isUnanswered && userArr.length === correctArr.length &&
                 [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
               const circleClass = isUnanswered
-                ? "bg-zinc-800 border-zinc-700 text-zinc-500"
+                ? "bg-neutral-800 border-neutral-700 text-neutral-500"
                 : isCorrect
                 ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300"
                 : "bg-red-500/20 border-red-500/50 text-red-300";
@@ -259,14 +259,14 @@ export default function ReviewPage() {
                 [...userArr].sort().every((a, i) => a === [...correctArr].sort()[i]);
 
               const statusLabel = isUnanswered ? "Unanswered" : isCorrect ? "Correct" : "Incorrect";
-              const statusDotClass = isUnanswered ? "bg-zinc-600" : isCorrect ? "bg-emerald-500" : "bg-red-500";
-              const statusTextClass = isUnanswered ? "text-zinc-500" : isCorrect ? "text-emerald-400" : "text-red-400";
+              const statusDotClass = isUnanswered ? "bg-neutral-600" : isCorrect ? "bg-emerald-500" : "bg-red-500";
+              const statusTextClass = isUnanswered ? "text-neutral-500" : isCorrect ? "text-emerald-400" : "text-red-400";
 
               return (
                 <div
                   key={idx}
                   id={`question-${idx}`}
-                  className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8 scroll-mt-24"
+                  className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-6 md:p-8 scroll-mt-24"
                 >
                   {/* Question header */}
                   <div className="flex items-center justify-between mb-4">
@@ -293,13 +293,13 @@ export default function ReviewPage() {
 
                   {/* Question text */}
                   <div
-                    className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                    className="mb-6 text-[18px] leading-relaxed text-neutral-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                     dangerouslySetInnerHTML={{ __html: question.content }}
                   />
 
                   {/* Image */}
                   {question.imgURL && (
-                    <div className="mb-6 rounded-xl overflow-hidden border border-zinc-800 bg-neutral-900">
+                    <div className="mb-6 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900">
                       <img
                         src={question.imgURL}
                         alt={`Question ${idx + 1}`}
@@ -318,13 +318,13 @@ export default function ReviewPage() {
                         ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-300"
                         : isUserAnswer
                         ? "bg-red-500/10 border-red-500/50 text-red-300"
-                        : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border-zinc-700/60";
+                        : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border-neutral-700/60";
 
                       const badgeClass = isChoiceCorrect
                         ? "bg-emerald-500/20 text-emerald-300"
                         : isUserAnswer
                         ? "bg-red-500/20 text-red-300"
-                        : "bg-neutral-900/30 text-zinc-500";
+                        : "bg-neutral-900/30 text-neutral-500";
 
                       return (
                         <div

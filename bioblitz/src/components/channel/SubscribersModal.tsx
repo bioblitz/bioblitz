@@ -72,9 +72,9 @@ export default function SubscribersModal({
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl flex flex-col max-h-[80vh] animate-in zoom-in-95 fade-in duration-200">
+      <div className="relative w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl shadow-2xl flex flex-col max-h-[80vh] animate-in zoom-in-95 fade-in duration-200">
         {/* Header */}
-        <div className="p-5 border-b border-zinc-800/50 flex justify-between items-center bg-zinc-900/30 rounded-t-3xl">
+        <div className="p-5 border-b border-neutral-800/50 flex justify-between items-center bg-neutral-900/30 rounded-t-3xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-neutral-500/10 flex items-center justify-center border border-neutral-500/20">
               <Users className="w-5 h-5 text-neutral-400" />
@@ -83,14 +83,14 @@ export default function SubscribersModal({
               <h3 className="font-bold text-white text-lg leading-tight">
                 Subscribers
               </h3>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-neutral-500">
                 People following this channel
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-white"
+            className="p-2 hover:bg-neutral-800 rounded-full transition-colors text-neutral-500 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -101,12 +101,12 @@ export default function SubscribersModal({
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <Loader2 className="w-6 h-6 border-neutral-500 animate-spin text-neutral-500" />
-              <p className="text-xs text-zinc-500 font-medium">
+              <p className="text-xs text-neutral-500 font-medium">
                 Loading fans...
               </p>
             </div>
           ) : subscribers.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500 bg-zinc-900/30 rounded-2xl border border-zinc-800/50 border-dashed m-2">
+            <div className="text-center py-12 text-neutral-500 bg-neutral-900/30 rounded-2xl border border-neutral-800/50 border-dashed m-2">
               <p>No subscribers yet.</p>
             </div>
           ) : (
@@ -116,7 +116,7 @@ export default function SubscribersModal({
                   key={sub.uid}
                   href={`/profile/${sub.username || sub.uid}`} // Fallback if username missing
                   onClick={onClose}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800/50 transition-all group"
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-neutral-900 border border-transparent hover:border-neutral-800/50 transition-all group"
                 >
                   {/* Avatar */}
                   <div className="relative shrink-0">
@@ -125,7 +125,7 @@ export default function SubscribersModal({
                         <img
                           src={sub.photoURL}
                           alt={sub.username || "User"}
-                          className="w-10 h-10 rounded-full object-cover border border-zinc-800 group-hover:border-neutral-500/30 transition-colors"
+                          className="w-10 h-10 rounded-full object-cover border border-neutral-800 group-hover:border-neutral-500/30 transition-colors"
 
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
@@ -145,13 +145,13 @@ export default function SubscribersModal({
 
                   {/* Name Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-zinc-200 font-medium truncate group-hover:text-white transition-colors text-sm">
+                    <p className="text-neutral-200 font-medium truncate group-hover:text-white transition-colors text-sm">
                       {sub.username || "Unknown"}
                     </p>
                   </div>
 
                   {/* Icon */}
-                  <ArrowUpRight className="w-4 h-4 text-zinc-700 group-hover:text-neutral-400 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="w-4 h-4 text-neutral-700 group-hover:text-neutral-400 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               ))}
             </>
@@ -160,8 +160,8 @@ export default function SubscribersModal({
 
         {/* Footer */}
         {!loading && subscribers.length > 0 && (
-          <div className="p-3 border-t border-zinc-800/50 bg-zinc-900/30 text-center rounded-b-3xl">
-            <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
+          <div className="p-3 border-t border-neutral-800/50 bg-neutral-900/30 text-center rounded-b-3xl">
+            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">
               {subscribers.length} Total Subscribers
             </p>
           </div>

@@ -230,13 +230,13 @@ export default function ChannelPage() {
                     <img
                       src={channelOwnerProfile.photoURL}
                       alt="Channel owner"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
 
                     />
                   </div>
                 </>
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black" />
+                <div className="absolute inset-0 bg-gradient-to-b from-neutral-900 to-black" />
               )}
               {isOwner && (
                 <button
@@ -262,7 +262,7 @@ export default function ChannelPage() {
             <div className="flex items-center justify-center min-h-[50vh] text-white">
               <div className="text-center">
                 <h1 className="text-2xl font-bold mb-2">Channel not found</h1>
-                <p className="text-zinc-400 mb-4">
+                <p className="text-neutral-400 mb-4">
                   No user with this username exists.
                 </p>
                 <Link
@@ -283,7 +283,7 @@ export default function ChannelPage() {
                     type="text"
                     value={newChannelName}
                     onChange={(e) => setNewChannelName(e.target.value)}
-                    className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-xl font-bold"
+                    className="px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded text-white text-xl font-bold"
                     placeholder="Channel name"
                     autoFocus
                   />
@@ -296,7 +296,7 @@ export default function ChannelPage() {
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    className="p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded"
+                    className="p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded"
                     title="Cancel"
                   >
                     <X className="w-4 h-4" />
@@ -320,7 +320,7 @@ export default function ChannelPage() {
                     </Link>
                     <button
                       onClick={() => setShowSubscribersModal(true)}
-                      className="text-zinc-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit cursor-pointer"
+                      className="text-neutral-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit cursor-pointer"
                     >
                       {channelOwnerProfile?.subscriberCount || 0} Subscribers
                     </button>
@@ -368,7 +368,7 @@ export default function ChannelPage() {
                         {isOwner &&
                           (game.status !== "completed" ||
                             (game as any).hidden) && (
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-800 text-zinc-400">
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-neutral-800 text-neutral-400">
                               {game.status !== "completed" ? "Draft" : "Hidden"}
                             </span>
                           )}
@@ -377,7 +377,7 @@ export default function ChannelPage() {
                             onClick={() =>
                               router.push(`/contests/create/${game.id}`)
                             }
-                            className="p-1.5 bg-zinc-900/90 hover:bg-zinc-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
+                            className="p-1.5 bg-neutral-900/90 hover:bg-neutral-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
                           >
                             <PencilIcon className="w-3 h-3" />
                             Edit
@@ -388,7 +388,7 @@ export default function ChannelPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-zinc-400">No Blitzes created yet.</p>
+                <p className="text-neutral-400">No Blitzes created yet.</p>
               );
             })()}
           </div>}

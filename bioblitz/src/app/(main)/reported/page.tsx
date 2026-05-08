@@ -109,7 +109,7 @@ export default function ReportedQuestionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100">
         <div className="max-w-4xl mx-auto px-4 py-20">Loading...</div>
       </div>
     );
@@ -117,10 +117,10 @@ export default function ReportedQuestionsPage() {
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100">
         <div className="max-w-4xl mx-auto px-4 py-20">
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-zinc-400">
+          <p className="text-neutral-400">
             You do not have permission to view this page.
           </p>
           <Link
@@ -137,13 +137,13 @@ export default function ReportedQuestionsPage() {
   const FILTERS: ReportStatus[] = ["all", "pending", "resolved"];
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-zinc-100">
+    <div className="min-h-screen bg-neutral-900 text-neutral-100">
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="flex items-center gap-3 mb-2">
-          <Flag className="w-5 h-5 text-zinc-400" />
+          <Flag className="w-5 h-5 text-neutral-400" />
           <h1 className="text-2xl font-bold">Reported Questions</h1>
         </div>
-        <p className="text-zinc-500 text-sm mb-8">
+        <p className="text-neutral-500 text-sm mb-8">
           Questions flagged by users. Mark as resolved once reviewed.
         </p>
 
@@ -154,8 +154,8 @@ export default function ReportedQuestionsPage() {
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
                 filter === f
-                  ? "bg-zinc-700 text-zinc-100"
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                  ? "bg-neutral-700 text-neutral-100"
+                  : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800"
               }`}
             >
               {f}
@@ -164,9 +164,9 @@ export default function ReportedQuestionsPage() {
         </div>
 
         {fetching ? (
-          <p className="text-zinc-500 text-sm">Loading reports...</p>
+          <p className="text-neutral-500 text-sm">Loading reports...</p>
         ) : reports.length === 0 ? (
-          <p className="text-zinc-500 text-sm">
+          <p className="text-neutral-500 text-sm">
             No {filter === "all" ? "" : filter} reports found.
           </p>
         ) : (
@@ -176,22 +176,22 @@ export default function ReportedQuestionsPage() {
                 key={r.id}
                 className={`rounded-xl border px-5 py-4 flex flex-col gap-2 transition-all ${
                   r.status === "resolved"
-                    ? "border-zinc-800 bg-zinc-900/40"
-                    : "border-zinc-700/60 bg-zinc-800/30"
+                    ? "border-neutral-800 bg-neutral-900/40"
+                    : "border-neutral-700/60 bg-neutral-800/30"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-zinc-200">
+                      <p className="text-sm font-semibold text-neutral-200">
                         {r.gameTitle || r.gameId}
                       </p>
-                      <span className="text-zinc-600 text-xs">·</span>
-                      <span className="text-zinc-500 text-xs">
+                      <span className="text-neutral-600 text-xs">·</span>
+                      <span className="text-neutral-500 text-xs">
                         Question #{r.questionIndex + 1}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-600 mt-0.5">
+                    <p className="text-xs text-neutral-600 mt-0.5">
                       {r.reporterName || r.reporterEmail || r.reportedBy} ·{" "}
                       {formatTime(r.createdAt)}
                     </p>
@@ -200,7 +200,7 @@ export default function ReportedQuestionsPage() {
                   <span
                     className={`text-[11px] font-semibold px-2 py-0.5 rounded-md shrink-0 ${
                       r.status === "resolved"
-                        ? "bg-zinc-800 text-zinc-500"
+                        ? "bg-neutral-800 text-neutral-500"
                         : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                     }`}
                   >
@@ -211,8 +211,8 @@ export default function ReportedQuestionsPage() {
                 <p
                   className={`text-sm rounded-lg px-3 py-2 ${
                     r.status === "resolved"
-                      ? "text-zinc-600 bg-zinc-900/60"
-                      : "text-zinc-300 bg-zinc-900/50"
+                      ? "text-neutral-600 bg-neutral-900/60"
+                      : "text-neutral-300 bg-neutral-900/50"
                   }`}
                 >
                   {r.reason}
@@ -222,7 +222,7 @@ export default function ReportedQuestionsPage() {
                   <Link
                     href={`/home/${r.gameId}`}
                     target="_blank"
-                    className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                    className="text-xs text-neutral-600 hover:text-neutral-400 transition-colors"
                   >
                     View game ↗
                   </Link>
@@ -232,7 +232,7 @@ export default function ReportedQuestionsPage() {
                       <button
                         onClick={() => setStatus(r.id, "resolved")}
                         disabled={resolving === r.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold hover:bg-zinc-700 hover:text-zinc-100 transition-all disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-semibold hover:bg-neutral-700 hover:text-neutral-100 transition-all disabled:opacity-50"
                       >
                         <CheckCircle className="w-3.5 h-3.5" />
                         {resolving === r.id ? "Saving..." : "Mark resolved"}
@@ -241,7 +241,7 @@ export default function ReportedQuestionsPage() {
                       <button
                         onClick={() => setStatus(r.id, "pending")}
                         disabled={resolving === r.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-600 text-xs font-semibold hover:bg-zinc-800 hover:text-zinc-400 transition-all disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-600 text-xs font-semibold hover:bg-neutral-800 hover:text-neutral-400 transition-all disabled:opacity-50"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         {resolving === r.id ? "Saving..." : "Unresolve"}

@@ -102,10 +102,10 @@ function MetricCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-zinc-50">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+      <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-neutral-50">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-neutral-500">{hint}</p> : null}
     </div>
   );
 }
@@ -191,15 +191,15 @@ export default function AdminAnalyticsPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(39,39,42,0.35),_transparent_42%),linear-gradient(180deg,_#09090b_0%,_#111113_100%)] text-zinc-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(39,39,42,0.35),_transparent_42%),linear-gradient(180deg,_#09090b_0%,_#111113_100%)] text-neutral-100">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-zinc-800/80 bg-zinc-950/70 p-6 shadow-2xl shadow-black/20 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-neutral-800/80 bg-neutral-950/70 p-6 shadow-2xl shadow-black/20 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Admin analytics</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">Admin analytics</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-50 sm:text-4xl">
               Retention, consent, and product usage in one view.
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-400">
               This dashboard pulls the full analytics payload from the admin API and surfaces the
               operational metrics that matter most: audience size, consent performance, funnel
               health, and the highest-volume tracked events.
@@ -209,14 +209,14 @@ export default function AdminAnalyticsPage() {
             <button
               type="button"
               onClick={() => void loadAnalytics(true)}
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-700 bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex items-center justify-center rounded-xl border border-neutral-700 bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading || refreshing}
             >
               {refreshing ? "Refreshing..." : "Refresh analytics"}
             </button>
             <Link
               href="/admin"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/80 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-700 hover:bg-zinc-800"
+              className="inline-flex items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-2 text-sm font-medium text-neutral-200 transition-colors hover:border-neutral-700 hover:bg-neutral-800"
             >
               Back to Admin
             </Link>
@@ -224,13 +224,13 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {lastUpdatedAt ? (
-          <p className="mb-6 text-xs uppercase tracking-[0.25em] text-zinc-500">
+          <p className="mb-6 text-xs uppercase tracking-[0.25em] text-neutral-500">
             Last updated {lastUpdatedAt.toLocaleString()}
           </p>
         ) : null}
 
         {loading ? (
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-zinc-400">
+          <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-6 text-neutral-400">
             Loading analytics...
           </div>
         ) : error ? (
@@ -239,20 +239,20 @@ export default function AdminAnalyticsPage() {
           </div>
         ) : data ? (
           <>
-            <section className="mb-8 rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+            <section className="mb-8 rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-zinc-50">Trends over time</h2>
-                  <p className="text-sm text-zinc-500">A 30-day view of signups, product activity, and consent volume.</p>
+                  <h2 className="text-lg font-semibold text-neutral-50">Trends over time</h2>
+                  <p className="text-sm text-neutral-500">A 30-day view of signups, product activity, and consent volume.</p>
                 </div>
-                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
                   30 days
                 </span>
               </div>
 
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="mb-3 text-sm text-zinc-300">User and product growth</p>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4">
+                  <p className="mb-3 text-sm text-neutral-300">User and product growth</p>
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={trendRows}>
@@ -277,8 +277,8 @@ export default function AdminAnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="mb-3 text-sm text-zinc-300">Marketing consent over time</p>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4">
+                  <p className="mb-3 text-sm text-neutral-300">Marketing consent over time</p>
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={trendRows}>
@@ -312,13 +312,13 @@ export default function AdminAnalyticsPage() {
             </section>
 
             <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-              <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+              <div className="rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-zinc-50">Users</h2>
-                    <p className="text-sm text-zinc-500">Retention and activity across the installed base.</p>
+                    <h2 className="text-lg font-semibold text-neutral-50">Users</h2>
+                    <p className="text-sm text-neutral-500">Retention and activity across the installed base.</p>
                   </div>
-                  <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                  <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
                     Activity
                   </span>
                 </div>
@@ -332,13 +332,13 @@ export default function AdminAnalyticsPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+              <div className="rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-zinc-50">Marketing consent</h2>
-                    <p className="text-sm text-zinc-500">Popup delivery and opt-in performance.</p>
+                    <h2 className="text-lg font-semibold text-neutral-50">Marketing consent</h2>
+                    <p className="text-sm text-neutral-500">Popup delivery and opt-in performance.</p>
                   </div>
-                  <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                  <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
                     Consent
                   </span>
                 </div>
@@ -353,13 +353,13 @@ export default function AdminAnalyticsPage() {
               </div>
             </section>
 
-            <section className="mb-8 rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+            <section className="mb-8 rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-zinc-50">Product funnel</h2>
-                  <p className="text-sm text-zinc-500">The path from landing page to contest participation.</p>
+                  <h2 className="text-lg font-semibold text-neutral-50">Product funnel</h2>
+                  <p className="text-sm text-neutral-500">The path from landing page to contest participation.</p>
                 </div>
-                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
                   Conversion
                 </span>
               </div>
@@ -374,31 +374,31 @@ export default function AdminAnalyticsPage() {
                 <MetricCard label="Hero → sign-up" value={formatPercent(data.product.funnel.heroToSignupRate)} />
                 <MetricCard label="Sign-up → onboarding" value={formatPercent(data.product.funnel.signupToOnboardingRate)} />
                 <MetricCard label="Onboarding → contest" value={formatPercent(data.product.funnel.onboardingToContestRate)} />
-                <MetricCard label="Matriculation" value={formatPercent(data.product.funnel.matriculationRate)} hint="Hero view → onboarding complete" />
+                <MetricCard label="Matriculation" value={formatPercent(data.product.funnel.matriculationRate)} hint="Sign-in → onboarding complete" />
               </div>
             </section>
 
             <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-              <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+              <div className="rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-zinc-50">Key events</h2>
-                    <p className="text-sm text-zinc-500">Core event counts used in the product funnel.</p>
+                    <h2 className="text-lg font-semibold text-neutral-50">Key events</h2>
+                    <p className="text-sm text-neutral-500">Core event counts used in the product funnel.</p>
                   </div>
-                  <span className="text-sm text-zinc-500">Total: {formatNumber(totalKeyEvents)}</span>
+                  <span className="text-sm text-neutral-500">Total: {formatNumber(totalKeyEvents)}</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {eventRows.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-8 text-sm text-zinc-500 sm:col-span-2">
+                    <div className="rounded-2xl border border-dashed border-neutral-800 px-4 py-8 text-sm text-neutral-500 sm:col-span-2">
                       No product events recorded yet.
                     </div>
                   ) : (
                     eventRows.map((row) => (
-                      <div key={row.eventName} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
+                      <div key={row.eventName} className="rounded-2xl border border-neutral-800 bg-neutral-900/50 px-4 py-3">
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm text-zinc-300">{row.eventName}</span>
-                          <span className="text-sm font-semibold text-zinc-50">{formatNumber(row.count)}</span>
+                          <span className="text-sm text-neutral-300">{row.eventName}</span>
+                          <span className="text-sm font-semibold text-neutral-50">{formatNumber(row.count)}</span>
                         </div>
                       </div>
                     ))
@@ -406,16 +406,16 @@ export default function AdminAnalyticsPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+              <div className="rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-zinc-50">Marketing source breakdown</h2>
-                    <p className="text-sm text-zinc-500">Consent shown, accepted, and declined by source.</p>
+                    <h2 className="text-lg font-semibold text-neutral-50">Marketing source breakdown</h2>
+                    <p className="text-sm text-neutral-500">Consent shown, accepted, and declined by source.</p>
                   </div>
                 </div>
-                <div className="overflow-x-auto rounded-2xl border border-zinc-800">
+                <div className="overflow-x-auto rounded-2xl border border-neutral-800">
                   <table className="w-full text-sm">
-                    <thead className="bg-zinc-900/80 text-zinc-500">
+                    <thead className="bg-neutral-900/80 text-neutral-500">
                       <tr className="text-left">
                         <th className="px-4 py-3">Source</th>
                         <th className="px-4 py-3">Shown</th>
@@ -427,13 +427,13 @@ export default function AdminAnalyticsPage() {
                     <tbody>
                       {sourceRows.length === 0 ? (
                         <tr>
-                          <td className="px-4 py-4 text-zinc-500" colSpan={5}>
+                          <td className="px-4 py-4 text-neutral-500" colSpan={5}>
                             No marketing analytics recorded yet.
                           </td>
                         </tr>
                       ) : (
                         sourceRows.map((row) => (
-                          <tr key={row.source} className="border-t border-zinc-800 text-zinc-200">
+                          <tr key={row.source} className="border-t border-neutral-800 text-neutral-200">
                             <td className="px-4 py-3">{row.source}</td>
                             <td className="px-4 py-3">{formatNumber(row.shown)}</td>
                             <td className="px-4 py-3">{formatNumber(row.accepted)}</td>
@@ -448,18 +448,18 @@ export default function AdminAnalyticsPage() {
               </div>
             </section>
 
-            <section className="mb-8 rounded-[1.75rem] border border-zinc-800 bg-zinc-950/60 p-5">
+            <section className="mb-8 rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-zinc-50">Tracked product events</h2>
-                  <p className="text-sm text-zinc-500">Complete event volume with top entities broken out below.</p>
+                  <h2 className="text-lg font-semibold text-neutral-50">Tracked product events</h2>
+                  <p className="text-sm text-neutral-500">Complete event volume with top entities broken out below.</p>
                 </div>
-                <span className="text-sm text-zinc-500">Total events: {formatNumber(data.product.totalTrackedEvents)}</span>
+                <span className="text-sm text-neutral-500">Total events: {formatNumber(data.product.totalTrackedEvents)}</span>
               </div>
 
-              <div className="overflow-x-auto rounded-2xl border border-zinc-800">
+              <div className="overflow-x-auto rounded-2xl border border-neutral-800">
                 <table className="w-full text-sm">
-                  <thead className="bg-zinc-900/80 text-zinc-500">
+                  <thead className="bg-neutral-900/80 text-neutral-500">
                     <tr className="text-left">
                       <th className="px-4 py-3">Event</th>
                       <th className="px-4 py-3">Count</th>
@@ -469,13 +469,13 @@ export default function AdminAnalyticsPage() {
                   <tbody>
                     {eventRows.length === 0 ? (
                       <tr>
-                        <td className="px-4 py-4 text-zinc-500" colSpan={3}>
+                        <td className="px-4 py-4 text-neutral-500" colSpan={3}>
                           No product events recorded yet.
                         </td>
                       </tr>
                     ) : (
                       eventRows.map((row) => (
-                        <tr key={row.eventName} className="border-t border-zinc-800 text-zinc-200">
+                        <tr key={row.eventName} className="border-t border-neutral-800 text-neutral-200">
                           <td className="px-4 py-3">{row.eventName}</td>
                           <td className="px-4 py-3">{formatNumber(row.count)}</td>
                           <td className="px-4 py-3">{formatPercent(data.product.totalTrackedEvents > 0 ? row.count / data.product.totalTrackedEvents : 0)}</td>
@@ -487,11 +487,11 @@ export default function AdminAnalyticsPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-                  <div className="border-b border-zinc-800 px-4 py-3 text-sm text-zinc-300">Top events</div>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 overflow-hidden">
+                  <div className="border-b border-neutral-800 px-4 py-3 text-sm text-neutral-300">Top events</div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="text-zinc-500">
+                      <thead className="text-neutral-500">
                         <tr className="text-left">
                           <th className="px-4 py-2">Event</th>
                           <th className="px-4 py-2">Count</th>
@@ -501,11 +501,11 @@ export default function AdminAnalyticsPage() {
                       <tbody>
                         {topEventRows.length === 0 ? (
                           <tr>
-                            <td className="px-4 py-4 text-zinc-500" colSpan={3}>No data</td>
+                            <td className="px-4 py-4 text-neutral-500" colSpan={3}>No data</td>
                           </tr>
                         ) : (
                           topEventRows.slice(0, 8).map((row) => (
-                            <tr key={row.event} className="border-t border-zinc-800 text-zinc-200">
+                            <tr key={row.event} className="border-t border-neutral-800 text-neutral-200">
                               <td className="px-4 py-2">{row.event}</td>
                               <td className="px-4 py-2">{formatNumber(row.count)}</td>
                               <td className="px-4 py-2">{formatPercent(row.share)}</td>
@@ -517,11 +517,11 @@ export default function AdminAnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-                  <div className="border-b border-zinc-800 px-4 py-3 text-sm text-zinc-300">Top sources</div>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 overflow-hidden">
+                  <div className="border-b border-neutral-800 px-4 py-3 text-sm text-neutral-300">Top sources</div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="text-zinc-500">
+                      <thead className="text-neutral-500">
                         <tr className="text-left">
                           <th className="px-4 py-2">Source</th>
                           <th className="px-4 py-2">Count</th>
@@ -531,11 +531,11 @@ export default function AdminAnalyticsPage() {
                       <tbody>
                         {topSourceRows.length === 0 ? (
                           <tr>
-                            <td className="px-4 py-4 text-zinc-500" colSpan={3}>No data</td>
+                            <td className="px-4 py-4 text-neutral-500" colSpan={3}>No data</td>
                           </tr>
                         ) : (
                           topSourceRows.slice(0, 8).map((row) => (
-                            <tr key={row.source} className="border-t border-zinc-800 text-zinc-200">
+                            <tr key={row.source} className="border-t border-neutral-800 text-neutral-200">
                               <td className="px-4 py-2">{row.source}</td>
                               <td className="px-4 py-2">{formatNumber(row.count)}</td>
                               <td className="px-4 py-2">{formatPercent(row.share)}</td>
@@ -547,11 +547,11 @@ export default function AdminAnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-                  <div className="border-b border-zinc-800 px-4 py-3 text-sm text-zinc-300">Top pages</div>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 overflow-hidden">
+                  <div className="border-b border-neutral-800 px-4 py-3 text-sm text-neutral-300">Top pages</div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="text-zinc-500">
+                      <thead className="text-neutral-500">
                         <tr className="text-left">
                           <th className="px-4 py-2">Page</th>
                           <th className="px-4 py-2">Count</th>
@@ -561,11 +561,11 @@ export default function AdminAnalyticsPage() {
                       <tbody>
                         {topPageRows.length === 0 ? (
                           <tr>
-                            <td className="px-4 py-4 text-zinc-500" colSpan={3}>No data</td>
+                            <td className="px-4 py-4 text-neutral-500" colSpan={3}>No data</td>
                           </tr>
                         ) : (
                           topPageRows.slice(0, 8).map((row) => (
-                            <tr key={row.page} className="border-t border-zinc-800 text-zinc-200">
+                            <tr key={row.page} className="border-t border-neutral-800 text-neutral-200">
                               <td className="px-4 py-2">{row.page}</td>
                               <td className="px-4 py-2">{formatNumber(row.count)}</td>
                               <td className="px-4 py-2">{formatPercent(row.share)}</td>

@@ -17,9 +17,9 @@ interface RecentSetsProps {
 export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
   if (setsPlayed.length === 0) {
     return (
-      <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+      <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Recent Sets</h3>
-        <div className="h-32 flex items-center justify-center text-zinc-600">
+        <div className="h-32 flex items-center justify-center text-neutral-600">
           <p>No blitzes completed yet</p>
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
   }
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+    <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-white">Recent Sets</h3>
         <BookOpen className="w-5 h-5 text-neutral-500" />
@@ -37,11 +37,11 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
           <Link
             key={i}
             href={`/home/${set.setId}`}
-            className="flex items-center justify-between p-3 bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-colors group"
+            className="flex items-center justify-between p-3 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-colors group"
           >
             <div className="flex-1 min-w-0">
               <p className="text-white font-medium truncate">{set.name}</p>
-              <p className="text-xs text-zinc-500">{set.topic}</p>
+              <p className="text-xs text-neutral-500">{set.topic}</p>
             </div>
             <div className="flex items-center gap-3">
               <span
@@ -55,7 +55,7 @@ export default function RecentSets({ setsPlayed, scrollRef }: RecentSetsProps) {
               >
                 {set.score}%
               </span>
-              <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-neutral-400 transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
             </div>
           </Link>
         ))}

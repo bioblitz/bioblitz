@@ -66,18 +66,18 @@ export default function ImageCropModal({ src, aspect = 16 / 9, onConfirm, onClos
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden w-full max-w-xl shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
+      <div className="bg-neutral-950 border border-neutral-800 rounded-2xl overflow-hidden w-full max-w-xl shadow-2xl flex flex-col">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-800">
           <span className="text-sm font-semibold text-white">Crop Banner</span>
           <button
             onClick={onClose}
-            className="text-zinc-500 hover:text-white transition-colors text-xl leading-none"
+            className="text-neutral-500 hover:text-white transition-colors text-xl leading-none"
           >
             ×
           </button>
         </div>
 
-        <div className="relative w-full bg-zinc-900" style={{ height: 320 }}>
+        <div className="relative w-full bg-neutral-900" style={{ height: 320 }}>
           <Cropper
             image={src}
             crop={crop}
@@ -91,7 +91,7 @@ export default function ImageCropModal({ src, aspect = 16 / 9, onConfirm, onClos
 
         <div className="px-5 py-4 flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-zinc-500 w-10 shrink-0">Zoom</span>
+            <span className="text-xs text-neutral-500 w-10 shrink-0">Zoom</span>
             <input
               type="range"
               min={1}
@@ -105,7 +105,7 @@ export default function ImageCropModal({ src, aspect = 16 / 9, onConfirm, onClos
           <div className="flex gap-3 justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-sm font-bold text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-600 transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 transition-colors"
             >
               Cancel
             </button>

@@ -38,10 +38,10 @@ export default function PotdQuestionCard({
 
   return (
     <section className="relative">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 shadow-2xl group text-center">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-neutral-900 to-neutral-950 border border-neutral-800 shadow-2xl group text-center">
         <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
           <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
-            <span className="text-sm font-medium text-zinc-500 flex items-center gap-2 border border-zinc-800 px-3 py-1 rounded-full">
+            <span className="text-sm font-medium text-neutral-500 flex items-center gap-2 border border-neutral-800 px-3 py-1 rounded-full">
               <Calendar className="w-4 h-4" />
               {new Date(puzzle.date).toLocaleDateString("en-US", {
                 month: "long",
@@ -54,7 +54,7 @@ export default function PotdQuestionCard({
             >
               {puzzle.topic}
             </span>
-            <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 px-2 py-1 rounded-md">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 border border-neutral-800 px-2 py-1 rounded-md">
               {puzzle.multiSelect ? (
                 <ListChecks className="w-3 h-3" />
               ) : (
@@ -75,7 +75,7 @@ export default function PotdQuestionCard({
             <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
               {puzzle.title}
             </h2>
-            <p className="text-zinc-300 text-lg leading-relaxed">
+            <p className="text-neutral-300 text-lg leading-relaxed">
               {puzzle.questionText}
             </p>
           </div>
@@ -86,9 +86,9 @@ export default function PotdQuestionCard({
               const isCorrectKey = puzzle.correctAnswer.includes(option.key);
               const showResults = isSubmitted;
 
-              let borderClass = "border-zinc-800 hover:border-zinc-700";
-              let bgClass = "bg-zinc-900/50 hover:bg-zinc-800";
-              let textClass = "text-zinc-300";
+              let borderClass = "border-neutral-800 hover:border-neutral-700";
+              let bgClass = "bg-neutral-900/50 hover:bg-neutral-800";
+              let textClass = "text-neutral-300";
 
               if (showResults) {
                 if (isCorrectKey) {
@@ -127,7 +127,7 @@ export default function PotdQuestionCard({
                       ${
                         isSelected || (showResults && isCorrectKey)
                           ? "bg-white/20 text-white"
-                          : "bg-zinc-800 text-zinc-500"
+                          : "bg-neutral-800 text-neutral-500"
                       }
                     `}
                   >
@@ -180,12 +180,12 @@ export default function PotdQuestionCard({
                 )}
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-left">
-                <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm font-bold uppercase tracking-wider">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 text-left">
+                <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold uppercase tracking-wider">
                   <Lightbulb className="w-4 h-4 text-yellow-500" />
                   Explanation
                 </div>
-                <p className="text-zinc-300 leading-relaxed">
+                <p className="text-neutral-300 leading-relaxed">
                   {puzzle.explanation}
                 </p>
               </div>
@@ -201,8 +201,8 @@ export default function PotdQuestionCard({
                   px-12 py-3 rounded-xl font-bold text-base transition-all w-full md:w-auto flex items-center justify-center gap-2
                   ${
                     selectedOptions.length > 0 && !submitting
-                      ? "bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                      : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                      ? "bg-white text-black hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                      : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
                   }
                 `}
               >

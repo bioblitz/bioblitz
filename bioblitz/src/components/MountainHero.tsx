@@ -84,8 +84,7 @@ export default function MountainHero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Banner background */}
+    <section className="relative min-h-[calc(100svh-4rem)] flex flex-col items-center justify-center overflow-hidden px-4 py-8 sm:px-6 sm:py-10 lg:py-0">
       <div
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
         style={{
@@ -95,18 +94,16 @@ export default function MountainHero() {
           backgroundSize: "cover",
         }}
       />
-      {/* Dark overlay so text stays readable */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-[1] bg-neutral-900/60" />
       <canvas
         ref={starsRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-[2] opacity-40"
       />
-      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pb-24 pt-0 -mt-[100px] flex flex-col items-center" style={{ zIndex: 10 }}>
+      <div className="relative z-10 text-center w-full max-w-3xl mx-auto flex flex-col items-center justify-center gap-2 sm:gap-3 px-2 sm:px-6 pb-4 sm:pb-8 lg:pb-0 lg:-mt-[100px]" style={{ zIndex: 10 }}>
         <h1
-          className="text-white mb-0 tracking-tight leading-[0.95]"
+          className="text-white mb-0 tracking-tight leading-[0.95] text-[clamp(1.75rem,7vw,6rem)] sm:text-[clamp(2.5rem,7vw,6rem)]"
           style={{
             fontFamily: "var(--font-instrument-serif), serif",
-            fontSize: "clamp(52px, 8vw, 96px)",
             fontWeight: 400,
           }}
         >
@@ -134,9 +131,8 @@ export default function MountainHero() {
         </div>
 
         <p
-          className="text-white/85 max-w-xl mb-6 leading-relaxed hero-reveal"
+          className="text-white/85 max-w-xl mb-0 leading-relaxed hero-reveal text-[clamp(0.78rem,1.9vw,1.125rem)] sm:text-[clamp(1rem,2vw,1.125rem)]"
           style={{
-            fontSize: "clamp(15px, 2vw, 18px)",
             fontWeight: 300,
             animationDelay: "0.5s",
           }}
@@ -148,7 +144,7 @@ export default function MountainHero() {
         </p>
 
         <div
-          className="flex flex-col sm:flex-row gap-3 items-center justify-center hero-reveal"
+          className="mt-2 sm:mt-4 flex flex-col sm:flex-row gap-3 items-center justify-center hero-reveal"
           style={{ animationDelay: "0.65s" }}
         >
           <Link
@@ -160,7 +156,7 @@ export default function MountainHero() {
                 page: "landing",
               });
             }}
-            className="bg-white hover:shadow-[0 0 30px rgba(245, 224, 36, 0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] relative overflow-hidden group"
+            className="bg-white hover:shadow-[0 0 30px rgba(245, 224, 36, 0.6)] rounded-[10px] inline-flex items-center gap-[6px] w-fit text-white font-medium text-[15px] sm:text-[16px] tracking-[-0.13px] px-4 py-2 sm:px-5 sm:py-[10px] relative overflow-hidden group"
           >
             <span className="pointer-events-none absolute inset-0 z-30 bg-neutral-900 opacity-0 group-hover:opacity-20 transition-opacity duration-200" aria-hidden="true" />
 

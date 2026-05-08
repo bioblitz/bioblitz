@@ -29,12 +29,12 @@ export default function ProfileHeader({
     : "Recently";
 
   return (
-    <div className="relative bg-gradient-to-b from-neutral-900/20 to-transparent border-b border-zinc-900 pb-8">
+    <div className="relative bg-gradient-to-b from-neutral-900/20 to-transparent border-b border-neutral-900 pb-8">
       <div className="max-w-6xl mx-auto px-6 pt-8">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
           <div className="relative group">
             <div
-              className={`w-32 h-32 rounded-full ring-4 ring-neutral-500/20 overflow-hidden bg-zinc-900 ${
+              className={`w-32 h-32 rounded-full ring-4 ring-neutral-500/20 overflow-hidden bg-neutral-900 ${
                 pfpLoading ? "opacity-50" : ""
               }`}
             >
@@ -74,7 +74,7 @@ export default function ProfileHeader({
                 {isOwnProfile && (
                   <button
                     onClick={onEditClick}
-                    className="px-4 py-2 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors flex items-center gap-2 border border-zinc-800"
+                    className="px-4 py-2 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-colors flex items-center gap-2 border border-neutral-800"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit Profile
@@ -83,7 +83,7 @@ export default function ProfileHeader({
                 {!isOwnProfile && onReportClick && (
                   <button
                     onClick={onReportClick}
-                    className="px-4 py-2 bg-zinc-900 text-zinc-400 rounded-xl hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2 border border-zinc-800"
+                    className="px-4 py-2 bg-neutral-900 text-neutral-400 rounded-xl hover:bg-neutral-800 hover:text-white transition-colors flex items-center gap-2 border border-neutral-800"
                   >
                     <Flag className="w-4 h-4" />
                   </button>
@@ -92,12 +92,12 @@ export default function ProfileHeader({
             </div>
 
             {userProfile.bio && (
-              <p className="text-zinc-400 mt-4 max-w-2xl leading-relaxed whitespace-pre-wrap">
+              <p className="text-neutral-400 mt-4 max-w-2xl leading-relaxed whitespace-pre-wrap">
                 {userProfile.bio}
               </p>
             )}
 
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-zinc-500">
+            <div className="flex flex-wrap gap-4 mt-4 text-sm text-neutral-500">
               {userProfile.location && (
                 <div className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4" />

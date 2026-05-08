@@ -20,7 +20,7 @@ export default function FriendsSection({
   }
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+    <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-bold text-white">Friends</h3>
@@ -34,7 +34,7 @@ export default function FriendsSection({
       </div>
 
       {loadingFriends ? (
-        <div className="py-8 text-center text-zinc-600">Loading...</div>
+        <div className="py-8 text-center text-neutral-600">Loading...</div>
       ) : (
         <>
           {isOwnProfile && incomingRequests.length > 0 && (
@@ -61,7 +61,7 @@ export default function FriendsSection({
           )}
 
           {friends.length === 0 ? (
-            <div className="py-8 text-center text-zinc-600">
+            <div className="py-8 text-center text-neutral-600">
               {isOwnProfile ? "No friends yet" : "No friends to show"}
             </div>
           ) : (
@@ -70,7 +70,7 @@ export default function FriendsSection({
                 <Link
                   key={friend.uid}
                   href={`/profile/${friend.username}`}
-                  className="flex items-center gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-colors group"
+                  className="flex items-center gap-3 p-3 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-colors group"
                 >
                   {friend.photoURL ? (
                     <div className="relative w-10 h-10">
@@ -98,11 +98,11 @@ export default function FriendsSection({
                       {friend.username || friend.displayName}
                     </p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-neutral-400 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
                 </Link>
               ))}
               {friends.length > 5 && (
-                <p className="text-center text-sm text-zinc-500 mt-2">
+                <p className="text-center text-sm text-neutral-500 mt-2">
                   +{friends.length - 5} more
                 </p>
               )}

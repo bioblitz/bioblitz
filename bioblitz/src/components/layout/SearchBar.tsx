@@ -85,7 +85,7 @@ export default function SearchBar() {
   return (
     <div className="hidden md:block relative ml-100" ref={searchRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -107,19 +107,19 @@ export default function SearchBar() {
             }
           }}
           placeholder="Search"
-          className="w-80 bg-zinc-900/70 border border-zinc-800 rounded-full pl-9 pr-9 py-2 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700"
+          className="w-80 bg-neutral-900/70 border border-neutral-800 rounded-full pl-9 pr-9 py-2 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-700"
         />
         {searchLoading && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500">
             ...
           </span>
         )}
       </div>
 
       {searchOpen && (
-        <div className="absolute left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute left-0 right-0 mt-2 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50">
           {searchResults.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-zinc-500">
+            <div className="px-4 py-3 text-sm text-neutral-500">
               No results found.
             </div>
           ) : (
@@ -141,17 +141,17 @@ export default function SearchBar() {
                     });
                     setSearchOpen(false);
                   }}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
-                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2 py-0.5">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-500 border border-neutral-800 rounded-full px-2 py-0.5">
                     {result.type}
                   </span>
                   <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-zinc-100 truncate">
+                    <span className="font-semibold text-neutral-100 truncate">
                       {result.title}
                     </span>
                     {result.subtitle && (
-                      <span className="text-xs text-zinc-500 truncate">
+                      <span className="text-xs text-neutral-500 truncate">
                         {result.subtitle}
                       </span>
                     )}

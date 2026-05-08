@@ -93,7 +93,7 @@ export default function SubscribeButton({
         group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border
         ${
           isSubscribed
-            ? "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
+            ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
             : "border-yellow-300 text-white hover:bg-neutral-800"
         }
       `}

@@ -15,9 +15,9 @@ export default function ProfileStats({
 }: ProfileStatsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div className="bg-gradient-to-br from-neutral-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-neutral-500/30 transition-colors">
+      <div className="bg-gradient-to-br from-neutral-950/50 to-neutral-950 border border-neutral-800/50 rounded-2xl p-6 hover:border-neutral-500/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-zinc-500 text-sm font-medium">Rating</p>
+          <p className="text-neutral-500 text-sm font-medium">Rating</p>
           {isTrendingUp ? (
             <TrendingUp className="w-4 h-4 text-green-500" />
           ) : (
@@ -25,25 +25,25 @@ export default function ProfileStats({
           )}
         </div>
         <p className="text-4xl font-bold text-white">{Math.round(bElo)}</p>
-        <p className="text-xs text-zinc-600 mt-1">bElo Points</p>
+        <p className="text-xs text-neutral-600 mt-1">bElo Points</p>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-blue-500/30 transition-colors">
+      <div className="bg-gradient-to-br from-blue-950/50 to-neutral-950 border border-neutral-800/50 rounded-2xl p-6 hover:border-blue-500/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-zinc-500 text-sm font-medium">Blitzes Completed</p>
+          <p className="text-neutral-500 text-sm font-medium">Blitzes Completed</p>
           <Activity className="w-4 h-4 text-blue-500" />
         </div>
         <p className="text-4xl font-bold text-white">{setsPlayedCount}</p>
-        <p className="text-xs text-zinc-600 mt-1">Total Completions</p>
+        <p className="text-xs text-neutral-600 mt-1">Total Completions</p>
       </div>
 
-      <div className="bg-gradient-to-br from-orange-950/50 to-zinc-950 border border-zinc-800/50 rounded-2xl p-6 hover:border-orange-500/30 transition-colors">
+      <div className="bg-gradient-to-br from-orange-950/50 to-neutral-950 border border-neutral-800/50 rounded-2xl p-6 hover:border-orange-500/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-zinc-500 text-sm font-medium">Streak</p>
+          <p className="text-neutral-500 text-sm font-medium">Streak</p>
           <Flame className="w-4 h-4 text-orange-500" />
         </div>
         <p className="text-4xl font-bold text-white">{streak}</p>
-        <p className="text-xs text-zinc-600 mt-1">Day Streak</p>
+        <p className="text-xs text-neutral-600 mt-1">Day Streak</p>
       </div>
     </div>
   );

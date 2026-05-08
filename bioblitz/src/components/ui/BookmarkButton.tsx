@@ -105,7 +105,7 @@ export default function BookmarkButton({
       className={`p-1.5 rounded-lg transition-all ${
         bookmarked
           ? "text-amber-400 bg-amber-500/15 hover:bg-amber-500/25"
-          : "text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800"
+          : "text-neutral-600 hover:text-neutral-400 hover:bg-neutral-800"
       }`}
       title={bookmarked ? "Remove bookmark" : "Bookmark this question"}
     >

@@ -414,7 +414,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-zinc-300">Loading...</div>
+        <div className="text-center text-neutral-300">Loading...</div>
         </div>
       </div>
     );
@@ -424,8 +424,8 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-4 text-zinc-100">Access Denied</h1>
-          <p className="text-zinc-300">You do not have permission to view this page.</p>
+          <h1 className="text-3xl font-bold mb-4 text-neutral-100">Access Denied</h1>
+          <p className="text-neutral-300">You do not have permission to view this page.</p>
         </div>
       </div>
     );
@@ -436,31 +436,31 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-zinc-100">Admin Panel</h1>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400 mt-1">
-              <span>Users: <span className="text-zinc-100 font-semibold">{totalUsers}</span></span>
-              <span className="text-zinc-700">|</span>
-              <span>Game submissions: <span className="text-zinc-100 font-semibold">{submissionsCount}</span></span>
+            <h1 className="text-3xl font-bold text-neutral-100">Admin Panel</h1>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-400 mt-1">
+              <span>Users: <span className="text-neutral-100 font-semibold">{totalUsers}</span></span>
+              <span className="text-neutral-700">|</span>
+              <span>Game submissions: <span className="text-neutral-100 font-semibold">{submissionsCount}</span></span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleRefreshStats}
-              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+              className="text-sm text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-lg transition-colors"
               title="Invalidate cached stats and fetch fresh data"
             >
               Refresh Stats
             </button>
             <Link
               href="/admin/analytics"
-              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+              className="text-sm text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-lg transition-colors"
             >
               Open Analytics
             </Link>
             {/** 
             <button
               onClick={handleReindexSearch}
-              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+              className="text-sm text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
               disabled={reindexing}
             >
               {reindexing ? "Reindexing..." : "Reindex Search"}
@@ -473,7 +473,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {status && <p className="text-sm text-zinc-400 mb-4">{status}</p>}
+        {status && <p className="text-sm text-neutral-400 mb-4">{status}</p>}
 
         <UserEditor
           status={status}
@@ -490,8 +490,8 @@ export default function AdminPage() {
         />
 
         {!showDb ? (
-          <div className="py-20 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">
-            <p className="text-zinc-400 mb-6 text-center max-w-md">
+          <div className="py-20 flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50">
+            <p className="text-neutral-400 mb-6 text-center max-w-md">
               The user database is not loaded by default to save on read operations.
             </p>
             <button

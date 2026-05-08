@@ -33,7 +33,7 @@ export default function MarketingNavbar() {
             <Link
               href="/home"
               onClick={() => trackClick("marketing_nav_click", "/home")}
-              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-zinc-400 hover:border-none border text-white border-slate-50 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-neutral-400 hover:border-none border text-white border-slate-50 transition-all duration-200"
             >
               Blitzes
             </Link>

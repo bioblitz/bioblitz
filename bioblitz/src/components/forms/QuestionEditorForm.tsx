@@ -22,9 +22,9 @@ interface QuestionEditorFormProps {
 const sectionHeaderClass =
   "flex items-center gap-2 w-full text-left py-2 group";
 const sectionLabelClass =
-  "text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors";
+  "text-sm font-semibold text-neutral-300 group-hover:text-white transition-colors";
 const chevronClass = (open: boolean) =>
-  `w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-all ${open ? "" : "-rotate-90"}`;
+  `w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 transition-all ${open ? "" : "-rotate-90"}`;
 
 const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
   question,
@@ -185,7 +185,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
       ` }} />
 
       {/* Question Text */}
-      <div className="border-b border-zinc-800/60 pb-3">
+      <div className="border-b border-neutral-800/60 pb-3">
         <button
           type="button"
           onClick={() => setShowQuestionText((v) => !v)}
@@ -209,14 +209,14 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
       </div>
 
       {/* Image */}
-      <div className="border-b border-zinc-800/60 pb-3">
+      <div className="border-b border-neutral-800/60 pb-3">
         <button
           type="button"
           onClick={() => setShowImage((v) => !v)}
           className={sectionHeaderClass}
         >
           <ChevronDown className={chevronClass(showImage)} />
-          <span className={sectionLabelClass}>Image <span className="text-zinc-600 font-normal">(optional)</span></span>
+          <span className={sectionLabelClass}>Image <span className="text-neutral-600 font-normal">(optional)</span></span>
         </button>
         {showImage && (
           <ImageUploadZone onFile={handleImageFile} className="mt-2">
@@ -228,8 +228,8 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
               accept="image/*"
             />
             {uploadingImage ? (
-              <div className="w-full flex items-center justify-center p-8 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
-                <span className="text-zinc-400 text-sm">Uploading...</span>
+              <div className="w-full flex items-center justify-center p-8 bg-neutral-800/50 rounded-lg border-2 border-dashed border-neutral-700">
+                <span className="text-neutral-400 text-sm">Uploading...</span>
               </div>
             ) : question.imageUrl ? (
               <div className="relative group">
@@ -241,7 +241,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="absolute top-2 right-2 p-2 bg-neutral-900/50 rounded-full hover:bg-zinc-500/10 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 p-2 bg-neutral-900/50 rounded-full hover:bg-neutral-500/10 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -250,7 +250,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 p-8 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-zinc-400 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-neutral-100"
+                className="w-full flex flex-col items-center justify-center gap-2 p-8 bg-neutral-800/50 hover:bg-neutral-800 transition-colors text-neutral-400 font-bold rounded-lg border-2 border-dashed border-neutral-700 hover:border-neutral-100"
               >
                 <span>Drop, paste, or click to upload an image</span>
               </button>
@@ -260,7 +260,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
       </div>
 
       {/* Answer Choices */}
-      <div className="border-b border-zinc-800/60 pb-3">
+      <div className="border-b border-neutral-800/60 pb-3">
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -276,7 +276,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
             className={`flex items-center gap-1.5 text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors ${
               question.isMultiSelect
                 ? "text-amber-300 bg-amber-500/10 border border-amber-500/30"
-                : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                : "text-neutral-500 hover:text-neutral-300 border border-transparent"
             }`}
             title="Allow multiple correct answers"
           >
@@ -297,7 +297,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                 <button
                   type="button"
                   onClick={() => toggleCorrectAnswer(choice.id)}
-                  className="text-zinc-500 hover:text-white transition-colors"
+                  className="text-neutral-500 hover:text-white transition-colors"
                   aria-label="Mark as correct"
                 >
                   {(question.correctAnswerIds ?? []).includes(choice.id) ? (
@@ -313,12 +313,12 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
                     handleChoiceTextChange(choice.id, e.target.value)
                   }
                   placeholder="Answer"
-                  className="flex-grow bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
+                  className="flex-grow bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => removeChoice(choice.id)}
-                  className="p-2 text-zinc-500 transition-colors hover:bg-zinc-500/10 rounded-md"
+                  className="p-2 text-neutral-500 transition-colors hover:bg-neutral-500/10 rounded-md"
                   aria-label="Remove choice"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -328,7 +328,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
             <button
               type="button"
               onClick={addChoice}
-              className="w-full flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 font-bold rounded-lg border-2 border-dashed border-zinc-700 hover:border-neutral-100"
+              className="w-full flex items-center justify-center gap-2 p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-300 font-bold rounded-lg border-2 border-dashed border-neutral-700 hover:border-neutral-100"
             >
               <Plus className="w-5 h-5" />
               Add Answer Choice
@@ -345,7 +345,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
           className={sectionHeaderClass}
         >
           <ChevronDown className={chevronClass(showSolution)} />
-          <span className={sectionLabelClass}>Solution / Explanation <span className="text-zinc-600 font-normal">(optional)</span></span>
+          <span className={sectionLabelClass}>Solution / Explanation <span className="text-neutral-600 font-normal">(optional)</span></span>
         </button>
         {showSolution && (
           <div className="mt-2">
@@ -356,7 +356,7 @@ const QuestionEditorForm: React.FC<QuestionEditorFormProps> = ({
               }
               placeholder="Explain why the correct answer is right..."
               rows={3}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition-all resize-none"
+              className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition-all resize-none"
             />
           </div>
         )}

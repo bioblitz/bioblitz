@@ -39,7 +39,7 @@ export default function NotFound() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-zinc-400 text-lg mb-10 max-w-lg mx-auto"
+          className="text-neutral-400 text-lg mb-10 max-w-lg mx-auto"
         >
           It seems the page you are looking for has undergone apoptosis :(
         </motion.p>
@@ -60,7 +60,7 @@ export default function NotFound() {
 
           <button
             onClick={() => window.history.back()}
-            className="w-full sm:w-auto px-8 py-3.5 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
+            className="w-full sm:w-auto px-8 py-3.5 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
           >
             <MoveLeft className="w-4 h-4" />
             Go Back

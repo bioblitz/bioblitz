@@ -53,28 +53,28 @@ export default async function ContestPage({ params }: ContestPageParams) {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
             {contest.title}
           </h1>
-          <p className="text-zinc-400 mt-4 text-lg">{contest.description}</p>
+          <p className="text-neutral-400 mt-4 text-lg">{contest.description}</p>
         </header>
 
-        <main className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-zinc-300 mb-6">
+        <main className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8">
+          <h2 className="text-2xl font-bold text-neutral-300 mb-6">
             Blitz Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-zinc-400">Topic</p>
+              <p className="text-sm text-neutral-400">Topic</p>
               <p className="font-semibold">{contest.topic}</p>
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Time Limit</p>
+              <p className="text-sm text-neutral-400">Time Limit</p>
               <p className="font-semibold">{contest.timeLimit} seconds</p>
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Number of Questions</p>
+              <p className="text-sm text-neutral-400">Number of Questions</p>
               <p className="font-semibold">{contest.number_of_questions}</p>
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Difficulty</p>
+              <p className="text-sm text-neutral-400">Difficulty</p>
               <p className="font-semibold">{contest.difficulty}</p>
             </div>
           </div>

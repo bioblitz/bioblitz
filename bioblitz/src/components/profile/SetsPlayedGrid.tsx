@@ -19,19 +19,19 @@ interface SetPlayed {
 }
 
 function deltaLabel(delta?: number) {
-  if (delta == null) return <span className="text-zinc-600">—</span>;
+  if (delta == null) return <span className="text-neutral-600">—</span>;
   if (delta > 0) return <span className="text-emerald-400 font-bold">+{delta}</span>;
   if (delta < 0) return <span className="text-red-400 font-bold">{delta}</span>;
-  return <span className="text-zinc-500 font-bold">±0</span>;
+  return <span className="text-neutral-500 font-bold">±0</span>;
 }
 
 function formatRank(rank?: number | string | null) {
-  if (rank == null) return <span className="text-zinc-600">—</span>;
+  if (rank == null) return <span className="text-neutral-600">—</span>;
   const r = String(rank);
   if (r === "1") return <span className="text-yellow-500 font-bold">#1 🥇</span>;
-  if (r === "2") return <span className="text-zinc-400 font-bold">#2 🥈</span>;
+  if (r === "2") return <span className="text-neutral-400 font-bold">#2 🥈</span>;
   if (r === "3") return <span className="text-orange-400 font-bold">#3 🥉</span>;
-  return <span className="text-zinc-400 font-bold">#{rank}</span>;
+  return <span className="text-neutral-400 font-bold">#{rank}</span>;
 }
 
 export default function SetsPlayedGrid({ setsPlayed }: { setsPlayed: SetPlayed[] }) {
@@ -52,12 +52,12 @@ export default function SetsPlayedGrid({ setsPlayed }: { setsPlayed: SetPlayed[]
       </div>
 
       {setsPlayed.length === 0 ? (
-        <div className="p-12 text-center border border-dashed border-zinc-800 rounded-3xl text-zinc-600">
+        <div className="p-12 text-center border border-dashed border-neutral-800 rounded-3xl text-neutral-600">
           <p className="text-sm font-medium">No blitzes completed yet.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-zinc-500 tracking-widest border-b border-neutral-900">
+          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-bold text-neutral-500 tracking-widest border-b border-neutral-900">
             <div className="col-span-6">Blitz Name</div>
             <div className="col-span-2 text-center">Contest Rating</div>
             <div className="col-span-2 text-center">+/-</div>
@@ -73,7 +73,7 @@ export default function SetsPlayedGrid({ setsPlayed }: { setsPlayed: SetPlayed[]
                 <Link
                   key={i}
                   href={`/home/${set.setId}`}
-                  className="grid grid-cols-12 gap-4 items-center p-4 bg-zinc-900/40 border border-transparent hover:border-zinc-700 hover:bg-neutral-800/60 rounded-2xl transition-all group"
+                  className="grid grid-cols-12 gap-4 items-center p-4 bg-neutral-900/40 border border-transparent hover:border-neutral-700 hover:bg-neutral-800/60 rounded-2xl transition-all group"
                 >
                   <div className="col-span-6 min-w-0">
                     <p className="text-sm font-bold text-white truncate transition-colors">
@@ -85,7 +85,7 @@ export default function SetsPlayedGrid({ setsPlayed }: { setsPlayed: SetPlayed[]
                   </div>
                   
                   <div className="col-span-2 flex flex-col items-center">
-                    <span className={`text-sm font-bold ${elo > 0 ? tier.textClass : "text-zinc-600"}`}>
+                    <span className={`text-sm font-bold ${elo > 0 ? tier.textClass : "text-neutral-600"}`}>
                       {elo > 0 ? elo : "Unrated"}
                     </span>
                   </div>

@@ -39,7 +39,7 @@ export default async function ContestsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-zinc-400">No completed Blitzes available.</p>
+            <p className="text-neutral-400">No completed Blitzes available.</p>
           )}
         </main>
       </div>

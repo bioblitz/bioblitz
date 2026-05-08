@@ -150,8 +150,8 @@ export default function ChallengeButton({
         disabled={checkingStatus || alreadyChallenged}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
           alreadyChallenged
-            ? "border-zinc-800 bg-zinc-900/50 text-zinc-600 cursor-not-allowed"
-            : "border-zinc-700 bg-zinc-800/60 text-white hover:bg-zinc-800 hover:border-zinc-600"
+            ? "border-neutral-800 bg-neutral-900/50 text-neutral-600 cursor-not-allowed"
+            : "border-neutral-700 bg-neutral-800/60 text-white hover:bg-neutral-800 hover:border-neutral-600"
         }`}
       >
         {alreadyChallenged ? "Challenge sent" : "Challenge a Friend"}
@@ -159,43 +159,43 @@ export default function ChallengeButton({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+          <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-800">
               <div className="flex items-center gap-3">
                 <div>
                   <p className="text-white font-bold text-sm">
                     Challenge a Friend
                   </p>
-                  <p className="text-zinc-500 text-xs truncate max-w-[180px]">
+                  <p className="text-neutral-500 text-xs truncate max-w-[180px]">
                     {blitzTitle}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1.5 hover:bg-zinc-800 rounded-full text-zinc-500 hover:text-white transition-colors"
+                className="p-1.5 hover:bg-neutral-800 rounded-full text-neutral-500 hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="px-6 pt-4 pb-2">
-              <p className="text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-neutral-500 leading-relaxed">
                 You'll play this Blitz and your score will be sent as the
                 challenge. Your friend has{" "}
-                <span className="text-zinc-300 font-medium">48 hours</span> to
+                <span className="text-neutral-300 font-medium">48 hours</span> to
                 beat it. Each attempt counts toward your own Elo rating.
               </p>
             </div>
 
             <div className="px-6 pt-3 pb-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search friends..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors"
                 />
               </div>
             </div>
@@ -203,10 +203,10 @@ export default function ChallengeButton({
             <div className="px-3 pb-4 max-h-64 overflow-y-auto space-y-1">
               {loadingFriends ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="w-5 h-5 text-zinc-600 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-neutral-600 animate-spin" />
                 </div>
               ) : filtered.length === 0 ? (
-                <p className="text-center text-zinc-600 text-sm py-8">
+                <p className="text-center text-neutral-600 text-sm py-8">
                   {friends.length === 0
                     ? "No friends eligible — they may have already played this Blitz."
                     : "No matching friends."}
@@ -218,13 +218,13 @@ export default function ChallengeButton({
                   return (
                     <div
                       key={friend.uid}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-900 transition-colors"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-900 transition-colors"
                     >
                       {friend.photoURL ? (
                         <img
                           src={friend.photoURL}
                           alt={friend.displayName}
-                          className="w-9 h-9 rounded-full object-cover border border-zinc-800 flex-shrink-0"
+                          className="w-9 h-9 rounded-full object-cover border border-neutral-800 flex-shrink-0"
 
                         />
                       ) : (
@@ -236,7 +236,7 @@ export default function ChallengeButton({
                         <p className="text-white text-sm font-medium truncate">
                           {friend.username || friend.displayName}
                         </p>
-                        <p className="text-zinc-500 text-xs">
+                        <p className="text-neutral-500 text-xs">
                           {friend.bElo} Elo
                         </p>
                       </div>
@@ -246,7 +246,7 @@ export default function ChallengeButton({
                         className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                           isSent
                             ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 cursor-default"
-                            : "bg-zinc-700 hover:bg-zinc-600 text-white border border-zinc-600"
+                            : "bg-neutral-700 hover:bg-neutral-600 text-white border border-neutral-600"
                         }`}
                       >
                         {isSending ? (
@@ -266,8 +266,8 @@ export default function ChallengeButton({
             </div>
 
             {sent && (
-              <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-900/50">
-                <p className="text-xs text-zinc-400 mb-3">
+              <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-900/50">
+                <p className="text-xs text-neutral-400 mb-3">
                   Challenge sent! Now play this Blitz — your score will be
                   locked in as the target.
                 </p>
@@ -276,7 +276,7 @@ export default function ChallengeButton({
                     setOpen(false);
                     onPlay?.();
                   }}
-                  className="w-full py-2.5 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-bold transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-neutral-700 hover:bg-neutral-600 text-white text-sm font-bold transition-colors"
                 >
                   Play Now →
                 </button>

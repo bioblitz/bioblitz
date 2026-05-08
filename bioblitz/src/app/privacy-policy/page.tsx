@@ -11,15 +11,15 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-neutral-500/30">
+    <div className="min-h-screen bg-neutral-950 text-neutral-300 font-sans selection:bg-neutral-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
+        <div className="border-b border-neutral-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
             BioBlitz Privacy Policy
           </h1>
-          <p className="text-zinc-300 ">
+          <p className="text-neutral-300 ">
             Effective Date:{" "}
-            <span className="text-zinc-300 italic">January 1st, 2026</span>
+            <span className="text-neutral-300 italic">January 1st, 2026</span>
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
                 href="https://mitosisphere.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-zinc-300  hover:text-zinc-100 transition-colors"
+                className="font-semibold text-neutral-300  hover:text-neutral-100 transition-colors"
               >
                 Mitosisphere
               </a>
@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
               do not use cookies or tracking technologies, and all data is
               collected directly from you.
             </p>
-            <div className="bg-zinc-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
+            <div className="bg-neutral-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
               <h3 className="text-white font-bold mb-2">Children's Privacy</h3>
               <p>
                 BioBlitz is not intended for users under 13. Please don't make an account if you're under 13 🙃. If we
@@ -99,7 +99,7 @@ export default function PrivacyPolicyPage() {
               responsibly. These providers process data strictly on our behalf
               and in accordance with their own privacy policies.
             </p>
-            <ul className="list-disc pl-5 space-y-3 text-zinc-300">
+            <ul className="list-disc pl-5 space-y-3 text-neutral-300">
               <li>
                 <strong className="text-white">
                   Authentication & Security:
@@ -122,7 +122,7 @@ export default function PrivacyPolicyPage() {
                 communications you’ve opted into.
               </li>
             </ul>
-            <p className="mt-6 text-sm text-zinc-400 italic">
+            <p className="mt-6 text-sm text-neutral-400 italic">
               Your privacy is our priority: we do not sell, rent, or trade
               personal information, nor do we share your data for cross-context
               behavioral or targeted advertising.

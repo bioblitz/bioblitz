@@ -139,7 +139,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
             {contest.description && (
               <>
                 <div className="h-3" />
-                <p className="text-zinc-300 text-xs text-center line-clamp-3 leading-relaxed">
+                <p className="text-neutral-300 text-xs text-center line-clamp-3 leading-relaxed">
                   {contest.description}
                 </p>
               </>
@@ -204,7 +204,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
                   {contest.title}
                 </h2>
                 <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 z-50 opacity-0 group-hover/title:opacity-100 transition-opacity duration-150 delay-0 group-hover/title:delay-[1000ms]">
-                  <div className="bg-zinc-900 border border-zinc-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-xl whitespace-normal max-w-[220px] leading-snug">
+                  <div className="bg-neutral-900 border border-neutral-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-xl whitespace-normal max-w-[220px] leading-snug">
                     {contest.title}
                   </div>
                 </div>

@@ -653,7 +653,7 @@ export default function EditContestPage() {
   const topicValue = selectedTopic === "Other" ? customTopic : selectedTopic;
 
   const inputClass =
-    "w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors";
+    "w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors";
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white font-sans pt-24 pb-16 pl-14">
@@ -675,12 +675,12 @@ export default function EditContestPage() {
         />
       )}
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-800">
+        <div className="flex items-center justify-between mb-8 pb-5 border-b border-neutral-800">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">
               Blitz Editor
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <p className="text-neutral-500 text-sm mt-0.5">
               Build and edit your blitz.
             </p>
             {postAsUsername && (
@@ -697,7 +697,7 @@ export default function EditContestPage() {
                 onClick={handleToggleVisibility}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
                   isHidden
-                    ? "border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600"
+                    ? "border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-600"
                     : "border-green-800/60 text-green-400 hover:bg-green-900/20"
                 }`}
               >
@@ -713,7 +713,7 @@ export default function EditContestPage() {
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-zinc-700 text-red-400 hover:text-red-300 hover:border-red-800/60 hover:bg-red-900/10 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-neutral-700 text-red-400 hover:text-red-300 hover:border-red-800/60 hover:bg-red-900/10 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
               {deleting ? "Deleting..." : "Delete"}
@@ -726,7 +726,7 @@ export default function EditContestPage() {
             {/* Questions editor — takes 2/3 */}
             <div className="lg:col-span-2 space-y-8">
               <section ref={carouselRef}>
-                <h2 className="text-xs font-semibold text-zinc-500 mb-3">
+                <h2 className="text-xs font-semibold text-neutral-500 mb-3">
                   Questions ({questions.length})
                 </h2>
                 <div className="space-y-4">
@@ -738,12 +738,12 @@ export default function EditContestPage() {
                         setCurrentEditorIndex((i) => Math.max(0, i - 1))
                       }
                       disabled={currentEditorIndex === 0}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                       Prev
                     </button>
-                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 bg-neutral-800 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-neutral-500 rounded-full transition-all duration-300"
                         style={{
@@ -751,7 +751,7 @@ export default function EditContestPage() {
                         }}
                       />
                     </div>
-                    <span className="text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0">
+                    <span className="text-neutral-400 text-[11px] font-[700] tabular-nums shrink-0">
                       {currentEditorIndex + 1} / {questions.length}
                     </span>
                     <button
@@ -762,7 +762,7 @@ export default function EditContestPage() {
                         )
                       }
                       disabled={currentEditorIndex === questions.length - 1}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                     >
                       Next
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -773,10 +773,10 @@ export default function EditContestPage() {
                   <div className="relative">
                     {questions[currentEditorIndex] && (
                       <div
-                        className={`rounded-xl border border-zinc-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}
+                        className={`rounded-xl border border-neutral-800 overflow-hidden${fetchingContest ? " invisible pointer-events-none" : ""}`}
                       >
-                        <div className="flex justify-between items-center px-5 py-3 bg-zinc-900 border-b border-zinc-800">
-                          <span className="text-sm font-semibold text-zinc-300">
+                        <div className="flex justify-between items-center px-5 py-3 bg-neutral-900 border-b border-neutral-800">
+                          <span className="text-sm font-semibold text-neutral-300">
                             Question {currentEditorIndex + 1}
                           </span>
                           <button
@@ -785,7 +785,7 @@ export default function EditContestPage() {
                               removeQuestion(questions[currentEditorIndex].id)
                             }
                             disabled={questions.length === 1}
-                            className="p-1 text-zinc-600 hover:text-red-400 transition-colors rounded disabled:opacity-30"
+                            className="p-1 text-neutral-600 hover:text-red-400 transition-colors rounded disabled:opacity-30"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -815,7 +815,7 @@ export default function EditContestPage() {
                       </div>
                     )}
                     {fetchingContest && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[200px]">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900 min-h-[200px]">
                         <div className="w-8 h-8 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
                         <span className="text-neutral-400 text-sm font-medium">
                           Loading...
@@ -827,7 +827,7 @@ export default function EditContestPage() {
                   <button
                     type="button"
                     onClick={addQuestion}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-zinc-500 hover:text-zinc-300 border border-dashed border-zinc-800 hover:border-zinc-600 rounded-xl transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-neutral-500 hover:text-neutral-300 border border-dashed border-neutral-800 hover:border-neutral-600 rounded-xl transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add question
@@ -881,17 +881,17 @@ export default function EditContestPage() {
                   onClick={() => setDetailsOpen((v) => !v)}
                   className="flex items-center gap-2 mb-3 group w-full text-left"
                 >
-                  <h2 className="text-xs font-semibold text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                  <h2 className="text-xs font-semibold text-neutral-500 group-hover:text-neutral-400 transition-colors">
                     Blitz Details
                   </h2>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-all ${detailsOpen ? "" : "-rotate-90"}`}
+                    className={`w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 transition-all ${detailsOpen ? "" : "-rotate-90"}`}
                   />
                 </button>
                 {detailsOpen && (
                   <div className="relative">
                     {fetchingContest && (
-                      <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 min-h-[120px] z-10">
+                      <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900 min-h-[120px] z-10">
                         <div className="w-7 h-7 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
                         <span className="text-neutral-400 text-sm font-medium">
                           Loading...
@@ -899,10 +899,10 @@ export default function EditContestPage() {
                       </div>
                     )}
                     <div
-                      className={`bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4${fetchingContest ? " invisible pointer-events-none" : ""}`}
+                      className={`bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4${fetchingContest ? " invisible pointer-events-none" : ""}`}
                     >
                       <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                           Title
                         </label>
                         <input
@@ -913,7 +913,7 @@ export default function EditContestPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                           Description
                         </label>
                         <textarea
@@ -926,7 +926,7 @@ export default function EditContestPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                             Time Limit (seconds)
                           </label>
                           <input
@@ -939,7 +939,7 @@ export default function EditContestPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                             Topic
                           </label>
                           <select
@@ -957,7 +957,7 @@ export default function EditContestPage() {
                       </div>
                       {selectedTopic === "Other" && (
                         <div>
-                          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                          <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                             Custom Topic
                           </label>
                           <input
@@ -969,7 +969,7 @@ export default function EditContestPage() {
                         </div>
                       )}
                       <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        <label className="block text-xs font-medium text-neutral-400 mb-1.5">
                           Banner Image
                         </label>
                         <ImageUploadZone onFile={handleBannerFile} className="flex items-center gap-3">
@@ -977,14 +977,14 @@ export default function EditContestPage() {
                             <img
                               src={bannerUrl}
                               alt="Banner"
-                              className="h-14 w-28 rounded-lg object-cover border border-zinc-700"
+                              className="h-14 w-28 rounded-lg object-cover border border-neutral-700"
                             />
                           ) : (
-                            <div className="h-14 w-28 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-600">
+                            <div className="h-14 w-28 bg-neutral-950 border border-neutral-800 rounded-lg flex items-center justify-center text-xs text-neutral-600">
                               No banner
                             </div>
                           )}
-                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors">
                             {uploadingBanner ? "Uploading..." : "Upload"}
                             <input
                               type="file"
@@ -1000,7 +1000,7 @@ export default function EditContestPage() {
                             className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                               isAiGenerated
                                 ? "border-neutral-600/60 bg-neutral-900/20 text-neutral-300"
-                                : "border-zinc-700 bg-zinc-800 text-zinc-500"
+                                : "border-neutral-700 bg-neutral-800 text-neutral-500"
                             }`}
                           >
                             {isAiGenerated ? (
@@ -1009,16 +1009,16 @@ export default function EditContestPage() {
                               <span className="relative">
                                 AI
                                 <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  <span className="block w-full h-px bg-zinc-500 rotate-[-20deg]" />
+                                  <span className="block w-full h-px bg-neutral-500 rotate-[-20deg]" />
                                 </span>
                               </span>
                             )}
                           </button>
                           <div className="relative group">
-                            <div className="w-4 h-4 rounded-full border border-zinc-700 text-zinc-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-zinc-500 hover:text-zinc-400 transition-colors">
+                            <div className="w-4 h-4 rounded-full border border-neutral-700 text-neutral-600 flex items-center justify-center text-[10px] font-bold cursor-default select-none hover:border-neutral-500 hover:text-neutral-400 transition-colors">
                               ?
                             </div>
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
+                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-[180px] px-2.5 py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-snug">
                               Toggle if any part of your blitz is AI-generated
                             </div>
                           </div>

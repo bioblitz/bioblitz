@@ -222,7 +222,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
       case "Multiple":
         return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"};
       default:
-        return { bg: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"};
+        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"};
     }
   };
 
@@ -316,11 +316,11 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
               </h1>
             </div>
             <div className="flex items-center gap-2 ml-1">
-              <span className="text-zinc-500 text-sm">{todayFormatted}</span>
+              <span className="text-neutral-500 text-sm">{todayFormatted}</span>
               {prevPuzzle && (
                 <button
                   onClick={() => router.push(`/potd/${prevPuzzle.id}`)}
-                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                  className="text-neutral-600 hover:text-neutral-300 transition-colors"
                   title="Previous problem"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -341,21 +341,21 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         {userDataLoading ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
             <Loader2 className="w-10 h-10 text-neutral-500 animate-spin" />
-            <p className="text-zinc-500 text-sm font-medium animate-pulse">
+            <p className="text-neutral-500 text-sm font-medium animate-pulse">
               Loading Your Progress...
             </p>
           </div>
         ) : (
           <div className="space-y-0">
-            <div className="flex items-center gap-0.5 p-[3px] border-b border-zinc-800 mb-8">
+            <div className="flex items-center gap-0.5 p-[3px] border-b border-neutral-800 mb-8">
               {(["today", "archive"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all ${
                     activeTab === tab
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-500 hover:text-zinc-300"
+                      ? "bg-neutral-800 text-white"
+                      : "text-neutral-500 hover:text-neutral-300"
                   }`}
                 >
                   {tab === "today" ? "Today's Problem" : "Archive"}
@@ -372,7 +372,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
                         Daily Problem Completed!
                       </h2>
-                      <p className="text-zinc-400 text-lg max-w-xl mx-auto mb-8">
+                      <p className="text-neutral-400 text-lg max-w-xl mx-auto mb-8">
                         Great work! You've kept your streak alive today. Come
                         back tomorrow for a new challenge.
                       </p>
@@ -386,7 +386,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         </button>
                         <button
                           onClick={() => setViewAnyway(true)}
-                          className="bg-zinc-900 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white px-6 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+                          className="bg-neutral-900 border border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white px-6 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
                         >
                           <Eye className="w-5 h-5" />
                           View Problem Again
@@ -399,7 +399,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                     <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
                       {isFallback && (
-                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300">
+                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300">
                           Sampled from archive
                         </span>
                       )}
@@ -411,7 +411,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         >
                           {activePuzzle.topic}
                         </span>
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-full">
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 border border-neutral-800 bg-neutral-900 px-3 py-1 rounded-full">
                           {activePuzzle.multiSelect
                             ? "Multi-Select"
                             : "Single Choice"}
@@ -422,7 +422,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                         <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
                           {activePuzzle.title}
                         </h2>
-                        <p className="text-zinc-300 text-lg leading-relaxed">
+                        <p className="text-neutral-300 text-lg leading-relaxed">
                           {activePuzzle.questionText}
                         </p>
                       </div>
@@ -440,9 +440,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                             ((viewAnyway || isFallback) && isActiveCompleted);
 
                           let borderClass =
-                            "border-zinc-800 hover:border-zinc-700";
-                          let bgClass = "bg-zinc-900/50 hover:bg-zinc-800";
-                          let textClass = "text-zinc-300";
+                            "border-neutral-800 hover:border-neutral-700";
+                          let bgClass = "bg-neutral-900/50 hover:bg-neutral-800";
+                          let textClass = "text-neutral-300";
 
                           if (showResults) {
                             if (isCorrectKey) {
@@ -481,7 +481,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                           (showResults &&
                                                             isCorrectKey)
                                                             ? "bg-white/20 text-white"
-                                                            : "bg-zinc-800 text-zinc-500"
+                                                            : "bg-neutral-800 text-neutral-500"
                                                         }
                                                     `}
                               >
@@ -502,9 +502,9 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                       {(isSubmitted ||
                         ((viewAnyway || isFallback) && isActiveCompleted)) && (
                         <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                          <div className="bg-zinc-900 rounded p-6 text-left">
-                            <p className="text-zinc-400 text-sm mb-3">Explanation</p>
-                            <p className="text-zinc-300 leading-relaxed">
+                          <div className="bg-neutral-900 rounded p-6 text-left">
+                            <p className="text-neutral-400 text-sm mb-3">Explanation</p>
+                            <p className="text-neutral-300 leading-relaxed">
                               {activePuzzle.explanation}
                             </p>
                           </div>
@@ -525,7 +525,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                       selectedOptions.length >
                                                         0 && !submitting
                                                         ? "bg-neutral-600 text-white hover:bg-neutral-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-neutral-900/20"
-                                                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                                        : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
                                                     }
                                                 `}
                           >
@@ -544,11 +544,11 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                   </div>
                 )
               ) : (
-                <div className="p-12 rounded-3xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 text-center">
+                <div className="p-12 rounded-3xl bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 text-center">
                   <h3 className="text-2xl font-bold text-white mb-2">
                     No Problem for Today (Yet)
                   </h3>
-                  <p className="text-zinc-400">
+                  <p className="text-neutral-400">
                     Check back later or browse the archive below!
                   </p>
                 </div>
@@ -560,13 +560,13 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                 <div className="flex flex-col gap-6 mb-8">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="relative flex-grow">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search past questions..."
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-neutral-500/50 transition-all placeholder:text-neutral-600"
                       />
                     </div>
                   </div>
@@ -574,7 +574,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredArchive.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-zinc-500">
+                    <div className="col-span-full py-12 text-center text-neutral-500">
                       No past problems found.
                     </div>
                   ) : (
@@ -589,7 +589,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                           className="block group"
                         >
                           <div
-                            className={`relative h-full flex flex-col justify-between bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1`}
+                            className={`relative h-full flex flex-col justify-between bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1`}
                           >
                             <div className="p-5">
                               <div className="flex justify-between items-start mb-3">
@@ -607,7 +607,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                 {isPlayed && (
                                   <div
                                     title="Redo Problem"
-                                    className="absolute top-5 right-5 text-zinc-600 group-hover:text-zinc-400 transition-colors"
+                                    className="absolute top-5 right-5 text-neutral-600 group-hover:text-neutral-400 transition-colors"
                                   >
                                     <RotateCcw className="w-4 h-4" />
                                   </div>
@@ -616,10 +616,10 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                               <h2 className="text-lg font-bold text-white mb-2 line-clamp-2">
                                 {puzzle.title}
                               </h2>
-                              <p className="text-sm text-zinc-500 line-clamp-2 mb-3">
+                              <p className="text-sm text-neutral-500 line-clamp-2 mb-3">
                                 {puzzle.questionText}
                               </p>
-                              <div className="flex items-center text-sm text-zinc-400 mt-auto">
+                              <div className="flex items-center text-sm text-neutral-400 mt-auto">
                                 <Calendar className="w-3 h-3 mr-2" />
                                 <span className="truncate">
                                   {new Date(puzzle.date).toLocaleDateString(

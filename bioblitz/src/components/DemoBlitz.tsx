@@ -83,29 +83,28 @@ export default function DemoBlitz() {
   return (
     <div className="flex flex-col xl:flex-row gap-8 items-start">
       <div className="flex-1 w-full">
-        {/* Nav bar */}
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => setCurrent((c) => Math.max(0, c - 1))}
             disabled={current === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Prev
           </button>
-          <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="flex-1 h-1 bg-neutral-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-neutral-500 rounded-full transition-all duration-300"
               style={{ width: `${((current + 1) / QUESTIONS.length) * 100}%` }}
             />
           </div>
-          <span className="text-zinc-400 text-[11px] font-[700] tabular-nums shrink-0">
+          <span className="text-neutral-400 text-[11px] font-[700] tabular-nums shrink-0">
             {current + 1} / {QUESTIONS.length}
           </span>
           <button
             onClick={() => setCurrent((c) => Math.min(QUESTIONS.length - 1, c + 1))}
             disabled={current === QUESTIONS.length - 1}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-zinc-800 text-zinc-300 font-bold text-[13px] rounded-lg hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[13px] rounded-lg hover:bg-neutral-800 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
             Next
             <ChevronRight className="w-3.5 h-3.5" />
@@ -113,11 +112,11 @@ export default function DemoBlitz() {
         </div>
 
         {/* Question card */}
-        <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
+        <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-6 md:p-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-neutral-400 text-sm">Question {current + 1}</span>
           </div>
-          <p className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium">
+          <p className="mb-6 text-[18px] leading-relaxed text-neutral-100 font-medium">
             {question.content}
           </p>
           <div className="flex flex-col space-y-2.5">
@@ -130,12 +129,12 @@ export default function DemoBlitz() {
                   className={`flex items-center w-full px-5 py-4 rounded-xl border transition-all duration-200 text-left ${
                     selected
                       ? "bg-neutral-600 text-white border-neutral-500 shadow-lg shadow-neutral-900/30"
-                      : "bg-[rgba(24,24,27,0.6)] text-zinc-300 border-zinc-700/60 hover:bg-zinc-800 hover:text-white hover:border-neutral-500/50"
+                      : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border-neutral-700/60 hover:bg-neutral-800 hover:text-white hover:border-neutral-500/50"
                   }`}
                 >
                   <span
                     className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-normal text-[12px] uppercase shrink-0 ${
-                      selected ? "bg-white/20 text-white" : "bg-neutral-900/30 text-zinc-500"
+                      selected ? "bg-white/20 text-white" : "bg-neutral-900/30 text-neutral-500"
                     }`}
                   >
                     {key}
@@ -177,7 +176,7 @@ export default function DemoBlitz() {
               <span className="text-4xl font-normal text-white tabular-nums">
                 {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
               </span>
-              <span className="text-zinc-500 text-xs font-medium tracking-wider mt-1">
+              <span className="text-neutral-500 text-xs font-medium tracking-wider mt-1">
                 Remaining
               </span>
             </div>

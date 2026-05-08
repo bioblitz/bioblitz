@@ -334,7 +334,7 @@ export default function SettingsPage() {
               <img
                 src={profileData?.photoURL || user?.photoURL}
                 alt="Profile picture"
-                className="w-16 h-16 rounded-full object-cover border border-zinc-700"
+                className="w-16 h-16 rounded-full object-cover border border-neutral-700"
 
               />
             </div>
@@ -368,7 +368,7 @@ export default function SettingsPage() {
             <Switch
               checked={emailNotifications}
               onCheckedChange={handleEmailToggle}
-              className="transition-colors duration-200 data-[state=checked]:bg-neutral-200 data-[state=unchecked]:bg-zinc-600"
+              className="transition-colors duration-200 data-[state=checked]:bg-neutral-200 data-[state=unchecked]:bg-neutral-600"
             />
           </div>
           <p className="text-sm text-gray-400 mt-3">

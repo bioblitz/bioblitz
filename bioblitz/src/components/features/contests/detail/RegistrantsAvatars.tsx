@@ -27,13 +27,13 @@ export default function RegistrantsAvatars({
           ? registrantAvatarSkeletons.map((_, index) => (
               <div
                 key={`loading-${index}`}
-                className="w-7 h-7 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+                className="w-7 h-7 rounded-full border border-neutral-800 bg-neutral-900 flex items-center justify-center text-[10px] font-bold text-neutral-500"
               />
             ))
           : registrantAvatars.map((entry) => (
               <div
                 key={entry.userId}
-                className="w-7 h-7 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+                className="w-7 h-7 rounded-full border border-neutral-800 bg-neutral-900 flex items-center justify-center text-[10px] font-bold text-neutral-500"
               >
                 {entry.photoURL ? (
                   <img
@@ -50,7 +50,7 @@ export default function RegistrantsAvatars({
         {[0, 1].map((index) => (
           <div
             key={`unknown-${index}`}
-            className="w-7 h-7 rounded-full border border-dashed border-zinc-700 bg-zinc-900/60 flex items-center justify-center text-[10px] font-bold text-zinc-500"
+            className="w-7 h-7 rounded-full border border-dashed border-neutral-700 bg-neutral-900/60 flex items-center justify-center text-[10px] font-bold text-neutral-500"
           >
             ?
           </div>

@@ -11,15 +11,15 @@ export const metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-sans selection:bg-neutral-500/30">
+    <div className="min-h-screen bg-neutral-950 text-neutral-300 font-sans selection:bg-neutral-500/30">
       <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <div className="border-b border-zinc-800 pt-6 pb-4 mb-2">
+        <div className="border-b border-neutral-800 pt-6 pb-4 mb-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 tracking-tight">
             BioBlitz Terms & Conditions
           </h1>
-          <p className="text-zinc-300">
+          <p className="text-neutral-300">
             Effective Date:{" "}
-            <span className="text-zinc-300 italic">January 1st, 2026</span>
+            <span className="text-neutral-300 italic">January 1st, 2026</span>
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function TermsOfServicePage() {
                 href="https://mitosisphere.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-zinc-300 hover:text-zinc-100 transition-colors"
+                className="font-semibold text-neutral-300 hover:text-neutral-100 transition-colors"
               >
                 Mitosisphere
               </a>
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
               To ensure a fair environment for all biology enthusiasts, you
               agree to the following:
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-zinc-300">
+            <ul className="list-disc pl-5 space-y-2 text-neutral-300">
               <li>
                 <strong>No Cheating:</strong> You will not use bots, scripts, or
                 external assistance during competitive play.
@@ -78,7 +78,7 @@ export default function TermsOfServicePage() {
                 accounts to manipulate rankings or ratings.
               </li>
             </ul>
-            <p className="mt-4 text-sm text-zinc-400 italic">
+            <p className="mt-4 text-sm text-neutral-400 italic">
               Violation of these rules may result in immediate account
               suspension or termination.
             </p>
@@ -100,7 +100,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-2xl font-bold text-white mb-4">
               4. Disclaimer & Liability
             </h2>
-            <div className="bg-zinc-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
+            <div className="bg-neutral-900/50 border-l-4 border-neutral-400 p-6 rounded-r-lg">
               <p>
                 BioBlitz is provided on an "as is" basis. While we strive for
                 accuracy, we do not guarantee that the service will be

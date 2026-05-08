@@ -23,7 +23,7 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
   ).map((k) => ({ key: k, text: question[k as keyof IQuestionForDisplay] as string }));
 
   return (
-    <div className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl p-6 md:p-8">
+    <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-6 md:p-8">
       <div className="flex items-center mb-4">
         <span className="text-neutral-400 text-sm">
           Question {questionNumber}
@@ -31,12 +31,12 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
       </div>
 
       <div
-        className="mb-6 text-[18px] leading-relaxed text-zinc-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+        className="mb-6 text-[18px] leading-relaxed text-neutral-100 font-medium overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_p]:text-left [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
         dangerouslySetInnerHTML={{ __html: question.content }}
       />
 
       {question.imgURL && (
-        <div className="mb-6 rounded-xl overflow-hidden border border-zinc-800 bg-neutral-900">
+        <div className="mb-6 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900">
           <img
             src={question.imgURL}
             alt={`Question ${questionNumber}`}
@@ -63,8 +63,8 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
             keyBadgeClass += "bg-red-500/20 text-red-400";
           } else {
             rowClass +=
-              "bg-[rgba(24,24,27,0.6)] text-zinc-300 border-zinc-700/60";
-            keyBadgeClass += "bg-neutral-900/30 text-zinc-500";
+              "bg-[rgba(24,24,27,0.6)] text-neutral-300 border-neutral-700/60";
+            keyBadgeClass += "bg-neutral-900/30 text-neutral-500";
           }
 
           return (
