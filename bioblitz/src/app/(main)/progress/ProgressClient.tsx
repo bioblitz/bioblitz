@@ -352,7 +352,7 @@ function EloSection({
   const isAtPeak = currentElo >= peakElo && peakElo > 0;
 
   return (
-    <div className="relative rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] overflow-hidden h-full flex flex-col">
+    <div className="relative rounded-2xl border border-neutral-800 bg-[rgba(9,9,11,0.8)] overflow-hidden h-full flex flex-col">
       <div className="absolute top-0 left-0 right-0 h-[120px] bg-gradient-to-b from-neutral-600/[0.08] to-transparent pointer-events-none" />
 
       <div className="relative p-5 pb-2">
@@ -407,14 +407,14 @@ function EloSection({
               )}
               {!isAtPeak && peakElo > 0 && (
                 <span
-                  className={`${mono} text-[10px] font-medium text-zinc-500`}
+                  className={`${mono} text-[10px] font-medium text-neutral-500`}
                 >
                   Peak: {peakElo}
                 </span>
               )}
               {biggestGain > 0 && (
                 <span
-                  className={`${mono} text-[10px] font-medium text-zinc-500`}
+                  className={`${mono} text-[10px] font-medium text-neutral-500`}
                 >
                   Best: +{biggestGain}
                 </span>
@@ -430,7 +430,7 @@ function EloSection({
             </div>
           </div>
 
-          <div className="flex items-center gap-0.5 bg-[#18181b] border border-zinc-800 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-[#18181b] border border-neutral-800 rounded-lg p-0.5">
             {([30, 60, 90] as const).map((r) => (
               <button
                 key={r}
@@ -438,7 +438,7 @@ function EloSection({
                 className={`${mono} px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${
                   range === r
                     ? "bg-[#7c3aed] text-white shadow-lg shadow-neutral-600/30"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 {r}d
@@ -450,7 +450,7 @@ function EloSection({
 
       <div className="px-3 pt-1 pb-3 flex-1 min-h-[160px]">
         {chartData.length < 2 ? (
-          <div className="h-full flex items-center justify-center text-zinc-600 text-sm">
+          <div className="h-full flex items-center justify-center text-neutral-600 text-sm">
             Play more ranked blitzes to see your Elo chart.
           </div>
         ) : (
@@ -571,9 +571,9 @@ function ActivitySection({
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] overflow-hidden h-full flex flex-col">
+    <div className="rounded-2xl border border-neutral-800 bg-[rgba(9,9,11,0.8)] overflow-hidden h-full flex flex-col">
       {/* Streak */}
-      <div className="p-4 pb-3 flex items-center gap-4 border-b border-zinc-800/60">
+      <div className="p-4 pb-3 flex items-center gap-4 border-b border-neutral-800/60">
         <motion.div
           initial={{ rotate: -20, scale: 0 }}
           animate={{ rotate: 0, scale: 1 }}
@@ -589,13 +589,13 @@ function ActivitySection({
             >
               <AnimatedNumber value={currentStreak} duration={800} />
             </span>
-            <span className="text-[12px] font-medium text-zinc-500">
+            <span className="text-[12px] font-medium text-neutral-500">
               day streak
             </span>
           </div>
-          <p className={`${mono} text-[10px] text-zinc-600 mt-0.5`}>
+          <p className={`${mono} text-[10px] text-neutral-600 mt-0.5`}>
             Longest:{" "}
-            <span className="text-zinc-400 font-bold">{longestStreak}</span>{" "}
+            <span className="text-neutral-400 font-bold">{longestStreak}</span>{" "}
             days
           </p>
         </div>
@@ -616,7 +616,7 @@ function ActivitySection({
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-[4px] mt-2 text-[9px] text-zinc-600">
+        <div className="flex items-center gap-[4px] mt-2 text-[9px] text-neutral-600">
           <span>Less</span>
           {[
             "bg-[rgba(24,24,27,0.8)]",
@@ -632,7 +632,7 @@ function ActivitySection({
       </div>
 
       {/* Lifetime stats */}
-      <div className="grid grid-cols-3 border-t border-zinc-800/60">
+      <div className="grid grid-cols-3 border-t border-neutral-800/60">
         {[
           {
             val: totalBlitzes,
@@ -656,7 +656,7 @@ function ActivitySection({
         ].map((s, i) => (
           <div
             key={s.label}
-            className={`py-3 px-2 text-center ${i < 2 ? "border-r border-zinc-800/60" : ""}`}
+            className={`py-3 px-2 text-center ${i < 2 ? "border-r border-neutral-800/60" : ""}`}
           >
             <div
               className={`flex items-center justify-center gap-1 ${s.color} mb-0.5`}
@@ -667,7 +667,7 @@ function ActivitySection({
               </span>
             </div>
             <p
-              className={`${mono} text-[9px] text-zinc-600 font-bold uppercase`}
+              className={`${mono} text-[9px] text-neutral-600 font-bold uppercase`}
               style={{ letterSpacing: "0.1em" }}
             >
               {s.label}
@@ -695,9 +695,9 @@ function TopicBreakdownSection({ topicStats }: { topicStats: TopicStat[] }) {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <SectionHeader icon={<Target className="w-5 h-5" />} title="Mastery" />
-        <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center">
-          <Target className="w-8 h-8 text-zinc-800 mx-auto mb-3" />
-          <p className="text-zinc-600 text-sm">
+        <div className="rounded-2xl border border-dashed border-neutral-800 p-12 text-center">
+          <Target className="w-8 h-8 text-neutral-800 mx-auto mb-3" />
+          <p className="text-neutral-600 text-sm">
             Complete some blitzes to see your topic mastery.
           </p>
         </div>
@@ -773,7 +773,7 @@ function TopicBreakdownSection({ topicStats }: { topicStats: TopicStat[] }) {
                         {delta}%
                       </span>
                     )}
-                    <span className="text-[11px] text-zinc-500 font-medium">
+                    <span className="text-[11px] text-neutral-500 font-medium">
                       {stat.total} questions
                     </span>
                   </div>
@@ -809,7 +809,7 @@ function WeeklySnapshotSection({
         icon={<Calendar className="w-5 h-5" />}
         title="This Week"
       />
-      <div className="rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.8)] p-5">
+      <div className="rounded-2xl border border-neutral-800 bg-[rgba(9,9,11,0.8)] p-5">
         <div className="grid grid-cols-4 gap-4 mb-4">
           {[
             {
@@ -847,7 +847,7 @@ function WeeklySnapshotSection({
                 {s.suffix || ""}
               </span>
               <p
-                className={`${mono} text-[9px] text-zinc-600 font-bold uppercase mt-0.5`}
+                className={`${mono} text-[9px] text-neutral-600 font-bold uppercase mt-0.5`}
                 style={{ letterSpacing: "0.1em" }}
               >
                 {s.label}
@@ -857,28 +857,28 @@ function WeeklySnapshotSection({
         </div>
         <Link
           href="/leaderboard"
-          className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all group"
+          className="flex items-center justify-between p-3 rounded-xl border border-neutral-800 bg-neutral-900/40 hover:bg-neutral-900/70 hover:border-neutral-700 transition-all group"
         >
           <div className="flex items-center gap-2.5">
             <FileText className="w-4 h-4 text-neutral-400" />
-            <span className="text-[13px] font-bold text-zinc-300 group-hover:text-white transition-colors">
+            <span className="text-[13px] font-bold text-neutral-300 group-hover:text-white transition-colors">
               See where you stand on the global leaderboard
             </span>
           </div>
-          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 group-hover:translate-x-0.5 transition-all" />
         </Link>
       </div>
       <Link
         href="/bookmarks"
-        className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all group mt-2"
+        className="flex items-center justify-between p-3 rounded-xl border border-neutral-800 bg-neutral-900/40 hover:bg-neutral-900/70 hover:border-neutral-700 transition-all group mt-2"
       >
         <div className="flex items-center gap-2.5">
           <Bookmark className="w-4 h-4 text-amber-400" />
-          <span className="text-[13px] font-bold text-zinc-300 group-hover:text-white transition-colors">
+          <span className="text-[13px] font-bold text-neutral-300 group-hover:text-white transition-colors">
             View your bookmarked questions
           </span>
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 group-hover:translate-x-0.5 transition-all" />
       </Link>
     </motion.section>
   );
@@ -942,7 +942,7 @@ function ReviewSection({
                 href={`/home/${set.gameId}/review/${set.submissionId}`}
                 className="block group"
               >
-                <div className="rounded-2xl border border-zinc-800 bg-[rgba(9,9,11,0.6)] p-4 flex flex-col items-center text-center gap-3 hover:border-zinc-700 hover:bg-zinc-900/60 transition-all aspect-square justify-center">
+                <div className="rounded-2xl border border-neutral-800 bg-[rgba(9,9,11,0.6)] p-4 flex flex-col items-center text-center gap-3 hover:border-neutral-700 hover:bg-neutral-900/60 transition-all aspect-square justify-center">
                   <RingChart
                     percentage={Math.round(set.accuracy)}
                     size={52}
@@ -958,7 +958,7 @@ function ReviewSection({
                   </RingChart>
 
                   <div className="w-full min-w-0">
-                    <p className="text-[12px] font-bold text-zinc-200 truncate group-hover:text-white transition-colors">
+                    <p className="text-[12px] font-bold text-neutral-200 truncate group-hover:text-white transition-colors">
                       {set.title}
                     </p>
                     <span
@@ -991,11 +991,11 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2.5">
-        <span className="text-zinc-400">{icon}</span>
+        <span className="text-neutral-400">{icon}</span>
         <h2 className="text-[17px] font-bold text-white">{title}</h2>
       </div>
       {subtitle && (
-        <span className="text-xs text-zinc-500 font-medium">{subtitle}</span>
+        <span className="text-xs text-neutral-500 font-medium">{subtitle}</span>
       )}
     </div>
   );
@@ -1330,7 +1330,7 @@ export default function ProgressClient() {
       >
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-6 h-6 text-neutral-500 animate-spin" />
-          <p className="text-zinc-500 text-sm font-medium animate-pulse">
+          <p className="text-neutral-500 text-sm font-medium animate-pulse">
             Loading progress...
           </p>
         </div>
@@ -1363,7 +1363,7 @@ export default function ProgressClient() {
             >
               Progress
             </h1>
-            <p className="text-zinc-500 text-[13px]">
+            <p className="text-neutral-500 text-[13px]">
               Your performance over time.
             </p>
           </div>
@@ -1406,10 +1406,10 @@ export default function ProgressClient() {
           />
         </div>
 
-        <div className="text-center pt-10 border-t border-zinc-900 mt-10">
+        <div className="text-center pt-10 border-t border-neutral-900 mt-10">
           <Link
             href="/home"
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="text-neutral-500 hover:text-white text-sm transition-colors"
           >
             Back to Dashboard
           </Link>

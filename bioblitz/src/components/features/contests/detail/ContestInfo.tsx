@@ -63,18 +63,18 @@ export default function ContestInfo({
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+                className="p-2 rounded-lg text-neutral-600 hover:text-neutral-300 hover:bg-neutral-800 transition-all"
               >
                 <MoreVertical className="w-5 h-5" />
               </button>
               {showMenu && (
-                <div className="absolute left-0 top-full mt-1 w-44 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="absolute left-0 top-full mt-1 w-44 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl z-50 overflow-hidden">
                   <button
                     onClick={() => {
                       setShowMenu(false);
                       router.push(`/contests/create/${game.id}`);
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800 transition-colors text-left"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit Blitz
@@ -106,7 +106,7 @@ export default function ContestInfo({
             {game.creatorUsername ? (
               <Link
                 href={`/profile/${game.creatorUsername}`}
-                className="flex items-center gap-2 text-zinc-200 hover:underline transition-colors"
+                className="flex items-center gap-2 text-neutral-200 hover:underline transition-colors"
               >
                 {game.creatorPfp ? (
                   <img
@@ -123,7 +123,7 @@ export default function ContestInfo({
                 <span>{game.creatorUsername}</span>
               </Link>
             ) : (
-              <span className="text-zinc-200">Unknown</span>
+              <span className="text-neutral-200">Unknown</span>
             )}
           </div>
         </div>

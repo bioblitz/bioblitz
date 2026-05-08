@@ -27,20 +27,20 @@ export default function DomainMasterySection({
   chartColors,
 }: DomainMasterySectionProps) {
   return (
-    <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl h-[42rem]">
-      <div className="h-px w-full bg-zinc-800/50 shrink-0" />
+    <div className="bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 rounded-3xl p-6 flex flex-col gap-4 shadow-xl h-[42rem]">
+      <div className="h-px w-full bg-neutral-800/50 shrink-0" />
       <h3 className="text-lg font-semibold text-white shrink-0 flex items-center gap-2">
         <BrainCircuit className="w-5 h-5 text-neutral-500" />
         Domain Mastery
       </h3>
-      <p className="text-xs text-zinc-500 -mt-2">Cumulative Score Per Topic</p>
+      <p className="text-xs text-neutral-500 -mt-2">Cumulative Score Per Topic</p>
 
       {chartData.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-xs text-zinc-600 italic">
+        <div className="flex-1 flex items-center justify-center text-xs text-neutral-600 italic">
           No blitzes played yet.
         </div>
       ) : (
-        <div className="flex-1 w-full bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4">
+        <div className="flex-1 w-full bg-neutral-900/40 border border-neutral-800/50 rounded-xl p-4">
           <ResponsiveContainer width="100%" height="100%" minHeight={200}>
             <BarChart
               data={chartData}
@@ -76,21 +76,21 @@ export default function DomainMasterySection({
                   if (active && payload && payload.length) {
                     const data: any = payload[0].payload;
                     return (
-                      <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
+                      <div className="bg-neutral-950 border border-neutral-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
                         <p className="text-white font-bold text-xs mb-2">{data.name}</p>
                         <div className="space-y-1">
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-zinc-400 text-[10px]">Total Score</span>
+                            <span className="text-neutral-400 text-[10px]">Total Score</span>
                             <span className="text-neutral-400 font-mono text-xs">
                               {data.totalScore.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-zinc-400 text-[10px]">Blitzes Completed</span>
+                            <span className="text-neutral-400 text-[10px]">Blitzes Completed</span>
                             <span className="text-white font-mono text-xs">{data.sets}</span>
                           </div>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-zinc-400 text-[10px]">Avg. Score</span>
+                            <span className="text-neutral-400 text-[10px]">Avg. Score</span>
                             <span className="text-emerald-400 font-mono text-xs">
                               {data.avg.toLocaleString()}
                             </span>

@@ -24,13 +24,13 @@ const instrumentSerif = Instrument_Serif({
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BioBlitz – Biology Quiz Game & Competition Platform",
+    default: "BioBlitz | Competitive Biology Platform",
     template: "%s | BioBlitz",
   },
   description:
-    "BioBlitz is a free competitive biology quiz game for USABO, AP Biology, and MCAT prep. Race against the clock, earn an Elo rating, and climb the global leaderboard.",
+    "BioBlitz is a free competitive biology platform for USABO, AP Biology, and MCAT prep. Race against the clock, earn an Elo rating, and climb the global leaderboard.",
   keywords: [
-    "biology quiz game",
+    "competitive biology platform",
     "bioblitz game",
     "USABO practice",
     "competitive biology",
@@ -46,7 +46,7 @@ export const metadata = {
     shortcut: "/icons/favicon.ico",
   },
   openGraph: {
-    title: "BioBlitz – Biology Quiz Game & Competition Platform",
+    title: "BioBlitz | Competitive Biology Platform",
     description:
       "Free competitive biology quiz game. Practice USABO, AP Bio, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
     url: SITE_URL,
@@ -57,13 +57,13 @@ export const metadata = {
         url: `${SITE_URL}/images/BIOBLITZ.png`,
         width: 1200,
         height: 630,
-        alt: "BioBlitz – Biology Quiz Game",
+        alt: "BioBlitz | Competitive Biology Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BioBlitz – Biology Quiz Game & Competition Platform",
+    title: "BioBlitz | Competitive Biology Platform",
     description:
       "Free competitive biology quiz game. Practice USABO, AP Bio, and MCAT questions, earn an Elo rating, and compete on a global leaderboard.",
     images: [`${SITE_URL}/images/BIOBLITZ.png`],

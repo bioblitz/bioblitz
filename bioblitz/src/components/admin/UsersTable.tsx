@@ -35,8 +35,8 @@ export default function UsersTable({
 }: Props) {
   if (!showDb) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">
-        <p className="text-zinc-400 mb-6 text-center max-w-md">
+      <div className="py-20 flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50">
+        <p className="text-neutral-400 mb-6 text-center max-w-md">
           The user database is not loaded by default to save on read operations.
         </p>
         <button
@@ -57,27 +57,27 @@ export default function UsersTable({
           placeholder="Search users by name, username, email, or UID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 max-w-md"
+          className="bg-neutral-900 border-neutral-800 text-neutral-100 placeholder:text-neutral-500 max-w-md"
         />
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-sm">
+        <table className="w-full bg-neutral-950 border border-neutral-800 rounded-xl text-sm">
           <thead>
-            <tr className="text-left text-zinc-300">
-              <th className="py-2 px-4 border-b border-zinc-800">Display Name</th>
-              <th className="py-2 px-4 border-b border-zinc-800">Username</th>
-              <th className="py-2 px-4 border-b border-zinc-800">Email</th>
-              <th className="py-2 px-4 border-b border-zinc-800">Role</th>
-              <th className="py-2 px-4 border-b border-zinc-800">UID</th>
-              <th className="py-2 px-4 border-b border-zinc-800 text-center">Actions</th>
+            <tr className="text-left text-neutral-300">
+              <th className="py-2 px-4 border-b border-neutral-800">Display Name</th>
+              <th className="py-2 px-4 border-b border-neutral-800">Username</th>
+              <th className="py-2 px-4 border-b border-neutral-800">Email</th>
+              <th className="py-2 px-4 border-b border-neutral-800">Role</th>
+              <th className="py-2 px-4 border-b border-neutral-800">UID</th>
+              <th className="py-2 px-4 border-b border-neutral-800 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {sortedUsers.map((u) => (
-              <tr key={u.uid} className="hover:bg-zinc-900/60">
+              <tr key={u.uid} className="hover:bg-neutral-900/60">
                 <td
-                  className="py-2 px-4 border-b border-zinc-800 text-zinc-100 cursor-pointer"
+                  className="py-2 px-4 border-b border-neutral-800 text-neutral-100 cursor-pointer"
                   onClick={() => {
                     setEditingUser({ ...u });
                     setEditingOriginal({ ...u });
@@ -98,14 +98,14 @@ export default function UsersTable({
                         setEditingUser(null);
                         setEditingOriginal(null);
                       }}
-                      className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
+                      className="w-full bg-transparent border-b border-neutral-700 text-neutral-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
                     />
                   ) : (
                     u.displayName || "Unnamed"
                   )}
                 </td>
                 <td
-                  className="py-2 px-4 border-b border-zinc-800 text-zinc-300 cursor-pointer"
+                  className="py-2 px-4 border-b border-neutral-800 text-neutral-300 cursor-pointer"
                   onClick={() => {
                     setEditingUser({ ...u });
                     setEditingOriginal({ ...u });
@@ -126,26 +126,26 @@ export default function UsersTable({
                         setEditingUser(null);
                         setEditingOriginal(null);
                       }}
-                      className="w-full bg-transparent border-b border-zinc-700 text-zinc-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
+                      className="w-full bg-transparent border-b border-neutral-700 text-neutral-100 px-0.5 py-1 focus:outline-none focus:border-neutral-500"
                     />
                   ) : (
                     `@${u.username || "no-username"}`
                   )}
                 </td>
-                <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">{u.email || "-"}</td>
-                <td className="py-2 px-4 border-b border-zinc-800 text-zinc-300">
+                <td className="py-2 px-4 border-b border-neutral-800 text-neutral-300">{u.email || "-"}</td>
+                <td className="py-2 px-4 border-b border-neutral-800 text-neutral-300">
                   <select
                     value={Array.isArray(u.roles) ? (u.roles.includes("admin") ? "admin" : u.roles.includes("staff") ? "staff" : "user") : "user"}
                     onChange={(e) => handleSetUserRole(u.uid, e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-md px-2 py-1"
+                    className="w-full bg-neutral-900 border border-neutral-700 text-neutral-100 rounded-md px-2 py-1"
                   >
                     <option value="user">User</option>
                     <option value="staff">Staff</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td className="py-2 px-4 border-b border-zinc-800 text-zinc-400 font-mono text-xs break-all">{u.uid}</td>
-                <td className="py-2 px-4 border-b border-zinc-800">
+                <td className="py-2 px-4 border-b border-neutral-800 text-neutral-400 font-mono text-xs break-all">{u.uid}</td>
+                <td className="py-2 px-4 border-b border-neutral-800">
                   <div className="flex items-center justify-center space-x-2 whitespace-nowrap">
                     <button onClick={() => handleDeleteUser(u.uid)} className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white">Delete</button>
                   </div>

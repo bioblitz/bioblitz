@@ -96,17 +96,17 @@ export default function ContestActionButtons({
           disabled={loadingAttempts || !authResolved || activeSession !== null}
           className={`w-full py-2.5 blurred-border relative group overflow-hidden rounded-xl p-5 transition-all duration-300 transform active:scale-[0.98] ${
             loadingAttempts
-              ? "bg-zinc-500 cursor-wait opacity-70"
+              ? "bg-neutral-500 cursor-wait opacity-70"
               : activeSession !== null
-                ? "bg-zinc-500 opacity-50 cursor-not-allowed"
+                ? "bg-neutral-500 opacity-50 cursor-not-allowed"
                 : isFirstAttempt && !isOwner
                   ? "border-neutral-100 border hover:bg-neutral-800"
-                  : "bg-white text-black hover:bg-zinc-200"
+                  : "bg-white text-black hover:bg-neutral-200"
           }`}
         >
           <div className="relative z-10 flex items-center justify-center gap-3">
             {!authResolved ? (
-              <span className="text-zinc-500 font-bold">
+              <span className="text-neutral-500 font-bold">
                 Checking sign-in...
               </span>
             ) : !user ? (
@@ -121,7 +121,7 @@ export default function ContestActionButtons({
                 </span>
               </div>
             ) : activeSession ? (
-              <span className="text-zinc-500 font-bold">
+              <span className="text-neutral-500 font-bold">
                 Finish your current attempt first
               </span>
             ) : isFirstAttempt ? (

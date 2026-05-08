@@ -22,8 +22,8 @@ export default function AdminTabs({ activeTab, setActiveTab }: Props) {
           onClick={() => setActiveTab(tab.key)}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === tab.key
-              ? "bg-zinc-100 text-zinc-950"
-              : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              ? "bg-neutral-100 text-neutral-950"
+              : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
           }`}
         >
           {tab.label}

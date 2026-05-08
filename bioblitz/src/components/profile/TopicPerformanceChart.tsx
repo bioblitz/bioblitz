@@ -23,9 +23,9 @@ const CHART_COLORS = [
 export default function TopicPerformanceChart({ chartData }: TopicPerformanceChartProps) {
   if (chartData.length === 0) {
     return (
-      <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+      <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Performance by Topic</h3>
-        <div className="h-64 flex items-center justify-center text-zinc-600">
+        <div className="h-64 flex items-center justify-center text-neutral-600">
           <p>No performance data yet</p>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function TopicPerformanceChart({ chartData }: TopicPerformanceCha
   }
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+    <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
       <h3 className="text-lg font-bold text-white mb-4">Performance by Topic</h3>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={chartData}>

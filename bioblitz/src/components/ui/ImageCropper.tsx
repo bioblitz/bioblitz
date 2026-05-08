@@ -103,12 +103,12 @@ export default function ImageCropper({
 
   return (
     <div className="fixed inset-0 z-50 bg-neutral-900/90 flex flex-col">
-      <div className="flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800">
+      <div className="flex items-center justify-between p-4 bg-neutral-900 border-b border-neutral-800">
         <h2 className="text-xl font-bold text-white">{title}</h2>
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded transition-colors"
+            className="p-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded transition-colors"
             title="Cancel"
           >
             <X className="w-5 h-5" />
@@ -137,7 +137,7 @@ export default function ImageCropper({
         />
       </div>
 
-      <div className="p-4 bg-zinc-900 border-t border-zinc-800">
+      <div className="p-4 bg-neutral-900 border-t border-neutral-800">
         <div className="max-w-md mx-auto">
           <label className="block text-white text-sm mb-2">Zoom</label>
           <input
@@ -147,7 +147,7 @@ export default function ImageCropper({
             step={0.1}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer slider"
+            className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
           />
         </div>
       </div>

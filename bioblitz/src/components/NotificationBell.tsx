@@ -188,7 +188,7 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleOpen}
-        className="relative p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
+        className="relative p-2 rounded-full hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-white"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -197,14 +197,14 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-85 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-          <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50">
+        <div className="absolute right-0 mt-2 w-85 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+          <div className="p-3 border-b border-neutral-800 flex justify-between items-center bg-neutral-950/50">
             <h3 className="font-semibold text-sm text-white">Notifications</h3>
             <div className="flex items-center gap-3">
               {allNotifications.length > 0 && (
                 <button
                   onClick={clearAll}
-                  className="text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-wider"
+                  className="text-[10px] font-bold text-neutral-500 hover:text-neutral-300 transition-colors uppercase tracking-wider"
                 >
                   Clear All
                 </button>
@@ -219,7 +219,7 @@ export default function NotificationBell() {
 
           <div className="max-h-[520px] overflow-y-auto custom-scrollbar">
             {allNotifications.length === 0 ? (
-              <div className="p-8 text-center text-zinc-500 text-sm">
+              <div className="p-8 text-center text-neutral-500 text-sm">
                 No notifications yet.
               </div>
             ) : (
@@ -232,8 +232,8 @@ export default function NotificationBell() {
                       handleNotificationClick(notification.link)
                     }
                     className={`
-                      relative p-4 border-b border-zinc-800/50 group ${notification.link ? "cursor-pointer" : "cursor-default"} transition-colors flex gap-3
-                      ${notification.read ? "bg-transparent hover:bg-zinc-900/50" : "bg-neutral-500/5 hover:bg-neutral-500/10"}
+                      relative p-4 border-b border-neutral-800/50 group ${notification.link ? "cursor-pointer" : "cursor-default"} transition-colors flex gap-3
+                      ${notification.read ? "bg-transparent hover:bg-neutral-900/50" : "bg-neutral-500/5 hover:bg-neutral-500/10"}
                     `}
                   >
                     <div className="shrink-0 mt-1">
@@ -241,7 +241,7 @@ export default function NotificationBell() {
                         <img
                           src={notification.senderPhotoURL}
                           alt="User"
-                          className="w-8 h-8 rounded-full object-cover border border-zinc-700"
+                          className="w-8 h-8 rounded-full object-cover border border-neutral-700"
 
                           onError={(e) => {
                             const target = e.currentTarget;
@@ -250,18 +250,18 @@ export default function NotificationBell() {
                           }}
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
-                          <User className="w-4 h-4 text-zinc-400" />
+                        <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center">
+                          <User className="w-4 h-4 text-neutral-400" />
                         </div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-0.5 pr-6">
-                        <p className={`text-sm ${notification.read ? "text-zinc-300" : "text-white font-semibold"}`}>
+                        <p className={`text-sm ${notification.read ? "text-neutral-300" : "text-white font-semibold"}`}>
                           {notification.title}
                         </p>
-                        <span className="text-[10px] text-zinc-500 whitespace-nowrap ml-2 mt-0.5 shrink-0">
+                        <span className="text-[10px] text-neutral-500 whitespace-nowrap ml-2 mt-0.5 shrink-0">
                           {notification.createdAt
                             ? new Date(notification.createdAt.seconds * 1000).toLocaleDateString(undefined, {
                                 month: "short",
@@ -270,14 +270,14 @@ export default function NotificationBell() {
                             : "Just now"}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-400 leading-relaxed">
+                      <p className="text-xs text-neutral-400 leading-relaxed">
                         {notification.message}
                       </p>
                     </div>
 
                     <button
                       onClick={(e) => dismissNotification(e, notification.id)}
-                      className="absolute right-2 top-4 p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-zinc-800 text-zinc-500 hover:text-white transition-all"
+                      className="absolute right-2 top-4 p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -294,7 +294,7 @@ export default function NotificationBell() {
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="w-full py-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-50"
+                    className="w-full py-3 text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-50"
                   >
                     {loadingMore ? "Loading…" : "Load more"}
                   </button>

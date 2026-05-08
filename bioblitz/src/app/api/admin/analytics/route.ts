@@ -389,7 +389,7 @@ export async function GET(request: Request) {
   const heroToSignupRate = heroViews > 0 ? authSuccesses / heroViews : 0;
   const signupToOnboardingRate = authSuccesses > 0 ? onboardingCompleted / authSuccesses : 0;
   const onboardingToContestRate = onboardingCompleted > 0 ? contestStartClicks / onboardingCompleted : 0;
-  const matriculationRate = heroViews > 0 ? onboardingCompleted / heroViews : 0;
+  const matriculationRate = authSuccesses > 0 ? onboardingCompleted / authSuccesses : 0;
 
   const totalDecisions = accepted + declined;
   const payload: StatsPayload = {

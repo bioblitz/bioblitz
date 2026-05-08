@@ -43,13 +43,13 @@ export default function ReportModal({
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative overflow-hidden"
+        className="bg-neutral-950 border border-neutral-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/5 blur-[60px] pointer-events-none" />
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-white bg-zinc-900 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white bg-neutral-900 rounded-full transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -61,7 +61,7 @@ export default function ReportModal({
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Report Submitted</h2>
-              <p className="text-zinc-400 text-sm mt-1">
+              <p className="text-neutral-400 text-sm mt-1">
                 Thank you for helping keep the community safe.
               </p>
             </div>
@@ -74,7 +74,7 @@ export default function ReportModal({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Report User</h2>
-                <p className="text-zinc-500 text-sm">
+                <p className="text-neutral-500 text-sm">
                   We take reports seriously. Please provide details.
                 </p>
               </div>
@@ -82,14 +82,14 @@ export default function ReportModal({
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 block">
                   Reason
                 </label>
                 <div className="relative">
                   <select
                     value={reportCategory}
                     onChange={(e) => onCategoryChange(e.target.value)}
-                    className="w-full appearance-none bg-zinc-900 text-white p-3 pr-10 rounded-xl border border-zinc-800 focus:border-red-500/50 focus:outline-none transition-colors"
+                    className="w-full appearance-none bg-neutral-900 text-white p-3 pr-10 rounded-xl border border-neutral-800 focus:border-red-500/50 focus:outline-none transition-colors"
                   >
                     {categoryOptions.map((cat) => (
                       <option key={cat} value={cat}>
@@ -97,14 +97,14 @@ export default function ReportModal({
                       </option>
                     ))}
                   </select>
-                  <div className="absolute right-3 top-3.5 pointer-events-none text-zinc-500">
+                  <div className="absolute right-3 top-3.5 pointer-events-none text-neutral-500">
                     <ChevronRight className="w-4 h-4 rotate-90" />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 block">
                   Description
                 </label>
                 <textarea
@@ -112,14 +112,14 @@ export default function ReportModal({
                   value={reportDescription}
                   onChange={(e) => onDescriptionChange(e.target.value)}
                   placeholder="Please describe the violation..."
-                  className="w-full bg-zinc-900 text-white p-3 rounded-xl border border-zinc-800 focus:border-red-500/50 focus:outline-none transition-colors resize-none placeholder:text-zinc-700"
+                  className="w-full bg-neutral-900 text-white p-3 rounded-xl border border-neutral-800 focus:border-red-500/50 focus:outline-none transition-colors resize-none placeholder:text-neutral-700"
                 />
               </div>
 
               <button
                 onClick={onSubmit}
                 disabled={isSubmitting}
-                className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>

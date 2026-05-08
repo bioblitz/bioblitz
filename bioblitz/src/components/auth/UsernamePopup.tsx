@@ -20,7 +20,7 @@ const INTRO_STEPS = [
     title: "Welcome to BioBlitz!",
     subtitle: "The competitive biology platform.",
     content: (
-      <p className="text-zinc-400 text-sm leading-relaxed">
+      <p className="text-neutral-400 text-sm leading-relaxed">
         BioBlitz is a timed, ranked quiz platform built for biology competitors.
         Work through question sets, climb the leaderboard, and sharpen your
         skills, all in one place.
@@ -31,7 +31,7 @@ const INTRO_STEPS = [
     title: "How Blitzes Work",
     subtitle: "Race the clock, answer correctly.",
     content: (
-      <p className="text-zinc-400 text-sm leading-relaxed">
+      <p className="text-neutral-400 text-sm leading-relaxed">
         Each Blitz is a timed set of biology questions. Your first attempt on
         any set is <span className="text-white font-medium">Ranked</span>, as it
         counts toward your Elo rating. After that, replay in Practice Mode as
@@ -43,7 +43,7 @@ const INTRO_STEPS = [
     title: "Earn Your Ranking",
     subtitle: "Elo-based competitive ladder.",
     content: (
-      <p className="text-zinc-400 text-sm leading-relaxed">
+      <p className="text-neutral-400 text-sm leading-relaxed">
         Every ranked attempt adjusts your{" "}
         <span className="text-white font-medium">Elo</span> score based on
         performance. Track your progress on the Global Leaderboard and see how
@@ -135,10 +135,10 @@ export function UsernamePopup() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/85 backdrop-blur-md px-4">
       <div
-        className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-lg bg-neutral-950 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
         style={{ maxHeight: "88vh" }}
       >
-        <div className="h-1 w-full bg-zinc-800">
+        <div className="h-1 w-full bg-neutral-800">
           <div
             className="h-full bg-yellow-300 transition-all duration-500 ease-out"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
@@ -152,9 +152,9 @@ export function UsernamePopup() {
                 <h2 className="text-2xl font-bold text-white mb-1">
                   {introStep.title}
                 </h2>
-                <p className="text-sm text-zinc-500">{introStep.subtitle}</p>
+                <p className="text-sm text-neutral-500">{introStep.subtitle}</p>
               </div>
-              <div className="w-full text-left bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+              <div className="w-full text-left bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
                 {introStep.content}
               </div>
             </div>
@@ -164,7 +164,7 @@ export function UsernamePopup() {
                 <h2 className="text-2xl font-bold text-white mb-1">
                   Pick your username
                 </h2>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-neutral-500">
                   This is how you&apos;ll appear on the leaderboard.
                 </p>
               </div>
@@ -180,12 +180,12 @@ export function UsernamePopup() {
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   placeholder="ramiz_elias"
                   maxLength={24}
-                  className="w-full bg-zinc-900 border border-neutral-300 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-200 hover:border-neutral-200 transition-all text-sm"
+                  className="w-full bg-neutral-900 border border-neutral-300 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-200 hover:border-neutral-200 transition-all text-sm"
                 />
                 {error && (
                   <p className="text-red-400 text-xs font-medium">{error}</p>
                 )}
-                <p className="text-zinc-600 text-xs">
+                <p className="text-neutral-600 text-xs">
                   3-24 characters, letters, numbers, underscores only
                 </p>
 
@@ -194,7 +194,7 @@ export function UsernamePopup() {
                   className={`mt-4 p-4 rounded bg-neutral-900 transition-all cursor-pointer flex items-center gap-4 ${
                     wantsMarketing
                       ? "bg-neutral-500/10 border-neutral-500/50"
-                      : "bg-neutral-900 border-zinc-800 hover:border-zinc-700"
+                      : "bg-neutral-900 border-neutral-800 hover:border-neutral-700"
                   }`}
                 >
                   <div
@@ -214,7 +214,7 @@ export function UsernamePopup() {
                         Stay in the loop!
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 leading-relaxed">
+                    <p className="text-xs text-neutral-500 leading-relaxed">
                       Can we send you occassional emails about new competitions,
                       features, or updates? No spam and you may unsubscribe
                       anytime.
@@ -226,7 +226,7 @@ export function UsernamePopup() {
           )}
         </div>
 
-        <div className="px-8 pb-8 pt-4 flex items-center justify-between gap-4 border-t border-zinc-800/50">
+        <div className="px-8 pb-8 pt-4 flex items-center justify-between gap-4 border-t border-neutral-800/50">
           <div className="flex items-center gap-1.5">
             {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
               <div
@@ -235,8 +235,8 @@ export function UsernamePopup() {
                   i === step
                     ? "w-4 h-2 bg-neutral-500"
                     : i < step
-                      ? "w-2 h-2 bg-zinc-600"
-                      : "w-2 h-2 bg-zinc-800"
+                      ? "w-2 h-2 bg-neutral-600"
+                      : "w-2 h-2 bg-neutral-800"
                 }`}
               />
             ))}
@@ -246,7 +246,7 @@ export function UsernamePopup() {
             {step > 0 && (
               <button
                 onClick={handleBack}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 border border-transparent hover:border-neutral-700 transition-all"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back

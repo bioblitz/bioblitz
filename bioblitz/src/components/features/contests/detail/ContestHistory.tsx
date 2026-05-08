@@ -32,11 +32,11 @@ export default function ContestHistory({
 
       {loadingAttempts ? (
         <div className="flex justify-center py-10">
-          <Loader2 className="w-8 h-8 text-zinc-700 animate-spin" />
+          <Loader2 className="w-8 h-8 text-neutral-700 animate-spin" />
         </div>
       ) : previousAttempts.length === 0 ? (
         <div className="p-8 text-center">
-          <p className="text-zinc-500">You haven't played this Blitz yet.</p>
+          <p className="text-neutral-500">You haven't played this Blitz yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -46,8 +46,8 @@ export default function ContestHistory({
               key={attempt.id}
               className={`group flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
                 attempt.ranked
-                  ? "bg-zinc-900 border-neutral-500/20 hover:border-neutral-500/50 hover:bg-zinc-900/80"
-                  : "bg-zinc-900 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
+                  ? "bg-neutral-900 border-neutral-500/20 hover:border-neutral-500/50 hover:bg-neutral-900/80"
+                  : "bg-neutral-900 border-neutral-800 hover:border-neutral-600 hover:bg-neutral-800"
               }`}
             >
               <div className="flex items-center gap-4 z-10">
@@ -55,7 +55,7 @@ export default function ContestHistory({
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
                     attempt.ranked
                       ? "bg-neutral-900/30 text-neutral-400"
-                      : "bg-zinc-800 text-zinc-400"
+                      : "bg-neutral-800 text-neutral-400"
                   }`}
                 >
                   {attempt.ranked ? (
@@ -83,7 +83,7 @@ export default function ContestHistory({
                       </span>
                     )}
                   </div>
-                  <div className="text-zinc-500 text-xs flex gap-2 mt-1">
+                  <div className="text-neutral-500 text-xs flex gap-2 mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" /> {formatDate(attempt.submittedAt)}
                     </span>
@@ -93,11 +93,11 @@ export default function ContestHistory({
 
               <div className="flex items-center gap-4 z-10">
                 <div className="text-right">
-                  <div className="text-zinc-400 text-sm font-mono flex items-center gap-1 justify-end">
+                  <div className="text-neutral-400 text-sm font-mono flex items-center gap-1 justify-end">
                     <Clock className="w-3 h-3" /> {formatTimePlayed(attempt.timeTaken)}
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
+                <ChevronRight className="w-5 h-5 text-neutral-600 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
               </div>
             </Link>
           ))}

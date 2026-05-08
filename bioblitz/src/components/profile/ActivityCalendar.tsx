@@ -24,32 +24,32 @@ export default function ActivityCalendar({
   });
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6">
+    <div className="bg-neutral-950 border border-neutral-800/50 rounded-2xl p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-white">Activity</h3>
         <div className="flex items-center gap-2">
           <button
             onClick={onPrevMonth}
-            className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-1.5 hover:bg-neutral-800 rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-4 h-4 text-zinc-400" />
+            <ChevronLeft className="w-4 h-4 text-neutral-400" />
           </button>
-          <span className="text-sm text-zinc-400 min-w-[100px] text-center">
+          <span className="text-sm text-neutral-400 min-w-[100px] text-center">
             {viewMonthName} {viewYear}
           </span>
           <button
             onClick={onNextMonth}
             disabled={isCurrentMonth}
-            className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronRight className="w-4 h-4 text-zinc-400" />
+            <ChevronRight className="w-4 h-4 text-neutral-400" />
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-7 gap-2">
         {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-          <div key={i} className="text-center text-xs text-zinc-600 font-medium">
+          <div key={i} className="text-center text-xs text-neutral-600 font-medium">
             {day}
           </div>
         ))}
@@ -72,8 +72,8 @@ export default function ActivityCalendar({
                 isActive
                   ? "bg-neutral-600 text-white font-bold shadow-lg"
                   : isFuture
-                  ? "bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
-                  : "bg-zinc-900 text-zinc-500 hover:bg-zinc-800"
+                  ? "bg-neutral-900/50 text-neutral-700 cursor-not-allowed"
+                  : "bg-neutral-900 text-neutral-500 hover:bg-neutral-800"
               }`}
             >
               {day}

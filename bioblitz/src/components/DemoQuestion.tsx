@@ -63,14 +63,14 @@ export default function DemoQuestion() {
   return (
     <div ref={sectionRef} className="flex flex-col xl:flex-row gap-8 items-start">
       {/* Question Card */}
-      <div className="flex-1 w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xl relative z-10">
+      <div className="flex-1 w-full bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 shadow-xl relative z-10">
         <div className="flex items-center gap-3 mb-4">
           <span className="bg-neutral-500/10 text-neutral-400 text-sm font-bold px-3 py-1 rounded-full border border-neutral-500/20">
             Question 4
           </span>
         </div>
 
-        <p className="mb-8 text-lg md:text-xl leading-relaxed text-zinc-100 font-medium">
+        <p className="mb-8 text-lg md:text-xl leading-relaxed text-neutral-100 font-medium">
           In the absence of oxygen, yeast cells can obtain energy by
           fermentation, resulting in the production of which of the following
           sets of molecules?
@@ -97,12 +97,12 @@ export default function DemoQuestion() {
                   ${
                     isSelected
                       ? "bg-neutral-600 text-white border-neutral-600 shadow-lg shadow-neutral-900/50 scale-[1.01]"
-                      : "bg-zinc-800/50 text-zinc-300 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800"
+                      : "bg-neutral-800/50 text-neutral-300 border-neutral-700 hover:border-neutral-500 hover:bg-neutral-800"
                   }`}
               >
                 <span
                   className={`flex items-center justify-center w-8 h-8 rounded-lg mr-4 font-bold text-sm transition-colors
-                    ${isSelected ? "bg-white/20 text-white" : "bg-neutral-900/20 text-zinc-400"}`}
+                    ${isSelected ? "bg-white/20 text-white" : "bg-neutral-900/20 text-neutral-400"}`}
                 >
                   {key}
                 </span>
@@ -147,7 +147,7 @@ export default function DemoQuestion() {
               >
                 00:{seconds}
               </span>
-              <span className="text-zinc-500 text-xs font-medium tracking-wider mt-1">
+              <span className="text-neutral-500 text-xs font-medium tracking-wider mt-1">
                 Remaining
               </span>
             </div>

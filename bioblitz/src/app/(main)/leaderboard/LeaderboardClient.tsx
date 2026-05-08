@@ -36,14 +36,14 @@ export default function LeaderboardClient({
   const getRankStyle = (index: number) => {
     switch (index) {
       case 0: return "border-yellow-500/50 bg-yellow-500/10 text-yellow-500";
-      case 1: return "border-zinc-400/50 bg-zinc-400/10 text-zinc-300";
+      case 1: return "border-neutral-400/50 bg-neutral-400/10 text-neutral-300";
       case 2: return "border-orange-700/50 bg-orange-700/10 text-orange-400";
-      default: return "border-zinc-800 bg-zinc-900/30 text-zinc-400";
+      default: return "border-neutral-800 bg-neutral-900/30 text-neutral-400";
     }
   };
 
   const getRankIcon = (index: number) => {
-    return <span className="font-bold text-zinc-500 w-10 text-center tabular-nums text-lg">#{index + 1}</span>;
+    return <span className="font-bold text-neutral-500 w-10 text-center tabular-nums text-lg">#{index + 1}</span>;
   };
 
   const getEloColor = (elo: number) => {
@@ -72,13 +72,13 @@ export default function LeaderboardClient({
         </div>
 
         <div className="flex justify-center mb-8">
-            <div className="bg-zinc-900/50 border border-zinc-800 p-1 rounded-xl flex items-center gap-1">
+            <div className="bg-neutral-900/50 border border-neutral-800 p-1 rounded-xl flex items-center gap-1">
                 <button
                     onClick={() => setActiveTab("elo")}
                     className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
                         activeTab === "elo" 
-                        ? "bg-zinc-800 text-white shadow-sm" 
-                        : "text-zinc-500 hover:text-zinc-300"
+                        ? "bg-neutral-800 text-white shadow-sm" 
+                        : "text-neutral-500 hover:text-neutral-300"
                     }`}
                 >
                     <Zap className="w-4 h-4" />
@@ -89,7 +89,7 @@ export default function LeaderboardClient({
                     className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
                         activeTab === "streak" 
                         ? "bg-orange-900/20 text-orange-400 border border-orange-500/10 shadow-sm" 
-                        : "text-zinc-500 hover:text-zinc-300"
+                        : "text-neutral-500 hover:text-neutral-300"
                     }`}
                 >
                     <Flame className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function LeaderboardClient({
                 className={`
                     relative flex items-center p-3 sm:p-4 rounded-2xl border transition-all duration-200
                     ${getRankStyle(index)}
-                    ${user.uid === currentUserUid ? "ring-2 ring-neutral-500 ring-offset-2 ring-offset-black scale-[1.01]" : "hover:border-zinc-700"}
+                    ${user.uid === currentUserUid ? "ring-2 ring-neutral-500 ring-offset-2 ring-offset-black scale-[1.01]" : "hover:border-neutral-700"}
                 `}
                 >
                     <div className="flex-shrink-0 w-8 sm:w-12 flex justify-center items-center">
@@ -124,20 +124,20 @@ export default function LeaderboardClient({
                           <img
                             src={user.photoURL}
                             alt={user.displayName}
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-zinc-800"
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-neutral-800"
 
                             onError={(e) => {
                               e.currentTarget.style.display = "none";
                               e.currentTarget.nextElementSibling?.classList.remove("hidden");
                             }}
                           />
-                          <div className="hidden absolute inset-0 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
-                            <span className="text-lg font-bold text-zinc-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
+                          <div className="hidden absolute inset-0 rounded-full bg-neutral-800 flex items-center justify-center border-2 border-neutral-700">
+                            <span className="text-lg font-bold text-neutral-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
                           </div>
                         </div>
                         ) : (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-zinc-700">
-                            <span className="text-lg font-bold text-zinc-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-800 flex items-center justify-center border-2 border-neutral-700">
+                            <span className="text-lg font-bold text-neutral-500">{user.username ? user.username[0].toUpperCase() : "?"}</span>
                         </div>
                         )}
                     </div>
@@ -152,7 +152,7 @@ export default function LeaderboardClient({
                           <span className={getRatingTier(user.bElo).textClass}>Unknown</span>
                         )}
                         </h3>
-                        {user.school && <p className="text-xs text-zinc-500 truncate">{user.school}</p>}
+                        {user.school && <p className="text-xs text-neutral-500 truncate">{user.school}</p>}
                     </div>
 
                     <div className="flex-shrink-0">
@@ -172,7 +172,7 @@ export default function LeaderboardClient({
         </motion.div>
 
         {displayedUsers.length === 0 && (
-          <div className="text-center py-20 text-zinc-500">
+          <div className="text-center py-20 text-neutral-500">
             <p>No active users found for this category yet ☹️</p>
           </div>
         )}

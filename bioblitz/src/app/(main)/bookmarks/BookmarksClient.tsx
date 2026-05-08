@@ -210,7 +210,7 @@ export default function BookmarksClient() {
       >
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
-          <p className="text-zinc-500 text-sm font-medium animate-pulse">
+          <p className="text-neutral-500 text-sm font-medium animate-pulse">
             Loading bookmarks...
           </p>
         </div>
@@ -235,7 +235,7 @@ export default function BookmarksClient() {
         >
           <Link
             href="/progress"
-            className="inline-flex items-center text-zinc-500 hover:text-white mb-4 transition-colors font-medium text-[13px]"
+            className="inline-flex items-center text-neutral-500 hover:text-white mb-4 transition-colors font-medium text-[13px]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Progress
@@ -251,7 +251,7 @@ export default function BookmarksClient() {
               >
                 Bookmarked Questions
               </h1>
-              <p className="text-zinc-500 text-[13px]">
+              <p className="text-neutral-500 text-[13px]">
                 {bookmarks.length} question{bookmarks.length !== 1 ? "s" : ""}{" "}
                 saved
               </p>
@@ -260,12 +260,12 @@ export default function BookmarksClient() {
         </motion.div>
 
         {bookmarks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 p-14 text-center">
-            <Bookmark className="w-10 h-10 text-zinc-800 mx-auto mb-4" />
-            <p className="text-zinc-500 text-sm font-semibold">
+          <div className="rounded-2xl border border-dashed border-neutral-800 p-14 text-center">
+            <Bookmark className="w-10 h-10 text-neutral-800 mx-auto mb-4" />
+            <p className="text-neutral-500 text-sm font-semibold">
               No bookmarked questions yet
             </p>
-            <p className="text-zinc-700 text-xs mt-2 max-w-xs mx-auto leading-relaxed">
+            <p className="text-neutral-700 text-xs mt-2 max-w-xs mx-auto leading-relaxed">
               After completing a blitz, tap the bookmark icon on any question to
               save it here for review.
             </p>
@@ -286,18 +286,18 @@ export default function BookmarksClient() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -8 }}
                     transition={{ duration: 0.25, delay: i * 0.03 }}
-                    className="bg-[rgba(9,9,11,0.8)] border border-zinc-800 rounded-2xl overflow-hidden"
+                    className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl overflow-hidden"
                   >
                     <div
-                      className="flex items-center gap-3 p-5 cursor-pointer hover:bg-zinc-900/40 transition-colors"
+                      className="flex items-center gap-3 p-5 cursor-pointer hover:bg-neutral-900/40 transition-colors"
                       onClick={() => toggleExpand(bookmark.id)}
                     >
                       <Bookmark className="w-4 h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[14px] font-bold text-zinc-200 truncate">
+                        <p className="text-[14px] font-bold text-neutral-200 truncate">
                           {bookmark.gameTitle || "Unknown Blitz"}
                           <span
-                            className={`${mono} text-zinc-600 text-[12px] ml-2`}
+                            className={`${mono} text-neutral-600 text-[12px] ml-2`}
                           >
                             Q{bookmark.questionIndex + 1}
                           </span>
@@ -309,7 +309,7 @@ export default function BookmarksClient() {
                           removeBookmark(bookmark.id);
                         }}
                         disabled={isRemoving}
-                        className="p-1.5 rounded-lg text-zinc-700 hover:text-red-400 hover:bg-red-500/10 transition-all flex-shrink-0"
+                        className="p-1.5 rounded-lg text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-all flex-shrink-0"
                         title="Remove bookmark"
                       >
                         <Trash2
@@ -317,9 +317,9 @@ export default function BookmarksClient() {
                         />
                       </button>
                       {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+                        <ChevronUp className="w-4 h-4 text-neutral-600 flex-shrink-0" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+                        <ChevronDown className="w-4 h-4 text-neutral-600 flex-shrink-0" />
                       )}
                     </div>
 
@@ -332,8 +332,8 @@ export default function BookmarksClient() {
                           transition={{ duration: 0.25 }}
                           className="overflow-hidden"
                         >
-                          <div className="px-5 pb-5 pt-0 border-t border-zinc-800/60">
-                            <p className="text-[16px] text-zinc-200 leading-relaxed mt-4 mb-5">
+                          <div className="px-5 pb-5 pt-0 border-t border-neutral-800/60">
+                            <p className="text-[16px] text-neutral-200 leading-relaxed mt-4 mb-5">
                               {question.content}
                             </p>
 
@@ -341,7 +341,7 @@ export default function BookmarksClient() {
                               <img
                                 src={question.imgURL}
                                 alt={`Question ${bookmark.questionIndex + 1}`}
-                                className="mb-5 rounded-xl max-h-[280px] w-auto border border-zinc-800"
+                                className="mb-5 rounded-xl max-h-[280px] w-auto border border-neutral-800"
                               />
                             )}
 
@@ -353,7 +353,7 @@ export default function BookmarksClient() {
                                   bookmark.userAnswer === key;
 
                                 let bgClass =
-                                  "bg-[rgba(24,24,27,0.5)] border-zinc-700/40 text-zinc-500";
+                                  "bg-[rgba(24,24,27,0.5)] border-neutral-700/40 text-neutral-500";
                                 if (isCorrect) {
                                   bgClass =
                                     "bg-emerald-500/10 border-emerald-500/50 text-emerald-300";
@@ -395,7 +395,7 @@ export default function BookmarksClient() {
                             </div>
                             <div className="mt-4 mb-2">
                               <p
-                                className={`${mono} text-[10px] text-zinc-600 font-bold uppercase mb-2`}
+                                className={`${mono} text-[10px] text-neutral-600 font-bold uppercase mb-2`}
                                 style={{ letterSpacing: "0.1em" }}
                               >
                                 Your Note
@@ -435,7 +435,7 @@ export default function BookmarksClient() {
                                     console.error("Error saving note:", err);
                                   }
                                 }}
-                                className="w-full bg-[rgba(24,24,27,0.5)] border border-zinc-700/40 rounded-xl px-4 py-3 text-[13px] text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-neutral-500/50 resize-none min-h-[60px] transition-colors"
+                                className="w-full bg-[rgba(24,24,27,0.5)] border border-neutral-700/40 rounded-xl px-4 py-3 text-[13px] text-neutral-300 placeholder:text-neutral-700 focus:outline-none focus:border-neutral-500/50 resize-none min-h-[60px] transition-colors"
                                 rows={2}
                               />
                             </div>
@@ -452,8 +452,8 @@ export default function BookmarksClient() {
                     </AnimatePresence>
 
                     {isExpanded && !question && (
-                      <div className="px-5 pb-5 pt-0 border-t border-zinc-800/60">
-                        <p className="text-zinc-600 text-[13px] mt-4">
+                      <div className="px-5 pb-5 pt-0 border-t border-neutral-800/60">
+                        <p className="text-neutral-600 text-[13px] mt-4">
                           Question data could not be loaded.
                         </p>
                       </div>
@@ -465,10 +465,10 @@ export default function BookmarksClient() {
           </div>
         )}
 
-        <div className="text-center pt-10 border-t border-zinc-900 mt-10">
+        <div className="text-center pt-10 border-t border-neutral-900 mt-10">
           <Link
             href="/progress"
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="text-neutral-500 hover:text-white text-sm transition-colors"
           >
             Back to Progress
           </Link>

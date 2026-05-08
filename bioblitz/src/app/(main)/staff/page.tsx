@@ -66,7 +66,7 @@ export default function StaffPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100">
         <div className="max-w-5xl mx-auto px-4 py-20">Loading...</div>
       </div>
     );
@@ -74,10 +74,10 @@ export default function StaffPage() {
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-neutral-900 text-zinc-100">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100">
         <div className="max-w-5xl mx-auto px-4 py-20">
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-zinc-400">
+          <p className="text-neutral-400">
             You do not have permission to view this page.
           </p>
           <div className="mt-6">
@@ -94,50 +94,50 @@ export default function StaffPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-zinc-100">
+    <div className="min-h-screen bg-neutral-900 text-neutral-100">
       <div className="max-w-5xl mx-auto px-4 py-20">
-        <h1 className="text-3xl font-bold text-zinc-100">Staff Page</h1>
-        <p className="text-zinc-400 mt-2">Staff and admins only.</p>
+        <h1 className="text-3xl font-bold text-neutral-100">Staff Page</h1>
+        <p className="text-neutral-400 mt-2">Staff and admins only.</p>
 
-        <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+        <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950/60 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-semibold text-neutral-100">
                 Contest Publishing Quota
               </h2>
-              <p className="text-sm text-zinc-400 mt-1">
+              <p className="text-sm text-neutral-400 mt-1">
                 Goal: 100 contests published by the end of April.
               </p>
             </div>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-neutral-500">
               {quota?.monthLabel || "April"}
             </span>
           </div>
 
           {quotaLoading ? (
-            <p className="text-sm text-zinc-500 mt-4">Loading progress...</p>
+            <p className="text-sm text-neutral-500 mt-4">Loading progress...</p>
           ) : quota ? (
             <>
-              <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-neutral-800">
                 <div
                   className="h-full bg-gradient-to-r from-emerald-500 to-yellow-400 transition-all"
                   style={{ width: `${Math.max(4, Math.round(quota.progress * 100))}%` }}
                 />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <span className="text-zinc-200">
+                <span className="text-neutral-200">
                   <strong>{quota.published}</strong> / {quota.target} published
                 </span>
-                <span className="text-zinc-400">
+                <span className="text-neutral-400">
                   {quota.remaining} remaining
                 </span>
-                <span className="text-zinc-500">
+                <span className="text-neutral-500">
                   {quota.daysRemaining} day{quota.daysRemaining === 1 ? "" : "s"} left
                 </span>
               </div>
             </>
           ) : (
-            <p className="text-sm text-zinc-500 mt-4">Quota metrics unavailable right now.</p>
+            <p className="text-sm text-neutral-500 mt-4">Quota metrics unavailable right now.</p>
           )}
         </div>
 

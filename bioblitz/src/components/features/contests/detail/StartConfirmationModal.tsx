@@ -15,7 +15,7 @@ export default function StartConfirmationModal({
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-zinc-950 border border-zinc-800 p-8 rounded-3xl max-w-md w-full relative overflow-hidden"
+        className="bg-neutral-950 border border-neutral-800 p-8 rounded-3xl max-w-md w-full relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-500/10 blur-[80px] pointer-events-none" />
 
@@ -24,7 +24,7 @@ export default function StartConfirmationModal({
 
           <div className="flex items-center gap-2 mb-6">
             <Clock className="w-4 h-4 text-yellow-500 shrink-0" />
-            <p className="text-zinc-400 text-sm">The timer keeps running even if you exit.</p>
+            <p className="text-neutral-400 text-sm">The timer keeps running even if you exit.</p>
           </div>
 
           <div className="flex gap-3 w-full">
@@ -37,7 +37,7 @@ export default function StartConfirmationModal({
 
             <button
               onClick={() => setShowStartConfirmation(false)}
-              className="flex-1 py-3.5 rounded-xl font-bold text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent hover:border-zinc-800 transition-all"
+              className="flex-1 py-3.5 rounded-xl font-bold text-neutral-400 hover:bg-neutral-900 hover:text-white border border-transparent hover:border-neutral-800 transition-all"
             >
               Cancel
             </button>
