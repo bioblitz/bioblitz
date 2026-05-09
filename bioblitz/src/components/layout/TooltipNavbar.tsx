@@ -81,7 +81,10 @@ export default function TooltipNavbar() {
               month: "2-digit",
               day: "2-digit",
             };
-            const lastDatePst = lastDate.toLocaleDateString("en-US", pstOptions);
+            const lastDatePst = lastDate.toLocaleDateString(
+              "en-US",
+              pstOptions,
+            );
             const nowDatePst = now.toLocaleDateString("en-US", pstOptions);
             setStreakActive(lastDatePst === nowDatePst);
           } else {
@@ -147,7 +150,9 @@ export default function TooltipNavbar() {
 
   const renderUserNav = () => {
     if (loading) {
-      return <div className="h-10 w-10 rounded-full bg-neutral-700 animate-pulse" />;
+      return (
+        <div className="h-10 w-10 rounded-full bg-neutral-700 animate-pulse" />
+      );
     }
     if (!isAuthenticated || !user) {
       return <div />;
@@ -167,7 +172,10 @@ export default function TooltipNavbar() {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => {
-              trackNavClick("nav_user_menu_toggle", dropdownOpen ? "close" : "open");
+              trackNavClick(
+                "nav_user_menu_toggle",
+                dropdownOpen ? "close" : "open",
+              );
               setDropdownOpen(!dropdownOpen);
             }}
             className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
@@ -215,7 +223,9 @@ export default function TooltipNavbar() {
               <div className="md:hidden px-4 py-3 border-b border-neutral-800 flex items-center justify-between">
                 <span className="text-neutral-400 text-sm">Streak</span>
                 <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-                  <Flame className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`} />
+                  <Flame
+                    className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`}
+                  />
                   {streak}
                 </div>
               </div>
@@ -223,16 +233,24 @@ export default function TooltipNavbar() {
                 <Link href={`/profile/${user.username}`}>
                   <span
                     className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
-                    onClick={() => { trackNavClick("nav_menu_link_click", "profile"); setDropdownOpen(false); }}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "profile");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Profile
                   </span>
                 </Link>
               )}
-              <Link href={user?.username ? `/channel/${user.username}` : "/channel"}>
+              <Link
+                href={user?.username ? `/channel/${user.username}` : "/channel"}
+              >
                 <span
                   className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
-                  onClick={() => { trackNavClick("nav_menu_link_click", "channel"); setDropdownOpen(false); }}
+                  onClick={() => {
+                    trackNavClick("nav_menu_link_click", "channel");
+                    setDropdownOpen(false);
+                  }}
                 >
                   Channel
                 </span>
@@ -240,7 +258,10 @@ export default function TooltipNavbar() {
               <Link href="/settings">
                 <span
                   className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
-                  onClick={() => { trackNavClick("nav_menu_link_click", "settings"); setDropdownOpen(false); }}
+                  onClick={() => {
+                    trackNavClick("nav_menu_link_click", "settings");
+                    setDropdownOpen(false);
+                  }}
                 >
                   Settings
                 </span>
@@ -249,7 +270,10 @@ export default function TooltipNavbar() {
                 <Link href="/staff">
                   <span
                     className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
-                    onClick={() => { trackNavClick("nav_menu_link_click", "staff"); setDropdownOpen(false); }}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "staff");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Staff
                   </span>
@@ -259,7 +283,10 @@ export default function TooltipNavbar() {
                 <Link href="/admin">
                   <span
                     className="block px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-neutral-900 cursor-pointer transition-colors"
-                    onClick={() => { trackNavClick("nav_menu_link_click", "admin"); setDropdownOpen(false); }}
+                    onClick={() => {
+                      trackNavClick("nav_menu_link_click", "admin");
+                      setDropdownOpen(false);
+                    }}
                   >
                     Admin
                   </span>
@@ -300,7 +327,11 @@ export default function TooltipNavbar() {
               className="flex items-center space-x-2 group"
             >
               <div className="bg-yellow-400/10 p-1.5 rounded-full group-hover:bg-yellow-400/20 transition-colors">
-                <img src="/icons/favicon.ico" className="w-6 h-6" alt="BioBlitz" />
+                <img
+                  src="/icons/favicon.ico"
+                  className="w-6 h-6"
+                  alt="BioBlitz"
+                />
               </div>
               <span
                 style={{ fontFamily: "'nunito', sans-serif", fontWeight: 800 }}
@@ -315,8 +346,28 @@ export default function TooltipNavbar() {
         </div>
       </nav>
 
-      <aside className="fixed left-0 top-16 h-[calc(100%-4rem)] z-40 flex items-center pointer-events-none -translate-y-8">
-        <div className="flex flex-col items-center py-6 gap-0 ml-2 pointer-events-auto">
+      <aside
+        className="
+    fixed z-40 pointer-events-none
+    /* Mobile: bottom horizontal bar */
+    bottom-0 left-0 right-0
+    /* Desktop: left vertical rail */
+    md:bottom-auto md:right-auto md:left-0 md:top-16 md:h-[calc(100%-4rem)]
+    md:flex md:items-center md:-translate-y-8
+  "
+      >
+        <div
+          className="
+      pointer-events-auto
+      /* Mobile: full-width row, safe-area padding for iPhone home indicator */
+      flex flex-row items-center justify-around
+      px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]
+      bg-neutral-900/95 backdrop-blur-md border-t border-neutral-800
+      /* Desktop: revert to vertical column with no bg */
+      md:flex-col md:justify-start md:gap-0 md:py-6 md:px-0 md:ml-2
+      md:bg-transparent md:backdrop-blur-none md:border-t-0
+    "
+        >
           {sideItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -336,8 +387,8 @@ export default function TooltipNavbar() {
                   size={26}
                   className={`relative z-10 ${isActive ? "text-white fill-white" : ""}`}
                 />
-                {/* Tooltip callout */}
-                <span className="pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 -translate-x-1 group-hover/tip:opacity-100 group-hover/tip:translate-x-0 transition-all duration-150 shadow-lg">
+                {/* Tooltip callout — desktop only */}
+                <span className="hidden md:block pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 -translate-x-1 group-hover/tip:opacity-100 group-hover/tip:translate-x-0 transition-all duration-150 shadow-lg">
                   {item.name}
                 </span>
               </Link>

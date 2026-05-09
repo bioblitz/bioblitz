@@ -4,7 +4,7 @@ import { applyUsernamePolicy } from "@/lib/usernamePolicy";
 import { applyTextPolicy } from "@/lib/textPolicy";
 import { getAdminStats } from "@/lib/admin-cache";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 function toDate(value: any): Date | null {
   if (!value) return null;
@@ -20,14 +20,16 @@ function toDate(value: any): Date | null {
 
 function normalizeRoles(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((r) => String(r).toLowerCase().trim())
-    .filter(Boolean);
+  return raw.map((r) => String(r).toLowerCase().trim()).filter(Boolean);
 }
 
 function isAdminFromClaims(claims: any): boolean {
   const roles = normalizeRoles(claims?.roles);
-  return claims?.admin === true || claims?.role === "admin" || roles.includes("admin");
+  return (
+    claims?.admin === true ||
+    claims?.role === "admin" ||
+    roles.includes("admin")
+  );
 }
 
 async function requireAdmin(request: Request): Promise<{ uid: string }> {
@@ -76,7 +78,10 @@ export async function GET(request: Request) {
     await requireAdmin(request);
   } catch (err: any) {
     const status = err?.message === "Forbidden" ? 403 : 401;
-    return NextResponse.json({ error: err?.message || "Unauthorized" }, { status });
+    return NextResponse.json(
+      { error: err?.message || "Unauthorized" },
+      { status },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -152,7 +157,10 @@ export async function DELETE(request: Request) {
     actingUid = admin.uid;
   } catch (err: any) {
     const status = err?.message === "Forbidden" ? 403 : 401;
-    return NextResponse.json({ error: err?.message || "Unauthorized" }, { status });
+    return NextResponse.json(
+      { error: err?.message || "Unauthorized" },
+      { status },
+    );
   }
 
   const body = await request.json();
@@ -163,7 +171,10 @@ export async function DELETE(request: Request) {
   }
 
   if (uid === actingUid) {
-    return NextResponse.json({ error: "You cannot delete your own account." }, { status: 400 });
+    return NextResponse.json(
+      { error: "You cannot delete your own account." },
+      { status: 400 },
+    );
   }
 
   // Fetch user doc before deletion to get subscriptions
@@ -174,7 +185,10 @@ export async function DELETE(request: Request) {
     await adminAuth.deleteUser(uid);
   } catch (err: any) {
     if (err?.code !== "auth/user-not-found") {
-      return NextResponse.json({ error: "Failed to delete user." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to delete user." },
+        { status: 500 },
+      );
     }
   }
 
@@ -203,7 +217,7 @@ export async function DELETE(request: Request) {
         .where("uid", "==", uid)
         .get();
       if (!friendsSnap.empty) {
-        const chunks: typeof friendsSnap.docs[] = [];
+        const chunks: (typeof friendsSnap.docs)[] = [];
         for (let i = 0; i < friendsSnap.docs.length; i += 500) {
           chunks.push(friendsSnap.docs.slice(i, i + 500));
         }
@@ -224,7 +238,9 @@ export async function DELETE(request: Request) {
       const batch = adminFirestore.batch();
       subscriptions.forEach((channelUid) => {
         const ref = adminFirestore.collection("users").doc(channelUid);
-        batch.update(ref, { subscriberCount: admin.firestore.FieldValue.increment(-1) });
+        batch.update(ref, {
+          subscriberCount: admin.firestore.FieldValue.increment(-1),
+        });
       });
       await batch.commit();
     })(),
@@ -236,14 +252,16 @@ export async function DELETE(request: Request) {
         .where("subscriptions", "array-contains", uid)
         .get();
       if (!subscribersSnap.empty) {
-        const chunks: typeof subscribersSnap.docs[] = [];
+        const chunks: (typeof subscribersSnap.docs)[] = [];
         for (let i = 0; i < subscribersSnap.docs.length; i += 500) {
           chunks.push(subscribersSnap.docs.slice(i, i + 500));
         }
         for (const chunk of chunks) {
           const batch = adminFirestore.batch();
           chunk.forEach((d) =>
-            batch.update(d.ref, { subscriptions: admin.firestore.FieldValue.arrayRemove(uid) })
+            batch.update(d.ref, {
+              subscriptions: admin.firestore.FieldValue.arrayRemove(uid),
+            }),
           );
           await batch.commit();
         }
@@ -251,8 +269,16 @@ export async function DELETE(request: Request) {
     })(),
 
     // 6. Delete search_index entries for this user and their channel
-    adminFirestore.collection("search_index").doc(`user_${uid}`).delete().catch(() => {}),
-    adminFirestore.collection("search_index").doc(`channel_${uid}`).delete().catch(() => {}),
+    adminFirestore
+      .collection("search_index")
+      .doc(`user_${uid}`)
+      .delete()
+      .catch(() => {}),
+    adminFirestore
+      .collection("search_index")
+      .doc(`channel_${uid}`)
+      .delete()
+      .catch(() => {}),
   ]);
 
   return NextResponse.json({ message: "User deleted." });
@@ -263,7 +289,10 @@ export async function PUT(request: Request) {
     await requireAdmin(request);
   } catch (err: any) {
     const status = err?.message === "Forbidden" ? 403 : 401;
-    return NextResponse.json({ error: err?.message || "Unauthorized" }, { status });
+    return NextResponse.json(
+      { error: err?.message || "Unauthorized" },
+      { status },
+    );
   }
 
   const body = await request.json();
@@ -275,9 +304,13 @@ export async function PUT(request: Request) {
   const displayNameRaw = String(body?.displayName ?? "").trim();
   const rawUsername = String(body?.username ?? "").trim();
   const { value: displayName } = await applyTextPolicy(displayNameRaw);
-  const { value: censoredUsername, censored } = await applyUsernamePolicy(rawUsername);
+  const { value: censoredUsername, censored } =
+    await applyUsernamePolicy(rawUsername);
   if (censored) {
-    return NextResponse.json({ error: "Inappropriate username, try again." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Inappropriate username, try again." },
+      { status: 400 },
+    );
   }
   const username = censoredUsername || "";
 
@@ -288,7 +321,10 @@ export async function PUT(request: Request) {
       .limit(1)
       .get();
     if (!existing.empty && existing.docs[0].id !== uid) {
-      return NextResponse.json({ error: "Username already in use." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Username already in use." },
+        { status: 409 },
+      );
     }
   }
 
@@ -298,7 +334,8 @@ export async function PUT(request: Request) {
   };
 
   if (body?.bio !== undefined) update.bio = String(body.bio).trim();
-  if (body?.location !== undefined) update.location = String(body.location).trim();
+  if (body?.location !== undefined)
+    update.location = String(body.location).trim();
   if (body?.grade !== undefined) update.grade = String(body.grade).trim();
   if (body?.school !== undefined) update.school = String(body.school).trim();
   if (body?.bElo !== undefined) {
@@ -310,6 +347,58 @@ export async function PUT(request: Request) {
     if (!isNaN(cp)) update.contestsPlayed = Math.max(0, Math.round(cp));
   }
 
-  await adminFirestore.collection("users").doc(uid).set(update, { merge: true });
+  await adminFirestore
+    .collection("users")
+    .doc(uid)
+    .set(update, { merge: true });
   return NextResponse.json({ message: "User updated." });
+}
+
+export async function PATCH(request: Request) {
+  try {
+    await requireAdmin(request);
+  } catch (err: any) {
+    const status = err?.message === "Forbidden" ? 403 : 401;
+    return NextResponse.json(
+      { error: err?.message || "Unauthorized" },
+      { status },
+    );
+  }
+
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get("action");
+
+  if (action === "recompute-subscribers") {
+    const usersSnap = await adminFirestore.collection("users").get();
+
+    const counts = new Map<string, number>();
+    usersSnap.docs.forEach((doc) => {
+      const subs: string[] = doc.data().subscriptions || [];
+      subs.forEach((channelUid) => {
+        counts.set(channelUid, (counts.get(channelUid) || 0) + 1);
+      });
+    });
+
+    let corrected = 0;
+    const docs = usersSnap.docs;
+    for (let i = 0; i < docs.length; i += 400) {
+      const chunk = docs.slice(i, i + 400);
+      const batch = adminFirestore.batch();
+      chunk.forEach((doc) => {
+        const newCount = counts.get(doc.id) || 0;
+        const oldCount = doc.data().subscriberCount || 0;
+        if (newCount !== oldCount) {
+          batch.update(doc.ref, { subscriberCount: newCount });
+          corrected++;
+        }
+      });
+      await batch.commit();
+    }
+
+    return NextResponse.json({
+      message: `Recomputed. Fixed ${corrected} channels.`,
+    });
+  }
+
+  return NextResponse.json({ error: "Unknown action." }, { status: 400 });
 }
