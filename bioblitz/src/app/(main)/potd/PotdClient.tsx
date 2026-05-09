@@ -10,7 +10,6 @@ import {
   XCircle,
   Search,
   Loader2,
-
   RotateCcw,
   Eye,
   ChevronRight,
@@ -46,7 +45,7 @@ export default function PotdClient({
   const [topic, setTopic] = useState("All Topics");
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Completed" | "New">(
-    "All"
+    "All",
   );
   const [activeTab, setActiveTab] = useState<"today" | "archive">("today");
 
@@ -106,8 +105,7 @@ export default function PotdClient({
     }
   };
 
-
-const handleSubmit = async (puzzle: DailyPuzzle) => {
+  const handleSubmit = async (puzzle: DailyPuzzle) => {
     if (!user) {
       alert("Please sign in to submit answers.");
       return;
@@ -117,25 +115,25 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
     const sortedSelected = [...selectedOptions].sort();
     const sortedCorrect = [...puzzle.correctAnswer].sort();
-    const correct = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
-    
+    const correct =
+      JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+
     setIsCorrect(correct);
     setPlayedGameIds((prev) => new Set(prev).add(puzzle.id));
-    if (correct) { 
-
+    if (correct) {
     }
 
     try {
       await createUserProfile(user);
       const userRef = doc(db, "users", user.uid);
       const setPlayedRef = doc(db, "users", user.uid, "setsPlayed", puzzle.id);
-      
+
       await setDoc(setPlayedRef, {
         gameId: puzzle.id,
         timestamp: serverTimestamp(),
         correct: correct,
         answers: sortedSelected,
-        puzzleDate: puzzle.date
+        puzzleDate: puzzle.date,
       });
 
       await setDoc(
@@ -143,13 +141,15 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
         {
           completedPotdIds: arrayUnion(puzzle.id),
         },
-        { merge: true }
+        { merge: true },
       );
 
       try {
         const activityRef = doc(db, "potdActivity", puzzle.id);
         const globalStatsRef = doc(db, "stats", "global");
-        const globalUpdate: Record<string, any> = { potdAttempts: increment(1) };
+        const globalUpdate: Record<string, any> = {
+          potdAttempts: increment(1),
+        };
         if (correct) globalUpdate.potdCorrect = increment(1);
         await Promise.all([
           setDoc(
@@ -161,7 +161,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
               ...(correct ? { correctUserIds: arrayUnion(user.uid) } : {}),
               lastPlayedAt: serverTimestamp(),
             },
-            { merge: true }
+            { merge: true },
           ),
           setDoc(globalStatsRef, globalUpdate, { merge: true }),
         ]);
@@ -177,7 +177,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     } finally {
       setSubmitting(false);
     }
-};
+  };
 
   const handleOptionClick = (key: string, isMulti: boolean) => {
     if (isSubmitted) return;
@@ -201,28 +201,34 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
     switch (topic) {
       case "Anatomy & Physiology":
       case "Anat & Phys":
-        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20"};
+        return { bg: "bg-blue-500/10 text-blue-400 border-blue-500/20" };
       case "Cell Biology":
       case "Cell Bio":
-        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"};
+        return { bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" };
       case "Plant Biology":
       case "Plant Bio":
-        return { bg: "bg-green-500/10 text-green-400 border-green-500/20"};
+        return { bg: "bg-green-500/10 text-green-400 border-green-500/20" };
       case "Genetics & Evolution":
       case "Gen & Evo":
       case "Genetics":
-        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20"};
+        return { bg: "bg-lime-500/10 text-lime-400 border-lime-500/20" };
       case "Biosystematics":
       case "Biosys":
-        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"};
+        return {
+          bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20",
+        };
       case "Ecology":
-        return { bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"};
+        return {
+          bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        };
       case "Ethology":
-        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20"};
+        return { bg: "bg-orange-500/10 text-orange-400 border-orange-500/20" };
       case "Multiple":
-        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"};
+        return { bg: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" };
       default:
-        return { bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"};
+        return {
+          bg: "bg-neutral-500/10 text-neutral-400 border-neutral-500/20",
+        };
     }
   };
 
@@ -252,7 +258,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
   const prevPuzzle = useMemo(() => {
     if (archivePuzzles.length === 0) return null;
     return [...archivePuzzles].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     )[0];
   }, [archivePuzzles]);
   const todayFormatted = new Date().toLocaleDateString("en-US", {
@@ -304,14 +310,15 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
 
   return (
     <div className="min-h-screen bg-neutral-900">
-      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-16 pt-24 pb-12">
-        <div className="flex flex-row items-end justify-between gap-6 mb-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 md:pl-16 md:pr-4 pt-16 md:pt-24 pb-24 md:pb-12">
+        {" "}
+        <div className="flex flex-row items-end justify-between gap-3 md:gap-6 mb-6 md:mb-8">
           <div className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-500/10 border border-orange-500/20 p-2 rounded-lg">
-                <Flame className="w-6 h-6 text-orange-500" />
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="bg-orange-500/10 border border-orange-500/20 p-1.5 md:p-2 rounded-lg">
+                <Flame className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
               </div>
-              <h1 className="text-4xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight">
                 Daily Problem
               </h1>
             </div>
@@ -331,13 +338,12 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
           {isStaffUser && (
             <Link
               href="/potd/staff"
-              className="text-sm text-neutral-300 border border-neutral-200 hover:bg-neutral-700 hover:text-neutral-400 px-3 py-1.5 rounded-full transition-colors"
+              className="hidden md:inline-flex text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
             >
               Manage Queue
             </Link>
           )}
         </div>
-
         {userDataLoading ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
             <Loader2 className="w-10 h-10 text-neutral-500 animate-spin" />
@@ -363,118 +369,121 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
               ))}
             </div>
 
-            {activeTab === "today" && <section className="relative">
-              {activePuzzle ? (
-                !isFallback && isTodayCompleted && !viewAnyway ? (
-                  <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm p-12 text-center animate-in fade-in duration-500">
+            {activeTab === "today" && (
+              <section className="relative">
+                {activePuzzle ? (
+                  !isFallback && isTodayCompleted && !viewAnyway ? (
+                    <div className="relative overflow-hidden rounded bg-neutral-900 backdrop-blur-sm p-12 text-center animate-in fade-in duration-500">
+                      <div className="relative z-10 flex flex-col items-center">
+                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                          Daily Problem Completed!
+                        </h2>
+                        <p className="text-neutral-400 text-lg max-w-xl mx-auto mb-8">
+                          Great work! You've kept your streak alive today. Come
+                          back tomorrow for a new challenge.
+                        </p>
 
-                    <div className="relative z-10 flex flex-col items-center">
-                      <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-                        Daily Problem Completed!
-                      </h2>
-                      <p className="text-neutral-400 text-lg max-w-xl mx-auto mb-8">
-                        Great work! You've kept your streak alive today. Come
-                        back tomorrow for a new challenge.
-                      </p>
-
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <button
-                          onClick={() => setActiveTab("archive")}
-                          className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
-                        >
-                          Practice Past Problems
-                        </button>
-                        <button
-                          onClick={() => setViewAnyway(true)}
-                          className="bg-neutral-900 border border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white px-6 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
-                        >
-                          <Eye className="w-5 h-5" />
-                          View Problem Again
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <button
+                            onClick={() => setActiveTab("archive")}
+                            className="bg-neutral-500/10 border border-neutral-500/50 text-neutral-200 hover:bg-neutral-500/20 hover:text-white px-8 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+                          >
+                            Practice Past Problems
+                          </button>
+                          <button
+                            onClick={() => setViewAnyway(true)}
+                            className="bg-neutral-900 border border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white px-6 py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-5 h-5" />
+                            View Problem Again
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="relative overflow-hidden rounded-3xl bg-neutral-900 group text-center">
+                  ) : (
+                    <div className="relative overflow-hidden rounded-3xl bg-neutral-900 group text-center">
+                      <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
+                        {isFallback && (
+                          <span className="mb-4 px-3 py-1 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300">
+                            Sampled from archive
+                          </span>
+                        )}
+                        <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                              getTopicColors(activePuzzle.topic).bg
+                            }`}
+                          >
+                            {activePuzzle.topic}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 border border-neutral-800 bg-neutral-900 px-3 py-1 rounded-full">
+                            {activePuzzle.multiSelect
+                              ? "Multi-Select"
+                              : "Single Choice"}
+                          </span>
+                        </div>
 
-                    <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
-                      {isFallback && (
-                        <span className="mb-4 px-3 py-1 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300">
-                          Sampled from archive
-                        </span>
-                      )}
-                      <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                            getTopicColors(activePuzzle.topic).bg
-                          }`}
-                        >
-                          {activePuzzle.topic}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 border border-neutral-800 bg-neutral-900 px-3 py-1 rounded-full">
-                          {activePuzzle.multiSelect
-                            ? "Multi-Select"
-                            : "Single Choice"}
-                        </span>
-                      </div>
+                        <div className="space-y-4 mb-8 max-w-4xl mx-auto">
+                          <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
+                            {activePuzzle.title}
+                          </h2>
+                          <p className="text-neutral-300 text-lg leading-relaxed">
+                            {activePuzzle.questionText}
+                          </p>
+                        </div>
 
-                      <div className="space-y-4 mb-8 max-w-4xl mx-auto">
-                        <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
-                          {activePuzzle.title}
-                        </h2>
-                        <p className="text-neutral-300 text-lg leading-relaxed">
-                          {activePuzzle.questionText}
-                        </p>
-                      </div>
+                        <div className="grid grid-cols-1 gap-3 w-full max-w-2xl mx-auto">
+                          {activePuzzle.options.map((option) => {
+                            const isSelected = selectedOptions.includes(
+                              option.key,
+                            );
+                            const isCorrectKey =
+                              activePuzzle.correctAnswer.includes(option.key);
 
-                      <div className="grid grid-cols-1 gap-3 w-full max-w-2xl mx-auto">
-                        {activePuzzle.options.map((option) => {
-                          const isSelected = selectedOptions.includes(
-                            option.key
-                          );
-                          const isCorrectKey =
-                            activePuzzle.correctAnswer.includes(option.key);
+                            const showResults =
+                              isSubmitted ||
+                              ((viewAnyway || isFallback) && isActiveCompleted);
 
-                          const showResults =
-                            isSubmitted ||
-                            ((viewAnyway || isFallback) && isActiveCompleted);
+                            let borderClass =
+                              "border-neutral-800 hover:border-neutral-700";
+                            let bgClass =
+                              "bg-neutral-900/50 hover:bg-neutral-800";
+                            let textClass = "text-neutral-300";
 
-                          let borderClass =
-                            "border-neutral-800 hover:border-neutral-700";
-                          let bgClass = "bg-neutral-900/50 hover:bg-neutral-800";
-                          let textClass = "text-neutral-300";
-
-                          if (showResults) {
-                            if (isCorrectKey) {
-                              borderClass = "border-green-500/50";
-                              bgClass = "bg-green-500/10";
-                              textClass = "text-green-100";
-                            } else if (isSelected && !isCorrectKey) {
-                              borderClass = "border-red-500/50";
-                              bgClass = "bg-red-500/10";
-                              textClass = "text-red-100";
-                            }
-                          } else if (isSelected) {
-                            borderClass = "border-neutral-500/50";
-                            bgClass = "bg-neutral-500/10";
-                            textClass = "text-neutral-100";
-                          }
-
-                          return (
-                            <button
-                              key={option.key}
-                              disabled={showResults || submitting}
-                              onClick={() =>
-                                handleOptionClick(option.key, activePuzzle.multiSelect)
+                            if (showResults) {
+                              if (isCorrectKey) {
+                                borderClass = "border-green-500/50";
+                                bgClass = "bg-green-500/10";
+                                textClass = "text-green-100";
+                              } else if (isSelected && !isCorrectKey) {
+                                borderClass = "border-red-500/50";
+                                bgClass = "bg-red-500/10";
+                                textClass = "text-red-100";
                               }
-                              className={`
+                            } else if (isSelected) {
+                              borderClass = "border-neutral-500/50";
+                              bgClass = "bg-neutral-500/10";
+                              textClass = "text-neutral-100";
+                            }
+
+                            return (
+                              <button
+                                key={option.key}
+                                disabled={showResults || submitting}
+                                onClick={() =>
+                                  handleOptionClick(
+                                    option.key,
+                                    activePuzzle.multiSelect,
+                                  )
+                                }
+                                className={`
                                                         relative flex items-center justify-center w-full p-4 rounded-xl border transition-all duration-200
                                                         ${bgClass} ${borderClass}
                                                         
                                                     `}
-                            >
-                              <div
-                                className={`
+                              >
+                                <div
+                                  className={`
                                                         flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold mr-4 transition-colors flex-shrink-0
                                                         ${
                                                           isSelected ||
@@ -484,42 +493,47 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                             : "bg-neutral-800 text-neutral-500"
                                                         }
                                                     `}
-                              >
-                                {option.key.toUpperCase()}
-                              </div>
+                                >
+                                  {option.key.toUpperCase()}
+                                </div>
 
-                              <span
-                                className={`text-base text-center font-medium ${textClass}`}
-                              >
-                                {option.text}
-                              </span>
-
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {(isSubmitted ||
-                        ((viewAnyway || isFallback) && isActiveCompleted)) && (
-                        <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                          <div className="bg-neutral-900 rounded p-6 text-left">
-                            <p className="text-neutral-400 text-sm mb-3">Explanation</p>
-                            <p className="text-neutral-300 leading-relaxed">
-                              {activePuzzle.explanation}
-                            </p>
-                          </div>
+                                <span
+                                  className={`text-base text-center font-medium ${textClass}`}
+                                >
+                                  {option.text}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
 
-                      {!isSubmitted &&
-                        !((viewAnyway || isFallback) && isActiveCompleted) && (
-                        <div className="mt-8 flex justify-center w-full border-t border-white/5 pt-6">
-                          <button
-                            disabled={
-                              selectedOptions.length === 0 || submitting
-                            }
-                            onClick={() => handleSubmit(activePuzzle)}
-                            className={`
+                        {(isSubmitted ||
+                          ((viewAnyway || isFallback) &&
+                            isActiveCompleted)) && (
+                          <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
+                            <div className="bg-neutral-900 rounded p-6 text-left">
+                              <p className="text-neutral-400 text-sm mb-3">
+                                Explanation
+                              </p>
+                              <p className="text-neutral-300 leading-relaxed">
+                                {activePuzzle.explanation}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {!isSubmitted &&
+                          !(
+                            (viewAnyway || isFallback) &&
+                            isActiveCompleted
+                          ) && (
+                            <div className="mt-8 flex justify-center w-full border-t border-white/5 pt-6">
+                              <button
+                                disabled={
+                                  selectedOptions.length === 0 || submitting
+                                }
+                                onClick={() => handleSubmit(activePuzzle)}
+                                className={`
                                                     px-12 py-3 rounded-xl font-bold text-base transition-all w-full md:w-auto flex items-center justify-center gap-2
                                                     ${
                                                       selectedOptions.length >
@@ -528,32 +542,33 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                                         : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
                                                     }
                                                 `}
-                          >
-                            {submitting ? (
-                              <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Submitting...
-                              </>
-                            ) : (
-                              "Submit Answer"
-                            )}
-                          </button>
-                        </div>
-                      )}
+                              >
+                                {submitting ? (
+                                  <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Submitting...
+                                  </>
+                                ) : (
+                                  "Submit Answer"
+                                )}
+                              </button>
+                            </div>
+                          )}
+                      </div>
                     </div>
+                  )
+                ) : (
+                  <div className="p-12 rounded-3xl bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 text-center">
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      No Problem for Today (Yet)
+                    </h3>
+                    <p className="text-neutral-400">
+                      Check back later or browse the archive below!
+                    </p>
                   </div>
-                )
-              ) : (
-                <div className="p-12 rounded-3xl bg-neutral-950/50 backdrop-blur-sm border border-neutral-800 text-center">
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    No Problem for Today (Yet)
-                  </h3>
-                  <p className="text-neutral-400">
-                    Check back later or browse the archive below!
-                  </p>
-                </div>
-              )}
-            </section>}
+                )}
+              </section>
+            )}
 
             {activeTab === "archive" && (
               <section className="pb-20">
@@ -628,7 +643,7 @@ const handleSubmit = async (puzzle: DailyPuzzle) => {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
-                                    }
+                                    },
                                   )}
                                 </span>
                               </div>
