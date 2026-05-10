@@ -13,11 +13,7 @@ import {
   ChevronUp,
   Search,
 } from "lucide-react";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { rankGamesWithPersonalizedPageRank } from "@/lib/pagerank";
@@ -54,17 +50,20 @@ export default function HomeClient() {
     { value: "Multiple", label: "Multiple" },
   ];
 
-  const fetchPlayedGames = useCallback(async (uid: string) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", uid));
-      const ids: string[] = userDoc.data()?.playedGameIds ?? [];
-      setPlayedGameIds(new Set(ids));
-    } catch (error) {
-      console.error("Error fetching played games:", error);
-    } finally {
-      setPlayedGamesLoaded(true);
-    }
-  }, [db]);
+  const fetchPlayedGames = useCallback(
+    async (uid: string) => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        const ids: string[] = userDoc.data()?.playedGameIds ?? [];
+        setPlayedGameIds(new Set(ids));
+      } catch (error) {
+        console.error("Error fetching played games:", error);
+      } finally {
+        setPlayedGamesLoaded(true);
+      }
+    },
+    [db],
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -146,7 +145,15 @@ export default function HomeClient() {
 
       return (b.rating || 0) - (a.rating || 0);
     });
-  }, [games, rankedGames, searchQuery, topic, playedGameIds, statusFilter, typeFilter]);
+  }, [
+    games,
+    rankedGames,
+    searchQuery,
+    topic,
+    playedGameIds,
+    statusFilter,
+    typeFilter,
+  ]);
 
   const activeFilterCount =
     (statusFilter !== "All" ? 1 : 0) +
@@ -155,12 +162,16 @@ export default function HomeClient() {
 
   return (
     <div className="min-h-screen bg-neutral-900">
-      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-16 pt-24 pb-12">
-        <div className="flex flex-col gap-6 mb-8">
+      <main className="max-w-7xl mx-auto pr-4 sm:pr-6 lg:pr-8 pl-4 md:pl-16 pt-16 md:pt-24 pb-24 md:pb-12">
+        {" "}
+        <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-8">
+          {" "}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-neutral-300">Welcome back!</h1>
-              <p className="text-neutral-400 mt-1">
+              <h1 className="text-2xl md:text-4xl font-bold text-neutral-300">
+                Welcome back!
+              </h1>
+              <p className="text-neutral-400 mt-1 text-sm md:text-base">
                 Select a Blitz to start competing
               </p>
             </div>
@@ -204,11 +215,10 @@ export default function HomeClient() {
               </button>
             </div>
           </div>
-
           {showFilters && (
-            <div className="p-6 bg-neutral-900/50 border border-neutral-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                <div className="md:col-span-5 space-y-6">
+            <div className="p-4 md:p-6 bg-neutral-900/50 border border-neutral-800 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+                <div className="md:col-span-5 space-y-4 md:space-y-6">
                   <div className="space-y-3">
                     <span className="text-xs font-bold text-neutral-500 tracking-wider flex items-center gap-2">
                       <CheckCircle2 className="w-3 h-3" /> Status
@@ -283,14 +293,15 @@ export default function HomeClient() {
             </div>
           )}
         </div>
-
         {authLoading || loading || !playedGamesLoaded ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
             <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-            <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+            <span className="text-neutral-400 text-sm font-medium">
+              Loading...
+            </span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {filteredGames.length === 0 ? (
               <div className="col-span-full py-20 text-center bg-neutral-900/50 rounded-2xl border border-white/5">
                 <Filter className="w-12 h-12 text-neutral-700 mx-auto mb-3" />

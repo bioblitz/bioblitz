@@ -26,8 +26,11 @@ import { trackAnalyticsEvent } from "@/lib/analytics-client";
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [olderNotifications, setOlderNotifications] = useState<AppNotification[]>([]);
-  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [olderNotifications, setOlderNotifications] = useState<
+    AppNotification[]
+  >([]);
+  const [lastDoc, setLastDoc] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -197,7 +200,8 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-85 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="fixed md:absolute right-2 md:right-0 left-2 md:left-auto top-16 md:top-auto md:mt-2 md:w-85 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+          {" "}
           <div className="p-3 border-b border-neutral-800 flex justify-between items-center bg-neutral-950/50">
             <h3 className="font-semibold text-sm text-white">Notifications</h3>
             <div className="flex items-center gap-3">
@@ -216,8 +220,8 @@ export default function NotificationBell() {
               )}
             </div>
           </div>
-
-          <div className="max-h-[520px] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[60vh] md:max-h-[520px] overflow-y-auto custom-scrollbar">
+            {" "}
             {allNotifications.length === 0 ? (
               <div className="p-8 text-center text-neutral-500 text-sm">
                 No notifications yet.
@@ -232,7 +236,7 @@ export default function NotificationBell() {
                       handleNotificationClick(notification.link)
                     }
                     className={`
-                      relative p-4 border-b border-neutral-800/50 group ${notification.link ? "cursor-pointer" : "cursor-default"} transition-colors flex gap-3
+                      relative p-3 md:p-4 border-b border-neutral-800/50 group ${notification.link ? "cursor-pointer" : "cursor-default"} transition-colors flex gap-3
                       ${notification.read ? "bg-transparent hover:bg-neutral-900/50" : "bg-neutral-500/5 hover:bg-neutral-500/10"}
                     `}
                   >
@@ -242,7 +246,6 @@ export default function NotificationBell() {
                           src={notification.senderPhotoURL}
                           alt="User"
                           className="w-8 h-8 rounded-full object-cover border border-neutral-700"
-
                           onError={(e) => {
                             const target = e.currentTarget;
                             target.onerror = null;
@@ -258,12 +261,16 @@ export default function NotificationBell() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-0.5 pr-6">
-                        <p className={`text-sm ${notification.read ? "text-neutral-300" : "text-white font-semibold"}`}>
+                        <p
+                          className={`text-sm ${notification.read ? "text-neutral-300" : "text-white font-semibold"}`}
+                        >
                           {notification.title}
                         </p>
                         <span className="text-[10px] text-neutral-500 whitespace-nowrap ml-2 mt-0.5 shrink-0">
                           {notification.createdAt
-                            ? new Date(notification.createdAt.seconds * 1000).toLocaleDateString(undefined, {
+                            ? new Date(
+                                notification.createdAt.seconds * 1000,
+                              ).toLocaleDateString(undefined, {
                                 month: "short",
                                 day: "numeric",
                               })

@@ -110,7 +110,8 @@ const ContestCard: React.FC<ContestCardProps> = ({
       className="block group w-full"
     >
       <div className="relative h-full flex flex-col bg-black border border-neutral-800 rounded-lg overflow-hidden transition-colors duration-200 hover:border-neutral-700">
-        <div className="relative w-full h-28 bg-neutral-900">
+        <div className="relative w-full h-24 md:h-28 bg-neutral-900">
+          {" "}
           {contest?.bannerUrl ? (
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -124,7 +125,6 @@ const ContestCard: React.FC<ContestCardProps> = ({
                   src={contest.creatorPfp}
                   alt="Channel owner"
                   className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-
                 />
               </div>
             </>
@@ -157,7 +157,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
           {contest.topic && (
             <div className="absolute bottom-2 left-2 z-10 transition-opacity duration-300 group-hover:opacity-80">
               <span
-                className={`${getTopicColor(contest.topic)} text-white text-[10px] font-bold tracking-wide px-2 py-1 rounded-full`}
+                className={`${getTopicColor(contest.topic)} text-white text-[9px] md:text-[10px] font-bold tracking-wide px-1.5 md:px-2 py-0.5 md:py-1 rounded-full`}
               >
                 {getTopicShortLabel(contest.topic)}
               </span>
@@ -165,42 +165,44 @@ const ContestCard: React.FC<ContestCardProps> = ({
           )}
           <div className="absolute bottom-2 right-2 z-10 flex rounded bg-neutral-800/80 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-80">
             {!contest.ratingActivated && (
-              <div className="flex items-center gap-0.5 text-amber-300 px-1.5 py-1">
-                <Zap className="w-3 h-3" />
-                <span className="text-xs font-bold">2x</span>
+              <div className="flex items-center gap-0.5 text-amber-300 px-1 md:px-1.5 py-0.5 md:py-1">
+                <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                <span className="text-[10px] md:text-xs font-bold">2x</span>
               </div>
             )}
             {contestElo > 0 && (
-              <div className="flex rounded px-1.5 backdrop-blur-sm py-1">
-                <span className={`text-xs font-bold ${tier.textClass}`}>
+              <div className="flex rounded px-1 md:px-1.5 backdrop-blur-sm py-0.5 md:py-1">
+                <span
+                  className={`text-[10px] md:text-xs font-bold ${tier.textClass}`}
+                >
                   {contestElo}
                 </span>
               </div>
             )}
-            <div className="flex gap-1 text-white px-1.5 py-1 rounded-md">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="text-xs">{timeInMinutes} min</span>
+            <div className="flex gap-0.5 md:gap-1 text-white px-1 md:px-1.5 py-0.5 md:py-1 rounded-md">
+              <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
+              <span className="text-[10px] md:text-xs">{timeInMinutes}m</span>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 p-3 flex flex-col">
-          <div className="flex items-start gap-3 flex-1">
+        <div className="flex-1 p-2.5 md:p-3 flex flex-col">
+          {" "}
+          <div className="flex items-start gap-2.5 md:gap-3 flex-1">
             {contest.creatorPfp ? (
               <img
                 src={contest.creatorPfp}
                 alt={contest.creatorUsername || "Creator"}
-                className="w-12 h-12 rounded-full object-cover border-2 border-neutral-700 flex-shrink-0"
-
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-neutral-700 flex-shrink-0"
               />
             ) : (
-              <div className="w-12 h-12 flex-shrink-0">
+              <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
                 <DefaultAvatar name={""} />
               </div>
             )}
             <div className="flex-1 min-w-0 flex flex-col">
               <div className="group/title relative">
-                <h2 className="text-base font-bold text-white truncate mb-1">
+                <h2 className="text-sm md:text-base font-bold text-white truncate mb-1">
                   {contest.title}
                 </h2>
                 <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 z-50 opacity-0 group-hover/title:opacity-100 transition-opacity duration-150 delay-0 group-hover/title:delay-[1000ms]">
@@ -231,7 +233,7 @@ const ContestCard: React.FC<ContestCardProps> = ({
               )}
               <div className="flex items-center gap-3 text-xs mt-auto">
                 {(contest.rating ?? 0) > 0 && (
-                  <div className="flex items-center gap-1 text-yellow-400">
+                  <div className="hidden md:flex items-center gap-1 text-yellow-400">
                     <span className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       <span className="font-medium">

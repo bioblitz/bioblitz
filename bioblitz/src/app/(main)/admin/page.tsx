@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -70,9 +69,18 @@ export default function AdminPage() {
   const [potdAttempts, setPotdAttempts] = useState(0);
   const [potdCorrect, setPotdCorrect] = useState(0);
   const [potdPublished, setPotdPublished] = useState(0);
-  const [analytics, setAnalytics] = useState<{ dau: number; wau: number; mau: number; stickiness: number; week1Retention: number; month1Retention: number } | null>(null);
+  const [analytics, setAnalytics] = useState<{
+    dau: number;
+    wau: number;
+    mau: number;
+    stickiness: number;
+    week1Retention: number;
+    month1Retention: number;
+  } | null>(null);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
-  const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(null);
+  const [editingOriginal, setEditingOriginal] = useState<AdminUser | null>(
+    null,
+  );
 
   // Find & edit user by username
   const [findUsername, setFindUsername] = useState("");
@@ -310,7 +318,6 @@ export default function AdminPage() {
     }
   };
 
-
   const handleFindUser = async () => {
     if (!user || !findUsername.trim()) return;
     setFindingUser(true);
@@ -321,7 +328,7 @@ export default function AdminPage() {
       const idToken = await user.getIdToken();
       const res = await fetch(
         `/api/admin/users?username=${encodeURIComponent(findUsername.trim().toLowerCase())}`,
-        { headers: { Authorization: `Bearer ${idToken}` } }
+        { headers: { Authorization: `Bearer ${idToken}` } },
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "User not found.");
@@ -342,7 +349,10 @@ export default function AdminPage() {
       const idToken = await user.getIdToken();
       const res = await fetch("/api/admin/users", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ uid: foundUser.uid, ...editFields }),
       });
       const data = await res.json();
@@ -414,7 +424,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-neutral-300">Loading...</div>
+          <div className="text-center text-neutral-300">Loading...</div>
         </div>
       </div>
     );
@@ -424,8 +434,12 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-neutral-900">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-4 text-neutral-100">Access Denied</h1>
-          <p className="text-neutral-300">You do not have permission to view this page.</p>
+          <h1 className="text-3xl font-bold mb-4 text-neutral-100">
+            Access Denied
+          </h1>
+          <p className="text-neutral-300">
+            You do not have permission to view this page.
+          </p>
         </div>
       </div>
     );
@@ -438,9 +452,19 @@ export default function AdminPage() {
           <div>
             <h1 className="text-3xl font-bold text-neutral-100">Admin Panel</h1>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-400 mt-1">
-              <span>Users: <span className="text-neutral-100 font-semibold">{totalUsers}</span></span>
+              <span>
+                Users:{" "}
+                <span className="text-neutral-100 font-semibold">
+                  {totalUsers}
+                </span>
+              </span>
               <span className="text-neutral-700">|</span>
-              <span>Game submissions: <span className="text-neutral-100 font-semibold">{submissionsCount}</span></span>
+              <span>
+                Game submissions:{" "}
+                <span className="text-neutral-100 font-semibold">
+                  {submissionsCount}
+                </span>
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -465,9 +489,39 @@ export default function AdminPage() {
             >
               {reindexing ? "Reindexing..." : "Reindex Search"}
             </button>
+
+            
             **/}
 
-            <Link href="/home" className="text-sm text-neutral-400 hover:text-neutral-300 transition-colors">
+            <button
+              onClick={async () => {
+                if (!user) return;
+                setStatus(null);
+                try {
+                  const idToken = await user.getIdToken(true); // force refresh
+                  const res = await fetch(
+                    "/api/admin/users?action=recompute-subscribers",
+                    {
+                      method: "PATCH",
+                      headers: { Authorization: `Bearer ${idToken}` },
+                    },
+                  );
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data?.error || "Failed.");
+                  setStatus(data?.message || "Recomputed.");
+                } catch (err: any) {
+                  setStatus(err?.message || "Failed.");
+                }
+              }}
+              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
+            >
+              Recompute Subscribers
+            </button>
+
+            <Link
+              href="/home"
+              className="text-sm text-neutral-400 hover:text-neutral-300 transition-colors"
+            >
               Return to home
             </Link>
           </div>
@@ -492,7 +546,8 @@ export default function AdminPage() {
         {!showDb ? (
           <div className="py-20 flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50">
             <p className="text-neutral-400 mb-6 text-center max-w-md">
-              The user database is not loaded by default to save on read operations.
+              The user database is not loaded by default to save on read
+              operations.
             </p>
             <button
               onClick={handleLoadDb}
