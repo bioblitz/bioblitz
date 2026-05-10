@@ -410,7 +410,7 @@ export default function PotdClient({
                         )}
                         <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                            className={`px-3 py-1 rounded-full text-xs font-bold ${
                               getTopicColors(activePuzzle.topic).bg
                             }`}
                           >
@@ -614,7 +614,7 @@ export default function PotdClient({
                                   {puzzle.topic || "General"}
                                 </span>
                                 {isPlayed && (
-                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold">
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>Completed</span>
                                   </div>
