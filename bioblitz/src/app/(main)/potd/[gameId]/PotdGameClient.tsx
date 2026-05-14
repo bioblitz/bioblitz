@@ -209,7 +209,9 @@ export default function PotdGameClient({
       try {
         const activityRef = doc(db, "potdActivity", puzzle.id);
         const globalStatsRef = doc(db, "stats", "global");
-        const globalUpdate: Record<string, any> = { potdAttempts: increment(1) };
+        const globalUpdate: Record<string, any> = {
+          potdAttempts: increment(1),
+        };
         if (correct) globalUpdate.potdCorrect = increment(1);
         await Promise.all([
           setDoc(
@@ -292,13 +294,14 @@ export default function PotdGameClient({
       <div className="absolute top-0 left-0 w-full h-125 bg-neutral-900 pointer-events-none" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
-        <div className="flex flex-row items-end justify-between gap-6 mb-8">
+        <div className="flex flex-row items-end justify-between gap-3 md:gap-6 mb-6 md:mb-8">
+          {" "}
           <div className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-500/10 border border-orange-500/20 p-2 rounded-lg">
-                <Flame className="w-6 h-6 text-orange-500" />
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="bg-orange-500/10 border border-orange-500/20 p-1.5 md:p-2 rounded-lg">
+                <Flame className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
               </div>
-              <h1 className="text-4xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight">
                 Daily Problem
               </h1>
             </div>
@@ -337,7 +340,7 @@ export default function PotdGameClient({
           {isStaffUser && (
             <Link
               href="/potd/staff"
-              className="text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
+              className="hidden md:inline-flex text-sm text-orange-300 border border-orange-500/40 hover:border-orange-300 hover:text-orange-200 px-3 py-1.5 rounded-full transition-colors"
             >
               Manage Queue
             </Link>
@@ -372,8 +375,9 @@ export default function PotdGameClient({
             {activeTab === "problem" && (
               <section className="relative">
                 <div className="relative overflow-hidden rounded-3xl bg-neutral-900 group text-center">
-                  <div className="relative z-10 p-8 md:p-10 flex flex-col items-center">
-                    <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+                  <div className="relative z-10 p-4 md:p-10 flex flex-col items-center">
+                    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 md:mb-6">
+                      {" "}
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${theme.bg}`}
                       >
@@ -390,15 +394,14 @@ export default function PotdGameClient({
                       )}
                     </div>
 
-                    <div className="space-y-4 mb-8 max-w-4xl mx-auto">
-                      <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">
+                    <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 max-w-4xl mx-auto">
+                      <h2 className="text-xl md:text-4xl font-bold text-white leading-tight">
                         {puzzle.title}
                       </h2>
-                      <p className="text-neutral-300 text-lg leading-relaxed">
+                      <p className="text-neutral-300 text-base md:text-lg leading-relaxed">
                         {puzzle.questionText}
                       </p>
                     </div>
-
                     <div className="grid grid-cols-1 gap-3 w-full max-w-2xl mx-auto">
                       {puzzle.options.map((option) => {
                         const isSelected = selectedOptions.includes(option.key);
@@ -434,26 +437,26 @@ export default function PotdGameClient({
                             disabled={showResults || submitting}
                             onClick={() => handleOptionClick(option.key)}
                             className={`
-                              relative flex items-center justify-center w-full p-4 rounded-xl border transition-all duration-200
-                              ${bgClass} ${borderClass}
-                              ${isSelected && !showResults ? "shadow-[0_0_20px_rgba(139,92,246,0.15)]" : ""}
-                            `}
+    relative flex items-center w-full p-3 md:p-4 rounded-xl border transition-all duration-200
+    ${bgClass} ${borderClass}
+    ${isSelected && !showResults ? "shadow-[0_0_20px_rgba(139,92,246,0.15)]" : ""}
+  `}
                           >
                             <div
                               className={`
-                                flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold mr-4 transition-colors flex-shrink-0
-                                ${
-                                  isSelected || (showResults && isCorrectKey)
-                                    ? "bg-white/20 text-white"
-                                    : "bg-neutral-800 text-neutral-500"
-                                }
-                              `}
+      flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg text-xs md:text-sm font-bold mr-3 md:mr-4 transition-colors flex-shrink-0
+      ${
+        isSelected || (showResults && isCorrectKey)
+          ? "bg-white/20 text-white"
+          : "bg-neutral-800 text-neutral-500"
+      }
+    `}
                             >
                               {option.key.toUpperCase()}
                             </div>
 
                             <span
-                              className={`text-base text-center font-medium ${textClass}`}
+                              className={`text-sm md:text-base text-left font-medium flex-1 pr-7 ${textClass}`}
                             >
                               {option.text}
                             </span>
