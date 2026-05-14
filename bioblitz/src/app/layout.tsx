@@ -8,6 +8,7 @@ import MarketingPopup from "@/components/auth/MarketingPopup";
 import RouteAnalyticsTracker from "@/components/analytics/RouteAnalyticsTracker";
 import { SITE_URL } from "@/lib/site-url";
 import { Suspense } from "react";
+import ChatSubscriber from "@/components/features/messages/ChatSubscriber";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -83,6 +84,8 @@ export default async function RootLayout({
     >
       <body>
         <AuthProvider>
+          <ChatSubscriber />
+
           <ActivityTracker />
           <Suspense fallback={null}>
             <RouteAnalyticsTracker />

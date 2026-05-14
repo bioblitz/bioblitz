@@ -11,17 +11,60 @@ service cloud.firestore {
       return !request.resource.data.diff(resource.data).affectedKeys()
         .hasAny(['bElo', 'mElo', 'buElo', 'muElo', 'score', 'contestsPlayed', 'lastContestAt']);
     }
+    
+     function isStaff() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(["admin", "staff"]);
+    }
+    
+     function areMutualFriends(uidA, uidB) {
+      return exists(/databases/$(database)/documents/users/$(uidA)/friends/$(uidB))
+        && exists(/databases/$(database)/documents/users/$(uidB)/friends/$(uidA))
+        && get(/databases/$(database)/documents/users/$(uidA)/friends/$(uidB)).data.status == "friends"
+        && get(/databases/$(database)/documents/users/$(uidB)/friends/$(uidA)).data.status == "friends";
+    }
+
+
+function isBlockedBy(victimUid, blockerUid) {
+      // Returns true if blockerUid has blocked victimUid.
+      // Uses get() which returns null fields gracefully via .get('blockedUserIds', []).
+      return blockerUid in get(/databases/$(database)/documents/users/$(victimUid)).data.get('blockedUserIds', []);
+    }
+
+
+ function eitherHasBlocked(uidA, uidB) {
+      return (uidB in get(/databases/$(database)/documents/users/$(uidA)).data.get('blockedUserIds', []))
+        || (uidA in get(/databases/$(database)/documents/users/$(uidB)).data.get('blockedUserIds', []));
+    }
+    
+     function isConversationParticipant(conversationId) {
+      return request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+    }
+ 
+    match /questionReports/{reportId} {
+      allow create: if isSignedIn();
+      allow read, update: if isStaff();
+      allow delete: if false;
+    }
+
     match /users/{userId} {
       allow read: if true; 
       allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId) && notUpdatingElo();
-
+allow update: if isSignedIn() && (
+    (isOwner(userId) && notUpdatingElo()) ||
+    (!isOwner(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriberCount']))
+  );
       match /friends/{friendId} {
         allow read: if true;
         allow write: if isSignedIn() && (
           isOwner(userId) || request.resource.data.uid == request.auth.uid
         );
       }
+
+  match /bookmarkedQuestions/{bookmarkId} {
+    allow read, write: if isSignedIn() && isOwner(userId);
+  }
+
 
       match /ratingHistory/{historyId} {
         allow read: if true;
@@ -37,12 +80,14 @@ service cloud.firestore {
         allow write: if false;
       }
     }
+match /gameSubmissions/{submissionId} {
+  allow read: if true;
+  allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+  allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+  allow write: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+  allow delete: if false;
+}
 
-    match /gameSubmissions/{submissionId} {
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow read: if true;
-      allow update, delete: if false;
-    }
 
     match /user_ratings/{ratingId} {
       allow read: if isSignedIn();
@@ -67,11 +112,11 @@ service cloud.firestore {
     }
 
     match /notifications/{notificationId} {
-      allow read: if isSignedIn();
-      allow update: if isSignedIn() && request.auth.uid == resource.data.recipientUid;
-      allow create: if isSignedIn();
-      allow delete: if false;
-    }
+  	allow read: if isSignedIn();
+  	allow update: if isSignedIn() && request.auth.uid == resource.data.recipientUid;
+  	allow create: if isSignedIn();
+  	allow delete: if isSignedIn() && request.auth.uid == resource.data.recipientUid;
+		}
 
     match /challenges/{challengeId} {
       allow read: if isSignedIn() && (
@@ -92,5 +137,120 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+
+    match /challengeLinks/{linkId} {
+      // Anyone signed in can read (needed to show the challenger banner)
+      allow read: if isSignedIn();
+      // Only signed-in users can create a challenge link
+      allow create: if isSignedIn() && request.resource.data.creatorId == request.auth.uid;
+      // Only the creator can update top-level doc (e.g. participantCount is updated via participant writes below)
+      allow update: if isSignedIn();
+      allow delete: if false;
+
+      match /entries/{uid} {
+        allow read: if isSignedIn();
+        // Users can only write their own entry
+        allow create, update: if isSignedIn() && uid == request.auth.uid;
+        allow delete: if false;
+      }
+
+    }
+    
+   // ====================================================================
+
+match /conversations/{conversationId} {
+  // Read: must be one of the two participants.
+  // (resource is null when the doc doesn't exist; in that case, allow the read
+  // so the client gets a clean "not found" instead of a permission error.)
+  allow read: if isSignedIn()
+    && (resource == null || request.auth.uid in resource.data.participantIds);
+         // Create: must be a participant, exactly 2 participants, mutual friends,
+      // neither has blocked the other.
+      allow create: if isSignedIn()
+        && request.resource.data.participantIds.size() == 2
+        && request.auth.uid in request.resource.data.participantIds
+        && areMutualFriends(
+            request.resource.data.participantIds[0],
+            request.resource.data.participantIds[1]
+          )
+        && !eitherHasBlocked(
+            request.resource.data.participantIds[0],
+            request.resource.data.participantIds[1]
+          )
+          
+           // Sanity check on initial state
+        && request.resource.data.unreadCounts[request.resource.data.participantIds[0]] == 0
+        && request.resource.data.unreadCounts[request.resource.data.participantIds[1]] == 0;
+
+      // Update: participant only. Cannot change participantIds. Allowed fields:
+      // lastMessageAt, lastMessagePreview, lastMessageSenderId, lastMessageType,
+      // unreadCounts.
+      allow update: if isSignedIn()
+        && request.auth.uid in resource.data.participantIds
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['lastMessageAt', 'lastMessagePreview', 'lastMessageSenderId', 'lastMessageType', 'unreadCounts']);
+            
+             // No conversation deletion in v1.
+      allow delete: if false;
+
+      // -------- messages subcollection --------
+     match /messages/{messageId} {
+  allow read: if isSignedIn()
+    && exists(/databases/$(database)/documents/conversations/$(conversationId))
+    && isConversationParticipant(conversationId);
+    
+        // Create: sender must match auth user, must be participant, friendship still
+        // mutual, neither has blocked the other, text size limit, valid type.
+        allow create: if isSignedIn()
+        
+         && request.auth.uid == request.resource.data.senderId
+          && isConversationParticipant(conversationId)
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.type in ['text', 'challenge_sent', 'challenge_completed']
+          && areMutualFriends(
+              get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds[0],
+              get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds[1]
+            )
+          && !eitherHasBlocked(
+          get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds[0],
+              get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds[1]
+            );
+
+        // Update: only reactions or soft-delete fields can change. Cannot edit text
+        // or senderId. Anyone in the conversation can react; only the original
+        // sender can soft-delete their own message.
+        allow update: if isSignedIn()
+          && isConversationParticipant(conversationId)
+          && request.resource.data.text == resource.data.text
+          && request.resource.data.senderId == resource.data.senderId
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['reactions', 'deletedAt', 'deletedBy'])
+          && (
+           // If touching deletedAt/deletedBy, must be the original sender
+              !request.resource.data.diff(resource.data).affectedKeys().hasAny(['deletedAt', 'deletedBy'])
+              || request.auth.uid == resource.data.senderId
+            );
+
+        // No hard delete — preserve moderation evidence.
+        allow delete: if false;
+      }
+    }
+ // ====================================================================
+    // MESSAGE REPORTS — for moderation queue
+    // ====================================================================
+    match /messageReports/{reportId} {
+      // Anyone signed in can file a report (about a message they can read).
+      allow create: if isSignedIn()
+        && request.resource.data.reportedByUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      // Staff only beyond creation.
+      allow read, update: if isStaff();
+      allow delete: if false;
+      }
+    
+    
   }
 }

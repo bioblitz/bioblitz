@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useRef,
+} from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { UserProfile, cacheUserPhotoURL } from '@/lib/user';
+import { UserProfile, cacheUserPhotoURL } from "@/lib/user";
+import { useChatStore } from "@/lib/chatStore";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -32,8 +40,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          const res = await fetch('/api/auth-status');
-          if (!res.ok) throw new Error('auth-status failed');
+          useChatStore.getState().setCurrentUser(firebaseUser.uid);
+
+          const res = await fetch("/api/auth-status");
+          if (!res.ok) throw new Error("auth-status failed");
           const data = await res.json();
 
           if (data.isAuthenticated && data.user) {
@@ -56,7 +66,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               cacheUserPhotoURL(serverUser.uid, serverUser.photoURL)
                 .then((cachedUrl) => {
                   if (cachedUrl) {
-                    setUser((prev) => (prev ? { ...prev, photoURL: cachedUrl } : prev));
+                    setUser((prev) =>
+                      prev ? { ...prev, photoURL: cachedUrl } : prev,
+                    );
                   }
                 })
                 .finally(() => {
@@ -71,11 +83,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(null);
           }
         } else {
+          useChatStore.getState().setCurrentUser(null);
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch (error) {
-        console.error('Failed to fetch auth status:', error);
+        console.error("Failed to fetch auth status:", error);
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -95,7 +108,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, updateUserPhoto, updateUsername, loading }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        setIsAuthenticated,
+        user,
+        updateUserPhoto,
+        updateUsername,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -104,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
