@@ -2,9 +2,14 @@
 
 import { Message } from "@/lib/chatStore";
 import { Trophy } from "lucide-react";
+import { useState } from "react";
+import { Flag } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import ReportMessageModal from "./ReportMessageModal";
 
 interface MessageBubbleProps {
   message: Message;
+  conversationId: string;
   isMine: boolean;
   showAvatar: boolean;
   isGroupedStart: boolean;
@@ -24,6 +29,7 @@ function formatTime(ms: number): string {
 
 export default function MessageBubble({
   message,
+  conversationId,
   isMine,
   showAvatar,
   isGroupedStart,
@@ -67,6 +73,9 @@ export default function MessageBubble({
     : `rounded-2xl ${isGroupedStart ? "rounded-tl-2xl" : "rounded-tl-md"} ${
         isGroupedEnd ? "rounded-bl-md" : "rounded-bl-md"
       }`;
+
+  const { user } = useAuth();
+  const [showReportModal, setShowReportModal] = useState(false);
 
   return (
     <div
@@ -112,6 +121,16 @@ export default function MessageBubble({
         <p className="text-sm leading-snug whitespace-pre-wrap break-words">
           {message.text}
         </p>
+        {!isMine && user && (
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="absolute -right-7 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-orange-400"
+            aria-label="Report message"
+            title="Report message"
+          >
+            <Flag className="w-3 h-3" />
+          </button>
+        )}
       </div>
 
       <span
@@ -121,6 +140,17 @@ export default function MessageBubble({
       >
         {formatTime(message.createdAt)}
       </span>
+
+      {showReportModal && user && (
+        <ReportMessageModal
+          conversationId={conversationId}
+          messageId={message.id}
+          messageText={message.text}
+          senderUid={message.senderId}
+          reportedByUid={user.uid}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
     </div>
   );
 }

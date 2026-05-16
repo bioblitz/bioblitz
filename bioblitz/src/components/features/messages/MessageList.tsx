@@ -11,6 +11,7 @@ interface MessageListProps {
     displayName: string;
     photoURL?: string;
   } | null;
+  conversationId: string;
 }
 
 function isSameDay(a: number, b: number): boolean {
@@ -45,6 +46,7 @@ export default function MessageList({
   messages,
   currentUserId,
   otherUser,
+  conversationId,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -100,6 +102,7 @@ export default function MessageList({
             )}
             <MessageBubble
               message={msg}
+              conversationId={conversationId}
               isMine={isMine}
               showAvatar={!isMine && !groupedWithNext}
               isGroupedStart={!groupedWithPrev}

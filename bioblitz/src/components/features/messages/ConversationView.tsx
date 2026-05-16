@@ -15,6 +15,8 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "@/lib/firebase";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
+import ConversationMenu from "./ConversationMenu";
+import BlockUserModal from "./BlockUserModal";
 
 interface ConversationViewProps {
   conversationId: string;
@@ -51,6 +53,9 @@ export default function ConversationView({
 
   const [conversationInFirestore, setConversationInFirestore] =
     useState<boolean>(!!conversation);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showBlockModal, setShowBlockModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -199,13 +204,23 @@ export default function ConversationView({
         </Link>
 
         {/* More menu (placeholder for step 7 — block/report) */}
-        <button
-          className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
-          aria-label="Conversation options"
-          title="More options (coming soon)"
-        >
-          <MoreVertical className="w-4 h-4" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+            aria-label="Conversation options"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+          {menuOpen && other && recipientUid && (
+            <ConversationMenu
+              otherUserId={recipientUid}
+              otherUsername={other.username}
+              onClose={() => setMenuOpen(false)}
+              onBlock={() => setShowBlockModal(true)}
+            />
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -219,6 +234,7 @@ export default function ConversationView({
             messages={messages}
             currentUserId={user.uid}
             otherUser={other}
+            conversationId={conversationId}
           />
         )}
       </div>
@@ -235,6 +251,15 @@ export default function ConversationView({
           <div className="px-4 py-3 text-xs text-neutral-500">Loading...</div>
         )}
       </div>
+
+      {showBlockModal && recipientUid && other && (
+        <BlockUserModal
+          blockerUid={user.uid}
+          blockedUid={recipientUid}
+          blockedDisplayName={other.username || other.displayName}
+          onClose={() => setShowBlockModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -2,15 +2,14 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Send, Loader2 } from "lucide-react";
-import { sendMessageBasic } from "@/lib/messages";
+import { sendMessage } from "@/lib/messages";
+import { failureMessage, MAX_MESSAGE_LENGTH } from "@/lib/messageValidation";
 
 interface MessageInputProps {
   conversationId: string;
   senderId: string;
   recipientId: string;
 }
-
-const MAX_LENGTH = 1000;
 
 export default function MessageInput({
   conversationId,
@@ -24,8 +23,8 @@ export default function MessageInput({
 
   const trimmed = text.trim();
   const canSend =
-    trimmed.length > 0 && trimmed.length <= MAX_LENGTH && !sending;
-  const showCounter = text.length > MAX_LENGTH * 0.8;
+    trimmed.length > 0 && trimmed.length <= MAX_MESSAGE_LENGTH && !sending;
+  const showCounter = text.length > MAX_MESSAGE_LENGTH * 0.8;
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -40,21 +39,31 @@ export default function MessageInput({
     setSending(true);
 
     const textToSend = trimmed;
-    setText(""); // Optimistic clear
 
     try {
-      await sendMessageBasic({
+      const result = await sendMessage({
         conversationId,
         senderId,
         recipientId,
         text: textToSend,
       });
-    } catch (err) {
+
+      if (!result.ok) {
+        setError(failureMessage(result));
+        setSending(false);
+        return;
+      }
+
+      setText("");
+    } catch (err: any) {
       console.error("Send failed:", err);
-      setText(textToSend); // Restore on failure
-      setError("Failed to send. Try again.");
-    } finally {
-      setSending(false);
+      if (err?.code === "permission-denied") {
+        setError(
+          "You can't message this user. They may have blocked you or unfriended you.",
+        );
+      } else {
+        setError("Failed to send. Try again.");
+      }
     }
   };
 
@@ -82,16 +91,18 @@ export default function MessageInput({
             placeholder="Message..."
             rows={1}
             disabled={sending}
-            maxLength={MAX_LENGTH + 100} // Allow typing slightly over for visible feedback
+            maxLength={MAX_MESSAGE_LENGTH + 100} // Allow typing slightly over for visible feedback
             className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl px-4 py-2.5 pr-12 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors placeholder:text-neutral-500 resize-none disabled:opacity-60"
           />
           {showCounter && (
             <span
               className={`absolute right-3 bottom-2 text-[10px] tabular-nums pointer-events-none ${
-                text.length > MAX_LENGTH ? "text-red-400" : "text-neutral-500"
+                text.length > MAX_MESSAGE_LENGTH
+                  ? "text-red-400"
+                  : "text-neutral-500"
               }`}
             >
-              {MAX_LENGTH - text.length}
+              {MAX_MESSAGE_LENGTH - text.length}
             </span>
           )}
         </div>

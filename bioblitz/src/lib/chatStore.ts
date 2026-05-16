@@ -46,6 +46,8 @@ interface ChatStore {
   messagesLoadedAt: Record<string, number>;
 
   totalUnread: number;
+  sendTimestamps: number[];
+  recordSend: () => void;
 
   setCurrentUser: (userId: string | null) => void;
 
@@ -98,6 +100,14 @@ export const useChatStore = create<ChatStore>()(
       messagesByConversationId: {},
       messagesLoadedAt: {},
       totalUnread: 0,
+
+      sendTimestamps: [],
+
+      recordSend: () => {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        const filtered = get().sendTimestamps.filter((t) => t > cutoff);
+        set({ sendTimestamps: [...filtered, Date.now()] });
+      },
 
       setCurrentUser: (userId) => {
         const prev = get().currentUserId;
@@ -197,6 +207,7 @@ export const useChatStore = create<ChatStore>()(
           messagesByConversationId: {},
           messagesLoadedAt: {},
           totalUnread: 0,
+          sendTimestamps: {},
         });
       },
     }),
@@ -209,6 +220,7 @@ export const useChatStore = create<ChatStore>()(
         conversationOrder: state.conversationOrder,
         conversationsLoadedAt: state.conversationsLoadedAt,
         totalUnread: state.totalUnread,
+        sendTimestamps: state.sendTimestamps,
       }),
     },
   ),

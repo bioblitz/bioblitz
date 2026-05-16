@@ -5,12 +5,14 @@ import {
   setDoc,
   updateDoc,
   query,
+  addDoc,
   where,
   orderBy,
   limit,
   onSnapshot,
   getDocs,
   serverTimestamp,
+  deleteDoc,
   Timestamp,
   Unsubscribe,
   writeBatch,
@@ -24,6 +26,14 @@ import {
   ChallengeMeta,
   makeConversationId,
 } from "@/lib/chatStore";
+
+import {
+  validateMessageContent,
+  type ValidationResult,
+  RATE_LIMIT_PER_MINUTE,
+  RATE_LIMIT_PER_DAY,
+} from "@/lib/messageValidation";
+import { useChatStore } from "@/lib/chatStore";
 
 function convertConversation(id: string, data: any): Conversation {
   return {
@@ -53,14 +63,6 @@ function convertMessage(id: string, data: any): Message {
   };
 }
 
-// ====================================================================
-// Read operations
-// ====================================================================
-
-/**
- * One-time fetch of a single conversation by ID.
- * Returns null if it doesn't exist (e.g. first-time conversation, not yet created).
- */
 export async function getConversation(
   conversationId: string,
 ): Promise<Conversation | null> {
@@ -69,13 +71,6 @@ export async function getConversation(
   return convertConversation(snap.id, snap.data());
 }
 
-/**
- * Subscribe to a user's conversation list, sorted by most recent activity.
- * Returns an unsubscribe function.
- *
- * Limit: 20 most recent conversations. For users with more than 20 active
- * threads, the older ones aren't shown in the live inbox (cost optimization).
- */
 export function subscribeToConversations(
   userId: string,
   onUpdate: (conversations: Conversation[]) => void,
@@ -101,12 +96,6 @@ export function subscribeToConversations(
   );
 }
 
-/**
- * Subscribe to messages in a single conversation.
- * Most recent 30 messages, ordered chronologically (oldest first for rendering).
- *
- * Returns an unsubscribe function.
- */
 export function subscribeToMessages(
   conversationId: string,
   onUpdate: (messages: Message[]) => void,
@@ -132,10 +121,6 @@ export function subscribeToMessages(
   );
 }
 
-/**
- * Fetch messages older than a given message (for scroll-up pagination).
- * Returns up to `limitCount` older messages, ordered oldest first.
- */
 export async function fetchOlderMessages(
   conversationId: string,
   beforeCreatedAt: number,
@@ -152,14 +137,6 @@ export async function fetchOlderMessages(
   return snap.docs.map((d) => convertMessage(d.id, d.data())).reverse();
 }
 
-// ====================================================================
-// Write operations (stubs — full implementation in step 6)
-// ====================================================================
-
-/**
- * Mark a conversation as read for the current user.
- * Resets that user's unread counter to 0 in the conversation document.
- */
 export async function markConversationRead(
   conversationId: string,
   userId: string,
@@ -170,14 +147,6 @@ export async function markConversationRead(
   });
 }
 
-// ====================================================================
-// Helpers
-// ====================================================================
-
-/**
- * Truncate text for the lastMessagePreview field. Cuts at a word boundary
- * when possible, fallback to hard cut at maxLen.
- */
 export function truncatePreview(text: string, maxLen: number = 80): string {
   if (text.length <= maxLen) return text;
   const cut = text.slice(0, maxLen);
@@ -188,10 +157,6 @@ export function truncatePreview(text: string, maxLen: number = 80): string {
   return cut + "…";
 }
 
-/**
- * Preview text for special message types.
- * Used when writing the lastMessagePreview field on the conversation doc.
- */
 export function previewForMessage(
   message: Pick<Message, "type" | "text">,
 ): string {
@@ -253,4 +218,118 @@ export async function sendMessageBasic(input: {
   });
 
   await batch.commit();
+}
+
+function checkRateLimit(): ValidationResult {
+  const timestamps = useChatStore.getState().sendTimestamps;
+  const now = Date.now();
+
+  const oneMinAgo = now - 60 * 1000;
+  const oneDayAgo = now - 24 * 60 * 60 * 1000;
+
+  const lastMinute = timestamps.filter((t) => t > oneMinAgo);
+  if (lastMinute.length >= RATE_LIMIT_PER_MINUTE) {
+    const oldest = Math.min(...lastMinute);
+    return {
+      ok: false,
+      code: "rate_limit_minute",
+      resetIn: 60 * 1000 - (now - oldest),
+    };
+  }
+
+  const lastDay = timestamps.filter((t) => t > oneDayAgo);
+  if (lastDay.length >= RATE_LIMIT_PER_DAY) {
+    return {
+      ok: false,
+      code: "rate_limit_day",
+      resetIn: 24 * 60 * 60 * 1000,
+    };
+  }
+
+  return { ok: true };
+}
+
+export async function sendMessage(input: {
+  conversationId: string;
+  senderId: string;
+  recipientId: string;
+  text: string;
+}): Promise<ValidationResult> {
+  const contentResult = validateMessageContent(input.text);
+  if (!contentResult.ok) return contentResult;
+
+  const rateResult = checkRateLimit();
+  if (!rateResult.ok) return rateResult;
+
+  useChatStore.getState().recordSend();
+
+  try {
+    await sendMessageBasic(input);
+    return { ok: true };
+  } catch (err) {
+    console.error("sendMessage Firestore write failed:", err);
+    throw err;
+  }
+}
+
+export async function blockUser(
+  blockerUid: string,
+  blockedUid: string,
+): Promise<void> {
+  const userRef = doc(db, "users", blockerUid);
+  const snap = await getDoc(userRef);
+  const current: string[] = snap.exists()
+    ? snap.data().blockedUserIds || []
+    : [];
+  if (current.includes(blockedUid)) return; // already blocked
+  await updateDoc(userRef, {
+    blockedUserIds: [...current, blockedUid],
+  });
+}
+
+export async function unblockUser(
+  blockerUid: string,
+  blockedUid: string,
+): Promise<void> {
+  const userRef = doc(db, "users", blockerUid);
+  const snap = await getDoc(userRef);
+  const current: string[] = snap.exists()
+    ? snap.data().blockedUserIds || []
+    : [];
+  if (!current.includes(blockedUid)) return;
+  await updateDoc(userRef, {
+    blockedUserIds: current.filter((uid) => uid !== blockedUid),
+  });
+}
+
+export async function isBlocked(
+  blockerUid: string,
+  potentiallyBlockedUid: string,
+): Promise<boolean> {
+  const snap = await getDoc(doc(db, "users", blockerUid));
+  if (!snap.exists()) return false;
+  const blocked: string[] = snap.data().blockedUserIds || [];
+  return blocked.includes(potentiallyBlockedUid);
+}
+
+export async function reportMessage(input: {
+  conversationId: string;
+  messageId: string;
+  messageText: string;
+  senderUid: string;
+  reportedByUid: string;
+  reason: "harassment" | "spam" | "inappropriate" | "other";
+  details?: string;
+}): Promise<void> {
+  await addDoc(collection(db, "messageReports"), {
+    conversationId: input.conversationId,
+    messageId: input.messageId,
+    messageText: input.messageText,
+    senderUid: input.senderUid,
+    reportedByUid: input.reportedByUid,
+    reason: input.reason,
+    details: input.details ?? "",
+    createdAt: serverTimestamp(),
+    status: "pending",
+  });
 }
