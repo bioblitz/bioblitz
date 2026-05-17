@@ -3,7 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MoreVertical, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  MoreVertical,
+  AlertTriangle,
+  Loader2,
+  Ban,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useChatStore, Message } from "@/lib/chatStore";
 import {
@@ -16,7 +22,7 @@ import { app } from "@/lib/firebase";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import ConversationMenu from "./ConversationMenu";
-import BlockUserModal from "./BlockUserModal";
+import { areMutualFriends } from "@/lib/friends";
 
 interface ConversationViewProps {
   conversationId: string;
@@ -44,18 +50,20 @@ export default function ConversationView({
   const markRead = useChatStore((s) => s.markConversationRead);
   const upsertConversation = useChatStore((s) => s.upsertConversation);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [other, setOther] = useState<OtherUser | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(messages.length === 0);
   const [conversationExists, setConversationExists] = useState<boolean | null>(
     conversation ? true : null,
   );
+  const [isFriend, setIsFriend] = useState<boolean | null>(null);
+
   const [recipientUid, setRecipientUid] = useState<string | null>(null);
 
   const [conversationInFirestore, setConversationInFirestore] =
     useState<boolean>(!!conversation);
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showBlockModal, setShowBlockModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -110,6 +118,31 @@ export default function ConversationView({
       })
       .catch((err) => console.error("Failed to load user info:", err));
   }, [recipientUid]);
+
+  useEffect(() => {
+    if (!user?.uid || !recipientUid) return;
+    let cancelled = false;
+    areMutualFriends(user.uid, recipientUid).then((result) => {
+      if (!cancelled) setIsFriend(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, recipientUid]);
+
+  // Auto-scroll to bottom when messages change or first load completes
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    // Use double rAF so we wait for both the React commit AND the next paint
+    const id1 = requestAnimationFrame(() => {
+      const id2 = requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
+      return () => cancelAnimationFrame(id2);
+    });
+    return () => cancelAnimationFrame(id1);
+  }, [messages.length, loadingMessages]);
 
   useEffect(() => {
     if (!user || !conversationInFirestore) {
@@ -217,14 +250,16 @@ export default function ConversationView({
               otherUserId={recipientUid}
               otherUsername={other.username}
               onClose={() => setMenuOpen(false)}
-              onBlock={() => setShowBlockModal(true)}
             />
           )}
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto min-h-0 [scrollbar-width:thin] [scrollbar-color:#3f3f46_transparent]">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto min-h-0 [scrollbar-width:thin] [scrollbar-color:#3f3f46_transparent]"
+      >
         {loadingMessages ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-5 h-5 text-neutral-500 animate-spin" />
@@ -240,26 +275,27 @@ export default function ConversationView({
       </div>
 
       {/* Input bar */}
+      {/* Input bar */}
       <div className="shrink-0 border-t border-neutral-800 bg-neutral-900">
-        {recipientUid ? (
+        {!recipientUid || isFriend === null ? (
+          <div className="px-4 py-3 text-xs text-neutral-500">Loading...</div>
+        ) : isFriend === false ? (
+          <div className="px-4 py-4 flex items-center justify-center gap-2 text-sm text-neutral-500">
+            <Ban className="w-3.5 h-3.5" />
+            <span>
+              You can&apos;t message{" "}
+              {other?.username || other?.displayName || "this user"} —
+              you&apos;re not friends.
+            </span>
+          </div>
+        ) : (
           <MessageInput
             conversationId={conversationId}
             senderId={user.uid}
             recipientId={recipientUid}
           />
-        ) : (
-          <div className="px-4 py-3 text-xs text-neutral-500">Loading...</div>
         )}
       </div>
-
-      {showBlockModal && recipientUid && other && (
-        <BlockUserModal
-          blockerUid={user.uid}
-          blockedUid={recipientUid}
-          blockedDisplayName={other.username || other.displayName}
-          onClose={() => setShowBlockModal(false)}
-        />
-      )}
     </div>
   );
 }

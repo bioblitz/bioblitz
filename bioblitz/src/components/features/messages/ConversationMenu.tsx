@@ -1,23 +1,19 @@
-//menu for each user to either block  or view profile
-
 "use client";
 
 import { useEffect, useRef } from "react";
-import { UserMinus, Ban, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 interface ConversationMenuProps {
   otherUserId: string;
   otherUsername?: string;
   onClose: () => void;
-  onBlock: () => void;
 }
 
 export default function ConversationMenu({
   otherUserId,
   otherUsername,
   onClose,
-  onBlock,
 }: ConversationMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -56,17 +52,6 @@ export default function ConversationMenu({
         <ExternalLink className="w-3.5 h-3.5" />
         View profile
       </Link>
-      <div className="h-px bg-neutral-800" />
-      <button
-        onClick={() => {
-          onClose();
-          onBlock();
-        }}
-        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-left"
-      >
-        <Ban className="w-3.5 h-3.5" />
-        Block user
-      </button>
     </div>
   );
 }

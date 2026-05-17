@@ -26,6 +26,7 @@ import {
   ChallengeMeta,
   makeConversationId,
 } from "@/lib/chatStore";
+import { Challenge } from "@/lib/challenges";
 
 import {
   validateMessageContent,
@@ -157,14 +158,22 @@ export function truncatePreview(text: string, maxLen: number = 80): string {
   return cut + "…";
 }
 
-export function previewForMessage(
-  message: Pick<Message, "type" | "text">,
-): string {
-  if (message.type === "challenge_sent") return "Sent you a challenge";
-  if (message.type === "challenge_completed") return "Completed your challenge";
-  return truncatePreview(message.text);
+export function previewForMessage(input: {
+  type: string;
+  text?: string;
+  data?: any;
+}): string {
+  switch (input.type) {
+    case "text":
+      return input.text ?? "";
+    case "challenge_invite":
+      return input.text ?? "🎯 Challenge sent";
+    case "challenge_result":
+      return input.text ?? "🏆 Challenge results";
+    default:
+      return input.text ?? "";
+  }
 }
-
 export { makeConversationId };
 
 export async function sendMessageBasic(input: {
@@ -272,46 +281,6 @@ export async function sendMessage(input: {
   }
 }
 
-export async function blockUser(
-  blockerUid: string,
-  blockedUid: string,
-): Promise<void> {
-  const userRef = doc(db, "users", blockerUid);
-  const snap = await getDoc(userRef);
-  const current: string[] = snap.exists()
-    ? snap.data().blockedUserIds || []
-    : [];
-  if (current.includes(blockedUid)) return; // already blocked
-  await updateDoc(userRef, {
-    blockedUserIds: [...current, blockedUid],
-  });
-}
-
-export async function unblockUser(
-  blockerUid: string,
-  blockedUid: string,
-): Promise<void> {
-  const userRef = doc(db, "users", blockerUid);
-  const snap = await getDoc(userRef);
-  const current: string[] = snap.exists()
-    ? snap.data().blockedUserIds || []
-    : [];
-  if (!current.includes(blockedUid)) return;
-  await updateDoc(userRef, {
-    blockedUserIds: current.filter((uid) => uid !== blockedUid),
-  });
-}
-
-export async function isBlocked(
-  blockerUid: string,
-  potentiallyBlockedUid: string,
-): Promise<boolean> {
-  const snap = await getDoc(doc(db, "users", blockerUid));
-  if (!snap.exists()) return false;
-  const blocked: string[] = snap.data().blockedUserIds || [];
-  return blocked.includes(potentiallyBlockedUid);
-}
-
 export async function reportMessage(input: {
   conversationId: string;
   messageId: string;
@@ -332,4 +301,199 @@ export async function reportMessage(input: {
     createdAt: serverTimestamp(),
     status: "pending",
   });
+}
+// ====================================================================
+// Challenge messages
+// ====================================================================
+
+/**
+ * Send a challenge invite into the conversation. Auto-creates the conversation
+ * if it doesn't exist. System message — bypasses profanity/rate-limit checks.
+ */
+export async function sendChallengeInviteMessage(input: {
+  conversationId: string;
+  challengerId: string;
+  challengedId: string;
+  challengeId: string;
+  blitzTitle: string;
+  challengerUsername: string;
+}): Promise<void> {
+  const {
+    conversationId,
+    challengerId,
+    challengedId,
+    challengeId,
+    blitzTitle,
+  } = input;
+
+  const convRef = doc(db, "conversations", conversationId);
+  const messagesCol = collection(
+    db,
+    "conversations",
+    conversationId,
+    "messages",
+  );
+
+  const previewText = `🎯 Challenged you to ${blitzTitle}`;
+
+  // Create conversation if missing
+  const existing = await getDoc(convRef);
+  if (!existing.exists()) {
+    await setDoc(convRef, {
+      participantIds: [challengerId, challengedId].sort(),
+      lastMessageAt: serverTimestamp(),
+      lastMessagePreview: previewText,
+      lastMessageSenderId: challengerId,
+      lastMessageType: "challenge_invite",
+      unreadCounts: { [challengerId]: 0, [challengedId]: 0 },
+      createdAt: serverTimestamp(),
+    });
+  }
+
+  const batch = writeBatch(db);
+  const newMessageRef = doc(messagesCol);
+
+  batch.set(newMessageRef, {
+    senderId: challengerId,
+    text: previewText,
+    type: "challenge_invite",
+    challengeId,
+    createdAt: serverTimestamp(),
+    reactions: {},
+  });
+
+  batch.update(convRef, {
+    lastMessageAt: serverTimestamp(),
+    lastMessagePreview: previewText,
+    lastMessageSenderId: challengerId,
+    lastMessageType: "challenge_invite",
+    [`unreadCounts.${challengedId}`]: increment(1),
+  });
+
+  await batch.commit();
+}
+
+/**
+ * Write the result message into the conversation when both players have played.
+ * Called from challenges.ts/resolveChallenge.
+ *
+ * `senderId` MUST equal request.auth.uid — i.e. whoever triggered the resolution
+ * by being the second player to finish. The rule requires this.
+ */
+export async function sendChallengeResultMessage(input: {
+  conversationId: string;
+  challengeId: string;
+  senderId: string;
+  challengerId: string;
+  challengedId: string;
+  winnerId: string;
+  challengerScore: number;
+  challengedScore: number;
+  challengerUsername: string;
+  challengedUsername: string;
+  blitzTitle: string;
+}): Promise<void> {
+  const {
+    conversationId,
+    challengeId,
+    senderId,
+    challengerId,
+    challengedId,
+    winnerId,
+    challengerScore,
+    challengedScore,
+    challengerUsername,
+    challengedUsername,
+    blitzTitle,
+  } = input;
+
+  const convRef = doc(db, "conversations", conversationId);
+  const messagesCol = collection(
+    db,
+    "conversations",
+    conversationId,
+    "messages",
+  );
+
+  const loserUsername =
+    winnerId === challengerId ? challengedUsername : challengerUsername;
+  const winnerUsername =
+    winnerId === challengerId ? challengerUsername : challengedUsername;
+  const winnerScore =
+    winnerId === challengerId ? challengerScore : challengedScore;
+  const loserScore =
+    winnerId === challengerId ? challengedScore : challengerScore;
+
+  const previewText = `🏆 @${winnerUsername} beat @${loserUsername} ${winnerScore}-${loserScore}`;
+
+  const existing = await getDoc(convRef);
+  if (!existing.exists()) {
+    await setDoc(convRef, {
+      participantIds: [challengerId, challengedId].sort(),
+      lastMessageAt: serverTimestamp(),
+      lastMessagePreview: previewText,
+      lastMessageSenderId: senderId,
+      lastMessageType: "challenge_result",
+      unreadCounts: { [challengerId]: 0, [challengedId]: 0 },
+      createdAt: serverTimestamp(),
+    });
+  }
+
+  const recipientId = senderId === challengerId ? challengedId : challengerId;
+
+  const batch = writeBatch(db);
+  const newMessageRef = doc(messagesCol);
+
+  batch.set(newMessageRef, {
+    senderId,
+    text: previewText,
+    type: "challenge_result",
+    challengeId,
+    createdAt: serverTimestamp(),
+    reactions: {},
+  });
+
+  batch.update(convRef, {
+    lastMessageAt: serverTimestamp(),
+    lastMessagePreview: previewText,
+    lastMessageSenderId: senderId,
+    lastMessageType: "challenge_result",
+    [`unreadCounts.${recipientId}`]: increment(1),
+  });
+
+  await batch.commit();
+}
+
+/**
+ * Live-subscribe to a single challenge doc.
+ */
+export function subscribeToChallenge(
+  challengeId: string,
+  onUpdate: (challenge: Challenge | null) => void,
+): () => void {
+  return onSnapshot(doc(db, "challenges", challengeId), (snap) => {
+    if (!snap.exists()) {
+      onUpdate(null);
+      return;
+    }
+    onUpdate({ id: snap.id, ...snap.data() } as Challenge);
+  });
+}
+
+/**
+ * Soft-delete a message. Sets deletedAt / deletedBy on the message doc.
+ * Security rules allow this when senderId === auth.uid OR isStaff.
+ */
+export async function softDeleteMessage(input: {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+}): Promise<void> {
+  await updateDoc(
+    doc(db, "conversations", input.conversationId, "messages", input.messageId),
+    {
+      deletedAt: serverTimestamp(),
+      deletedBy: input.userId,
+    },
+  );
 }

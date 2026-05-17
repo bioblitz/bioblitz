@@ -6,6 +6,9 @@ import { useState } from "react";
 import { Flag } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import ReportMessageModal from "./ReportMessageModal";
+import ChallengeCard from "./ChallengeCard";
+import { Trash2 } from "lucide-react";
+import { softDeleteMessage } from "@/lib/messages";
 
 interface MessageBubbleProps {
   message: Message;
@@ -36,6 +39,10 @@ export default function MessageBubble({
   isGroupedEnd,
   otherUser,
 }: MessageBubbleProps) {
+  const { user } = useAuth();
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   if (message.deletedAt) {
     return (
       <div
@@ -49,20 +56,15 @@ export default function MessageBubble({
   }
 
   if (
-    message.type === "challenge_sent" ||
-    message.type === "challenge_completed"
+    message.type === "challenge_invite" ||
+    message.type === "challenge_result"
   ) {
     return (
-      <div className={`flex ${isMine ? "justify-end" : "justify-start"} mt-1`}>
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-orange-500/10 border border-orange-500/30 max-w-[75%]">
-          <Trophy className="w-4 h-4 text-orange-400 shrink-0" />
-          <span className="text-xs text-orange-200">
-            {message.type === "challenge_sent"
-              ? "Sent a challenge"
-              : "Completed a challenge"}
-          </span>
-        </div>
-      </div>
+      <ChallengeCard
+        message={message}
+        currentUserId={user?.uid ?? ""}
+        isMine={isMine}
+      />
     );
   }
 
@@ -74,9 +76,22 @@ export default function MessageBubble({
         isGroupedEnd ? "rounded-bl-md" : "rounded-bl-md"
       }`;
 
-  const { user } = useAuth();
-  const [showReportModal, setShowReportModal] = useState(false);
-
+  const handleDelete = async () => {
+    if (!user || deleting) return;
+    if (!confirm("Delete this message?")) return;
+    setDeleting(true);
+    try {
+      await softDeleteMessage({
+        conversationId,
+        messageId: message.id,
+        userId: user.uid,
+      });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Couldn't delete. Try again.");
+      setDeleting(false);
+    }
+  };
   return (
     <div
       className={`group flex items-end gap-2 ${
@@ -129,6 +144,17 @@ export default function MessageBubble({
             title="Report message"
           >
             <Flag className="w-3 h-3" />
+          </button>
+        )}
+        {isMine && user && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="absolute -left-7 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-red-400 disabled:opacity-30"
+            aria-label="Delete message"
+            title="Delete message"
+          >
+            <Trash2 className="w-3 h-3" />
           </button>
         )}
       </div>

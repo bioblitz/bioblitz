@@ -8,7 +8,6 @@ import { subscribeToConversations } from "@/lib/messages";
 export default function ChatSubscriber() {
   const { user } = useAuth();
   const setConversations = useChatStore((s) => s.setConversations);
-
   useEffect(() => {
     if (!user?.uid) return;
 

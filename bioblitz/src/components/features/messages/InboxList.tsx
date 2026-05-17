@@ -53,28 +53,26 @@ export default function InboxList({ activeConversationId }: InboxListProps) {
 
   return (
     <>
-      <div className="px-4 py-4 border-b border-neutral-800 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-neutral-400" />
-          <h2 className="text-sm font-bold text-white tracking-tight">
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-lg font-bold text-white tracking-tight">
             Messages
           </h2>
           {conversationOrder.length > 0 && (
-            <span className="text-[10px] font-bold text-neutral-500 tabular-nums">
+            <span className="text-xs text-neutral-600 tabular-nums">
               {conversationOrder.length}
             </span>
           )}
         </div>
         <button
           onClick={() => setShowNewModal(true)}
-          className="p-1.5 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-white"
+          className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors text-neutral-500 hover:text-white"
           aria-label="New conversation"
           title="New conversation"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
-
       <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#3f3f46_transparent]">
         {isInitialLoad && conversationOrder.length === 0 ? (
           <div className="flex items-center justify-center py-12">
@@ -99,7 +97,6 @@ export default function InboxList({ activeConversationId }: InboxListProps) {
           </div>
         )}
       </div>
-
       {showNewModal && (
         <NewConversationModal
           currentUserId={user.uid}

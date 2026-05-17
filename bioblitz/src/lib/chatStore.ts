@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type MessageType = "text" | "challenge_sent" | "challenge_completed";
+export type MessageType = "text" | "challenge_invite" | "challenge_result";
 
 export interface ChallengeMeta {
   topic: string;
@@ -21,7 +21,7 @@ export interface Message {
   deletedAt?: number;
   deletedBy?: string;
   challengeId?: string;
-  challengeMeta?: ChallengeMeta;
+  conversationId: string;
 }
 
 export interface Conversation {

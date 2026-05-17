@@ -50,11 +50,23 @@ export default function MessageList({
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    // Defer to next animation frame so the new message has actually rendered.
+    const id = requestAnimationFrame(() => {
+      const el = bottomRef.current;
+      if (!el) return;
+      let parent = el.parentElement;
+      while (parent) {
+        const style = window.getComputedStyle(parent);
+        if (style.overflowY === "auto" || style.overflowY === "scroll") {
+          parent.scrollTop = parent.scrollHeight;
+          return;
+        }
+        parent = parent.parentElement;
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, [messages.length]);
-
   if (messages.length === 0) {
     return (
       <div className="flex items-center justify-center h-full px-6 py-12">

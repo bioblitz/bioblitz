@@ -66,27 +66,22 @@ export default function ConversationRow({
   }, [otherUid]);
 
   const isChallengePreview =
-    conversation.lastMessageType === "challenge_sent" ||
-    conversation.lastMessageType === "challenge_completed";
-
+    conversation.lastMessageType === "challenge_invite" ||
+    conversation.lastMessageType === "challenge_result";
   const previewPrefix =
     conversation.lastMessageSenderId === currentUserId ? "You: " : "";
 
   return (
     <Link
       href={`/messages/${conversation.id}`}
-      className={`
-        flex items-center gap-3 px-4 py-3 transition-colors relative
-        ${isActive ? "bg-neutral-800/70" : "hover:bg-neutral-900"}
-      `}
+      className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
     >
-      {/* Avatar */}
       <div className="relative w-11 h-11 shrink-0">
         {other?.photoURL ? (
           <img
             src={other.photoURL}
             alt={other.displayName}
-            className="w-11 h-11 rounded-full object-cover border border-neutral-800"
+            className="w-11 h-11 rounded-full object-cover"
             onError={(e) => {
               const target = e.currentTarget;
               target.style.display = "none";
@@ -103,21 +98,20 @@ export default function ConversationRow({
         </div>
       </div>
 
-      {/* Name + preview */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline justify-between gap-2">
           <p
             className={`text-sm truncate ${
               unread > 0
                 ? "font-bold text-white"
-                : "font-medium text-neutral-200"
+                : "font-medium text-neutral-300"
             }`}
           >
             {other?.username || other?.displayName || "..."}
           </p>
           <span
             className={`text-[10px] tabular-nums shrink-0 ${
-              unread > 0 ? "text-orange-400 font-bold" : "text-neutral-500"
+              unread > 0 ? "text-red-400 font-bold" : "text-neutral-600"
             }`}
           >
             {formatRelativeTime(conversation.lastMessageAt)}
@@ -125,11 +119,11 @@ export default function ConversationRow({
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           {isChallengePreview && (
-            <Trophy className="w-3 h-3 text-orange-400 shrink-0" />
+            <Trophy className="w-3 h-3 text-red-400/80 shrink-0" />
           )}
           <p
             className={`text-xs truncate ${
-              unread > 0 ? "text-neutral-200" : "text-neutral-500"
+              unread > 0 ? "text-neutral-300" : "text-neutral-500"
             }`}
           >
             {previewPrefix}
@@ -138,9 +132,8 @@ export default function ConversationRow({
         </div>
       </div>
 
-      {/* Unread badge */}
       {unread > 0 && (
-        <div className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 flex items-center justify-center">
+        <div className="shrink-0 min-w-[18px] h-[18px] px-1.5 rounded-full bg-red-500/90 flex items-center justify-center">
           <span className="text-[10px] font-bold text-white tabular-nums">
             {unread > 99 ? "99+" : unread}
           </span>

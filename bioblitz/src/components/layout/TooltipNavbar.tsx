@@ -22,7 +22,7 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
-import { MessageSquare } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useChatStore } from "@/lib/chatStore";
 
 export default function TooltipNavbar() {
@@ -149,7 +149,7 @@ export default function TooltipNavbar() {
     {
       name: "Messages",
       href: "/messages",
-      icon: MessageSquare,
+      icon: MessageCircle,
       badge: totalUnread,
     },
 
@@ -399,7 +399,7 @@ export default function TooltipNavbar() {
                   className={`relative z-10 ${isActive ? "text-white fill-white" : ""}`}
                 />
                 {item.badge > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center tabular-nums z-20">
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center tabular-nums z-20">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}

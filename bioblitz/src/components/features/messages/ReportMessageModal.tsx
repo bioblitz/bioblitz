@@ -96,8 +96,9 @@ export default function ReportMessageModal({
         {submitted ? (
           <div className="px-5 py-6 text-center">
             <p className="text-sm text-neutral-300 leading-relaxed mb-5">
-              Thanks. Our team will review this report. You can also block this
-              user from the conversation menu.
+              Thanks. Our team will review this report. You can also unfriend
+              this user from their profile so they can&apos;t message you
+              anymore.
             </p>
             <button
               onClick={onClose}

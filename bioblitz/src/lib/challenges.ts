@@ -12,10 +12,14 @@ import {
   serverTimestamp,
   Timestamp,
   getFirestore,
+  deleteDoc,
 } from "firebase/firestore";
 import { app } from "@/lib/firebase";
-import { createNotification } from "@/lib/notifications";
-import { deleteDoc } from "firebase/firestore";
+import {
+  sendChallengeInviteMessage,
+  sendChallengeResultMessage,
+  makeConversationId,
+} from "@/lib/messages";
 
 const db = getFirestore(app);
 
@@ -77,16 +81,21 @@ export async function createChallenge({
     winnerId: null,
   });
 
-  await createNotification(
-    challenged.uid,
-    "friend_request",
-    `@${challenger.username} challenged you!`,
-    `@${challenger.username} wants to compete on "${blitzTitle}". You have 48 hours to play.`,
-    `/home/${blitzId}`,
-    challenger.uid,
-    challenger.photoURL,
-    challenger.username,
-  );
+  // Write the invite into the DM thread (auto-creates conversation if missing)
+  const conversationId = makeConversationId(challenger.uid, challenged.uid);
+  try {
+    await sendChallengeInviteMessage({
+      conversationId,
+      challengerId: challenger.uid,
+      challengedId: challenged.uid,
+      challengeId: ref.id,
+      blitzTitle,
+      challengerUsername: challenger.username,
+    });
+  } catch (err) {
+    console.error("Failed to write challenge invite to chat:", err);
+    // Don't throw — the challenge itself was created successfully
+  }
 
   return ref.id;
 }
@@ -118,11 +127,15 @@ export async function tryResolveChallenge({
     });
     const data = d.data() as Challenge;
     if (data.challengedScore !== null) {
-      await resolveChallenge(d.id, {
-        ...data,
-        challengerScore: score,
-        challengerTimeTaken: timeTaken,
-      });
+      await resolveChallenge(
+        d.id,
+        {
+          ...data,
+          challengerScore: score,
+          challengerTimeTaken: timeTaken,
+        },
+        userId,
+      );
     }
     return;
   }
@@ -142,16 +155,24 @@ export async function tryResolveChallenge({
       challengedTimeTaken: timeTaken,
     });
     if (data.challengerScore !== null) {
-      await resolveChallenge(d.id, {
-        ...data,
-        challengedScore: score,
-        challengedTimeTaken: timeTaken,
-      });
+      await resolveChallenge(
+        d.id,
+        {
+          ...data,
+          challengedScore: score,
+          challengedTimeTaken: timeTaken,
+        },
+        userId,
+      );
     }
   }
 }
 
-async function resolveChallenge(id: string, data: Challenge) {
+async function resolveChallenge(
+  id: string,
+  data: Challenge,
+  triggeringUserId: string,
+) {
   const hoursElapsed =
     (Date.now() - data.createdAt.toMillis()) / (1000 * 60 * 60);
   const affectsElo = hoursElapsed <= 24;
@@ -173,34 +194,28 @@ async function resolveChallenge(id: string, data: Challenge) {
     winnerId,
   });
 
-  const challengerWon = winnerId === data.challengerId;
-
-  // Notify challenger
-  await createNotification(
+  // Write the result into the DM thread
+  const conversationId = makeConversationId(
     data.challengerId,
-    "challenge_completed",
-    challengerWon
-      ? `You beat @${data.challengedUsername}!`
-      : `@${data.challengedUsername} beat you`,
-    `${data.blitzTitle} · ${cs} vs ${ds}`,
-    `/challenges`,
     data.challengedId,
-    data.challengedPhotoURL,
-    data.challengedUsername,
   );
-
-  await createNotification(
-    data.challengedId,
-    "challenge_completed",
-    challengerWon
-      ? `@${data.challengerUsername} beat you`
-      : `You beat @${data.challengerUsername}!`,
-    `${data.blitzTitle} · ${ds} vs ${cs}`,
-    `/challenges`,
-    data.challengerId,
-    data.challengerPhotoURL,
-    data.challengerUsername,
-  );
+  try {
+    await sendChallengeResultMessage({
+      conversationId,
+      challengeId: id,
+      senderId: triggeringUserId, // ← ADD
+      challengerId: data.challengerId,
+      challengedId: data.challengedId,
+      winnerId,
+      challengerScore: cs,
+      challengedScore: ds,
+      challengerUsername: data.challengerUsername,
+      challengedUsername: data.challengedUsername,
+      blitzTitle: data.blitzTitle,
+    });
+  } catch (err) {
+    console.error("Failed to write challenge result to chat:", err);
+  }
 }
 
 export async function getUserChallenges(uid: string): Promise<Challenge[]> {

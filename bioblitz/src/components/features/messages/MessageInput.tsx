@@ -50,20 +50,19 @@ export default function MessageInput({
 
       if (!result.ok) {
         setError(failureMessage(result));
-        setSending(false);
         return;
       }
 
       setText("");
     } catch (err: any) {
-      console.error("Send failed:", err);
       if (err?.code === "permission-denied") {
-        setError(
-          "You can't message this user. They may have blocked you or unfriended you.",
-        );
+        setError("You can't message this user. They may have unfriended you.");
       } else {
+        console.error("Send failed:", err);
         setError("Failed to send. Try again.");
       }
+    } finally {
+      setSending(false);
     }
   };
 
