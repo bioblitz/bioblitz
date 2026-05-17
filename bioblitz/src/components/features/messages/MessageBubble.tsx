@@ -139,7 +139,7 @@ export default function MessageBubble({
         {!isMine && user && (
           <button
             onClick={() => setShowReportModal(true)}
-            className="absolute -right-7 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-orange-400"
+            className="absolute -right-7 top-1/2 -translate-y-5/8 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-orange-400"
             aria-label="Report message"
             title="Report message"
           >
@@ -150,7 +150,7 @@ export default function MessageBubble({
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="absolute -left-7 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-red-400 disabled:opacity-30"
+            className="absolute -left-7 top-1/2 -translate-y-5/8 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-red-400 disabled:opacity-30"
             aria-label="Delete message"
             title="Delete message"
           >
