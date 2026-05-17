@@ -117,7 +117,9 @@ export function subscribeToMessages(
       onUpdate(messages);
     },
     (err) => {
-      console.error("subscribeToMessages error:", err);
+      if (err?.code !== "permission-denied") {
+        console.error("subscribeToMessages error:", err);
+      }
     },
   );
 }
