@@ -15,6 +15,8 @@ import {
   Firestore,
 } from "firebase/firestore";
 import { createNotification } from "@/lib/notifications";
+import { removeFriendship } from "@/lib/friends";
+
 import { FriendshipStatus, UserProfile } from "./types";
 
 export interface SearchUser {
@@ -68,7 +70,7 @@ export function useFriendActions({
           "users",
           currentUser.uid,
           "friends",
-          profileUid
+          profileUid,
         );
         const relationshipSnap = await getDoc(relationshipRef);
 
@@ -88,7 +90,7 @@ export function useFriendActions({
       try {
         const friendsQuery = query(
           collection(db, "users", profileUid, "friends"),
-          where("status", "==", "friends")
+          where("status", "==", "friends"),
         );
         const friendsSnap = await getDocs(friendsQuery);
 
@@ -109,7 +111,7 @@ export function useFriendActions({
         if (currentUser.uid === profileUid) {
           const requestsQuery = query(
             collection(db, "users", currentUser.uid, "friends"),
-            where("status", "==", "received")
+            where("status", "==", "received"),
           );
           const requestsSnap = await getDocs(requestsQuery);
 
@@ -151,7 +153,7 @@ export function useFriendActions({
           collection(db, "users"),
           where("username", ">=", term),
           where("username", "<=", term + "\uf8ff"),
-          limit(6)
+          limit(6),
         );
         const snap = await getDocs(q);
         const currentUid = auth.currentUser?.uid;
@@ -163,7 +165,7 @@ export function useFriendActions({
               displayName: d.data().displayName || "",
               username: d.data().username || "",
               photoURL: d.data().photoURL || "",
-            }))
+            })),
         );
       } catch (err) {
         console.error("User search failed:", err);
@@ -185,9 +187,18 @@ export function useFriendActions({
 
       if (myFriendSnap.exists()) {
         const status = (myFriendSnap.data() as any).status;
-        if (status === "friends") { setAddFriendSuccess("Already friends."); return; }
-        if (status === "sent") { setAddFriendSuccess("Request already sent."); return; }
-        if (status === "received") { setAddFriendSuccess("They already sent you a request!"); return; }
+        if (status === "friends") {
+          setAddFriendSuccess("Already friends.");
+          return;
+        }
+        if (status === "sent") {
+          setAddFriendSuccess("Request already sent.");
+          return;
+        }
+        if (status === "received") {
+          setAddFriendSuccess("They already sent you a request!");
+          return;
+        }
       }
 
       const myUsername = (myUserSnap.data() as any)?.username || "";
@@ -248,7 +259,7 @@ export function useFriendActions({
         "users",
         auth.currentUser.uid,
         "friends",
-        targetUid
+        targetUid,
       );
       const myFriendSnap = await getDoc(myFriendDocRef);
 
@@ -273,7 +284,13 @@ export function useFriendActions({
 
       const batch = writeBatch(db);
 
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", targetUid);
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        targetUid,
+      );
       batch.set(myRef, {
         uid: targetUid,
         status: "sent",
@@ -288,7 +305,7 @@ export function useFriendActions({
         "users",
         targetUid,
         "friends",
-        auth.currentUser.uid
+        auth.currentUser.uid,
       );
       batch.set(theirRef, {
         uid: auth.currentUser.uid,
@@ -310,19 +327,10 @@ export function useFriendActions({
 
   const removeFriend = async () => {
     if (!auth.currentUser || !profileUid) return;
-
     if (!confirm("Are you sure you want to remove this friend?")) return;
 
     try {
-      const batch = writeBatch(db);
-
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
-      batch.delete(myRef);
-
-      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
-      batch.delete(theirRef);
-
-      await batch.commit();
+      await removeFriendship(auth.currentUser.uid, profileUid);
       setFriendshipStatus("none");
     } catch (err) {
       console.error("Error removing friend:", err);
@@ -340,7 +348,13 @@ export function useFriendActions({
     try {
       const batch = writeBatch(db);
 
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid,
+      );
       batch.set(myRef, {
         uid: profileUid,
         status: "sent",
@@ -350,7 +364,13 @@ export function useFriendActions({
         photoURL: userProfile.photoURL || "",
       });
 
-      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid,
+      );
       batch.set(theirRef, {
         uid: auth.currentUser.uid,
         status: "received",
@@ -370,7 +390,7 @@ export function useFriendActions({
         `/profile/${myUsername}`,
         auth.currentUser.uid,
         myData.photoURL || "",
-        auth.currentUser.displayName || "A user"
+        auth.currentUser.displayName || "A user",
       );
     } catch (err) {
       console.error(err);
@@ -387,8 +407,20 @@ export function useFriendActions({
 
     try {
       const batch = writeBatch(db);
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
-      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid,
+      );
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid,
+      );
       batch.update(myRef, { status: "friends" });
       batch.update(theirRef, { status: "friends" });
       await batch.commit();
@@ -402,7 +434,7 @@ export function useFriendActions({
         `/profile/${myUsername}`,
         auth.currentUser.uid,
         auth.currentUser.photoURL || "",
-        auth.currentUser.displayName || "A user"
+        auth.currentUser.displayName || "A user",
       );
     } catch (err) {
       console.error(err);
@@ -413,8 +445,20 @@ export function useFriendActions({
     if (!auth.currentUser || !profileUid) return;
     try {
       const batch = writeBatch(db);
-      const myRef = doc(db, "users", auth.currentUser.uid, "friends", profileUid);
-      const theirRef = doc(db, "users", profileUid, "friends", auth.currentUser.uid);
+      const myRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "friends",
+        profileUid,
+      );
+      const theirRef = doc(
+        db,
+        "users",
+        profileUid,
+        "friends",
+        auth.currentUser.uid,
+      );
       batch.delete(myRef);
       batch.delete(theirRef);
       await batch.commit();
@@ -428,8 +472,20 @@ export function useFriendActions({
     if (!auth.currentUser) return;
 
     const batch = writeBatch(db);
-    const myRef = doc(db, "users", auth.currentUser.uid, "friends", request.uid);
-    const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser.uid);
+    const myRef = doc(
+      db,
+      "users",
+      auth.currentUser.uid,
+      "friends",
+      request.uid,
+    );
+    const theirRef = doc(
+      db,
+      "users",
+      request.uid,
+      "friends",
+      auth.currentUser.uid,
+    );
     batch.update(myRef, { status: "friends" });
     batch.update(theirRef, { status: "friends" });
     await batch.commit();
@@ -445,7 +501,7 @@ export function useFriendActions({
       `${auth.currentUser.displayName || "User"} accepted your friend request!`,
       `/profile/${myUsername}`,
       auth.currentUser.uid,
-      auth.currentUser.photoURL || ""
+      auth.currentUser.photoURL || "",
     );
   };
 
@@ -453,8 +509,20 @@ export function useFriendActions({
     if (!auth.currentUser) return;
 
     const batch = writeBatch(db);
-    const myRef = doc(db, "users", auth.currentUser.uid, "friends", request.uid);
-    const theirRef = doc(db, "users", request.uid, "friends", auth.currentUser.uid);
+    const myRef = doc(
+      db,
+      "users",
+      auth.currentUser.uid,
+      "friends",
+      request.uid,
+    );
+    const theirRef = doc(
+      db,
+      "users",
+      request.uid,
+      "friends",
+      auth.currentUser.uid,
+    );
     batch.delete(myRef);
     batch.delete(theirRef);
     await batch.commit();

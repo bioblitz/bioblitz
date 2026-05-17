@@ -183,8 +183,8 @@ export default function ChallengeButton({
               <p className="text-xs text-neutral-500 leading-relaxed">
                 You'll play this Blitz and your score will be sent as the
                 challenge. Your friend has{" "}
-                <span className="text-neutral-300 font-medium">48 hours</span> to
-                beat it. Each attempt counts toward your own Elo rating.
+                <span className="text-neutral-300 font-medium">48 hours</span>{" "}
+                to beat it. Each attempt counts toward your own Elo rating.
               </p>
             </div>
 
@@ -225,7 +225,6 @@ export default function ChallengeButton({
                           src={friend.photoURL}
                           alt={friend.displayName}
                           className="w-9 h-9 rounded-full object-cover border border-neutral-800 flex-shrink-0"
-
                         />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-neutral-900/30 flex items-center justify-center text-neutral-300 font-bold text-sm flex-shrink-0">

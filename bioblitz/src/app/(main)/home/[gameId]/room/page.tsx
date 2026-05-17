@@ -7,7 +7,6 @@ import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import BookmarkButton from "@/components/ui/BookmarkButton";
 import ReportButton from "@/components/ui/ReportQuestionButton";
 
-import Link from "next/link";
 import {
   addDoc,
   onSnapshot,
@@ -36,7 +35,6 @@ import {
   ClipboardList,
   X,
 } from "lucide-react";
-import { getRatingTier } from "@/lib/rating";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -452,7 +450,6 @@ export default function GameRoomPage() {
     return `${m} min${m !== 1 ? "s" : ""} ${s} sec${s !== 1 ? "s" : ""}`;
   };
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [userRank, setUserRank] = useState<number | null>(null);
 
@@ -483,7 +480,6 @@ export default function GameRoomPage() {
           (a, b) =>
             b.correctCount - a.correctCount || a.timeTaken - b.timeTaken,
         );
-        setLeaderboard(sorted);
         const rank = sorted.findIndex((e) => e.userId === user.uid);
         if (rank !== -1) {
           setUserRank(rank + 1);
@@ -504,43 +500,6 @@ export default function GameRoomPage() {
     fetchLeaderboard();
   }, [finalResult?.correctCount, gameId, user?.uid]);
 
-  const [usersMap, setUsersMap] = useState<{
-    [uid: string]: { name: string; handle: string; bElo: number };
-  }>({});
-
-  useEffect(() => {
-    if (leaderboard.length === 0) return;
-    const fetchSpecificUsers = async () => {
-      try {
-        const missing = leaderboard
-          .filter((l) => !l.username)
-          .map((l) => l.userId);
-        if (missing.length === 0) return;
-        const snaps = await Promise.all(
-          [...new Set(missing)].map((uid) =>
-            getDoc(doc(firestore, "users", uid)),
-          ),
-        );
-        const newMap: {
-          [uid: string]: { name: string; handle: string; bElo: number };
-        } = {};
-        snaps.forEach((snap) => {
-          if (snap.exists()) {
-            const d = snap.data();
-            newMap[snap.id] = {
-              name: d.username || "Unknown",
-              handle: d.username || "",
-              bElo: d.bElo || 500,
-            };
-          }
-        });
-        setUsersMap(newMap);
-      } catch (err) {
-        console.error("Error fetching user profiles:", err);
-      }
-    };
-    fetchSpecificUsers();
-  }, [leaderboard]);
 
   useEffect(() => {
     if (user && gameId && Object.keys(userAnswers).length > 0 && !submitted) {
@@ -636,19 +595,22 @@ export default function GameRoomPage() {
 
           {submitted && (
             <div className="mb-8 flex flex-wrap gap-2 justify-center md:justify-start">
-              {(["result", "leaderboard"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-5 py-2 rounded-xl font-bold text-[14px] transition-all capitalize ${
-                    activeTab === tab
-                      ? "bg-neutral-600 text-white shadow-lg shadow-neutral-900/40"
-                      : "bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                  }`}
-                >
-                  {tab === "result" ? "Results" : "Leaderboard"}
-                </button>
-              ))}
+              <button
+                onClick={() => setActiveTab("result")}
+                className={`px-5 py-2 rounded-xl font-bold text-[14px] transition-all ${
+                  activeTab === "result"
+                    ? "bg-neutral-600 text-white shadow-lg shadow-neutral-900/40"
+                    : "bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                }`}
+              >
+                Results
+              </button>
+              <button
+                onClick={() => router.push(`/home/${gameId}`)}
+                className="px-5 py-2 rounded-xl font-bold text-[14px] transition-all bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              >
+                Leaderboard
+              </button>
               <button
                 onClick={() => router.push("/home")}
                 className="px-5 py-2 rounded-xl bg-[rgba(9,9,11,0.8)] border border-neutral-800 text-neutral-300 font-bold text-[14px] hover:bg-white hover:text-black hover:border-white transition-all"
@@ -976,88 +938,6 @@ export default function GameRoomPage() {
               </>
             )}
 
-            {submitted && activeTab === "leaderboard" && (
-              <div className="bg-[rgba(9,9,11,0.8)] border border-neutral-800 rounded-2xl p-8">
-                <h2
-                  className="text-[22px] font-[900] mb-6 text-center"
-                  style={{ letterSpacing: "-0.02em" }}
-                >
-                  Blitz Leaderboard
-                </h2>
-                {loadingLeaderboard ? (
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="w-8 h-8 text-neutral-500 animate-spin mb-2" />
-                    <span className="text-neutral-500 text-[13px]">
-                      Loading leaderboard...
-                    </span>
-                  </div>
-                ) : leaderboard.length === 0 ? (
-                  <p className="text-neutral-600 text-center text-[14px]">
-                    No submissions yet.
-                  </p>
-                ) : (
-                  <div className="space-y-2 max-h-[420px] overflow-y-auto">
-                    {leaderboard.map((entry, idx) => {
-                      const isCurrentUser = entry.userId === user?.uid;
-                      const displayName =
-                        entry.username ||
-                        usersMap[entry.userId]?.name ||
-                        "Unknown";
-                      const bElo =
-                        entry.bElo || usersMap[entry.userId]?.bElo || 500;
-                      return (
-                        <div
-                          key={entry.userId}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition ${
-                            isCurrentUser
-                              ? "bg-neutral-500/[0.08] border border-neutral-500/30 text-white font-semibold"
-                              : "bg-[rgba(24,24,27,0.6)] text-neutral-300 border border-transparent hover:border-neutral-800"
-                          }`}
-                        >
-                          <div className="w-6 flex justify-center">
-                            <span
-                              className={`font-bold text-neutral-600 w-6 text-center text-[12px]`}
-                            >
-                              #{idx + 1}
-                            </span>
-                          </div>
-                          <img
-                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
-                            alt={displayName}
-                            className="w-9 h-9 rounded-full border border-neutral-800 bg-neutral-900"
-                          />
-                          <div className="truncate flex-1 text-left text-[13px] font-bold">
-                            {displayName ? (
-                              <Link
-                                href={`/profile/${displayName}`}
-                                className={`hover:underline transition-colors ${getRatingTier(bElo).textClass}`}
-                              >
-                                {displayName}
-                              </Link>
-                            ) : (
-                              <span className={getRatingTier(bElo).textClass}>
-                                Unknown
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <span
-                              className={`font-normal text-[16px] tabular-nums ${isCurrentUser ? "text-neutral-400" : "text-neutral-300"}`}
-                            >
-                              {entry.correctCount ?? "?"}/
-                              {entry.totalQuestions ?? "?"}
-                            </span>
-                            <p className={`text-[11px] text-neutral-500`}>
-                              {formatTime(entry.timeTaken)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 

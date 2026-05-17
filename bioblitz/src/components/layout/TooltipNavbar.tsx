@@ -22,6 +22,8 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
+import { MessageCircle } from "lucide-react";
+import { useChatStore } from "@/lib/chatStore";
 
 export default function TooltipNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -138,10 +140,19 @@ export default function TooltipNavbar() {
     return () => unsubscribe();
   }, []);
 
+  const totalUnread = useChatStore((s) => s.totalUnread);
+
   const createHref = user?.username ? `/channel/${user.username}` : "/channel";
   const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
+    {
+      name: "Messages",
+      href: "/messages",
+      icon: MessageCircle,
+      badge: totalUnread,
+    },
+
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Create", href: createHref, icon: Plus },
     ...(isStaff ? [{ name: "Staff", href: "/staff", icon: ShieldUser }] : []),
@@ -387,6 +398,11 @@ export default function TooltipNavbar() {
                   size={26}
                   className={`relative z-10 ${isActive ? "text-white fill-white" : ""}`}
                 />
+                {item.badge > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center tabular-nums z-20">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
                 {/* Tooltip callout — desktop only */}
                 <span className="hidden md:block pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-white text-xs font-medium whitespace-nowrap opacity-0 -translate-x-1 group-hover/tip:opacity-100 group-hover/tip:translate-x-0 transition-all duration-150 shadow-lg">
                   {item.name}

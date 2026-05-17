@@ -72,17 +72,19 @@ export default function SettingsPage() {
 
   const handleCropComplete = async (croppedImage: Blob) => {
     if (!user) return;
-    
+
     setPfpLoading(true);
     setImageToEdit(null);
-    
+
     try {
       const extension = imageType.split("/")[1] || "jpg";
-      const file = new File([croppedImage], `pfp-${Date.now()}.${extension}`, { type: imageType });
+      const file = new File([croppedImage], `pfp-${Date.now()}.${extension}`, {
+        type: imageType,
+      });
       const filePath = `userPhotos/${user.uid}/${file.name}`;
       const downloadURL = await uploadImage(file, filePath);
       await updateUserPhoto(user.uid, downloadURL);
-      
+
       setProfileData((prev: any) => ({
         ...prev,
         photoURL: downloadURL,
@@ -122,7 +124,7 @@ export default function SettingsPage() {
       console.log("Removed user from all friend connections.");
       const gameQuery = query(
         collection(db, "gameSubmissions"),
-        where("userId", "==", uid)
+        where("userId", "==", uid),
       );
       const gameDocs = await getDocs(gameQuery);
       await Promise.all(gameDocs.docs.map((gDoc) => deleteDoc(gDoc.ref)));
@@ -139,7 +141,7 @@ export default function SettingsPage() {
         console.log("User doc not found by ID. Trying query...");
         const userQuery = query(
           collection(db, "users"),
-          where("uid", "==", uid)
+          where("uid", "==", uid),
         );
         const userDocs = await getDocs(userQuery);
 
@@ -152,10 +154,12 @@ export default function SettingsPage() {
       }
 
       // Remove search index entries for this user and their channel
-      await Promise.all([
-        deleteDoc(doc(db, "search_index", `user_${uid}`)),
-        deleteDoc(doc(db, "search_index", `channel_${uid}`)),
-      ].map((p) => p.catch(() => {})));
+      await Promise.all(
+        [
+          deleteDoc(doc(db, "search_index", `user_${uid}`)),
+          deleteDoc(doc(db, "search_index", `channel_${uid}`)),
+        ].map((p) => p.catch(() => {})),
+      );
 
       console.log("User data deleted successfully!");
     } catch (error) {
@@ -252,14 +256,14 @@ export default function SettingsPage() {
     if (!currentUser) return;
 
     const confirmed = confirm(
-      "Are you sure you want to permanently delete your account?"
+      "Are you sure you want to permanently delete your account?",
     );
     if (!confirmed) return;
 
     const walrusChorus =
       "I am the egg man, they are the egg men, I am the walrus, goo goo g'joob";
     const userInput = prompt(
-      `Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`
+      `Security Verification: To confirm deletion, type the following phrase exactly:\n\n${walrusChorus}`,
     );
     if (userInput !== walrusChorus) {
       alert("Incorrect phrase. Deletion cancelled.");
@@ -274,7 +278,7 @@ export default function SettingsPage() {
     } catch (error: any) {
       if (error.code === "auth/requires-recent-login") {
         const reConfirm = confirm(
-          "For security, you must sign in again to confirm deletion. Sign in now?"
+          "For security, you must sign in again to confirm deletion. Sign in now?",
         );
         if (reConfirm) {
           try {
@@ -304,7 +308,7 @@ export default function SettingsPage() {
     );
   }
   return (
-      <main
+    <main
       className={`${inter.className} min-h-screen bg-neutral-900 text-white p-8 pl-16 overflow-y-auto pt-24`}
     >
       {toastMessage && (
@@ -321,40 +325,40 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-bold text-left mb-8">
           Settings & Preferences
         </h1>
-          <h2 className="text-2xl mb-4">Profile</h2>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-          />
-          <ImageUploadZone onFile={handleFileDirect} className="flex items-center gap-4 mb-4">
-            <div className="relative group">
-              <img
-                src={profileData?.photoURL || user?.photoURL}
-                alt="Profile picture"
-                className="w-16 h-16 rounded-full object-cover border border-neutral-700"
-
-              />
-            </div>
-            <div>
-              <p className="font-medium">
-                {profileData?.displayName ||
-                  user?.displayName ||
-                  "Unnamed User"}
-              </p>
-              <p className="text-sm text-gray-400">
-                {user?.email || "No email available"}
-              </p>
-            </div>
-          </ImageUploadZone>
-          <Link
-            href={username ? `/profile/${username}` : "#"}
-            className="bg-neutral-300 border px-4 py-2 mb-10 rounded-lg text-neutral-800 font-semibold hover:scale-105 transition-transform inline-block"
-          >
-            View Profile
-          </Link>
+        <h2 className="text-2xl mb-4">Profile</h2>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        />
+        <ImageUploadZone
+          onFile={handleFileDirect}
+          className="flex items-center gap-4 mb-4"
+        >
+          <div className="relative group">
+            <img
+              src={profileData?.photoURL || user?.photoURL}
+              alt="Profile picture"
+              className="w-16 h-16 rounded-full object-cover border border-neutral-700"
+            />
+          </div>
+          <div>
+            <p className="font-medium">
+              {profileData?.displayName || user?.displayName || "Unnamed User"}
+            </p>
+            <p className="text-sm text-gray-400">
+              {user?.email || "No email available"}
+            </p>
+          </div>
+        </ImageUploadZone>
+        <Link
+          href={username ? `/profile/${username}` : "#"}
+          className="bg-neutral-300 border px-4 py-2 mb-10 rounded-lg text-neutral-800 font-semibold hover:scale-105 transition-transform inline-block"
+        >
+          View Profile
+        </Link>
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}

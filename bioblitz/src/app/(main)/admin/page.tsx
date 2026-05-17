@@ -484,6 +484,13 @@ export default function AdminPage() {
             >
               Open Analytics
             </Link>
+
+            <Link
+              href="/admin/message-reports"
+              className="text-sm text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-2 rounded-lg transition-colors"
+            >
+              <span>Message Reports</span>
+            </Link>
             {/** 
             <button
               onClick={handleReindexSearch}
@@ -495,31 +502,6 @@ export default function AdminPage() {
 
             
             **/}
-
-            <button
-              onClick={async () => {
-                if (!user) return;
-                setStatus(null);
-                try {
-                  const idToken = await user.getIdToken(true); // force refresh
-                  const res = await fetch(
-                    "/api/admin/users?action=recompute-subscribers",
-                    {
-                      method: "PATCH",
-                      headers: { Authorization: `Bearer ${idToken}` },
-                    },
-                  );
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data?.error || "Failed.");
-                  setStatus(data?.message || "Recomputed.");
-                } catch (err: any) {
-                  setStatus(err?.message || "Failed.");
-                }
-              }}
-              className="text-sm text-zinc-200 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors"
-            >
-              Recompute Subscribers
-            </button>
 
             <Link
               href="/home"
