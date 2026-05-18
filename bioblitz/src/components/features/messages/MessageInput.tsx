@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MoreHorizontal } from "lucide-react";
 import { sendMessage } from "@/lib/messages";
 import { failureMessage, MAX_MESSAGE_LENGTH } from "@/lib/messageValidation";
+import ChallengeFromConversationModal from "./ChallengeFromConversationModal";
 
 interface MessageInputProps {
   conversationId: string;
@@ -19,7 +20,10 @@ export default function MessageInput({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dotsOpen, setDotsOpen] = useState(false);
+  const [challengeType, setChallengeType] = useState<"official" | "unofficial" | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dotsRef = useRef<HTMLDivElement>(null);
 
   const trimmed = text.trim();
   const canSend =
@@ -32,6 +36,17 @@ export default function MessageInput({
     ta.style.height = "auto";
     ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
   }, [text]);
+
+  useEffect(() => {
+    if (!dotsOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dotsRef.current && !dotsRef.current.contains(e.target as Node)) {
+        setDotsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [dotsOpen]);
 
   const handleSend = async () => {
     if (!canSend) return;
@@ -81,6 +96,39 @@ export default function MessageInput({
         </div>
       )}
       <div className="flex items-end gap-2">
+        {/* Three-dots challenge menu */}
+        <div ref={dotsRef} className="relative shrink-0 self-end pb-0.5">
+          <button
+            onClick={() => setDotsOpen((v) => !v)}
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-colors"
+            aria-label="Challenge options"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+          {dotsOpen && (
+            <div className="absolute left-0 bottom-full mb-2 w-52 bg-neutral-950 border border-neutral-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in slide-in-from-bottom-1 fade-in duration-150">
+              <button
+                onClick={() => {
+                  setChallengeType("official");
+                  setDotsOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors text-left"
+              >
+                Official challenge
+              </button>
+              <button
+                onClick={() => {
+                  setChallengeType("unofficial");
+                  setDotsOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors text-left"
+              >
+                Unofficial challenge
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -105,6 +153,7 @@ export default function MessageInput({
             </span>
           )}
         </div>
+
         <button
           onClick={handleSend}
           disabled={!canSend}
@@ -122,6 +171,15 @@ export default function MessageInput({
           )}
         </button>
       </div>
+
+      {challengeType && (
+        <ChallengeFromConversationModal
+          senderId={senderId}
+          recipientId={recipientId}
+          challengeType={challengeType}
+          onClose={() => setChallengeType(null)}
+        />
+      )}
     </div>
   );
 }
