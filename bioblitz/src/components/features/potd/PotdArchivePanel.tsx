@@ -158,7 +158,7 @@ export default function PotdArchivePanel({
                             {p.topic || "General"}
                           </span>
                           {isPlayed && (
-                            <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                            <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold">
                               <CheckCircle2 className="w-3 h-3" />
                               <span>Completed</span>
                             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import Link from "next/link";
 import { app } from "@/lib/firebase";
@@ -110,12 +110,30 @@ function MetricCard({
   );
 }
 
+type PotdRow = {
+  id: string;
+  date: string | null;
+  title: string;
+  topic: string;
+  attempts: number;
+  correctCount: number;
+  correctRate: number | null;
+  submittedBy: string | null;
+};
+
 export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AdminAnalytics | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
+
+  const [potdRows, setPotdRows] = useState<PotdRow[]>([]);
+  const [potdLoading, setPotdLoading] = useState(false);
+  const [potdDateFrom, setPotdDateFrom] = useState("");
+  const [potdDateTo, setPotdDateTo] = useState("");
+  const [potdSearch, setPotdSearch] = useState("");
+  const potdTableRef = useRef<HTMLDivElement>(null);
 
   const loadAnalytics = async (isRefresh = false) => {
     try {
@@ -152,9 +170,109 @@ export default function AdminAnalyticsPage() {
     }
   };
 
+  const loadPotdAnalytics = async () => {
+    setPotdLoading(true);
+    try {
+      const auth = getAuth(app);
+      const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+      const res = await fetch("/api/admin/potd-analytics", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: "no-store",
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload?.error || "Failed to load POTD analytics.");
+      setPotdRows(Array.isArray(payload.potd) ? payload.potd : []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to load POTD analytics.");
+    } finally {
+      setPotdLoading(false);
+    }
+  };
+
+  const exportPdf = () => {
+    const rows = filteredPotdRows;
+    const generatedAt = new Date().toLocaleString();
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>POTD Analytics Report</title>
+  <style>
+    body { font-family: system-ui, sans-serif; font-size: 12px; color: #111; margin: 32px; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .meta { color: #555; font-size: 11px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f3f4f6; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 7px 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .rate { font-weight: 600; }
+    .low { color: #dc2626; }
+    .mid { color: #d97706; }
+    .high { color: #16a34a; }
+  </style>
+</head>
+<body>
+  <h1>POTD Analytics Report</h1>
+  <div class="meta">Generated ${generatedAt}${potdDateFrom || potdDateTo ? ` · Date range: ${potdDateFrom || "—"} to ${potdDateTo || "—"}` : ""}${potdSearch ? ` · Filter: "${potdSearch}"` : ""} · ${rows.length} problem${rows.length !== 1 ? "s" : ""}</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th>Topic</th>
+        <th>Attempts</th>
+        <th>Correct</th>
+        <th>Correct %</th>
+        <th>Submitted by</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map((r) => {
+        const rate = r.correctRate !== null ? Math.round(r.correctRate * 100) : null;
+        const cls = rate === null ? "" : rate >= 60 ? "high" : rate >= 35 ? "mid" : "low";
+        return `<tr>
+          <td>${r.date ?? "—"}</td>
+          <td>${r.title || "—"}</td>
+          <td>${r.topic}</td>
+          <td>${r.attempts}</td>
+          <td>${r.correctCount}</td>
+          <td class="rate ${cls}">${rate !== null ? `${rate}%` : "—"}</td>
+          <td>${r.submittedBy ?? "—"}</td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 400);
+  };
+
   useEffect(() => {
     void loadAnalytics();
+    void loadPotdAnalytics();
   }, []);
+
+  const filteredPotdRows = useMemo(() => {
+    return potdRows.filter((r) => {
+      if (potdDateFrom && r.date && r.date < potdDateFrom) return false;
+      if (potdDateTo && r.date && r.date > potdDateTo) return false;
+      if (potdSearch) {
+        const q = potdSearch.toLowerCase();
+        if (
+          !r.title.toLowerCase().includes(q) &&
+          !r.topic.toLowerCase().includes(q) &&
+          !(r.submittedBy ?? "").toLowerCase().includes(q)
+        ) return false;
+      }
+      return true;
+    });
+  }, [potdRows, potdDateFrom, potdDateTo, potdSearch]);
 
   const sourceRows = useMemo(() => {
     if (!data) return [];
@@ -446,6 +564,123 @@ export default function AdminAnalyticsPage() {
                   </table>
                 </div>
               </div>
+            </section>
+
+            {/* ── POTD Analytics ───────────────────────────────────────── */}
+            <section className="mb-8 rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
+              <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-neutral-50">POTD history</h2>
+                  <p className="text-sm text-neutral-500">Per-problem attempt and accuracy stats across all published POTDs.</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => void loadPotdAnalytics()}
+                    disabled={potdLoading}
+                    className="rounded-xl border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-200 hover:bg-neutral-700 disabled:opacity-50 transition-colors"
+                  >
+                    {potdLoading ? "Loading…" : "Refresh"}
+                  </button>
+                  <button
+                    onClick={exportPdf}
+                    disabled={filteredPotdRows.length === 0}
+                    className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-3 py-1.5 text-xs text-orange-300 hover:bg-orange-500/20 disabled:opacity-40 transition-colors"
+                  >
+                    Export PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="mb-4 flex flex-wrap gap-3">
+                <input
+                  type="date"
+                  value={potdDateFrom}
+                  onChange={(e) => setPotdDateFrom(e.target.value)}
+                  className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 focus:outline-none focus:border-neutral-500"
+                  placeholder="From"
+                  title="From date"
+                />
+                <input
+                  type="date"
+                  value={potdDateTo}
+                  onChange={(e) => setPotdDateTo(e.target.value)}
+                  className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 focus:outline-none focus:border-neutral-500"
+                  placeholder="To"
+                  title="To date"
+                />
+                <input
+                  type="text"
+                  value={potdSearch}
+                  onChange={(e) => setPotdSearch(e.target.value)}
+                  placeholder="Search title, topic, or author…"
+                  className="flex-1 min-w-48 rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
+                />
+                {(potdDateFrom || potdDateTo || potdSearch) && (
+                  <button
+                    onClick={() => { setPotdDateFrom(""); setPotdDateTo(""); setPotdSearch(""); }}
+                    className="rounded-xl border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              <div ref={potdTableRef} className="overflow-x-auto rounded-2xl border border-neutral-800">
+                <table className="w-full text-sm">
+                  <thead className="bg-neutral-900/80 text-neutral-500">
+                    <tr className="text-left">
+                      <th className="px-4 py-3 whitespace-nowrap">Date</th>
+                      <th className="px-4 py-3">Title</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Topic</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Attempts</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Correct</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Correct %</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Submitted by</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {potdLoading ? (
+                      <tr>
+                        <td className="px-4 py-6 text-neutral-500" colSpan={7}>Loading…</td>
+                      </tr>
+                    ) : filteredPotdRows.length === 0 ? (
+                      <tr>
+                        <td className="px-4 py-6 text-neutral-500" colSpan={7}>No POTD records found.</td>
+                      </tr>
+                    ) : (
+                      filteredPotdRows.map((row) => {
+                        const rate = row.correctRate !== null ? Math.round(row.correctRate * 100) : null;
+                        const rateColor =
+                          rate === null ? "text-neutral-500"
+                          : rate >= 60 ? "text-green-400"
+                          : rate >= 35 ? "text-yellow-400"
+                          : "text-red-400";
+                        return (
+                          <tr key={row.id} className="border-t border-neutral-800 text-neutral-200 hover:bg-neutral-900/30">
+                            <td className="px-4 py-3 whitespace-nowrap tabular-nums text-neutral-400">{row.date ?? "—"}</td>
+                            <td className="px-4 py-3 max-w-xs truncate" title={row.title}>{row.title || "—"}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className="rounded-full border border-neutral-700 bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300">{row.topic}</span>
+                            </td>
+                            <td className="px-4 py-3 tabular-nums">{formatNumber(row.attempts)}</td>
+                            <td className="px-4 py-3 tabular-nums">{formatNumber(row.correctCount)}</td>
+                            <td className={`px-4 py-3 tabular-nums font-semibold ${rateColor}`}>
+                              {rate !== null ? `${rate}%` : "—"}
+                            </td>
+                            <td className="px-4 py-3 text-neutral-400">{row.submittedBy ?? "—"}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {filteredPotdRows.length > 0 && (
+                <p className="mt-2 text-xs text-neutral-600 text-right">
+                  {filteredPotdRows.length} of {potdRows.length} problem{potdRows.length !== 1 ? "s" : ""}
+                </p>
+              )}
             </section>
 
             <section className="mb-8 rounded-[1.75rem] border border-neutral-800 bg-neutral-950/60 p-5">
