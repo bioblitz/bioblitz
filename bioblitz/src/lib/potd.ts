@@ -77,5 +77,5 @@ export const getCachedPuzzles = unstable_cache(
     });
   },
   ["daily-puzzles-list"], // Cache Key
-  { revalidate: 3600 }    // Revalidate every 1 hour
+  { revalidate: 600 }     // Revalidate every 10 minutes
 );

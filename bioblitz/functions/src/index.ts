@@ -969,13 +969,12 @@ export const publishScheduledPotd = onSchedule(
         imageAlt: data.imageAlt || "",
         publishedAt: FieldValue.serverTimestamp(),
         publishedBy: "scheduler",
+        // Track original submitter for monthly draw
+        submittedBy: data.createdBy || null,
       });
 
-      // Mark the queue item as published
-      batch.update(queueDoc.ref, {
-        status: "published",
-        publishedAt: FieldValue.serverTimestamp(),
-      });
+      // Remove from queue — it now lives in the potd collection
+      batch.delete(queueDoc.ref);
     });
 
     await batch.commit();

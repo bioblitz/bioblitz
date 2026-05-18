@@ -120,8 +120,14 @@ export async function GET(request: Request) {
     await autoArchiveBatch.commit();
   }
 
+  // Exclude published and archived items from the queue view
+  const visibleDocs = queueSnap.docs.filter((d) => {
+    const effectiveStatus = statusById.get(d.id) ?? d.data()?.status;
+    return effectiveStatus !== "published" && effectiveStatus !== "archived";
+  });
+
   const queue = await Promise.all(
-    queueSnap.docs.map(async (docSnap) => {
+    visibleDocs.map(async (docSnap) => {
       const data = docSnap.data() as any;
       const activitySnap = await adminFirestore
         .collection("potdActivity")

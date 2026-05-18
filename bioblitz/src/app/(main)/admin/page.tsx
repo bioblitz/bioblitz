@@ -11,6 +11,7 @@ import AdminOverview from "@/components/admin/AdminOverview";
 import AdminAnalyticsCard from "@/components/admin/AdminAnalyticsCard";
 import UserEditor from "@/components/admin/UserEditor";
 import UsersTable from "@/components/admin/UsersTable";
+import PotdAdminPanel from "@/components/admin/PotdAdminPanel";
 
 type AdminUser = {
   uid: string;
@@ -96,6 +97,7 @@ export default function AdminPage() {
   const [reindexing, setReindexing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDb, setShowDb] = useState(false);
+  const [idToken, setIdToken] = useState<string | null>(null);
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -115,6 +117,7 @@ export default function AdminPage() {
           setIsAdmin(admin);
           if (admin) {
             fetchStats(nextUser);
+            nextUser.getIdToken().then(setIdToken);
           }
           setLoading(false);
         });
@@ -524,6 +527,12 @@ export default function AdminPage() {
           savingUser={savingUser}
           handleSaveUserFields={handleSaveUserFields}
         />
+
+        {idToken && (
+          <div className="my-6">
+            <PotdAdminPanel idToken={idToken} />
+          </div>
+        )}
 
         {!showDb ? (
           <div className="py-20 flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50">

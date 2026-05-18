@@ -50,7 +50,7 @@ export default function PotdQuestionCard({
               })}
             </span>
             <span
-              className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${theme.bg}`}
+              className={`px-3 py-1 rounded-md text-xs font-bold ${theme.bg}`}
             >
               {puzzle.topic}
             </span>
@@ -64,7 +64,7 @@ export default function PotdQuestionCard({
             </span>
 
             {isCompleted && (
-              <span className="flex items-center gap-1.5 text-xs font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-md uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-md">
                 <CheckCircle2 className="w-3 h-3" />
                 Completed
               </span>
@@ -181,7 +181,7 @@ export default function PotdQuestionCard({
               </div>
 
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 text-left">
-                <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold">
                   <Lightbulb className="w-4 h-4 text-yellow-500" />
                   Explanation
                 </div>
