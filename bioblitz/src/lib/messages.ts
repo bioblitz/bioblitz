@@ -169,9 +169,9 @@ export function previewForMessage(input: {
     case "text":
       return input.text ?? "";
     case "challenge_invite":
-      return input.text ?? "🎯 Challenge sent";
+      return input.text ?? "Challenge sent";
     case "challenge_result":
-      return input.text ?? "🏆 Challenge results";
+      return input.text ?? "Challenge results";
     default:
       return input.text ?? "";
   }
@@ -375,13 +375,6 @@ export async function sendChallengeInviteMessage(input: {
   await batch.commit();
 }
 
-/**
- * Write the result message into the conversation when both players have played.
- * Called from challenges.ts/resolveChallenge.
- *
- * `senderId` MUST equal request.auth.uid — i.e. whoever triggered the resolution
- * by being the second player to finish. The rule requires this.
- */
 export async function sendChallengeResultMessage(input: {
   conversationId: string;
   challengeId: string;
@@ -466,9 +459,6 @@ export async function sendChallengeResultMessage(input: {
   await batch.commit();
 }
 
-/**
- * Live-subscribe to a single challenge doc.
- */
 export function subscribeToChallenge(
   challengeId: string,
   onUpdate: (challenge: Challenge | null) => void,
@@ -482,10 +472,6 @@ export function subscribeToChallenge(
   });
 }
 
-/**
- * Soft-delete a message. Sets deletedAt / deletedBy on the message doc.
- * Security rules allow this when senderId === auth.uid OR isStaff.
- */
 export async function softDeleteMessage(input: {
   conversationId: string;
   messageId: string;
@@ -498,4 +484,45 @@ export async function softDeleteMessage(input: {
       deletedBy: input.userId,
     },
   );
+}
+
+export const ALLOWED_REACTIONS = ["⚡", "🔥", "💀", "😭", "😂", "❤️"] as const;
+
+export type ReactionEmoji = (typeof ALLOWED_REACTIONS)[number];
+
+export async function toggleReaction(input: {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+  emoji: ReactionEmoji;
+}): Promise<void> {
+  const { conversationId, messageId, userId, emoji } = input;
+  const msgRef = doc(
+    db,
+    "conversations",
+    conversationId,
+    "messages",
+    messageId,
+  );
+
+  const snap = await getDoc(msgRef);
+  if (!snap.exists()) return;
+
+  const current: Record<string, string[]> = snap.data().reactions || {};
+  const next: Record<string, string[]> = {};
+
+  let alreadyHadThisEmoji = false;
+  for (const [emo, uids] of Object.entries(current)) {
+    const without = (uids as string[]).filter((u) => u !== userId);
+    if (emo === emoji && (uids as string[]).includes(userId)) {
+      alreadyHadThisEmoji = true;
+    }
+    if (without.length > 0) next[emo] = without;
+  }
+
+  if (!alreadyHadThisEmoji) {
+    next[emoji] = [...(next[emoji] || []), userId];
+  }
+
+  await updateDoc(msgRef, { reactions: next });
 }

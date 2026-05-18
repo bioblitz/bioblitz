@@ -4,11 +4,17 @@ import { Message } from "@/lib/chatStore";
 import { Trophy } from "lucide-react";
 import { useState } from "react";
 import { Flag } from "lucide-react";
+import { useRef } from "react";
+
 import { useAuth } from "@/context/AuthContext";
 import ReportMessageModal from "./ReportMessageModal";
 import ChallengeCard from "./ChallengeCard";
 import { Trash2 } from "lucide-react";
 import { softDeleteMessage } from "@/lib/messages";
+import { SmilePlus } from "lucide-react";
+import ReactionPicker from "./ReactionPicker";
+import ReactionBadges from "./ReactionBadges";
+import { toggleReaction, type ReactionEmoji } from "@/lib/messages";
 
 interface MessageBubbleProps {
   message: Message;
@@ -42,6 +48,8 @@ export default function MessageBubble({
   const { user } = useAuth();
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const smileyButtonRef = useRef<HTMLButtonElement>(null);
 
   if (message.deletedAt) {
     return (
@@ -76,6 +84,20 @@ export default function MessageBubble({
         isGroupedEnd ? "rounded-bl-md" : "rounded-bl-md"
       }`;
 
+  const handleReact = async (emoji: ReactionEmoji) => {
+    if (!user) return;
+    try {
+      await toggleReaction({
+        conversationId,
+        messageId: message.id,
+        userId: user.uid,
+        emoji,
+      });
+    } catch (err) {
+      console.error("React failed:", err);
+    }
+  };
+
   const handleDelete = async () => {
     if (!user || deleting) return;
     if (!confirm("Delete this message?")) return;
@@ -98,6 +120,7 @@ export default function MessageBubble({
         isMine ? "justify-end" : "justify-start"
       } ${isGroupedStart ? "mt-2" : "mt-0.5"}`}
     >
+      {/* Avatar (only on other-user messages, last in group) */}
       {!isMine && (
         <div className="w-7 shrink-0">
           {showAvatar && (
@@ -106,7 +129,7 @@ export default function MessageBubble({
                 <img
                   src={otherUser.photoURL}
                   alt={otherUser.displayName}
-                  className="w-7 h-7 rounded-full object-cover border border-neutral-800"
+                  className="w-7 h-7 rounded-full object-cover"
                   onError={(e) => {
                     const target = e.currentTarget;
                     target.style.display = "none";
@@ -126,47 +149,89 @@ export default function MessageBubble({
         </div>
       )}
 
+      {/* Bubble + badges column */}
       <div
-        className={`relative max-w-[70%] px-3.5 py-2 ${myRadius} ${
-          isMine
-            ? "bg-neutral-200 text-neutral-900"
-            : "bg-neutral-800 text-neutral-100"
-        }`}
+        className={`flex flex-col ${isMine ? "items-end" : "items-start"} max-w-[70%]`}
       >
-        <p className="text-sm leading-snug whitespace-pre-wrap break-words">
-          {message.text}
-        </p>
-        {!isMine && user && (
-          <button
-            onClick={() => setShowReportModal(true)}
-            className="absolute -right-7 top-1/2 -translate-y-5/8 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-orange-400"
-            aria-label="Report message"
-            title="Report message"
+        <div className="relative">
+          {/* Bubble */}
+          <div
+            className={`px-3.5 py-2 ${myRadius} ${
+              isMine
+                ? "bg-neutral-200 text-neutral-900"
+                : "bg-neutral-800 text-neutral-100"
+            }`}
           >
-            <Flag className="w-3 h-3" />
-          </button>
-        )}
-        {isMine && user && (
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="absolute -left-7 top-1/2 -translate-y-5/8 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-600 hover:text-red-400 disabled:opacity-30"
-            aria-label="Delete message"
-            title="Delete message"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
+            <p className="text-sm leading-snug whitespace-pre-wrap break-words">
+              {message.text}
+            </p>
+          </div>
+
+          {/* Action buttons (react + flag/trash) — appear on hover */}
+          {user && (
+            <div
+              className={`absolute ${
+                isMine ? "right-full mr-1" : "left-full ml-1"
+              } top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity`}
+            >
+              {!isMine && (
+                <button
+                  ref={smileyButtonRef}
+                  onClick={() => setShowReactionPicker((v) => !v)}
+                  className="p-1 text-neutral-600 hover:text-neutral-300 transition-colors"
+                  aria-label="React"
+                  title="React"
+                >
+                  <SmilePlus className="w-3.5 h-3.5" />
+                </button>
+              )}
+
+              {!isMine && (
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="p-1 text-neutral-600 hover:text-red-400 transition-colors"
+                  aria-label="Report"
+                  title="Report"
+                >
+                  <Flag className="w-3 h-3" />
+                </button>
+              )}
+              {isMine && (
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="p-1 text-neutral-600 hover:text-red-400 transition-colors disabled:opacity-30"
+                  aria-label="Delete"
+                  title="Delete"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Reaction picker (when open) */}
+          {showReactionPicker && (
+            <ReactionPicker
+              anchorEl={smileyButtonRef.current}
+              onPick={handleReact}
+              onClose={() => setShowReactionPicker(false)}
+            />
+          )}
+        </div>
+
+        {/* Reaction badges */}
+        {message.reactions && Object.keys(message.reactions).length > 0 && (
+          <ReactionBadges
+            reactions={message.reactions}
+            conversationId={conversationId}
+            messageId={message.id}
+            alignRight={isMine}
+          />
         )}
       </div>
 
-      <span
-        className={`text-[10px] text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity tabular-nums shrink-0 ${
-          isMine ? "order-first" : ""
-        }`}
-      >
-        {formatTime(message.createdAt)}
-      </span>
-
+      {/* Report modal */}
       {showReportModal && user && (
         <ReportMessageModal
           conversationId={conversationId}

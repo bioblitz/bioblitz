@@ -94,18 +94,24 @@ export function useFriendActions({
         );
         const friendsSnap = await getDocs(friendsQuery);
 
-        const friendsData = friendsSnap.docs
-          .map((friendDoc) => {
-            const d = friendDoc.data() as any;
-            if (!d.uid) return null;
-            return {
-              uid: d.uid,
-              displayName: d.displayName || "",
-              username: d.username || "",
-              photoURL: d.photoURL || "",
-            } as UserProfile;
-          })
-          .filter((u): u is UserProfile => u !== null);
+        // Fetch fresh user data for each friend (and filter out deleted users)
+        const friendsData = (
+          await Promise.all(
+            friendsSnap.docs.map(async (friendDoc) => {
+              const friendUid = (friendDoc.data() as any).uid;
+              if (!friendUid) return null;
+              const userSnap = await getDoc(doc(db, "users", friendUid));
+              if (!userSnap.exists()) return null; // user was deleted
+              const u = userSnap.data() as any;
+              return {
+                uid: friendUid,
+                displayName: u.displayName || "",
+                username: u.username || "",
+                photoURL: u.photoURL || "",
+              } as UserProfile;
+            }),
+          )
+        ).filter((u): u is UserProfile => u !== null);
         setFriends(friendsData);
 
         if (currentUser.uid === profileUid) {
@@ -115,18 +121,24 @@ export function useFriendActions({
           );
           const requestsSnap = await getDocs(requestsQuery);
 
-          const requestsData = requestsSnap.docs
-            .map((reqDoc) => {
-              const d = reqDoc.data() as any;
-              if (!d.uid) return null;
-              return {
-                uid: d.uid,
-                displayName: d.displayName || "",
-                username: d.username || "",
-                photoURL: d.photoURL || "",
-              } as UserProfile;
-            })
-            .filter((u): u is UserProfile => u !== null);
+          // Same pattern for incoming requests
+          const requestsData = (
+            await Promise.all(
+              requestsSnap.docs.map(async (reqDoc) => {
+                const reqUid = (reqDoc.data() as any).uid;
+                if (!reqUid) return null;
+                const userSnap = await getDoc(doc(db, "users", reqUid));
+                if (!userSnap.exists()) return null;
+                const u = userSnap.data() as any;
+                return {
+                  uid: reqUid,
+                  displayName: u.displayName || "",
+                  username: u.username || "",
+                  photoURL: u.photoURL || "",
+                } as UserProfile;
+              }),
+            )
+          ).filter((u): u is UserProfile => u !== null);
           setIncomingRequests(requestsData);
         }
       } catch (err) {
