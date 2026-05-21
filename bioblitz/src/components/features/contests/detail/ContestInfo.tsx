@@ -6,7 +6,7 @@ import { gameRoom } from "@/types/index";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import GameRating from "@/components/features/reviews/GameRating";
 import { getTopicColors, getTopicShortLabel } from "@/lib/utils";
-import {getRatingTier} from "@/lib/rating";
+import { getRatingTier } from "@/lib/rating";
 
 interface ContestInfoProps {
   game: gameRoom;
@@ -113,7 +113,6 @@ export default function ContestInfo({
                     src={game.creatorPfp}
                     alt={game.creatorUsername}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-neutral-500"
-
                   />
                 ) : (
                   <div className="w-6 h-6 flex-shrink-0">
@@ -141,13 +140,24 @@ export default function ContestInfo({
             averageRating={game.rating}
             ratingCount={game.ratingCount}
           />
-          <div className="text-neutral-300 rounded-full border border-neutral-700 py-0.5 px-2 text-sm"> Rating: <span className={`text-sm font-bold ${
-                                    game.contestRating ? getRatingTier(game?.contestRating).textClass: "text-neutral-300"}`}>   {game.contestRating?.toFixed(0)} </span></div>
+          <div className="text-neutral-300 rounded-full border border-neutral-700 py-0.5 px-2 text-sm">
+            {" "}
+            Rating:{" "}
+            <span
+              className={`text-sm font-bold ${
+                game.contestRating
+                  ? getRatingTier(game?.contestRating).textClass
+                  : "text-neutral-300"
+              }`}
+            >
+              {" "}
+              {game.contestRating?.toFixed(0)}{" "}
+            </span>
+          </div>
         </div>
-        
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         <div>
           <div className="text-xl font-bold text-white">
             {game.number_of_questions}

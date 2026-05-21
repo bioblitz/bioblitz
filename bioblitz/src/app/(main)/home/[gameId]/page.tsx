@@ -5,7 +5,6 @@ import { allGames } from "@/lib/gameRoomsAll";
 import { gameRoom } from "@/types/index";
 import { Loader2 } from "lucide-react";
 
-
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -21,7 +20,10 @@ import {
   limit,
 } from "firebase/firestore";
 
-import { GameSubmission, LeaderboardEntry } from "@/components/features/contests/detail/types";
+import {
+  GameSubmission,
+  LeaderboardEntry,
+} from "@/components/features/contests/detail/types";
 import ContestBanner from "@/components/features/contests/detail/ContestBanner";
 import ContestInfo from "@/components/features/contests/detail/ContestInfo";
 import ContestActionButtons from "@/components/features/contests/detail/ContestActionButtons";
@@ -209,7 +211,8 @@ export default function GameDetailPage() {
 
         const leaderboardData = await Promise.all(
           uniqueSubmissions.map(async (submission) => {
-            let username = submission.handle || submission.username || "Unknown";
+            let username =
+              submission.handle || submission.username || "Unknown";
             let photoURL = submission.photoURL || "";
             let bElo = submission.bElo || 500;
 
@@ -381,12 +384,13 @@ export default function GameDetailPage() {
   const registrantAvatars = leaderboard.slice(0, 3);
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-900 text-white font-sans pl-14">
+    <div className="flex flex-col min-h-screen bg-neutral-900 text-white font-sans pl-0 md:pl-14">
       <ContestBanner game={game} />
 
-      <div className="flex flex-1 pr-4 pl-2 md:pr-8 md:pl-4 pb-16 gap-6 max-w-7xl mx-auto w-full">
+      <div className="flex flex-col md:flex-row flex-1 pr-3 pl-3 md:pr-8 md:pl-4 pb-16 gap-4 md:gap-6 max-w-7xl mx-auto w-full">
+        {" "}
         <motion.main
-          className="flex-[1.4] flex flex-col pr-2"
+          className="w-full md:flex-[1.4] flex flex-col pr-0 md:pr-2"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -405,7 +409,7 @@ export default function GameDetailPage() {
             router={router}
           />
 
-          <div className="flex flex-col gap-3 px-8">
+          <div className="flex flex-col gap-3 px-4 md:px-8">
             <ContestActionButtons
               game={game}
               user={user}
@@ -424,7 +428,7 @@ export default function GameDetailPage() {
             />
           </div>
 
-          <div className="px-8 mt-4">
+          <div className="px-4 md:px-8 mt-4">
             <h1 className="py-4 text-lg text-neutral-300">
               Description:
               {game.description && (
@@ -441,7 +445,6 @@ export default function GameDetailPage() {
             gameId={gameId}
           />
         </motion.main>
-
         <ContestLeaderboard
           loadingLeaderboard={loadingLeaderboard}
           leaderboard={leaderboard}

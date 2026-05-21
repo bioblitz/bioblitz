@@ -25,18 +25,23 @@ export default function ContestHistory({
   gameId,
 }: ContestHistoryProps) {
   return (
-    <motion.div variants={slideUp} className="mt-6 flex-1 mb-8 pl-6">
+    <motion.div
+      variants={slideUp}
+      className="mt-6 flex-1 mb-0 md:mb-8 pl-0 md:pl-6 pt-6 border-t border-neutral-800/60 md:border-t-0 md:pt-0"
+    >
+      {" "}
       <div className="flex items-center gap-2 mb-4 px-2">
         <h3 className="text-xl font-bold text-white">Your History</h3>
       </div>
-
       {loadingAttempts ? (
         <div className="flex justify-center py-10">
           <Loader2 className="w-8 h-8 text-neutral-700 animate-spin" />
         </div>
       ) : previousAttempts.length === 0 ? (
-        <div className="p-8 text-center">
-          <p className="text-neutral-500">You haven't played this Blitz yet.</p>
+        <div className="py-4 text-center">
+          <p className="text-neutral-500 text-sm mt-1">
+            You haven't played this Blitz yet.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -58,19 +63,13 @@ export default function ContestHistory({
                       : "bg-neutral-800 text-neutral-400"
                   }`}
                 >
-                  {attempt.ranked ? (
-                    attempt.ratingDelta != null ? (
-                      attempt.ratingDelta >= 0 ? (
-                        `+${attempt.ratingDelta}`
-                      ) : (
-                        attempt.ratingDelta
-                      )
-                    ) : (
-                      "±0"
-                    )
-                  ) : (
-                    `${attempt.correctCount}/${attempt.totalQuestions}`
-                  )}
+                  {attempt.ranked
+                    ? attempt.ratingDelta != null
+                      ? attempt.ratingDelta >= 0
+                        ? `+${attempt.ratingDelta}`
+                        : attempt.ratingDelta
+                      : "±0"
+                    : `${attempt.correctCount}/${attempt.totalQuestions}`}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -85,7 +84,8 @@ export default function ContestHistory({
                   </div>
                   <div className="text-neutral-500 text-xs flex gap-2 mt-1">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> {formatDate(attempt.submittedAt)}
+                      <Calendar className="w-3 h-3" />{" "}
+                      {formatDate(attempt.submittedAt)}
                     </span>
                   </div>
                 </div>
@@ -94,7 +94,8 @@ export default function ContestHistory({
               <div className="flex items-center gap-4 z-10">
                 <div className="text-right">
                   <div className="text-neutral-400 text-sm font-mono flex items-center gap-1 justify-end">
-                    <Clock className="w-3 h-3" /> {formatTimePlayed(attempt.timeTaken)}
+                    <Clock className="w-3 h-3" />{" "}
+                    {formatTimePlayed(attempt.timeTaken)}
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-neutral-600 group-hover:text-white transition-colors transform group-hover:translate-x-1" />

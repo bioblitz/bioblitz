@@ -29,7 +29,6 @@ const slideUp: Variants = {
   },
 };
 
-
 export default function ContestLeaderboard({
   loadingLeaderboard,
   leaderboard,
@@ -40,7 +39,9 @@ export default function ContestLeaderboard({
   setEloPenalty,
   setEraseAttempt,
 }: ContestLeaderboardProps) {
-  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(
+    new Set(),
+  );
 
   const getRankIcon = (index: number) => {
     return (
@@ -53,12 +54,10 @@ export default function ContestLeaderboard({
   return (
     <motion.aside
       variants={slideUp}
-      className="hidden lg:flex flex-[0.8] flex-col p-6 h-fit"
+      className="flex flex-[0.8] flex-col p-4 h-fit w-full lg:w-auto border-t border-neutral-800/60 lg:border-t-0 lg:border-l mt-4 lg:mt-0"
     >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          Leaderboard
-        </h2>
+        <h2 className="text-xl lg:text-lg font-bold text-white">Leaderboard</h2>
       </div>
 
       {loadingLeaderboard ? (
@@ -91,7 +90,6 @@ export default function ContestLeaderboard({
                       src={entry.photoURL}
                       alt={entry.username}
                       className="w-8 h-8 rounded-full border border-neutral-700 bg-neutral-900 object-cover"
-
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-neutral-500/20 border border-neutral-500/30 flex items-center justify-center text-xs font-bold text-neutral-300">
