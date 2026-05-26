@@ -31,9 +31,7 @@ export async function createContest(
   let creatorUsername = "";
   const normalizeRoles = (raw: unknown): string[] => {
     if (!Array.isArray(raw)) return [];
-    return raw
-      .map((role) => String(role).toLowerCase().trim())
-      .filter(Boolean);
+    return raw.map((role) => String(role).toLowerCase().trim()).filter(Boolean);
   };
   const isStaffOrAdminFromClaims = (claims: any): boolean => {
     const roles = normalizeRoles(claims?.roles);
@@ -54,7 +52,10 @@ export async function createContest(
     }
 
     try {
-      const userDoc = await adminFirestore.collection("users").doc(userId).get();
+      const userDoc = await adminFirestore
+        .collection("users")
+        .doc(userId)
+        .get();
       if (userDoc.exists) {
         const data = userDoc.data() as any;
         if (data.photoURL) creatorPfp = data.photoURL;
@@ -72,12 +73,17 @@ export async function createContest(
     if (postAsUsernameRaw) {
       let allowed = isStaffOrAdminFromClaims(decoded);
       if (!allowed) {
-        const actorDoc = await adminFirestore.collection("users").doc(uid).get();
+        const actorDoc = await adminFirestore
+          .collection("users")
+          .doc(uid)
+          .get();
         const actorRoles = normalizeRoles(actorDoc.data()?.roles);
         allowed = actorRoles.includes("admin") || actorRoles.includes("staff");
       }
       if (!allowed) {
-        return { message: "You do not have permission to post as another user." };
+        return {
+          message: "You do not have permission to post as another user.",
+        };
       }
 
       const normalizedUsername = postAsUsernameRaw.toLowerCase();
@@ -92,7 +98,10 @@ export async function createContest(
       if (!userDoc.empty) {
         targetUid = userDoc.docs[0].id;
       } else {
-        const byId = await adminFirestore.collection("users").doc(normalizedUsername).get();
+        const byId = await adminFirestore
+          .collection("users")
+          .doc(normalizedUsername)
+          .get();
         if (byId.exists) {
           targetUid = byId.id;
         }
@@ -118,19 +127,19 @@ export async function createContest(
   const status = (formData.get("status") as string) || "incomplete";
 
   const hiddenParam = formData.get("hidden");
-  const hidden = status === "completed"
-    ? (hiddenParam === "true" ? true : false)
-    : true;
+  const hidden =
+    status === "completed" ? (hiddenParam === "true" ? true : false) : true;
 
-  // When editing an existing contest without an explicit postAs, preserve the
-  // original creator fields so editing never re-assigns ownership.
   let finalCreatorUid = uid;
   let finalCreatorPfp = creatorPfp;
   let finalCreatorUsername = creatorUsername;
 
   if (contestId && !postAsUsernameRaw) {
     try {
-      const existingDoc = await adminFirestore.collection("sets").doc(contestId).get();
+      const existingDoc = await adminFirestore
+        .collection("sets")
+        .doc(contestId)
+        .get();
       if (existingDoc.exists) {
         const existing = existingDoc.data() as any;
         if (existing.creator) {
@@ -177,14 +186,17 @@ export async function createContest(
 
     // Write questions to subcollection, replacing any existing ones
     if (savedId && questions.length > 0) {
-      const questionsColRef = adminFirestore.collection("sets").doc(savedId).collection("questions");
+      const questionsColRef = adminFirestore
+        .collection("sets")
+        .doc(savedId)
+        .collection("questions");
       const existing = await questionsColRef.get();
       await Promise.all(existing.docs.map((d) => d.ref.delete()));
       await Promise.all(
         questions.map((q) => {
           const { id, ...qData } = q;
           return questionsColRef.doc(id || questionsColRef.doc().id).set(qData);
-        })
+        }),
       );
     }
 
@@ -192,43 +204,45 @@ export async function createContest(
       await adminFirestore
         .collection("users")
         .doc(finalCreatorUid)
-        .set({ publicSetCount: admin.firestore.FieldValue.increment(1) }, { merge: true });
+        .set(
+          { publicSetCount: admin.firestore.FieldValue.increment(1) },
+          { merge: true },
+        );
     }
 
     revalidatePath("/contests");
     // "Blitz saved with ID:" prefix is checked by the editor to set isPublished=true.
     // Draft saves use a different prefix so the editor doesn't treat them as published.
-    const messagePrefix = status === "completed" ? "Blitz saved with ID:" : "Blitz draft saved with ID:";
+    const messagePrefix =
+      status === "completed"
+        ? "Blitz saved with ID:"
+        : "Blitz draft saved with ID:";
     return { message: `${messagePrefix} ${savedId}` };
   } catch (e) {
     console.error("Error saving document: ", e);
     return { message: "Failed to save Blitz" };
   }
 }
-
 export async function getContestsByCreator(
   creatorUid: string,
   creatorUsername?: string | null,
 ): Promise<gameRoom[]> {
   try {
-    const contests: gameRoom[] = [];
     const docsById = new Map<string, any>();
 
-    const byCreator = query(
-      collection(firestore, "sets"),
-      where("creator", "==", creatorUid),
-    );
-    const byCreatorSnapshot = await getDocs(byCreator);
+    const byCreatorSnapshot = await adminFirestore
+      .collection("sets")
+      .where("creator", "==", creatorUid)
+      .get();
     byCreatorSnapshot.forEach((docSnap) => {
       docsById.set(docSnap.id, docSnap.data());
     });
 
     if (creatorUsername) {
-      const byUsername = query(
-        collection(firestore, "sets"),
-        where("creatorUsername", "==", creatorUsername),
-      );
-      const byUsernameSnapshot = await getDocs(byUsername);
+      const byUsernameSnapshot = await adminFirestore
+        .collection("sets")
+        .where("creatorUsername", "==", creatorUsername)
+        .get();
       byUsernameSnapshot.forEach((docSnap) => {
         docsById.set(docSnap.id, docSnap.data());
       });
@@ -244,6 +258,7 @@ export async function getContestsByCreator(
       console.error("Error fetching creator banner:", e);
     }
 
+    const contests: gameRoom[] = [];
     docsById.forEach((data, id) => {
       const questionCount =
         data.questions && Array.isArray(data.questions)

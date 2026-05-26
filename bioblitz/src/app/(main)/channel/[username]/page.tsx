@@ -137,6 +137,7 @@ export default function ChannelPage() {
     }
   };
 
+  // Fetch profile + contests once when username changes
   useEffect(() => {
     async function fetchChannelOwnerAndContests() {
       if (!username) return;
@@ -146,16 +147,17 @@ export default function ChannelPage() {
         const profile = await getUserProfileByUsername(username as string);
         if (profile) {
           setChannelOwnerProfile(profile);
-          setIsOwner(authUser?.uid === profile.uid);
-
+          console.log("profile.uid:", profile.uid);
+          console.log("profile.username:", profile.username);
           const contests = await getContestsByCreator(
             profile.uid,
             profile.username,
           );
+          console.log("contests returned:", contests);
+
           setUserContests(contests);
         } else {
           setChannelOwnerProfile(null);
-          setIsOwner(false);
         }
       } catch (err) {
         console.error("Error fetching channel:", err);
@@ -164,7 +166,15 @@ export default function ChannelPage() {
       }
     }
     fetchChannelOwnerAndContests();
-  }, [username, authUser?.uid, router]);
+  }, [username]);
+
+  useEffect(() => {
+    if (channelOwnerProfile && authUser) {
+      setIsOwner(authUser.uid === channelOwnerProfile.uid);
+    } else {
+      setIsOwner(false);
+    }
+  }, [authUser?.uid, channelOwnerProfile]);
 
   const handleCreateNewContest = () => {
     const newContestId = uuidv4();
@@ -204,7 +214,9 @@ export default function ChannelPage() {
           {loading ? (
             <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
               <div className="w-10 h-10 border-[3px] border-neutral-700 border-t-neutral-400 rounded-full animate-spin" />
-              <span className="text-neutral-400 text-sm font-medium">Loading...</span>
+              <span className="text-neutral-400 text-sm font-medium">
+                Loading...
+              </span>
             </div>
           ) : (
             <div className="relative h-48 overflow-hidden">
@@ -222,7 +234,6 @@ export default function ChannelPage() {
                     className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
                     alt=""
                     aria-hidden
-
                   />
                   <div className="absolute inset-0 bg-neutral-900/60" />
 
@@ -231,7 +242,6 @@ export default function ChannelPage() {
                       src={channelOwnerProfile.photoURL}
                       alt="Channel owner"
                       className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700"
-
                     />
                   </div>
                 </>
@@ -275,123 +285,134 @@ export default function ChannelPage() {
             </div>
           )}
 
-          {!loading && <div className="p-4 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newChannelName}
-                    onChange={(e) => setNewChannelName(e.target.value)}
-                    className="px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded text-white text-xl font-bold"
-                    placeholder="Channel name"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveChannelName}
-                    className="p-2 bg-green-600 hover:bg-green-700 text-white rounded"
-                    title="Save"
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded"
-                    title="Cancel"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex flex-col">
-                    <Link
-                      href={
-                        channelOwnerProfile?.username
-                          ? `/profile/${channelOwnerProfile.username}`
-                          : `/profile/${channelOwnerProfile?.uid}`
-                      }
-                      className="text-2xl font-bold hover:underline transition-colors"
-                    >
-                      {channelOwnerProfile?.channelName ||
-                        channelOwnerProfile?.displayName ||
-                        channelOwnerProfile?.username}
-                      's Channel
-                    </Link>
+          {!loading && (
+            <div className="p-4 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                {isEditingName ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newChannelName}
+                      onChange={(e) => setNewChannelName(e.target.value)}
+                      className="px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded text-white text-xl font-bold"
+                      placeholder="Channel name"
+                      autoFocus
+                    />
                     <button
-                      onClick={() => setShowSubscribersModal(true)}
-                      className="text-neutral-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit cursor-pointer"
+                      onClick={handleSaveChannelName}
+                      className="p-2 bg-green-600 hover:bg-green-700 text-white rounded"
+                      title="Save"
                     >
-                      {channelOwnerProfile?.subscriberCount || 0} Subscribers
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded"
+                      title="Cancel"
+                    >
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                </>
-              )}
-            </div>
-            {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
-            <div className="flex items-center gap-3">
-              {!isOwner && channelOwnerProfile && (
-                <SubscribeButton
-                  topicId={channelOwnerProfile.uid}
-                  topicName={channelOwnerProfile.displayName || "this channel"}
-                />
-              )}
-              {isOwner && (
-                <button
-                  onClick={handleCreateNewContest}
-                  className="px-4 py-2 bg-neutral-900 border border-neutral-700 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
-                >
-                  <PlusIcon className="w-5 h-5" />
-                  Create New Blitz
-                </button>
-              )}
-            </div>
-          </div>}
-
-          {!loading && <div className="mt-8 px-2">
-            <h2 className="text-xl font-bold mb-4">Blitzes</h2>
-            {(() => {
-              const displayed = isOwner
-                ? userContests
-                : userContests.filter((contest) => {
-                    const isHidden = (contest as any).hidden === true;
-                    const isCompleted = contest.status === "completed";
-                    const hasStatus = Boolean(contest.status);
-                    return !isHidden && (isCompleted || !hasStatus);
-                  });
-              return displayed.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {displayed.map((game) => (
-                    <div key={game.id} className="relative group">
-                      <ContestCard contest={game} href={`/home/${game.id}`} />
-                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isOwner &&
-                          (game.status !== "completed" ||
-                            (game as any).hidden) && (
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-neutral-800 text-neutral-400">
-                              {game.status !== "completed" ? "Draft" : "Hidden"}
-                            </span>
-                          )}
-                        {isOwner && (
-                          <button
-                            onClick={() =>
-                              router.push(`/contests/create/${game.id}`)
-                            }
-                            className="p-1.5 bg-neutral-900/90 hover:bg-neutral-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
-                          >
-                            <PencilIcon className="w-3 h-3" />
-                            Edit
-                          </button>
-                        )}
-                      </div>
+                ) : (
+                  <>
+                    <div className="flex flex-col">
+                      <Link
+                        href={
+                          channelOwnerProfile?.username
+                            ? `/profile/${channelOwnerProfile.username}`
+                            : `/profile/${channelOwnerProfile?.uid}`
+                        }
+                        className="text-2xl font-bold hover:underline transition-colors"
+                      >
+                        {channelOwnerProfile?.channelName ||
+                          channelOwnerProfile?.displayName ||
+                          channelOwnerProfile?.username}
+                        's Channel
+                      </Link>
+                      <button
+                        onClick={() => setShowSubscribersModal(true)}
+                        className="text-neutral-400 text-sm mt-1 hover:text-white hover:underline transition-all text-left w-fit cursor-pointer"
+                      >
+                        {channelOwnerProfile?.subscriberCount || 0} Subscribers
+                      </button>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-neutral-400">No Blitzes created yet.</p>
-              );
-            })()}
-          </div>}
+                  </>
+                )}
+              </div>
+              {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
+              <div className="flex items-center gap-3">
+                {!isOwner && channelOwnerProfile && (
+                  <SubscribeButton
+                    topicId={channelOwnerProfile.uid}
+                    topicName={
+                      channelOwnerProfile.displayName || "this channel"
+                    }
+                  />
+                )}
+                {isOwner && (
+                  <button
+                    onClick={handleCreateNewContest}
+                    className="px-4 py-2 bg-neutral-900 border border-neutral-700 hover:bg-neutral-700 text-white rounded-md flex items-center gap-2"
+                  >
+                    <PlusIcon className="w-5 h-5" />
+                    Create New Blitz
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!loading && (
+            <div className="mt-8 px-2">
+              <h2 className="text-xl font-bold mb-4">Blitzes</h2>
+              {(() => {
+                console.log("userContests:", userContests);
+                console.log("isOwner:", isOwner);
+
+                const displayed = isOwner
+                  ? userContests
+                  : userContests.filter((contest) => {
+                      const isHidden = (contest as any).hidden === true;
+                      const isCompleted = contest.status === "completed";
+                      const hasStatus = Boolean(contest.status);
+                      return !isHidden && (isCompleted || !hasStatus);
+                    });
+                return displayed.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {displayed.map((game) => (
+                      <div key={game.id} className="relative group">
+                        <ContestCard contest={game} href={`/home/${game.id}`} />
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {isOwner &&
+                            (game.status !== "completed" ||
+                              (game as any).hidden) && (
+                              <span className="px-2 py-0.5 rounded text-xs font-medium bg-neutral-800 text-neutral-400">
+                                {game.status !== "completed"
+                                  ? "Draft"
+                                  : "Hidden"}
+                              </span>
+                            )}
+                          {isOwner && (
+                            <button
+                              onClick={() =>
+                                router.push(`/contests/create/${game.id}`)
+                              }
+                              className="p-1.5 bg-neutral-900/90 hover:bg-neutral-700 rounded text-white text-xs font-medium flex items-center gap-1 transition-colors"
+                            >
+                              <PencilIcon className="w-3 h-3" />
+                              Edit
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-neutral-400">No Blitzes created yet.</p>
+                );
+              })()}
+            </div>
+          )}
         </div>
       </div>
     </>

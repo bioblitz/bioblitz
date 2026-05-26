@@ -1,8 +1,6 @@
-import { getFirestore, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { app } from "@/lib/firebase"; // Your firebase config
+import { adminFirestore } from "@/lib/firebase-admin";
 import { unstable_cache } from "next/cache";
 
-// Define the shape of the data
 export interface DailyPuzzle {
   id: string;
   title: string;
@@ -14,26 +12,24 @@ export interface DailyPuzzle {
   options: { key: string; text: string }[];
   correctAnswer: string[];
   explanation: string;
-  a?: string; b?: string; c?: string; d?: string; e?: string; // Raw fields
+  a?: string;
+  b?: string;
+  c?: string;
+  d?: string;
+  e?: string;
   correct?: any;
 }
-
-// THE CACHED FUNCTION
 export const getCachedPuzzles = unstable_cache(
   async () => {
-    const db = getFirestore(app);
-    const q = query(
-      collection(db, "potd"),
-      orderBy("date", "desc"),
-      limit(10000)
-    );
-
-    const snapshot = await getDocs(q);
+    const snapshot = await adminFirestore
+      .collection("potd")
+      .orderBy("date", "desc")
+      .limit(10000)
+      .get();
 
     return snapshot.docs.map((doc) => {
       const data = doc.data();
 
-      // Serialize Date
       let dateString = new Date().toISOString();
       if (data.date) {
         if (typeof data.date.toDate === "function") {
@@ -43,7 +39,6 @@ export const getCachedPuzzles = unstable_cache(
         }
       }
 
-      // Format Options
       const rawOptions = [
         { key: "a", text: data.a },
         { key: "b", text: data.b },
@@ -52,7 +47,6 @@ export const getCachedPuzzles = unstable_cache(
         { key: "e", text: data.e },
       ];
 
-      // Format Correct Answers
       let correctArr: string[] = [];
       if (Array.isArray(data.correct)) {
         correctArr = data.correct;
@@ -76,6 +70,6 @@ export const getCachedPuzzles = unstable_cache(
       } as DailyPuzzle;
     });
   },
-  ["daily-puzzles-list"], // Cache Key
-  { revalidate: 600 }     // Revalidate every 10 minutes
+  ["daily-puzzles-list"],
+  { revalidate: 600 },
 );
