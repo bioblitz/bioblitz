@@ -948,8 +948,10 @@ export const publishScheduledPotd = onSchedule(
     queueSnap.docs.forEach((queueDoc) => {
       const data = queueDoc.data();
 
-      // Build the potd document — same shape getCachedPuzzles expects
-      const potdRef = db.collection("potd").doc(queueDoc.id);
+      // Use YYYY-M-D format (no leading zeros) for the potd doc ID
+      const [yr, mo, dy] = todayPst.split("-");
+      const potdDocId = `${yr}-${parseInt(mo)}-${parseInt(dy)}`;
+      const potdRef = db.collection("potd").doc(potdDocId);
       batch.set(potdRef, {
         title: data.title || "",
         question: data.question || "",

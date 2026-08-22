@@ -14,6 +14,7 @@ import {
   Plus,
   Hammer,
   ShieldUser,
+  BookOpen,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -24,6 +25,7 @@ import SearchBar from "./SearchBar";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import { MessageCircle } from "lucide-react";
 import { useChatStore } from "@/lib/chatStore";
+import { hasAiChatAccess } from "@/lib/aiChatAccess";
 
 export default function TooltipNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -45,6 +47,7 @@ export default function TooltipNavbar() {
     : [];
   const isAdmin = roles.includes("admin");
   const isStaff = isAdmin || roles.includes("staff");
+  const canUseAiChat = hasAiChatAccess(user?.email);
 
   const trackNavClick = (event: string, target: string) => {
     void trackAnalyticsEvent({
@@ -155,6 +158,9 @@ export default function TooltipNavbar() {
 
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Create", href: createHref, icon: Plus },
+    ...(canUseAiChat
+      ? [{ name: "Flashcards", href: "/flashcards", icon: BookOpen }]
+      : []),
     ...(isStaff ? [{ name: "Staff", href: "/staff", icon: ShieldUser }] : []),
     ...(isAdmin ? [{ name: "Admin", href: "/admin", icon: Hammer }] : []),
   ];

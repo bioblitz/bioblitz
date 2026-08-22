@@ -1,12 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import { getCachedPuzzles } from "@/lib/potd";
+import { getPuzzles } from "@/lib/potd";
 import PotdClient from "./PotdClient";
 
-export const revalidate = 600;
-
 export default async function PotdPage() {
-  const puzzles = await getCachedPuzzles();
-
+  const puzzles = await getPuzzles();
   return <PotdClient initialPuzzles={puzzles} />;
 }

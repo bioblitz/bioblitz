@@ -13,6 +13,7 @@ import {
   Hammer,
   ShieldUser,
   Swords,
+  BookOpen,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -21,6 +22,7 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import NotificationBell from "@/components/NotificationBell";
 import SearchBar from "./SearchBar";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
+import { hasAiChatAccess } from "@/lib/aiChatAccess";
 
 export default function MainNavbar() {
   const { isAuthenticated, user, setIsAuthenticated, loading } = useAuth();
@@ -45,6 +47,7 @@ export default function MainNavbar() {
     : [];
   const isAdmin = roles.includes("admin");
   const isStaff = isAdmin || roles.includes("staff");
+  const canUseAiChat = hasAiChatAccess(user?.email);
 
   const trackNavClick = (event: string, target: string) => {
     void trackAnalyticsEvent({
@@ -148,6 +151,9 @@ export default function MainNavbar() {
     },
 
     { name: "Create", href: createHref, icon: Plus },
+    ...(canUseAiChat
+      ? [{ name: "Flashcards", href: "/flashcards", icon: BookOpen }]
+      : []),
   ];
 
   useEffect(() => {
