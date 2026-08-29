@@ -121,7 +121,33 @@ function parseSubjectFlags(subject: string): {
 
 /** Matches the "On <date> <person> wrote:" banner, which clients often wrap. */
 const QUOTE_HEADER =
-  /^[ \t]*(?:>[ \t]?)*(?:On\b[^\n]*(?:\n[^\n]*){0,2}?wrote:|-{2,}\s*Original Message\s*-{2,}|_{5,})[ \t]*$/m;
+  /^[ \t]*(?:>[ \t]?)*(?:On\b[^\n]*(?:\n[^\n]*){0,3}?wrote:|-{2,}\s*Original Message\s*-{2,}|_{5,}|From:[ \t]*\S[^\n]*)[ \t]*$/m;
+
+/** First line that is quoted with ">", for clients that omit a banner. */
+const QUOTE_LINE = /^[ \t]{0,3}>/m;
+
+/**
+ * Finds where the quoted history starts. The banner is preferred because it
+ * is consumed rather than fed to the model; a bare ">" run is the fallback
+ * for clients that quote with no banner at all.
+ */
+function findQuoteBoundary(
+  text: string,
+): { index: number; skip: number } | null {
+  const banner = text.match(QUOTE_HEADER);
+  const line = text.match(QUOTE_LINE);
+
+  // Whichever comes first wins: a banner below the quote marks is part of a
+  // deeper level, not the boundary of this one.
+  if (
+    banner?.index !== undefined &&
+    (line?.index === undefined || banner.index <= line.index)
+  ) {
+    return { index: banner.index, skip: banner[0].length };
+  }
+  if (line?.index !== undefined) return { index: line.index, skip: 0 };
+  return null;
+}
 
 /** Removes one level of "> " quoting from a block. */
 function dequote(block: string): string {
@@ -146,12 +172,15 @@ function splitQuoteChain(text: string): string[] {
   let current = text.replace(/\r\n/g, "\n");
 
   for (let depth = 0; depth < MAX_QUOTE_DEPTH; depth++) {
-    const match = current.match(QUOTE_HEADER);
-    const head = match ? current.slice(0, match.index) : current;
+    const boundary = findQuoteBoundary(current);
+    const head = boundary ? current.slice(0, boundary.index) : current;
     segments.push(stripSignature(head).trim());
 
-    if (!match || match.index === undefined) break;
-    current = dequote(current.slice(match.index + match[0].length));
+    if (!boundary) break;
+    const rest = dequote(current.slice(boundary.index + boundary.skip));
+    // Nothing was unwrapped, so another pass would loop on the same text.
+    if (rest === current) break;
+    current = rest;
   }
 
   return segments.filter((segment) => segment.length > 0);
@@ -175,10 +204,17 @@ function buildHistory(text: string): GeminiTurn[] {
     });
   }
 
-  // Gemini wants oldest first, and rejects a history that does not end on the
-  // user's turn — so trim a leading model turn after reversing.
   turns.reverse();
-  while (turns.length > 0 && turns[0].role === "model") turns.shift();
+
+  // Gemini wants oldest first and rejects a history opening on a model turn,
+  // which happens whenever the quote chain starts mid-conversation. Opening a
+  // synthetic user turn keeps that earlier context instead of dropping it.
+  if (turns.length > 0 && turns[0].role === "model") {
+    turns.unshift({
+      role: "user",
+      parts: [{ text: "(earlier in this conversation)" }],
+    });
+  }
   return turns;
 }
 
@@ -341,13 +377,34 @@ export async function POST(request: NextRequest) {
     console.log(
       `respondToEmail: ${model}/${reasoning}, ${contents.length} turn(s)`,
     );
+    if (process.env.RESPOND_TO_EMAIL_DEBUG === "1") {
+      console.log("respondToEmail: raw body >>>", emailText.slice(0, 4000));
+      console.log("respondToEmail: turns >>>", JSON.stringify(contents));
+    }
 
     const reply = await generateReply(contents, model, reasoning);
     const messageId = received.message_id;
 
+    // Quote the message being answered, the way a mail client would. Without
+    // it a reply-to-our-reply quotes only our text, and the thread loses the
+    // question that prompted it.
+    const quoted = contents[contents.length - 1].parts[0].text
+      .split("\n")
+      .map((line) => `> ${line}`)
+      .join("\n");
+
     // Standard "-- " signature delimiter: mail clients collapse it, and the
     // quote parser strips it back off when this reply is quoted next round.
-    const body = `${reply}\n\n-- \nsent with ${model}, ${reasoning}`;
+    const body = [
+      reply,
+      "",
+      "-- ",
+      `sent with ${model}, ${reasoning}`,
+      "",
+      `On ${new Date().toUTCString()}, ${sender} wrote:`,
+      "",
+      quoted,
+    ].join("\n");
 
     const { error } = await new Resend(resendApiKey).emails.send({
       from: fromAddress,
