@@ -50,17 +50,27 @@ const SYSTEM_PROMPT = [
   "greeting boilerplate beyond a short one, and no markdown formatting.",
 ].join(" ");
 
-/** Resend inbound payload — only the fields this route reads. */
-type InboundEmail = {
+/**
+ * Resend's inbound webhook is metadata only — it deliberately omits the body,
+ * headers and attachments so large mail cannot blow the serverless request
+ * limit. The body is fetched separately with `email_id`.
+ */
+type InboundWebhook = {
   type?: string;
   data?: {
+    email_id?: string;
     from?: string;
     to?: string[] | string;
     subject?: string;
-    text?: string;
-    html?: string;
-    message_id?: string;
   };
+};
+
+/** Shape of GET /emails/receiving/{id} — only the fields this route reads. */
+type ReceivedEmail = {
+  subject?: string;
+  text?: string;
+  html?: string;
+  message_id?: string;
 };
 
 type GeminiTurn = { role: "user" | "model"; parts: { text: string }[] };
@@ -172,6 +182,43 @@ function buildHistory(text: string): GeminiTurn[] {
   return turns;
 }
 
+const RESEND_API_BASE = "https://api.resend.com";
+
+/** Pulls the full inbound message, which the webhook payload does not carry. */
+async function fetchReceivedEmail(
+  emailId: string,
+  apiKey: string,
+): Promise<ReceivedEmail> {
+  const response = await fetch(
+    `${RESEND_API_BASE}/emails/receiving/${emailId}`,
+    { headers: { Authorization: `Bearer ${apiKey}` } },
+  );
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`Resend retrieve failed ${response.status}: ${detail}`);
+  }
+
+  return (await response.json()) as ReceivedEmail;
+}
+
+/** Last resort when a sender ships HTML with no text/plain alternative. */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function generateReply(
   contents: GeminiTurn[],
   model: GeminiModelId,
@@ -226,13 +273,13 @@ export async function POST(request: NextRequest) {
   // re-serializing changes them, so the signature would never match.
   const rawBody = await request.text();
 
-  let payload: InboundEmail;
+  let payload: InboundWebhook;
   try {
     payload = new Webhook(secret).verify(rawBody, {
       "svix-id": request.headers.get("svix-id") ?? "",
       "svix-timestamp": request.headers.get("svix-timestamp") ?? "",
       "svix-signature": request.headers.get("svix-signature") ?? "",
-    }) as InboundEmail;
+    }) as InboundWebhook;
   } catch (err) {
     console.error("respondToEmail: signature verification failed", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -241,17 +288,18 @@ export async function POST(request: NextRequest) {
   // Everything past this point returns 200 no matter what: a non-2xx puts the
   // delivery into Resend's retry loop, which would re-run the whole thing.
   try {
+    if (payload.type && payload.type !== "email.received") {
+      console.log(`respondToEmail: ignoring ${payload.type} event`);
+      return NextResponse.json({ ok: true, ignored: true });
+    }
+
+    // The webhook's metadata is enough to reject a stranger, so an
+    // unauthorized sender never costs an API round trip.
     const sender = extractAddress(payload.data?.from);
     const authorized = (process.env.AUTHORIZED_EMAIL ?? "").trim().toLowerCase();
 
     if (!authorized || sender !== authorized) {
       console.log(`respondToEmail: ignoring message from ${sender || "unknown"}`);
-      return NextResponse.json({ ok: true, ignored: true });
-    }
-
-    const emailText = (payload.data?.text ?? "").trim();
-    if (!emailText) {
-      console.log("respondToEmail: message had no text body, skipping");
       return NextResponse.json({ ok: true, ignored: true });
     }
 
@@ -264,7 +312,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    const subject = payload.data?.subject ?? "";
+    const emailId = payload.data?.email_id;
+    if (!emailId) {
+      console.error("respondToEmail: webhook had no email_id");
+      return NextResponse.json({ ok: true, ignored: true });
+    }
+
+    const received = await fetchReceivedEmail(emailId, resendApiKey);
+    const emailText = (
+      received.text?.trim() ||
+      (received.html ? htmlToText(received.html) : "")
+    ).trim();
+
+    if (!emailText) {
+      console.log(`respondToEmail: ${emailId} had no readable body, skipping`);
+      return NextResponse.json({ ok: true, ignored: true });
+    }
+
+    const subject = received.subject ?? payload.data?.subject ?? "";
     const { model, reasoning } = parseSubjectFlags(subject);
     const contents = buildHistory(emailText);
 
@@ -278,7 +343,7 @@ export async function POST(request: NextRequest) {
     );
 
     const reply = await generateReply(contents, model, reasoning);
-    const messageId = payload.data?.message_id;
+    const messageId = received.message_id;
 
     const { error } = await new Resend(resendApiKey).emails.send({
       from: fromAddress,
