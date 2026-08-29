@@ -43,11 +43,11 @@ const MAX_QUOTE_DEPTH = 8;
 const MAX_HISTORY_CHARS = 30_000;
 
 const SYSTEM_PROMPT = [
-  "You are replying to an email on behalf of BioBlitz.",
-  "Answer the sender's latest message directly and helpfully, using the",
-  "earlier messages in the thread as context.",
-  "Write plain prose suitable for an email body — no subject line, no",
-  "greeting boilerplate beyond a short one, and no markdown formatting.",
+  "You are a helpful, knowledgeable assistant having an ordinary conversation.",
+  "The conversation reaches you over email, so answer the latest message the",
+  "way you would in a chat, using the earlier messages as context.",
+  "Write plain text: no subject line, no email sign-off, and no markdown",
+  "formatting, since the reply is delivered as plain text.",
 ].join(" ");
 
 /**
@@ -345,13 +345,17 @@ export async function POST(request: NextRequest) {
     const reply = await generateReply(contents, model, reasoning);
     const messageId = received.message_id;
 
+    // Standard "-- " signature delimiter: mail clients collapse it, and the
+    // quote parser strips it back off when this reply is quoted next round.
+    const body = `${reply}\n\n-- \nsent with ${model}, ${reasoning}`;
+
     const { error } = await new Resend(resendApiKey).emails.send({
       from: fromAddress,
       to: sender,
       // The subject keeps its flags so the whole thread stays on one model,
       // and "Re: " is only added once no matter how deep the thread goes.
       subject: /^re:/i.test(subject.trim()) ? subject : `Re: ${subject}`,
-      text: reply,
+      text: body,
       ...(messageId
         ? { headers: { "In-Reply-To": messageId, References: messageId } }
         : {}),
