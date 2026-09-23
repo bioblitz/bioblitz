@@ -80,6 +80,12 @@ export interface UserProfile {
   subscriberCount?: number;
   marketingConsent?: boolean,
   marketingConsentAskedAt?: Timestamp | FieldValue;
+  /**
+   * True for an account that has a username but has not been through the rest
+   * of onboarding — the state left by signing in from a live invite link,
+   * where only the username is asked for so the room is not kept waiting.
+   */
+  onboardingPending?: boolean;
 }
 
 export async function isUsernameUnique(username: string): Promise<boolean> {
@@ -110,10 +116,17 @@ export async function updateMarketingPreference(
   source: string = "unknown",
 ): Promise<void> {
   const userRef = doc(firestore, "users", uid);
-  await updateDoc(userRef, {
+  // Merged rather than updated: this is the record that stops the opt-in popup
+  // from asking again, so it must land even on a profile that is missing or
+  // mid-creation.
+  await setDoc(
+    userRef,
+    {
     marketingConsent: consent,
     marketingConsentAskedAt: serverTimestamp(),
-  });
+    },
+    { merge: true },
+  );
 
   try {
     await fetch("/api/analytics/marketing-consent", {
@@ -128,6 +141,20 @@ export async function updateMarketingPreference(
   } catch {
     // best-effort analytics only
   }
+}
+
+/**
+ * Records whether this account still owes the rest of onboarding.
+ *
+ * Merged rather than updated so it lands on a profile that is still being
+ * created, which is exactly the case it exists for.
+ */
+export async function setOnboardingPending(
+  uid: string,
+  pending: boolean,
+): Promise<void> {
+  const userRef = doc(firestore, "users", uid);
+  await setDoc(userRef, { onboardingPending: pending }, { merge: true });
 }
 
 export async function updateUserBanner(

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminAuth, adminFirestore } from '@/lib/firebase-admin';
+import { removeSetFromPoolUsage } from '@/lib/questionPool';
 
 export const dynamic = 'force-dynamic';
 
@@ -276,6 +277,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ c
     const questionsSnap = await docRef.collection('questions').get();
     await Promise.all(questionsSnap.docs.map((d) => d.ref.delete()));
     await docRef.delete();
+    await removeSetFromPoolUsage(contestId);
 
     return NextResponse.json({ message: 'Deleted' });
   } catch (err) {

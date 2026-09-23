@@ -13,6 +13,7 @@ import {
   Flame,
   Plus,
   Hammer,
+  Radio,
   ShieldUser,
   BookOpen,
 } from "lucide-react";
@@ -149,6 +150,7 @@ export default function TooltipNavbar() {
   const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
+    { name: "Live", href: "/live", icon: Radio },
     {
       name: "Messages",
       href: "/messages",
@@ -181,7 +183,7 @@ export default function TooltipNavbar() {
           title="Current Streak"
         >
           <Flame
-            className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`}
+            className={`w-4 h-4 text-orange-500 ${streakActive ?"fill-orange-500" :"fill-transparent"}`}
           />
           <span className="text-sm font-bold text-orange-400">{streak}</span>
         </div>
@@ -241,7 +243,7 @@ export default function TooltipNavbar() {
                 <span className="text-neutral-400 text-sm">Streak</span>
                 <div className="flex items-center gap-1.5 text-orange-400 font-bold">
                   <Flame
-                    className={`w-4 h-4 text-orange-500 ${streakActive ? "fill-orange-500" : "fill-transparent"}`}
+                    className={`w-4 h-4 text-orange-500 ${streakActive ?"fill-orange-500" :"fill-transparent"}`}
                   />
                   {streak}
                 </div>

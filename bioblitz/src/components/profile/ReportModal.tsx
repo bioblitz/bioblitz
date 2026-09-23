@@ -82,7 +82,7 @@ export default function ReportModal({
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-bold text-neutral-500 tracking-wider mb-2 block">
                   Reason
                 </label>
                 <div className="relative">
@@ -104,7 +104,7 @@ export default function ReportModal({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-bold text-neutral-500 tracking-wider mb-2 block">
                   Description
                 </label>
                 <textarea

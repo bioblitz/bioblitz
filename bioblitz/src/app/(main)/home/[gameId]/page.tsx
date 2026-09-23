@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { allGames } from "@/lib/gameRoomsAll";
 import { gameRoom } from "@/types/index";
-import { Loader2 } from "lucide-react";
+import { Loader2, Radio } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
@@ -421,6 +422,15 @@ export default function GameDetailPage() {
               proceedToGame={proceedToGame}
               handleJoinGame={handleJoinGame}
             />
+            {user && (
+              <Link
+                href={`/live?set=${gameId}`}
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-neutral-800 bg-[rgba(9,9,11,0.8)] text-neutral-300 font-bold text-[14px] hover:bg-neutral-800 hover:text-white transition-all"
+        >
+                <Radio className="w-4 h-4" />
+                Host this live
+              </Link>
+            )}
             <RegistrantsAvatars
               game={game}
               loadingLeaderboard={loadingLeaderboard}

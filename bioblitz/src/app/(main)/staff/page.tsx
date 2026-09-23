@@ -144,6 +144,14 @@ export default function StaffPage() {
         <div className="mt-6 flex flex-col gap-3">
           <button
             type="button"
+            onClick={() => router.push("/staff/pool")}
+            className="px-4 py-2 rounded-lg bg-neutral-900 border border-yellow-300 text-white text-sm font-semibold hover:bg-neutral-800 transition-colors w-fit"
+          >
+            Question pool
+          </button>
+
+          <button
+            type="button"
             onClick={() => router.push("/contests/create?postAs=mitosisphere")}
             className="px-4 py-2 rounded-lg bg-neutral-900 border border-yellow-300 text-white text-sm font-semibold hover:bg-neutral-800 transition-colors w-fit"
           >

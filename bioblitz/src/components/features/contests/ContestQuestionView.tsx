@@ -76,7 +76,7 @@ const ContestQuestionView: React.FC<ContestQuestionViewProps> = ({
               />
               {isCorrect && (
                 <span className="ml-auto text-emerald-400 font-normal text-[11px] tracking-wider shrink-0">
-                  CORRECT
+                  Correct
                 </span>
               )}
             </div>

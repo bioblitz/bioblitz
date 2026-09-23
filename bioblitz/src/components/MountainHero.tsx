@@ -195,7 +195,6 @@ export default function MountainHero() {
           color: "rgba(245,240,232,0.2)",
           fontSize: "10px",
           letterSpacing: "0.12em",
-          textTransform: "uppercase",
           textDecoration: "none",
           animation: "float-cue 3s ease-in-out infinite",
         }}

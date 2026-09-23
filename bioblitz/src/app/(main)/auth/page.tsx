@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { createUserProfile } from "@/lib/user";
-import { markMarketingPopupForNextSignIn } from "@/hooks/useMarketingPopup";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import GoogleButton from "@/components/ui/GoogleButton";
 import Link from "next/link";
@@ -105,7 +104,7 @@ export default function AuthenticationPage() {
   }
   return (
     <div className="min-h-screen w-full bg-neutral-900 text-white flex items-center justify-center relative overflow-hidden font-sans p-4">
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none  bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-[size:24px_24px]"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-neutral-900 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-4xl">

@@ -71,6 +71,28 @@ export interface EditableQuestion {
   solution?: string;
 }
 
+/** A set that a pool question has been used in, for usage links in the staff pool. */
+export interface PoolSetUsage {
+  id: string;
+  title: string;
+  status?: string;
+  hidden?: boolean;
+}
+
+/** A question in the staff question pool: an editable question plus its tags and usage. */
+export interface PoolQuestion extends EditableQuestion {
+  topic: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  tags: string[];
+  source: "manual" | "ai";
+  createdAt: number | null;
+  updatedAt: number | null;
+  createdBy?: string;
+  createdByUsername?: string;
+  usageCount: number;
+  usedIn: PoolSetUsage[];
+}
+
 export interface IQuestionForDisplay {
   content: string;
   imgURL?: string;

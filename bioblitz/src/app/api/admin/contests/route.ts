@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase-admin";
+import { removeSetFromPoolUsage } from "@/lib/questionPool";
 
 export const dynamic = 'force-dynamic';
 
@@ -84,6 +85,9 @@ export async function DELETE(request: Request) {
 
     // 2. Delete the set document itself
     await adminFirestore.collection("sets").doc(gameId).delete();
+
+    // 2b. Drop this set from the usage history of any pool questions it used
+    await removeSetFromPoolUsage(gameId);
 
     // 3. Delete all gameSubmissions for this game
     const submissionsRef = adminFirestore

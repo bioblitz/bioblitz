@@ -667,7 +667,7 @@ function ActivitySection({
               </span>
             </div>
             <p
-              className={`${mono} text-[9px] text-neutral-600 font-bold uppercase`}
+              className={`${mono} text-[9px] text-neutral-600 font-bold`}
               style={{ letterSpacing: "0.1em" }}
             >
               {s.label}
@@ -753,7 +753,7 @@ function TopicBreakdownSection({ topicStats }: { topicStats: TopicStat[] }) {
                       {stat.topic}
                     </span>
                     <span
-                      className={`${mono} text-[9px] font-normal uppercase px-1.5 py-0.5 rounded ${vc.bg} ${vc.text}`}
+                      className={`${mono} text-[9px] font-normal px-1.5 py-0.5 rounded ${vc.bg} ${vc.text}`}
                       style={{ letterSpacing: "0.1em" }}
                     >
                       {verdict}
@@ -847,7 +847,7 @@ function WeeklySnapshotSection({
                 {s.suffix || ""}
               </span>
               <p
-                className={`${mono} text-[9px] text-neutral-600 font-bold uppercase mt-0.5`}
+                className={`${mono} text-[9px] text-neutral-600 font-bold mt-0.5`}
                 style={{ letterSpacing: "0.1em" }}
               >
                 {s.label}
@@ -962,7 +962,7 @@ function ReviewSection({
                       {set.title}
                     </p>
                     <span
-                      className={`inline-block text-[9px] font-bold uppercase tracking-wide ${topicColors.bg} px-1.5 py-0.5 rounded mt-1.5`}
+                      className={`inline-block text-[9px] font-bold tracking-wide ${topicColors.bg} px-1.5 py-0.5 rounded mt-1.5`}
                     >
                       {getTopicShortLabel(set.topic)}
                     </span>

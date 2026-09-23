@@ -11,6 +11,7 @@ import {
   Flame,
   Plus,
   Hammer,
+  Radio,
   ShieldUser,
   Swords,
   BookOpen,
@@ -144,6 +145,7 @@ export default function MainNavbar() {
   const sideItems = [
     { name: "Home", href: "/home", icon: House },
     { name: "Daily Problem", href: "/potd", icon: Flame },
+    { name: "Live", href: "/live", icon: Radio },
     {
       name: "Leaderboard",
       href: "/leaderboard",

@@ -93,7 +93,7 @@ export default function LandingPlatformExplorer() {
       <div className="mx-auto max-w-6xl rounded-[2rem] border border-neutral-800 bg-neutral-950/70 p-5 sm:p-6 lg:p-8 shadow-2xl shadow-black/20">
         <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">Learn the platform</p>
+            <p className="text-xs tracking-[0.3em] text-neutral-500">Learn the platform</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-50 sm:text-3xl">
               Tap through the parts that make BioBlitz work.
             </h2>
@@ -132,7 +132,7 @@ export default function LandingPlatformExplorer() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
           <div className="rounded-[1.5rem] border border-neutral-800 bg-neutral-900/60 p-5 sm:p-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">{activeItem.eyebrow}</p>
+            <p className="text-xs tracking-[0.3em] text-neutral-500">{activeItem.eyebrow}</p>
             <h3 className="mt-3 text-2xl font-semibold text-neutral-50 sm:text-3xl">{activeItem.title}</h3>
             <p className="mt-3 text-sm leading-6 text-neutral-300 sm:text-base">{activeItem.description}</p>
 
@@ -147,7 +147,7 @@ export default function LandingPlatformExplorer() {
           </div>
 
           <div className="overflow-hidden rounded-[1.5rem] border border-neutral-800 bg-neutral-900/50">
-            <div className="border-b border-neutral-800 bg-neutral-950 px-4 py-3 text-xs uppercase tracking-[0.25em] text-neutral-500">
+            <div className="border-b border-neutral-800 bg-neutral-950 px-4 py-3 text-xs tracking-[0.25em] text-neutral-500">
               {activeItem.title}
             </div>
             <div className="relative aspect-[4/5] min-h-[18rem] w-full bg-neutral-950 sm:aspect-[16/10] lg:aspect-auto lg:min-h-full">

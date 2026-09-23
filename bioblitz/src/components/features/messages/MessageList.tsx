@@ -106,7 +106,7 @@ export default function MessageList({
             {showDayLabel && (
               <div className="flex items-center gap-3 my-4">
                 <div className="flex-1 h-px bg-neutral-800" />
-                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-neutral-500 tracking-wider">
                   {formatDayLabel(msg.createdAt)}
                 </span>
                 <div className="flex-1 h-px bg-neutral-800" />

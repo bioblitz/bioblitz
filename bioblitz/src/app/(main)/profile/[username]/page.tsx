@@ -573,9 +573,9 @@ export default function ProfilePage() {
               <div className="absolute inset-0 bg-gradient-to-b from-neutral-900 to-black" />
             )}
           </div>
-          <div className="px-4 py-3 sm:px-6 sm:py-5  flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="px-4 py-3 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-widest text-neutral-500">
+              <p className="text-xs tracking-widest text-neutral-500">
                 Channel
               </p>
               <h3 className="text-sm sm:text-xl font-semibold text-white">

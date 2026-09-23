@@ -92,7 +92,7 @@ export default function PotdArchivePanel({
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-neutral-800">
                 <div className="space-y-3">
-                  <span className="text-xs font-bold text-neutral-500 uppercase">
+                  <span className="text-xs font-bold text-neutral-500">
                     Status
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -112,7 +112,7 @@ export default function PotdArchivePanel({
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <span className="text-xs font-bold text-neutral-500 uppercase">
+                  <span className="text-xs font-bold text-neutral-500">
                     Topics
                   </span>
                   <div className="flex flex-wrap gap-2">

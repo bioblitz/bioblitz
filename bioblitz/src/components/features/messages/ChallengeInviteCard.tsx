@@ -188,7 +188,7 @@ export default function ChallengeInviteCard({
             <span
               className={`${getTopicChipBg(
                 blitz.topic,
-              )} text-white text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full`}
+              )} text-white text-[9px] font-bold tracking-wider  px-1.5 py-0.5 rounded-full`}
             >
               {getTopicShortLabel(blitz.topic)}
             </span>
@@ -225,7 +225,7 @@ export default function ChallengeInviteCard({
       </div>
 
       <div className="px-3.5 py-2.5">
-        <p className="text-[10px] text-neutral-500 uppercase tracking-wider truncate">
+        <p className="text-[10px] text-neutral-500 tracking-wider truncate">
           {contextLine}
         </p>
 

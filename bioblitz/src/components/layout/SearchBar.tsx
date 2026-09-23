@@ -143,7 +143,7 @@ export default function SearchBar() {
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
-                  <span className="text-[10px] uppercase tracking-widest text-neutral-500 border border-neutral-800 rounded-full px-2 py-0.5">
+                  <span className="text-[10px] tracking-widest text-neutral-500 border border-neutral-800 rounded-full px-2 py-0.5">
                     {result.type}
                   </span>
                   <div className="flex flex-col min-w-0">

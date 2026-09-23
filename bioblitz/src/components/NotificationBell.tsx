@@ -208,7 +208,7 @@ export default function NotificationBell() {
               {allNotifications.length > 0 && (
                 <button
                   onClick={clearAll}
-                  className="text-[10px] font-bold text-neutral-500 hover:text-neutral-300 transition-colors uppercase tracking-wider"
+                  className="text-[10px] font-bold text-neutral-500 hover:text-neutral-300 transition-colors tracking-wider"
                 >
                   Clear All
                 </button>
