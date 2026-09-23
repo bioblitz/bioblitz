@@ -118,7 +118,7 @@ export default function EloChart({ eloHistory }: EloChartProps) {
                   const tier = getRatingTier(Math.round(data.elo));
                   return (
                     <div className="bg-neutral-900 border border-neutral-800 p-3 rounded-xl shadow-2xl backdrop-blur-md">
-                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-tighter mb-1">{data.fullDate}</p>
+                      <p className="text-[10px] font-bold text-neutral-500 tracking-tighter mb-1">{data.fullDate}</p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-black text-white">{Math.round(data.elo)}</span>
                         {data.delta !== undefined && data.delta !== 0 && (

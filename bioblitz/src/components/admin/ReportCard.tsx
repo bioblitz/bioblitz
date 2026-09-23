@@ -135,7 +135,7 @@ export default function ReportCard({ report, staffUid }: ReportCardProps) {
       {/* Top row: reason badge + timestamp */}
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <span
-          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${REASON_COLORS[report.reason]}`}
+          className={`text-[10px] font-bold tracking-wider px-2 py-1 rounded-full border ${REASON_COLORS[report.reason]}`}
         >
           {REASON_LABELS[report.reason]}
         </span>
@@ -147,7 +147,7 @@ export default function ReportCard({ report, staffUid }: ReportCardProps) {
 
       {/* The reported message */}
       <div className="mb-4">
-        <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1.5">
+        <p className="text-[10px] text-neutral-500 tracking-wider mb-1.5">
           Reported message
         </p>
         <div className="bg-neutral-900 border border-neutral-800/50 rounded-lg px-3.5 py-2.5">
@@ -170,7 +170,7 @@ export default function ReportCard({ report, staffUid }: ReportCardProps) {
       {/* Details */}
       {report.details && (
         <div className="mb-4">
-          <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">
+          <p className="text-[10px] text-neutral-500 tracking-wider mb-1">
             Reporter notes
           </p>
           <p className="text-sm text-neutral-400 italic">
@@ -264,7 +264,7 @@ function UserPill({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] text-neutral-500 uppercase tracking-wider leading-none mb-0.5">
+        <p className="text-[10px] text-neutral-500 tracking-wider leading-none mb-0.5">
           {label}
         </p>
         <p className="text-xs font-medium text-neutral-200 truncate">

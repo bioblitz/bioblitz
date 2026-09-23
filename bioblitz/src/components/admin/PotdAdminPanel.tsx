@@ -205,7 +205,7 @@ export default function PotdAdminPanel({ idToken }: { idToken: string }) {
           {drawResult && (
             <div className="rounded-2xl border border-orange-500/30 bg-orange-500/10 p-5 text-center space-y-2">
               <Trophy className="w-6 h-6 text-orange-400 mx-auto" />
-              <p className="text-xs text-orange-300 font-medium uppercase tracking-widest">Winner</p>
+              <p className="text-xs text-orange-300 font-medium tracking-widest">Winner</p>
               <p className="text-xl font-bold text-white">{drawResult.winner.displayName}</p>
               {drawResult.winner.username && (
                 <p className="text-sm text-zinc-400">@{drawResult.winner.username}</p>

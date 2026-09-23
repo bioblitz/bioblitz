@@ -161,7 +161,7 @@ export default function SubscribersModal({
         {/* Footer */}
         {!loading && subscribers.length > 0 && (
           <div className="p-3 border-t border-neutral-800/50 bg-neutral-900/30 text-center rounded-b-3xl">
-            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">
+            <p className="text-[10px] text-neutral-500 font-medium tracking-wider">
               {subscribers.length} Total Subscribers
             </p>
           </div>

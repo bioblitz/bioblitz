@@ -5,10 +5,11 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
   useRef,
 } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { UserProfile, cacheUserPhotoURL } from "@/lib/user";
 import { useChatStore } from "@/lib/chatStore";
 
@@ -19,6 +20,12 @@ interface AuthContextType {
   updateUserPhoto: (photoURL: string) => void;
   updateUsername: (username: string) => void;
   loading: boolean;
+  /**
+   * Re-reads the server session. Needed after signing in somewhere that does
+   * not reload the page: the provider only reacts to Firebase auth changes,
+   * and the session cookie is minted a moment after those fire.
+   */
+  refresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,15 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const isCachingPhoto = useRef(false);
 
-  useEffect(() => {
-    const auth = getAuth();
-
-    // Wait for Firebase Auth to restore its state from IndexedDB before doing
-    // anything. This fires once with the real auth state (no null-then-user
-    // indeterminate period for cached sessions), so we never check
-    // auth.currentUser synchronously, which was the race condition that caused
-    // force-logouts on every page reload.
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+  const syncFromFirebaseUser = useCallback(
+    async (firebaseUser: User | null) => {
       try {
         if (firebaseUser) {
           useChatStore.getState().setCurrentUser(firebaseUser.uid);
@@ -94,10 +94,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } finally {
         setLoading(false);
       }
-    });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const auth = getAuth();
+
+    // Wait for Firebase Auth to restore its state from IndexedDB before doing
+    // anything. This fires once with the real auth state (no null-then-user
+    // indeterminate period for cached sessions), so we never check
+    // auth.currentUser synchronously, which was the race condition that caused
+    // force-logouts on every page reload.
+    const unsubscribe = onAuthStateChanged(auth, syncFromFirebaseUser);
 
     return () => unsubscribe();
-  }, []);
+  }, [syncFromFirebaseUser]);
+
+  const refresh = useCallback(async () => {
+    await syncFromFirebaseUser(getAuth().currentUser);
+  }, [syncFromFirebaseUser]);
 
   const updateUserPhoto = (photoURL: string) => {
     if (user) setUser({ ...user, photoURL });
@@ -116,6 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         updateUserPhoto,
         updateUsername,
         loading,
+        refresh,
       }}
     >
       {children}

@@ -375,18 +375,18 @@ export default function BookmarksClient() {
                                     <span className="text-[14px]">{text}</span>
                                     {isCorrect && (
                                       <span
-                                        className={`${mono} ml-auto text-emerald-400 font-normal text-[10px] uppercase`}
+                                        className={`${mono} ml-auto text-emerald-400 font-normal text-[10px]`}
                                         style={{ letterSpacing: "0.06em" }}
                                       >
-                                        CORRECT
+                                        Correct
                                       </span>
                                     )}
                                     {isUserAnswer && !isCorrect && (
                                       <span
-                                        className={`${mono} ml-auto text-red-400 font-normal text-[10px] uppercase`}
+                                        className={`${mono} ml-auto text-red-400 font-normal text-[10px]`}
                                         style={{ letterSpacing: "0.06em" }}
                                       >
-                                        YOUR ANSWER
+                                        Your answer
                                       </span>
                                     )}
                                   </div>
@@ -395,7 +395,7 @@ export default function BookmarksClient() {
                             </div>
                             <div className="mt-4 mb-2">
                               <p
-                                className={`${mono} text-[10px] text-neutral-600 font-bold uppercase mb-2`}
+                                className={`${mono} text-[10px] text-neutral-600 font-bold mb-2`}
                                 style={{ letterSpacing: "0.1em" }}
                               >
                                 Your Note

@@ -80,6 +80,12 @@ allow update: if isSignedIn() && (
         allow write: if false;
       }
     }
+
+    // Staff question pool: written only through the staff APIs (admin SDK).
+    match /questionPool/{questionId} {
+      allow read: if isStaff();
+      allow write: if false;
+    }
 match /gameSubmissions/{submissionId} {
   allow read: if true;
   allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
@@ -131,6 +137,35 @@ match /gameSubmissions/{submissionId} {
         request.auth.uid == resource.data.challengerId || 
         request.auth.uid == resource.data.challengedId
       );
+    }
+
+    // ====================================================================
+    // LIVE (HOSTED) BLITZES
+    // Everything here is written by the live APIs through the Admin SDK: the
+    // phase clock, the grading and the answer timing all have to come from the
+    // server for the standings to mean anything. Clients only ever read.
+    // ====================================================================
+    match /liveGames/{liveGameId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+
+      match /players/{playerId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+
+      // `content/questions` is the public question list; `content/answers`
+      // holds the answer key and stays unreadable for the whole game.
+      match /content/{contentId} {
+        allow read: if isSignedIn() && contentId != 'answers';
+        allow write: if false;
+      }
+    }
+
+    // Join code -> live game lookup. Resolved server-side on join, so there is
+    // no reason for a client to read (or enumerate) these.
+    match /liveJoinCodes/{joinCode} {
+      allow read, write: if false;
     }
 
     match /search_index/{docId} {

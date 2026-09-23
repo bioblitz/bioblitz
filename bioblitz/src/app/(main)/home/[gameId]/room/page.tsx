@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore, auth } from "@/lib/firebase";
+import { RATING_SETTLE_MS, ratingOutcome } from "@/lib/ratingOutcome";
 import { User } from "firebase/auth";
 import {
   Loader2,
@@ -72,6 +73,10 @@ type GameResult = {
   correctAnswers: { [key: number]: string | string[] };
   ratingDelta: number | null;
   newElo: number | null;
+  /** Grading outcome, needed to tell "still rating" from "never will be". */
+  status?: string;
+  ranked?: boolean;
+  earlyEntry?: boolean;
 };
 
 type LeaderboardEntry = {
@@ -115,7 +120,7 @@ export default function GameRoomPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [finalResult, setFinalResult] = useState<GameResult | null>(null);
-  const [ratingTimedOut, setRatingTimedOut] = useState(false);
+  const [ratingSettled, setRatingSettled] = useState(false);
   const [isOwnBlitz, setIsOwnBlitz] = useState(false);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -203,11 +208,14 @@ export default function GameRoomPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [submitted]);
 
+  // Most endings never write `ratingDelta` at all (replay, practice, a set
+  // short of activation), so the spinner gets a deadline instead of waiting on
+  // a field that may never arrive. See `ratingOutcome` for the full set.
   useEffect(() => {
     if (!finalResult || finalResult.ratingDelta != null) return;
     const t = setTimeout(() => {
-      if (isMounted.current) setRatingTimedOut(true);
-    }, 12000);
+      if (isMounted.current) setRatingSettled(true);
+    }, RATING_SETTLE_MS);
     return () => clearTimeout(t);
   }, [finalResult?.ratingDelta]);
 
@@ -406,6 +414,9 @@ export default function GameRoomPage() {
               correctAnswers: data.correctAnswers,
               ratingDelta: data.ratingDelta ?? null,
               newElo: data.newElo ?? null,
+              status: data.status,
+              ranked: data.ranked,
+              earlyEntry: data.earlyEntry,
             });
           }
           tryResolveChallenge({
@@ -449,6 +460,13 @@ export default function GameRoomPage() {
     const s = totalSeconds % 60;
     return `${m} min${m !== 1 ? "s" : ""} ${s} sec${s !== 1 ? "s" : ""}`;
   };
+
+  const rating = ratingOutcome({
+    submission: finalResult,
+    exists: finalResult !== null,
+    settled: ratingSettled,
+    ownBlitz: isOwnBlitz,
+  });
 
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [userRank, setUserRank] = useState<number | null>(null);
@@ -814,26 +832,24 @@ export default function GameRoomPage() {
                           <p className="text-[14px] font-[700] text-neutral-500">
                             {isOwnBlitz ? "Your blitz" : "Practice"}
                           </p>
-                        ) : finalResult.ratingDelta !== null ? (
+                        ) : rating.kind === "delta" ? (
                           <p
-                            className={`text-[28px] font-normal ${finalResult.ratingDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                            className={`text-[28px] font-normal ${rating.delta >= 0 ?"text-emerald-400" :"text-red-400"}`}
                           >
-                            {finalResult.ratingDelta >= 0 ? "+" : ""}
-                            {finalResult.ratingDelta}
+                            {rating.delta >= 0 ? "+" : ""}
+                            {rating.delta}
                           </p>
-                        ) : ratingTimedOut ? (
-                          <p className="text-[12px] font-[700] text-neutral-500 leading-snug">
-                            Pending
-                            <br />
-                            activation
-                          </p>
-                        ) : (
+                        ) : rating.kind === "pending" ? (
                           <div className="flex flex-col items-center gap-1 mt-1">
                             <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
                             <p className="text-[10px] text-neutral-500">
                               Calculating…
                             </p>
                           </div>
+                        ) : (
+                          <p className="text-[12px] font-[700] text-neutral-500 leading-snug">
+                            {rating.label}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -912,18 +928,18 @@ export default function GameRoomPage() {
                                   />
                                   {isChoiceCorrect && (
                                     <span
-                                      className={`ml-auto text-emerald-400 font-normal text-[11px] uppercase`}
+                                      className={`ml-auto text-emerald-400 font-normal text-[11px]`}
                                       style={{ letterSpacing: "0.06em" }}
                                     >
-                                      CORRECT
+                                      Correct
                                     </span>
                                   )}
                                   {isUserChoice && !isChoiceCorrect && (
                                     <span
-                                      className={`ml-auto text-red-400 font-normal text-[11px] uppercase`}
+                                      className={`ml-auto text-red-400 font-normal text-[11px]`}
                                       style={{ letterSpacing: "0.06em" }}
                                     >
-                                      YOUR ANSWER
+                                      Your answer
                                     </span>
                                   )}
                                 </div>

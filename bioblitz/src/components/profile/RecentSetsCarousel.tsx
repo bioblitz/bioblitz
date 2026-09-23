@@ -71,7 +71,7 @@ export default function RecentSetsCarousel({
                   {set.name.replace("Name: ", "")}
                 </span>
                 <div className="flex items-end justify-between border-t border-neutral-800 pt-3">
-                  <span className="text-xs text-neutral-500 uppercase tracking-wider">
+                  <span className="text-xs text-neutral-500 tracking-wider">
                     Score
                   </span>
                   <span className="text-xl font-bold text-neutral-400">{set.score}</span>

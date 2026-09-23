@@ -1,1 +1,12 @@
-{ "indexes": [] }
+{
+  "indexes": [
+    {
+      "collectionGroup": "liveGames",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hostId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    }
+  ]
+}

@@ -103,7 +103,7 @@ function MetricCard({
 }) {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-      <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{label}</p>
+      <p className="text-xs tracking-[0.2em] text-neutral-500">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-neutral-50">{value}</p>
       {hint ? <p className="mt-1 text-xs text-neutral-500">{hint}</p> : null}
     </div>
@@ -202,7 +202,7 @@ export default function AdminAnalyticsPage() {
     h1 { font-size: 20px; margin-bottom: 4px; }
     .meta { color: #555; font-size: 11px; margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; }
-    th { background: #f3f4f6; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; }
+    th { background: #f3f4f6; text-align: left; padding: 8px 10px; font-size: 11px; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; }
     td { padding: 7px 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     tr:last-child td { border-bottom: none; }
     .rate { font-weight: 600; }
@@ -313,7 +313,7 @@ export default function AdminAnalyticsPage() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-neutral-800/80 bg-neutral-950/70 p-6 shadow-2xl shadow-black/20 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">Admin analytics</p>
+            <p className="text-xs tracking-[0.35em] text-neutral-500">Admin analytics</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-50 sm:text-4xl">
               Retention, consent, and product usage in one view.
             </h1>
@@ -342,7 +342,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {lastUpdatedAt ? (
-          <p className="mb-6 text-xs uppercase tracking-[0.25em] text-neutral-500">
+          <p className="mb-6 text-xs tracking-[0.25em] text-neutral-500">
             Last updated {lastUpdatedAt.toLocaleString()}
           </p>
         ) : null}
@@ -363,7 +363,7 @@ export default function AdminAnalyticsPage() {
                   <h2 className="text-lg font-semibold text-neutral-50">Trends over time</h2>
                   <p className="text-sm text-neutral-500">A 30-day view of signups, product activity, and consent volume.</p>
                 </div>
-                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs tracking-[0.2em] text-neutral-500">
                   30 days
                 </span>
               </div>
@@ -436,7 +436,7 @@ export default function AdminAnalyticsPage() {
                     <h2 className="text-lg font-semibold text-neutral-50">Users</h2>
                     <p className="text-sm text-neutral-500">Retention and activity across the installed base.</p>
                   </div>
-                  <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs tracking-[0.2em] text-neutral-500">
                     Activity
                   </span>
                 </div>
@@ -456,7 +456,7 @@ export default function AdminAnalyticsPage() {
                     <h2 className="text-lg font-semibold text-neutral-50">Marketing consent</h2>
                     <p className="text-sm text-neutral-500">Popup delivery and opt-in performance.</p>
                   </div>
-                  <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs tracking-[0.2em] text-neutral-500">
                     Consent
                   </span>
                 </div>
@@ -477,7 +477,7 @@ export default function AdminAnalyticsPage() {
                   <h2 className="text-lg font-semibold text-neutral-50">Product funnel</h2>
                   <p className="text-sm text-neutral-500">The path from landing page to contest participation.</p>
                 </div>
-                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                <span className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs tracking-[0.2em] text-neutral-500">
                   Conversion
                 </span>
               </div>

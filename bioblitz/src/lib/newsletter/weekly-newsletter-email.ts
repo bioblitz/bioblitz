@@ -97,7 +97,7 @@ export function generateNewsletterNotificationEmail(
       <!-- Date badge -->
       <table role="presentation" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td align="center" style="background-color:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.22);border-radius:100px;padding:6px 18px;font-family:Verdana,Geneva,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1px;color:#facc15;text-transform:uppercase;">
+          <td align="center" style="background-color:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.22);border-radius:100px;padding:6px 18px;font-family:Verdana,Geneva,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1px;color:#facc15;">
             ${sendDate}
           </td>
         </tr>

@@ -4,23 +4,27 @@ import { app } from "@/lib/firebase";
 import { UserProfile } from "@/lib/user";
 import { updateMarketingPreference } from "@/lib/user";
 
-const NEXT_SIGN_IN_POPUP_KEY = "showMarketingPopupOnNextSignIn";
 const MARKETING_POPUP_LOCAL_STATE_KEY = "marketingPopupLocalState";
-const MARKETING_POPUP_RESPONSE_TIME_KEY = "marketingPopupResponseTime";
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-const RESPONSE_COOLDOWN_MS = 5 * 60 * 1000;
 
 interface useMarketingPopup {
     user: UserProfile | null;
-    checkNextSignInFlag?: boolean;
 }
 
-export function markMarketingPopupForNextSignIn() {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(NEXT_SIGN_IN_POPUP_KEY, "1");
-}
-
-export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMarketingPopup) {
+/**
+ * The email-updates opt-in.
+ *
+ * It is asked **once per account, ever**. Whatever the answer is, it is the
+ * answer: the only way it changes afterwards is the toggle in settings. A
+ * popup that reappears on sign-in reads as the site ignoring a choice the
+ * person already made, so there is deliberately no re-ask window, no
+ * "next sign-in" flag and no decline cooldown here.
+ *
+ * The answer is recorded in two places. Firestore is authoritative, so the
+ * question does not come back on a new device. localStorage is a fallback for
+ * the case where that write fails — without it a failed write would mean the
+ * popup returned on the very next page load.
+ */
+export function useMarketingPopup({ user }: useMarketingPopup) {
     const [showModal, setShowModal] = useState(false);
     const db = getFirestore(app);
     const shownLoggedRef = useRef(false);
@@ -46,20 +50,7 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
                     MARKETING_POPUP_LOCAL_STATE_KEY,
                     JSON.stringify({ consent, askedAt: Date.now() })
                 );
-                window.localStorage.setItem(MARKETING_POPUP_RESPONSE_TIME_KEY, Date.now().toString());
             } catch {
-            }
-        };
-
-        const hasRecentlyResponded = () => {
-            if (typeof window === "undefined") return false;
-            try {
-                const responseTime = window.localStorage.getItem(MARKETING_POPUP_RESPONSE_TIME_KEY);
-                if (!responseTime) return false;
-                const lastResponseTime = parseInt(responseTime, 10);
-                return Date.now() - lastResponseTime < RESPONSE_COOLDOWN_MS;
-            } catch {
-                return false;
             }
         };
 
@@ -76,102 +67,65 @@ export function useMarketingPopup({ user, checkNextSignInFlag = false }: useMark
             } catch {
             }
         };
-    
+
     useEffect(() => {
         if(!user?.uid) return;
-        
-        if (hasRecentlyResponded()) {
-            return;
-        }
-        
+
+        // An answer given in this session, before the profile read below has
+        // caught up with it.
+        if (readLocalState() !== null) return;
+
         const uid = user.uid;
+        let cancelled = false;
+
         async function check(){
+            let data: Record<string, unknown> | undefined;
+            try {
             const ref = doc(db, "users", uid)
             const snap = await getDoc(ref);
-            const data = snap.data();
-
-                        const forceShow =
-                            checkNextSignInFlag &&
-                            typeof window !== "undefined" &&
-                            window.localStorage.getItem(NEXT_SIGN_IN_POPUP_KEY) === "1";
-
-                        if(data?.marketingConsent === true){
-                                writeLocalState(true);
-                                if (typeof window !== "undefined") {
-                                    window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
-                                }
+                data = snap.data();
+            } catch {
+                // If the profile cannot be read there is no way to know whether
+                // they have already answered. Staying quiet is the only choice
+                // that cannot re-ask someone who already said no.
                 return;
             }
 
-            const askedAtMs = data?.marketingConsentAskedAt?.toDate?.()?.getTime?.() || null;
-            const localState = readLocalState();
-            const effectiveConsent =
-                typeof data?.marketingConsent === "boolean"
-                    ? data.marketingConsent
-                    : localState?.consent;
-            const effectiveAskedAt =
-                askedAtMs || (typeof localState?.askedAt === "number" ? localState.askedAt : null);
+            if (cancelled) return;
 
-            if (effectiveConsent === true) {
-                if (typeof window !== "undefined") {
-                    window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
-                }
-                return;
-            }
+            const answered =
+                typeof data?.marketingConsent === "boolean" ||
+                data?.marketingConsentAskedAt != null;
+            if (answered) return;
 
-            if (effectiveConsent === false && effectiveAskedAt !== null) {
-                const daysSinceDeclining = (Date.now() - effectiveAskedAt) / (1000 * 60 * 60 * 24);
-                if (daysSinceDeclining < 30) {
-                    return;
-                }
-            }
-
-            const shouldShowFirstAsk = effectiveAskedAt === null;
-            const shouldShowDeclineCooldown =
-                effectiveConsent === false &&
-                effectiveAskedAt !== null &&
-                Date.now() - effectiveAskedAt >= THIRTY_DAYS_MS;
-
-            if (shouldShowFirstAsk || shouldShowDeclineCooldown) {
                 setShowModal(true);
                 if (!shownLoggedRef.current) {
                     shownLoggedRef.current = true;
-                    trackAnalytics(
-                        "shown",
-                        shouldShowFirstAsk
-                            ? forceShow
-                                ? "next_sign_in_first_ask"
-                                : "first_ask"
-                            : forceShow
-                                ? "next_sign_in_decline_30d"
-                                : "decline_30d"
-                    );
-                }
+                trackAnalytics("shown", "first_ask");
             }
-
-                        if (forceShow && typeof window !== "undefined") {
-                            window.localStorage.removeItem(NEXT_SIGN_IN_POPUP_KEY);
-                        }
         }
         check();
-    }, [checkNextSignInFlag, db, user]);
+        return () => {
+            cancelled = true;
+        };
+    }, [db, user]);
 
-    const handleAccept = async () => {
+    // Both answers are final, so the modal closes even if persisting fails —
+    // the local record still keeps it from coming straight back.
+    const respond = async (consent: boolean) => {
         if (!user?.uid) return;
-        writeLocalState(true);
-        await updateMarketingPreference(user.uid, true, "popup");
-        await trackAnalytics("accepted");
+        writeLocalState(consent);
         setShowModal(false);
+            try {
+            await updateMarketingPreference(user.uid, consent, "popup");
+        } catch (err) {
+            console.error("Could not save marketing preference:", err);
+        }
+        await trackAnalytics(consent ? "accepted" : "declined");
     }
 
-    const handleDecline = async () => {
-        if (!user?.uid) return;
-        writeLocalState(false);
-        await updateMarketingPreference(user.uid, false, "popup");
-        await trackAnalytics("declined");
-        setShowModal(false);
-    }
+    const handleAccept = () => respond(true);
+    const handleDecline = () => respond(false);
+
     return { showModal, handleAccept, handleDecline};
 }
-
-

@@ -77,7 +77,7 @@ export default function ContestHistory({
                       Attempt #{previousAttempts.length - index}
                     </span>
                     {attempt.ranked && (
-                      <span className="text-[10px] bg-neutral-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">
+                      <span className="text-[10px] bg-neutral-600 text-white px-1.5 py-0.5 rounded font-bold">
                         Ranked
                       </span>
                     )}

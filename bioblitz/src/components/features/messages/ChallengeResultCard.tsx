@@ -137,7 +137,7 @@ export default function ChallengeResultCard({
                 <span
                   className={`${getTopicChipBg(
                     topic,
-                  )} text-white text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full`}
+                  )} text-white text-[9px] font-bold tracking-wider  px-1.5 py-0.5 rounded-full`}
                 >
                   {getTopicShortLabel(topic)}
                 </span>
@@ -146,7 +146,7 @@ export default function ChallengeResultCard({
 
             <div className="absolute top-2.5 right-2.5 z-10">
               <span
-                className={`text-[10px] font-bold tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
+                className={`text-[10px] font-bold tracking-[0.12em] px-2 py-0.5 rounded ${
                   iWon
                     ? "bg-white text-black"
                     : "bg-black/60 backdrop-blur-md text-neutral-400 border border-neutral-700/60"
@@ -183,7 +183,7 @@ export default function ChallengeResultCard({
 
           <div className="px-3.5 py-2.5">
             <p
-              className={`text-[10px] uppercase tracking-wider truncate font-bold ${
+              className={`text-[10px] tracking-wider truncate font-bold ${
                 iWon ? accentText : "text-neutral-500"
               }`}
             >

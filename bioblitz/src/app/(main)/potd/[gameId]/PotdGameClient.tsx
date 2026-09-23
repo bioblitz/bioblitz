@@ -379,7 +379,7 @@ export default function PotdGameClient({
                     <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 md:mb-6">
                       {" "}
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${theme.bg}`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${theme.bg}`}
                       >
                         {puzzle.topic}
                       </span>
@@ -387,7 +387,7 @@ export default function PotdGameClient({
                         {puzzle.multiSelect ? "Multi-Select" : "Single Choice"}
                       </span>
                       {isCompleted && (
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-full uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-full tracking-wider">
                           <CheckCircle2 className="w-3 h-3" />
                           Completed
                         </span>
@@ -480,7 +480,7 @@ export default function PotdGameClient({
                     {isSubmitted && (
                       <div className="w-full max-w-2xl mx-auto mt-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
                         <div className="bg-neutral-900 rounded p-6 text-left">
-                          <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold uppercase tracking-wider">
+                          <div className="flex items-center gap-2 mb-3 text-neutral-400 text-sm font-bold tracking-wider">
                             <Lightbulb className="w-4 h-4 text-yellow-500" />
                             Explanation
                           </div>
@@ -563,7 +563,7 @@ export default function PotdGameClient({
                                   {p.topic || "General"}
                                 </span>
                                 {isPlayed && (
-                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                                  <div className="flex items-center gap-1 bg-green-300/10 border border-green-300/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold">
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>Completed</span>
                                   </div>

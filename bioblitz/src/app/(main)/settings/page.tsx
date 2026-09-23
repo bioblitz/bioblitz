@@ -8,7 +8,6 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut,
-  deleteUser,
   GoogleAuthProvider,
   reauthenticateWithPopup,
   User,
@@ -18,20 +17,14 @@ import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import {
   getFirestore,
-  collection,
-  getDoc,
   doc,
-  query,
-  where,
-  getDocs,
   updateDoc,
-  deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
 import { Loader2, Info, Camera } from "lucide-react";
 import ImageCropper from "@/components/ui/ImageCropper";
 import { uploadImage } from "@/lib/storage";
-import { updateUserPhoto } from "@/lib/user";
+import { updateUserPhoto, updateMarketingPreference } from "@/lib/user";
 import ImageUploadZone from "@/components/ui/ImageUploadZone";
 
 const inter = Inter({
@@ -41,6 +34,7 @@ const inter = Inter({
 
 export default function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [gregoryMode, setGregoryMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -103,70 +97,31 @@ export default function SettingsPage() {
     }
   };
 
-  const deleteSubcollection = async (path: string) => {
-    const colRef = collection(db, path);
-    const colDocs = await getDocs(colRef);
-    await Promise.all(colDocs.docs.map((docSnap) => deleteDoc(docSnap.ref)));
-  };
-
-  const deleteUserData = async (uid: string) => {
-    try {
-      console.log("Starting deletion for UID:", uid);
-      console.log("Removing user from friends' lists...");
-      const myFriendsRef = collection(db, "users", uid, "friends");
-      const myFriendsSnap = await getDocs(myFriendsRef);
-      const removalPromises = myFriendsSnap.docs.map((friendDoc) => {
-        const friendId = friendDoc.id;
-        const refInFriendList = doc(db, "users", friendId, "friends", uid);
-        return deleteDoc(refInFriendList);
-      });
-      await Promise.all(removalPromises);
-      console.log("Removed user from all friend connections.");
-      const gameQuery = query(
-        collection(db, "gameSubmissions"),
-        where("userId", "==", uid),
-      );
-      const gameDocs = await getDocs(gameQuery);
-      await Promise.all(gameDocs.docs.map((gDoc) => deleteDoc(gDoc.ref)));
-
-      const directUserRef = doc(db, "users", uid);
-      const directUserSnap = await getDoc(directUserRef);
-
-      if (directUserSnap.exists()) {
-        console.log("Found user doc by ID. Deleting...");
-        await deleteSubcollection(`users/${uid}/setsPlayed`);
-        await deleteSubcollection(`users/${uid}/friends`);
-        await deleteDoc(directUserRef);
-      } else {
-        console.log("User doc not found by ID. Trying query...");
-        const userQuery = query(
-          collection(db, "users"),
-          where("uid", "==", uid),
-        );
-        const userDocs = await getDocs(userQuery);
-
-        for (const userDoc of userDocs.docs) {
-          const docId = userDoc.id;
-          await deleteSubcollection(`users/${docId}/setsPlayed`);
-          await deleteSubcollection(`users/${docId}/friends`);
-          await deleteDoc(userDoc.ref);
-        }
-      }
-
-      // Remove search index entries for this user and their channel
-      await Promise.all(
-        [
-          deleteDoc(doc(db, "search_index", `user_${uid}`)),
-          deleteDoc(doc(db, "search_index", `channel_${uid}`)),
-        ].map((p) => p.catch(() => {})),
-      );
-
-      console.log("User data deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting user data:", error);
+  /**
+   * Deletes the account through `/api/account/delete`.
+   *
+   * This used to run from the browser and always failed with "missing or
+   * insufficient permissions": a client cannot delete `gameSubmissions`,
+   * cannot reach into other users' `friends` subcollections, and has no
+   * delete rule on its own `users` document. Those rules are deliberate —
+   * erasing a first attempt would let someone re-roll their Elo on a set —
+   * so the work belongs on the server, where it runs for one proven uid.
+   */
+  const requestAccountDeletion = async (currentUser: User) => {
+    const response = await fetch("/api/account/delete", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${await currentUser.getIdToken(true)}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const error = new Error(data?.error || "Account deletion failed.");
+      (error as Error & { code?: string }).code = data?.code;
       throw error;
     }
   };
+
   useEffect(() => {
     const email = localStorage.getItem("emailNotifications");
     const gregory = localStorage.getItem("gregoryMode");
@@ -179,8 +134,30 @@ export default function SettingsPage() {
     if (profileData) {
       const preference = profileData.emailNotifications ?? true;
       setEmailNotifications(preference);
+      setMarketingConsent(profileData.marketingConsent === true);
     }
   }, [profileData]);
+
+  // The sign-up popup asks this once and never again, so this toggle is the
+  // only place the answer can be revisited.
+  const handleMarketingToggle = async (checked: boolean) => {
+    if (!user) return;
+    setMarketingConsent(checked);
+    try {
+      await updateMarketingPreference(user.uid, checked, "settings");
+      // Keep the popup's local record in step, so the page that reads it does
+      // not fall back to a stale answer.
+      localStorage.setItem(
+        "marketingPopupLocalState",
+        JSON.stringify({ consent: checked, askedAt: Date.now() }),
+      );
+    } catch (error) {
+      console.error("Failed to save update-email preference:", error);
+      setMarketingConsent(!checked);
+        setToastMessage("Failed to save setting");
+        setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
 
   const handleEmailToggle = async (checked: boolean) => {
     setEmailNotifications(checked);
@@ -270,33 +247,39 @@ export default function SettingsPage() {
       return;
     }
 
-    try {
-      await deleteUserData(currentUser.uid);
-      await deleteUser(currentUser);
+    const finish = async () => {
+      await signOut(auth).catch(() => {});
       alert("Account and all associated data deleted successfully.");
-      router.push("/auth");
+      window.location.assign("/auth");
+    };
+
+    try {
+      await requestAccountDeletion(currentUser);
+      await finish();
     } catch (error: any) {
-      if (error.code === "auth/requires-recent-login") {
+      // The server requires a sign-in from the last few minutes, not just a
+      // valid token, so a long-lived session lands here rather than deleting.
+      if (
+        error?.code === "requires-recent-login" ||
+        error?.code === "auth/requires-recent-login"
+      ) {
         const reConfirm = confirm(
           "For security, you must sign in again to confirm deletion. Sign in now?",
         );
-        if (reConfirm) {
-          try {
-            const provider = new GoogleAuthProvider();
-            await reauthenticateWithPopup(currentUser, provider);
-            await deleteUserData(currentUser.uid);
-            await deleteUser(currentUser);
-            alert("Account and all associated data deleted successfully.");
-            router.push("/auth");
-          } catch (reAuthError) {
-            console.error("Re-auth failed", reAuthError);
-            alert("Verification failed. Account was not deleted.");
-          }
+        if (!reConfirm) return;
+        try {
+          const provider = new GoogleAuthProvider();
+          await reauthenticateWithPopup(currentUser, provider);
+          await requestAccountDeletion(currentUser);
+          await finish();
+        } catch (reAuthError) {
+          console.error("Re-auth failed", reAuthError);
+          alert("Verification failed. Account was not deleted.");
         }
-      } else {
-        console.error("Error deleting user:", error);
-        alert("An error occurred. Please try again later.");
+        return;
       }
+      console.error("Error deleting user:", error);
+      alert(error?.message || "An error occurred. Please try again later.");
     }
   };
 
@@ -378,6 +361,20 @@ export default function SettingsPage() {
           <p className="text-sm text-gray-400 mt-3">
             Turn on/off email notifications for updates, announcements, and
             other notifications
+          </p>
+
+          <div className="flex items-center justify-between mt-6">
+            <p>Receive product update emails</p>
+            <Switch
+              checked={marketingConsent}
+              onCheckedChange={handleMarketingToggle}
+              className="transition-colors duration-200 data-[state=checked]:bg-neutral-200 data-[state=unchecked]:bg-neutral-600"
+            />
+          </div>
+          <p className="text-sm text-gray-400 mt-3">
+            New ranked contests, strategy tips, and feature drops. This is the
+            same question asked when you first signed up — we only ask once, so
+            change it here whenever you like.
           </p>
         </motion.section>
 
